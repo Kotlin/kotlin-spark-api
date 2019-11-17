@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="5a8a6090-c99a-4958-b903-35e6be07239a" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/core/src/main/scala/org/jetbrains/spark/extensions/KSparkExtensions.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/ApiV1.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/ApiV1.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/Main.kt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="kotlin-spark-api" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="kotlin-spark-api" type="f1a62948:ProjectNode" />
+                <item name="core" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="kotlin-spark-api" type="f1a62948:ProjectNode" />
+                <item name="kotlin-api" type="2d1252cf:ModuleNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Package Object" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="1" />
+  </component>
+  <component name="ProjectId" id="1ZIMRN5b2jNCYNAmHTkh28qnc5T" />
+  <component name="ProjectViewState">
+    <option name="autoscrollFromSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="JAVA" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/build.gradle" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="show.unlinked.gradle.project.popup" value="true" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/kotlin-api/src/main/scala" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Kotlin.Main">
+    <configuration name="Main" type="JetRunConfigurationType" factoryName="Kotlin" temporary="true" nameIsGenerated="true">
+      <module name="kotlin-spark-api.kotlin-api.main" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="MAIN_CLASS_NAME" value="org.jetbrains.spark.api.Main" />
+      <option name="WORKING_DIRECTORY" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Scala REPL" type="ScalaScriptConsoleRunConfiguration" factoryName="Scala Console" temporary="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="kotlin-spark-api.core.main" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="javaOptions" value="-Djline.terminal=NONE" />
+      <option name="myConsoleArgs" value="" />
+      <option name="workingDirectory" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Kotlin.Main" />
+        <item itemvalue="Scala REPL.Scala REPL" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5a8a6090-c99a-4958-b903-35e6be07239a" name="Default Changelist" comment="" />
+      <created>1584522145847</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1584522145847</updated>
+      <workItem from="1584522147904" duration="26178000" />
+      <workItem from="1584601652149" duration="21988000" />
+      <workItem from="1584720519829" duration="7943000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1649" y="777" width="542" height="547" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog" timestamp="1584723646602">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1649" y="777" width="542" height="547" key="#com.intellij.codeInsight.editorActions.RestoreReferencesDialog/0.0.3840.2102@0.0.3840.2102" timestamp="1584723646602" />
+    <state x="1636" y="802" width="1819" height="993" key="#com.intellij.debugger.actions.ViewTextAction" timestamp="1584536009293">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1636" y="802" width="1819" height="993" key="#com.intellij.debugger.actions.ViewTextAction/0.0.3840.2102@0.0.3840.2102" timestamp="1584536009293" />
+    <state x="1862" y="399" width="887" height="986" key="#com.intellij.ide.util.MemberChooser" timestamp="1584608391065">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1862" y="399" width="887" height="986" key="#com.intellij.ide.util.MemberChooser/0.0.3840.2102@0.0.3840.2102" timestamp="1584608391065" />
+    <state x="1512" y="752" width="1730" height="1046" key="#xdebugger.evaluate" timestamp="1584721855160">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1512" y="752" width="1730" height="1046" key="#xdebugger.evaluate/0.0.3840.2102@0.0.3840.2102" timestamp="1584721855160" />
+    <state width="3750" height="570" key="GridCell.Tab.0.bottom" timestamp="1584729110274">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="570" key="GridCell.Tab.0.bottom/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
+    <state width="3750" height="570" key="GridCell.Tab.0.center" timestamp="1584729110274">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="570" key="GridCell.Tab.0.center/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
+    <state width="3750" height="570" key="GridCell.Tab.0.left" timestamp="1584729110274">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="570" key="GridCell.Tab.0.left/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
+    <state width="3750" height="570" key="GridCell.Tab.0.right" timestamp="1584729110274">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="570" key="GridCell.Tab.0.right/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
+    <state width="3750" height="703" key="GridCell.Tab.1.bottom" timestamp="1584722350195">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="703" key="GridCell.Tab.1.bottom/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
+    <state width="3750" height="703" key="GridCell.Tab.1.center" timestamp="1584722350195">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="703" key="GridCell.Tab.1.center/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
+    <state width="3750" height="703" key="GridCell.Tab.1.left" timestamp="1584722350195">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="703" key="GridCell.Tab.1.left/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
+    <state width="3750" height="703" key="GridCell.Tab.1.right" timestamp="1584722350195">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="3750" height="703" key="GridCell.Tab.1.right/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
+    <state x="1445" y="585" width="1089" height="917" key="StructurePopup" timestamp="1584727874158">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1445" y="585" width="1089" height="917" key="StructurePopup/0.0.3840.2102@0.0.3840.2102" timestamp="1584727874158" />
+    <state width="1920" height="1051" key="XDebugger.FullValuePopup" timestamp="1584544847222">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state width="1920" height="1051" key="XDebugger.FullValuePopup/0.0.3840.2102@0.0.3840.2102" timestamp="1584544847222" />
+    <state x="1158" y="347" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1584523290681">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1158" y="347" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.0.3840.2102@0.0.3840.2102" timestamp="1584523290681" />
+    <state x="1119" y="594" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1584545191424">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1119" y="594" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.3840.2102@0.0.3840.2102" timestamp="1584545191424" />
+    <state x="1331" y="484" key="run.anything.popup" timestamp="1584724075154">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1331" y="484" key="run.anything.popup/0.0.3840.2102@0.0.3840.2102" timestamp="1584724075154" />
+    <state x="1324" y="124" width="1188" height="1976" key="search.everywhere.popup" timestamp="1584726729815">
+      <screen x="0" y="0" width="3840" height="2102" />
+    </state>
+    <state x="1324" y="124" width="1188" height="1976" key="search.everywhere.popup/0.0.3840.2102@0.0.3840.2102" timestamp="1584726729815" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint type="scala-line">
+          <url>file://$PROJECT_DIR$/kotlin-api/src/main/scala/sql/KotlinReflection.scala</url>
+          <line>349</line>
+          <option name="timeStamp" value="21" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>file://$PROJECT_DIR$/kotlin-api/src/main/scala/sql/KotlinReflection.scala</url>
+          <line>415</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-sql_2.12/3.1.0-SNAPSHOT/spark-sql_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/SparkSession.scala</url>
+          <line>497</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-sql_2.12/3.1.0-SNAPSHOT/spark-sql_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/SparkSession.scala</url>
+          <line>464</line>
+          <properties>
+            <option name="lambda-ordinal" value="0" />
+          </properties>
+          <option name="timeStamp" value="31" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/codegen/CodeGenerator.scala</url>
+          <line>1260</line>
+          <option name="timeStamp" value="32" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/codegen/GenerateUnsafeProjection.scala</url>
+          <line>336</line>
+          <option name="timeStamp" value="33" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/Expression.scala</url>
+          <line>141</line>
+          <option name="timeStamp" value="35" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <condition expression="javaType.toString == &quot;Object&quot;" language="Scala" />
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/objects/objects.scala</url>
+          <line>343</line>
+          <option name="timeStamp" value="37" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/encoders/ExpressionEncoder.scala</url>
+          <line>194</line>
+          <option name="timeStamp" value="38" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/InternalRow.scala</url>
+          <line>130</line>
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/BoundAttribute.scala</url>
+          <line>40</line>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/codegen/GenerateUnsafeProjection.scala</url>
+          <line>373</line>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/codegen/GenerateUnsafeProjection.scala</url>
+          <line>289</line>
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>file://$PROJECT_DIR$/kotlin-api/src/main/scala/sql/KotlinReflection.scala</url>
+          <line>219</line>
+          <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint type="scala-line">
+          <url>file://$PROJECT_DIR$/kotlin-api/src/main/scala/sql/KotlinReflection.scala</url>
+          <line>309</line>
+          <option name="timeStamp" value="55" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <condition expression="!TypeCoercion.haveSameType(inputTypesForMerging)" language="Scala" />
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/expressions/Expression.scala</url>
+          <line>1040</line>
+          <option name="timeStamp" value="66" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/kotlin-api/src/main/scala/sql/KotlinReflection.scala</url>
+          <line>1006</line>
+          <option name="timeStamp" value="67" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/kotlin-api/src/main/scala/sql/MyJavaInference.scala</url>
+          <line>223</line>
+          <option name="timeStamp" value="75" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/analysis/CheckAnalysis.scala</url>
+          <line>145</line>
+          <option name="timeStamp" value="78" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/SerializerBuildHelper.scala</url>
+          <line>187</line>
+          <option name="timeStamp" value="81" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="JetRunConfigurationType">
+        <watch expression="((AssertNotNull)$this).canonicalized" custom="org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull" />
+        <watch expression="inputTypesForMerging" language="Scala" />
+        <watch expression="((AssertNotNull)$this).canonicalized" custom="org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
