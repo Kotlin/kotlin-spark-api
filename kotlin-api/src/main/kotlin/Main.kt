@@ -1,7 +1,4 @@
-import org.apache.spark.SparkEnv
-import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.sql.Encoders
-import org.apache.spark.sql.KotlinEncoder
 import org.apache.spark.sql.SparkSession
 
 object Main {
@@ -25,8 +22,8 @@ object Main {
 //        println("Lines with a: $numAs, lines with b: $numBs")
 
         val ds = spark
-            .toDS(listOf(1, 2, 3))
-            .map { Pair(it, it + 1) }
+                .toDS(listOf(1, 2, 3))
+                .map { Pair(it, it + 1) }
 //
         println("TEST >>>" + ds)
 //        val enc = KotlinEncoder.bean(Pair::class.java)
