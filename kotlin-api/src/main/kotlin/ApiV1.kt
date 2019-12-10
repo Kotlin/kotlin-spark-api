@@ -2,19 +2,20 @@ import org.apache.spark.api.java.function.MapFunction
 import org.apache.spark.api.java.function.MapGroupsFunction
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
-import org.apache.spark.sql.catalyst.JavaTypeInference
-import org.apache.spark.sql.types.DataType
-import org.apache.spark.sql.types.Metadata
-import org.apache.spark.sql.types.StructField
-import org.apache.spark.sql.types.StructType
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl
-import java.lang.reflect.ParameterizedType
+import org.apache.spark.sql.catalyst.WalkedTypePath
+import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.types.*
+
+import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
 import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.starProjectedType
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.primaryConstructor
 
 @JvmField
 val ENCODERS = mapOf<KClass<out Any>, Encoder<out Any?>>(
@@ -38,9 +39,9 @@ fun <T : Any> encoder(c: KClass<T>): Encoder<T> = ENCODERS[c] as? Encoder<T>? ?:
 inline fun <reified T : Any> SparkSession.toDS(list: List<T>): Dataset<T> =
         createDataset(list, genericRefEncoder<T>())
 
-inline fun <reified T : Any> genericRefEncoder() = genericDataEncoder((typeRef<T>()))
+inline fun <reified T : Any> genericRefEncoder(): Encoder<T> = TODO()//typeRef<T>().encoder()
 
-inline fun <reified T : Any> typeRef() = object : TypeRef<T>() {}
+//inline fun <reified T : Any> typeRef() = object : TypeRef<T>() {}
 
 inline fun <T, reified R : Any> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
         map(MapFunction(func), genericRefEncoder<R>())
@@ -62,54 +63,33 @@ inline fun <KEY, VALUE, reified R : Any> KeyValueGroupedDataset<KEY, VALUE>.mapG
 
 inline fun <reified R : Any> Dataset<Row>.cast(): Dataset<R> = `as`(genericRefEncoder<R>())
 
-// TODO: should we copyright Jackson here? It's almost copypaste
-abstract class TypeRef<T> protected constructor() {
-    var type: ParameterizedType
-
-    init {
-        val sC = this::class.java.genericSuperclass
-        require(sC !is Class<*>) { "Internal error: TypeReference constructed without actual type information" }
-        this.type = sC as ParameterizedType
-    }
+abstract class KTypeRef<T> protected constructor() {
+    var type = this::class.supertypes[0].arguments[0].type ?:
+    throw IllegalArgumentException("Internal error: TypeReference constructed without actual type information")
 }
 
-fun <T> genericDataEncoder(ref: TypeRef<T>): Encoder<T> {
-    val typeImpl = ref.type.actualTypeArguments[0] as ParameterizedTypeImpl
-    return genericDataEncoder(typeImpl)
-}
+fun schema(type: KType): DataType {
+    val klass = type.classifier!! as KClass<*>
+    val args = type.arguments
 
-private fun <T> genericDataEncoder(typeImpl: ParameterizedTypeImpl): Encoder<T> {
-    val rawType = typeImpl.rawType.kotlin
-    if (ENCODERS[rawType] != null) {
-        return ENCODERS[rawType] as Encoder<T>
-    }
-    if (rawType.typeParameters.isNotEmpty() && rawType.isData) {
-        /**
-         * All the generic data is known here from typeImpl (because of TypeRef). We need to build serializer for
-         * generics by reifying their types
-         *
-         * Also we need to build deserializer based on constructor, not setters
-         */
-        val schema = obtainGenericDataSchema(typeImpl)
-    }
-    // TODO: implement non-generic data encoder here
-    // TODO: delegate to bean encoder for non-data classes
-    TODO()
-}
+    val types = klass.typeParameters.zip(args).map {
+        it.first.name to it.second.type
+    }.toMap()
 
-fun obtainGenericDataSchema(typeImpl: ParameterizedTypeImpl): DataType {
-    val z = typeImpl.rawType.kotlin.declaredMemberProperties
-    val y = typeImpl.actualTypeArguments
-    return StructType(
-            KotlinReflectionHelper
-                    .dataClassProps(typeImpl.rawType.kotlin)
-                    .map {
-                        val dt = if(!it.c.isData) JavaTypeInference.inferDataType(it.c.java)._1 else null
-                        // TODO: refine type is it's Any from typeImpl.
-                        // TODO: is reified class is not data — we should delegete to JavaTypeInference
-                        // TODO: if we have concrete type and it's not data - we should delegate to JavaTypeInference. It won't cover data-class inside non-data, but who cares?
-                        StructField(it.name, dt, it.nullable, Metadata.empty())
-                    }
-                    .toTypedArray()
-    )
+    return StructType(klass.declaredMemberProperties.filter { it.findAnnotation<Transient>() == null }.map {
+        val projectedType = types[it.returnType.toString()] ?: it.returnType
+        val tpe = when (projectedType.classifier) {
+            Byte::class -> DataTypes.ByteType
+            Short::class -> DataTypes.ShortType
+            Int::class -> DataTypes.IntegerType
+            Long::class -> DataTypes.LongType
+            Boolean::class -> DataTypes.BooleanType
+            Float::class -> DataTypes.FloatType
+            Double::class -> DataTypes.DoubleType
+            String::class -> DataTypes.StringType
+            // Data/Timestamp
+            else -> schema(projectedType)
+        }
+        StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
+    }.toTypedArray())
 }
