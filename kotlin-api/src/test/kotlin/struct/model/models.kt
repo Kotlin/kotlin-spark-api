@@ -36,18 +36,18 @@ data class StructField(
 typealias Metadata = JsonObject
 
 sealed class DataType {
-    data class TypeValue(val value: Struct) : DataType()
-    data class StringValue(val value: String) : DataType()
+    data class StructType(val value: Struct) : DataType()
+    data class TypeName(val value: String) : DataType()
 
     public fun toJson(): String = klaxon.toJsonString(when (this) {
-        is TypeValue -> this.value
-        is StringValue -> this.value
+        is StructType -> this.value
+        is TypeName -> this.value
     })
 
     companion object {
         public fun fromJson(jv: JsonValue): DataType = when (jv.inside) {
-            is JsonObject -> TypeValue(jv.obj?.let { klaxon.parseFromJsonObject<Struct>(it) }!!)
-            is String -> StringValue(jv.string!!)
+            is JsonObject -> StructType(jv.obj?.let { klaxon.parseFromJsonObject<Struct>(it) }!!)
+            is String -> TypeName(jv.string!!)
             else -> throw IllegalArgumentException()
         }
     }
