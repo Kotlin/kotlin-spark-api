@@ -10,11 +10,11 @@ import struct.model.StructField
 import kotlin.reflect.KClass
 
 
-
 class ApiV1KtTest : ShouldSpec({
     "schema"{
         data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
+
         val schema = schema(object : KTypeRef<Pair<String, Test<Int>>>() {}.type)
         var struct = Struct.fromJson(schema.prettyJson())!!
         should("contain correct typings") {
@@ -59,9 +59,10 @@ class ApiV1KtTest : ShouldSpec({
         }
     }
     "schema with more complex data"{
-        data class Single<T>(val vala3:T)
+        data class Single<T>(val vala3: T)
         data class Test2<T>(val vala2: T, val para2: Pair<T, Single<Double>>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
+
         val schema = schema(object : KTypeRef<Pair<String, Test<Int>>>() {}.type)
         var struct = Struct.fromJson(schema.prettyJson())!!
         should("contain correct typings") {
@@ -112,6 +113,18 @@ class ApiV1KtTest : ShouldSpec({
             struct.fields.forOne { it.shouldBeDescribed("vala3", "double") }
         }
 
+    }
+    "schema without generics"{
+        data class Test(val a: String, val b: Int, val c: Double)
+
+        val schema = schema(object : KTypeRef<Test>() {}.type)
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("return correct types too") {
+            struct.fields shouldHaveSize 3
+            struct.fields.forOne { it.shouldBeDescribed("a", "string") }
+            struct.fields.forOne { it.shouldBeDescribed("b", "integer") }
+            struct.fields.forOne { it.shouldBeDescribed("c", "double") }
+        }
     }
 })
 
