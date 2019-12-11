@@ -2,20 +2,14 @@ import org.apache.spark.api.java.function.MapFunction
 import org.apache.spark.api.java.function.MapGroupsFunction
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
-import org.apache.spark.sql.catalyst.WalkedTypePath
-import org.apache.spark.sql.catalyst.expressions.Expression
 import org.apache.spark.sql.types.*
-
-import java.lang.IllegalArgumentException
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
-import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.primaryConstructor
 
 @JvmField
 val ENCODERS = mapOf<KClass<out Any>, Encoder<out Any?>>(
@@ -65,16 +59,16 @@ inline fun <reified R : Any> Dataset<Row>.cast(): Dataset<R> = `as`(genericRefEn
 
 abstract class KTypeRef<T> protected constructor() {
     var type = this::class.supertypes[0].arguments[0].type ?:
-    throw IllegalArgumentException("Internal error: TypeReference constructed without actual type information")
+    throw IllegalArgumentException("Internal error: KTypeRef constructed without actual type information")
 }
 
-fun schema(type: KType): DataType {
+fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val klass = type.classifier!! as KClass<*>
     val args = type.arguments
 
-    val types = klass.typeParameters.zip(args).map {
-        it.first.name to it.second.type
-    }.toMap()
+    val types = transitiveMerge(map, klass.typeParameters.zip(args).map {
+        it.first.name to it.second.type!!
+    }.toMap())
 
     return StructType(klass.declaredMemberProperties.filter { it.findAnnotation<Transient>() == null }.map {
         val projectedType = types[it.returnType.toString()] ?: it.returnType
@@ -88,8 +82,14 @@ fun schema(type: KType): DataType {
             Double::class -> DataTypes.DoubleType
             String::class -> DataTypes.StringType
             // Data/Timestamp
-            else -> schema(projectedType)
+            else -> schema(projectedType, types)
         }
         StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
     }.toTypedArray())
+}
+
+fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {
+    return a + b.mapValues {
+        a.getOrDefault(it.value.toString(), it.value)
+    }
 }
