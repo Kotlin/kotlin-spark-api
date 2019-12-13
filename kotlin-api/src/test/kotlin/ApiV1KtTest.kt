@@ -4,10 +4,12 @@ import io.kotlintest.matchers.collections.shouldHaveSize
 import io.kotlintest.matchers.instanceOf
 import io.kotlintest.specs.ShouldSpec
 import struct.model.DataType
+import struct.model.DataType.StructType
 import struct.model.DataType.TypeName
+import struct.model.ElementType.ComplexElement
+import struct.model.ElementType.SimpleElement
 import struct.model.Struct
 import struct.model.StructField
-import kotlin.reflect.KClass
 
 
 class ApiV1KtTest : ShouldSpec({
@@ -17,45 +19,57 @@ class ApiV1KtTest : ShouldSpec({
 
         val schema = schema(object : KTypeRef<Pair<String, Test<Int>>>() {}.type)
         var struct = Struct.fromJson(schema.prettyJson())!!
+        var testField: DataType
+        var typeValue: StructType
         should("contain correct typings") {
-            //root object is pair of string and struct
-            struct.fields shouldHaveSize 2
-            struct.type shouldBe "struct"
-            struct.fields.forOne { it.shouldBeDescribed("first", "string") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("second") }
-            // struct is os type Test with integer named vala and Triple named tripl1
-            var testField = struct.fields.find { it.name == "second" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            var typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                //root object is pair of string and struct
+                this shouldHaveSize 2
+                struct.type shouldBe "struct"
+                this.forOne { it.shouldBeDescribed("first", "string") }
+                this.forOne { it.shouldBeDescribed<StructType>("second") }
+                // struct is os type Test with integer named vala and Triple named tripl1
+                testField = this.find { it.name == "second" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 2
-            struct.fields.forOne { it.shouldBeDescribed("vala", "integer") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("tripl1") }
-            // tripl1 is Triple of integer, Test2 and integer
-            testField = struct.fields.find { it.name == "tripl1" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                this shouldHaveSize 2
+                this.forOne { it.shouldBeDescribed("vala", "integer") }
+                this.forOne { it.shouldBeDescribed<StructType>("tripl1") }
+                // tripl1 is Triple of integer, Test2 and integer
+                testField = this.find { it.name == "tripl1" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 3
-            struct.fields.forOne { it.shouldBeDescribed("first", "integer") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("second") }
-            struct.fields.forOne { it.shouldBeDescribed("third", "integer") }
-            // Test2 lying in field second contains fields vala2 of type long and para2 which is pair
-            testField = struct.fields.find { it.name == "second" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                this shouldHaveSize 3
+                this.forOne { it.shouldBeDescribed("first", "integer") }
+                this.forOne { it.shouldBeDescribed<StructType>("second") }
+                this.forOne { it.shouldBeDescribed("third", "integer") }
+                // Test2 lying in field second contains fields vala2 of type long and para2 which is pair
+                testField = this.find { it.name == "second" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 2
-            struct.fields.forOne { it.shouldBeDescribed("vala2", "long") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("para2") }
-            // para2 is Pair of long to string
-            testField = struct.fields.find { it.name == "para2" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                this shouldHaveSize 2
+                this.forOne { it.shouldBeDescribed("vala2", "long") }
+                this.forOne { it.shouldBeDescribed<StructType>("para2") }
+                // para2 is Pair of long to string
+                testField = this.find { it.name == "para2" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 2
-            struct.fields.forOne { it.shouldBeDescribed("first", "long") }
-            struct.fields.forOne { it.shouldBeDescribed("second", "string") }
+            struct.fields!!.apply {
+                this shouldHaveSize 2
+                this.forOne { it.shouldBeDescribed("first", "long") }
+                this.forOne { it.shouldBeDescribed("second", "string") }
+            }
         }
     }
     "schema with more complex data"{
@@ -65,52 +79,66 @@ class ApiV1KtTest : ShouldSpec({
 
         val schema = schema(object : KTypeRef<Pair<String, Test<Int>>>() {}.type)
         var struct = Struct.fromJson(schema.prettyJson())!!
+        var testField: DataType
+        var typeValue: StructType
         should("contain correct typings") {
             //root object is pair of string and struct
-            struct.fields shouldHaveSize 2
-            struct.type shouldBe "struct"
-            struct.fields.forOne { it.shouldBeDescribed("first", "string") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("second") }
-            // struct is os type Test with integer named vala and Triple named tripl1
-            var testField = struct.fields.find { it.name == "second" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            var typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                this shouldHaveSize 2
+                struct.type shouldBe "struct"
+                this.forOne { it.shouldBeDescribed("first", "string") }
+                this.forOne { it.shouldBeDescribed<StructType>("second") }
+                // struct is os type Test with integer named vala and Triple named tripl1
+                testField = this.find { it.name == "second" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 2
-            struct.fields.forOne { it.shouldBeDescribed("vala", "integer") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("tripl1") }
-            // tripl1 is Triple of integer, Test2 and integer
-            testField = struct.fields.find { it.name == "tripl1" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                this shouldHaveSize 2
+                this.forOne { it.shouldBeDescribed("vala", "integer") }
+                this.forOne { it.shouldBeDescribed<StructType>("tripl1") }
+                // tripl1 is Triple of integer, Test2 and integer
+                testField = this.find { it.name == "tripl1" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 3
-            struct.fields.forOne { it.shouldBeDescribed("first", "integer") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("second") }
-            struct.fields.forOne { it.shouldBeDescribed("third", "integer") }
-            // Test2 lying in field second contains fields vala2 of type long and para2 which is pair
-            testField = struct.fields.find { it.name == "second" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                this shouldHaveSize 3
+                this.forOne { it.shouldBeDescribed("first", "integer") }
+                this.forOne { it.shouldBeDescribed<StructType>("second") }
+                this.forOne { it.shouldBeDescribed("third", "integer") }
+                // Test2 lying in field second contains fields vala2 of type long and para2 which is pair
+                testField = this.find { it.name == "second" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 2
-            struct.fields.forOne { it.shouldBeDescribed("vala2", "long") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("para2") }
-            // para2 is Pair of long to Single
-            testField = struct.fields.find { it.name == "para2" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            typeValue = testField as DataType.StructType
+            struct.fields!!.apply {
+                this shouldHaveSize 2
+                this.forOne { it.shouldBeDescribed("vala2", "long") }
+                this.forOne { it.shouldBeDescribed<StructType>("para2") }
+                // para2 is Pair of long to Single
+                testField = find { it.name == "para2" }!!.type
+            }
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 2
-            struct.fields.forOne { it.shouldBeDescribed("first", "long") }
-            struct.fields.forOne { it.shouldBeDescribed<DataType.StructType>("second") }
+            struct.fields!!.apply {
+                this shouldHaveSize 2
+                forOne { it.shouldBeDescribed("first", "long") }
+                forOne { it.shouldBeDescribed<StructType>("second") }
+                testField = find { it.name == "second" }!!.type
+            }
             // para2 is Pair of long to string
-            testField = struct.fields.find { it.name == "second" }!!.type
-            testField shouldBeInstanceOf DataType.StructType::class
-            typeValue = testField as DataType.StructType
+            testField should instanceOf(StructType::class)
+            typeValue = testField as StructType
             struct = typeValue.value
-            struct.fields shouldHaveSize 1
-            struct.fields.forOne { it.shouldBeDescribed("vala3", "double") }
+            struct.fields!!.apply {
+                this shouldHaveSize 1
+                forOne { it.shouldBeDescribed("vala3", "double") }
+            }
         }
 
     }
@@ -120,10 +148,55 @@ class ApiV1KtTest : ShouldSpec({
         val schema = schema(object : KTypeRef<Test>() {}.type)
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
+            struct.fields!!
             struct.fields shouldHaveSize 3
             struct.fields.forOne { it.shouldBeDescribed("a", "string") }
             struct.fields.forOne { it.shouldBeDescribed("b", "integer") }
             struct.fields.forOne { it.shouldBeDescribed("c", "double") }
+        }
+    }
+    "type with list of ints"{
+        val schema = schema(object : KTypeRef<List<Int>>() {}.type)
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("return correct types too") {
+            struct.type shouldBe "array"
+            struct.elementType!! shouldBe SimpleElement("integer")
+        }
+    }
+    "type with list of Pairs int to long"{
+        val schema = schema(object : KTypeRef<List<Pair<Int, Long>>>() {}.type)
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("return correct types too") {
+            struct.type shouldBe "array"
+            struct.elementType!! should instanceOf(ComplexElement::class)
+            val elType = (struct.elementType as ComplexElement)
+            elType.value.fields!!.forOne { it.shouldBeDescribed("first", "integer") }
+            elType.value.fields.forOne { it.shouldBeDescribed("second", "long") }
+        }
+    }
+    "type with list of generic data class with E generic name"{
+        data class Test<E>(val e: E)
+
+        val schema = schema(object : KTypeRef<List<Test<String>>>() {}.type)
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("return correct types too") {
+            struct.type shouldBe "array"
+            struct.elementType!! should instanceOf(ComplexElement::class)
+            val elType = (struct.elementType as ComplexElement)
+            elType.value.fields!!.forOne { it.shouldBeDescribed("e", "string") }
+        }
+    }
+    "type with list of list of int"{
+
+        val schema = schema(object : KTypeRef<List<List<Int>>>() {}.type)
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("return correct types too") {
+            struct.type shouldBe "array"
+            struct.elementType!! should instanceOf(ComplexElement::class)
+            val elType = (struct.elementType as ComplexElement)
+            elType.value.elementType!! should instanceOf(SimpleElement::class)
+            val el = elType.value.elementType as SimpleElement
+            el.value shouldBe "integer"
         }
     }
 })
@@ -132,10 +205,6 @@ inline fun <reified T> StructField.shouldBeDescribed(name: String) = this should
 fun StructField.shouldBeDescribed(name: String, typeName: String) = this should describedStruct(name, typeName)
 inline fun <reified T> StructField.shouldNotBeDescribed(name: String) = this shouldNot describedStruct<T>(name)
 fun StructField.shouldNotBeDescribed(name: String, typeName: String) = this shouldNot describedStruct(name, typeName)
-
-infix fun DataType.shouldBeInstanceOf(c: KClass<*>) = this should instanceOf(c)
-infix fun DataType.shouldNotBeInstanceOf(c: KClass<*>) = this shouldNot instanceOf(c)
-
 
 inline fun <reified T> describedStruct(name: String) = object : Matcher<StructField> {
     override fun test(value: StructField) =

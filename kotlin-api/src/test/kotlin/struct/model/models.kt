@@ -14,10 +14,13 @@ private fun <T> Klaxon.convert(k: kotlin.reflect.KClass<*>, fromJson: (JsonValue
 private val klaxon = Klaxon()
         .convert(JsonObject::class, { it.obj!! }, { it.toJsonString() })
         .convert(DataType::class, { DataType.fromJson(it) }, { it.toJson() }, true)
+        .convert(ElementType::class, { ElementType.fromJson(it) }, { it.toJson() }, true)
 
 data class Struct(
         val type: String,
-        val fields: List<StructField>
+        val fields: List<StructField>? = null,
+        val containsNull: Boolean? = null,
+        val elementType: ElementType? = null
 ) {
     public fun toJson() = klaxon.toJsonString(this)
 
@@ -51,5 +54,24 @@ sealed class DataType {
             else -> throw IllegalArgumentException()
         }
     }
+}
+
+sealed class ElementType {
+    data class SimpleElement(val value: String) : ElementType()
+    data class ComplexElement(val value: Struct) : ElementType()
+
+    public fun toJson(): String = klaxon.toJsonString(when (this) {
+        is SimpleElement -> this.value
+        is ComplexElement -> this.value
+    })
+
+    companion object {
+        public fun fromJson(jv: JsonValue): ElementType = when (jv.inside) {
+            is JsonObject -> ComplexElement(jv.obj?.let { klaxon.parseFromJsonObject<Struct>(it) }!!)
+            is String -> SimpleElement(jv.string!!)
+            else -> throw IllegalArgumentException()
+        }
+    }
+
 }
 
