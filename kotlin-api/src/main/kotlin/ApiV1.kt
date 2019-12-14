@@ -9,10 +9,11 @@ import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
 import kotlin.reflect.KClass
-import kotlin.reflect.KClassifier
 import kotlin.reflect.KType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.superclasses
 
 @JvmField
 val ENCODERS = mapOf<KClass<out Any>, Encoder<out Any?>>(
@@ -66,7 +67,7 @@ abstract class KTypeRef<T> protected constructor() {
 }
 
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
-    val primitivesSchema = primitivesSchema(type.classifier)
+    val primitivesSchema = knownDataTypes[type.classifier]
     if (primitivesSchema != null) return primitivesSchema
     val klass = type.classifier!! as KClass<*>
     val args = type.arguments
@@ -75,29 +76,44 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
         it.first.name to it.second.type!!
     }.toMap())
 
-    return if (klass == List::class) {
-        DataTypes.createArrayType(schema(types.getValue(klass.typeParameters[0].name), types))
-    } else StructType(klass.declaredMemberProperties.filter { it.findAnnotation<Transient>() == null }.map {
-        val projectedType = types[it.returnType.toString()] ?: it.returnType
-        val tpe = primitivesSchema(projectedType.classifier) ?: schema(projectedType, types)
-        StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
-    }.toTypedArray())
-}
-
-private fun primitivesSchema(clazz: KClassifier?): DataType? {
-    return when (clazz) {
-        Byte::class -> DataTypes.ByteType
-        Short::class -> DataTypes.ShortType
-        Int::class -> DataTypes.IntegerType
-        Long::class -> DataTypes.LongType
-        Boolean::class -> DataTypes.BooleanType
-        Float::class -> DataTypes.FloatType
-        Double::class -> DataTypes.DoubleType
-        String::class -> DataTypes.StringType
-        // Data/Timestamp
-        else -> null
+    return when {
+        klass.isSubclassOf(Iterable::class) -> {
+            val listParam = types.getValue(klass.typeParameters[0].name)
+            DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable)
+        }
+        klass.isSubclassOf(Map::class) -> {
+            val mapKeyParam = types.getValue(klass.typeParameters[0].name)
+            val mapValueParam = types.getValue(klass.typeParameters[1].name)
+            DataTypes.createMapType(
+                    schema(mapKeyParam, types),
+                    schema(mapValueParam, types),
+                    mapValueParam.isMarkedNullable
+            )
+        }
+        else -> StructType(
+                klass
+                        .declaredMemberProperties
+                        .filter { it.findAnnotation<Transient>() == null }
+                        .map {
+                            val projectedType = types[it.returnType.toString()] ?: it.returnType
+                            val tpe = knownDataTypes[projectedType.classifier] ?: schema(projectedType, types)
+                            StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
+                        }
+                        .toTypedArray()
+        )
     }
 }
+
+private val knownDataTypes = mapOf(
+        Byte::class to DataTypes.ByteType,
+        Short::class to DataTypes.ShortType,
+        Int::class to DataTypes.IntegerType,
+        Long::class to DataTypes.LongType,
+        Boolean::class to DataTypes.BooleanType,
+        Float::class to DataTypes.FloatType,
+        Double::class to DataTypes.DoubleType,
+        String::class to DataTypes.StringType
+)
 
 fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {
     return a + b.mapValues {

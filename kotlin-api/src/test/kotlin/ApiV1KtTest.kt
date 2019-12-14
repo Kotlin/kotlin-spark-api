@@ -10,6 +10,7 @@ import struct.model.ElementType.ComplexElement
 import struct.model.ElementType.SimpleElement
 import struct.model.Struct
 import struct.model.StructField
+import java.util.ArrayList
 
 
 class ApiV1KtTest : ShouldSpec({
@@ -187,7 +188,6 @@ class ApiV1KtTest : ShouldSpec({
         }
     }
     "type with list of list of int"{
-
         val schema = schema(object : KTypeRef<List<List<Int>>>() {}.type)
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
@@ -197,6 +197,28 @@ class ApiV1KtTest : ShouldSpec({
             elType.value.elementType!! should instanceOf(SimpleElement::class)
             val el = elType.value.elementType as SimpleElement
             el.value shouldBe "integer"
+        }
+    }
+    "Subtypes of list"{
+        val schema = schema(object : KTypeRef<ArrayList<Int>>() {}.type)
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("return correct types too") {
+            struct.type shouldBe "array"
+            struct.elementType!! should instanceOf(SimpleElement::class)
+            struct.containsNull shouldBe false
+            val elType = (struct.elementType as SimpleElement)
+            elType.value shouldBe "integer"
+        }
+    }
+    "Subtypes of list with nullable values"{
+        val schema = schema(object : KTypeRef<ArrayList<Int?>>() {}.type)
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("return correct types too") {
+            struct.type shouldBe "array"
+            struct.elementType!! should instanceOf(SimpleElement::class)
+            struct.containsNull shouldBe true
+            val elType = (struct.elementType as SimpleElement)
+            elType.value shouldBe "integer"
         }
     }
 })
