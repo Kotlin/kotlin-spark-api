@@ -1,8 +1,13 @@
+package org.jetbrains.spark.api
+
+import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.api.java.function.MapFunction
 import org.apache.spark.api.java.function.MapGroupsFunction
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
+import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.types.*
+import scala.reflect.ClassTag
 
 import java.lang.IllegalArgumentException
 import java.math.BigDecimal
@@ -13,7 +18,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.superclasses
+import kotlin.reflect.typeOf
 
 @JvmField
 val ENCODERS = mapOf<KClass<out Any>, Encoder<out Any?>>(
@@ -37,9 +42,20 @@ fun <T : Any> encoder(c: KClass<T>): Encoder<T> = ENCODERS[c] as? Encoder<T>? ?:
 inline fun <reified T : Any> SparkSession.toDS(list: List<T>): Dataset<T> =
         createDataset(list, genericRefEncoder<T>())
 
-inline fun <reified T : Any> genericRefEncoder(): Encoder<T> = TODO()//typeRef<T>().encoder()
+@OptIn(ExperimentalStdlibApi::class)
+inline fun <reified T : Any> genericRefEncoder(): Encoder<T> = when {
+    T::class.isData -> dataClassEncoder(schema(typeOf<T>()),T::class)
+    else -> encoder(T::class)
+}
 
-//inline fun <reified T : Any> typeRef() = object : TypeRef<T>() {}
+fun <T : Any> dataClassEncoder(schema: DataType, kClass: KClass<T>): Encoder<T> {
+    val isStruct = schema is StructType
+    return ExpressionEncoder(
+            if (isStruct) KotlinReflection.serializerForDataType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
+            if (isStruct) KotlinReflection.deserializerForDataType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
+            ClassTag.apply(kClass.java)
+    )
+}
 
 inline fun <T, reified R : Any> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
         map(MapFunction(func), genericRefEncoder<R>())
@@ -61,10 +77,7 @@ inline fun <KEY, VALUE, reified R : Any> KeyValueGroupedDataset<KEY, VALUE>.mapG
 
 inline fun <reified R : Any> Dataset<Row>.cast(): Dataset<R> = `as`(genericRefEncoder<R>())
 
-abstract class KTypeRef<T> protected constructor() {
-    var type = this::class.supertypes[0].arguments[0].type
-            ?: throw IllegalArgumentException("Internal error: TypeReference constructed without actual type information")
-}
+inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
 
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitivesSchema = knownDataTypes[type.classifier]

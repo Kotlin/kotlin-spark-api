@@ -1,3 +1,5 @@
+package org.jetbrains.spark.api
+
 class PartitioningIterator<T>(
     private val source: Iterator<T>,
     private val size: Int,

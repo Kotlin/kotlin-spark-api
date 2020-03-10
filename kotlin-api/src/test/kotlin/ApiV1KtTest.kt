@@ -14,7 +14,7 @@ import java.util.ArrayList
 
 
 class ApiV1KtTest : ShouldSpec({
-    "schema"{
+    "org.jetbrains.spark.api.org.jetbrains.spark.api.schema"{
         data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
 
@@ -73,7 +73,7 @@ class ApiV1KtTest : ShouldSpec({
             }
         }
     }
-    "schema with more complex data"{
+    "org.jetbrains.spark.api.org.jetbrains.spark.api.schema with more complex data"{
         data class Single<T>(val vala3: T)
         data class Test2<T>(val vala2: T, val para2: Pair<T, Single<Double>>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
@@ -143,7 +143,7 @@ class ApiV1KtTest : ShouldSpec({
         }
 
     }
-    "schema without generics"{
+    "org.jetbrains.spark.api.org.jetbrains.spark.api.schema without generics"{
         data class Test(val a: String, val b: Int, val c: Double)
 
         val schema = schema(object : KTypeRef<Test>() {}.type)

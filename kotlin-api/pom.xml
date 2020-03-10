@@ -34,7 +34,7 @@
             <version>${spark.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.spark</groupId>
+            <groupId>org.jetbrains.spark.api</groupId>
             <artifactId>core</artifactId>
             <version>0.1-SNAPSHOT</version>
         </dependency>
@@ -65,6 +65,9 @@
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <configuration>
                     <jvmTarget>${jvm.version}</jvmTarget>
+                    <args>
+                        <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
+                    </args>
                 </configuration>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <version>${kotlin.version}</version>

@@ -10,9 +10,10 @@
     </parent>
 
     <artifactId>core</artifactId>
-	<version>0.1-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
+    <groupId>org.jetbrains.spark.api</groupId>
 
-	<dependencies>
+    <dependencies>
         <!-- scala-maven-plugin determines the Scala version to use from this dependency -->
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -33,8 +34,8 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.0</version>
-		</dependency>
-	</dependencies>
+        </dependency>
+    </dependencies>
 
     <build>
         <resources>
@@ -44,8 +45,8 @@
         </resources>
         <!--<sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>-->
         <!--<testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>-->
-		<plugins>
-				            <plugin>
+        <plugins>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <version>3.0.0</version>
@@ -94,16 +95,20 @@
                     <execution>
                         <id>java-compile</id>
                         <phase>compile</phase>
-                        <goals> <goal>compile</goal> </goals>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>java-test-compile</id>
                         <phase>test-compile</phase>
-                        <goals> <goal>testCompile</goal> </goals>
+                        <goals>
+                            <goal>testCompile</goal>
+                        </goals>
                     </execution>
                 </executions>
-		</plugin>
-		      <plugin>
+            </plugin>
+            <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>3.2.2</version>
