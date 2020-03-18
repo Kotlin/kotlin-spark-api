@@ -3,6 +3,7 @@ import io.kotlintest.inspectors.forOne
 import io.kotlintest.matchers.collections.shouldHaveSize
 import io.kotlintest.matchers.instanceOf
 import io.kotlintest.specs.ShouldSpec
+import org.jetbrains.spark.api.schema
 import struct.model.DataType
 import struct.model.DataType.StructType
 import struct.model.DataType.TypeName
@@ -11,14 +12,16 @@ import struct.model.ElementType.SimpleElement
 import struct.model.Struct
 import struct.model.StructField
 import java.util.ArrayList
+import kotlin.reflect.typeOf
 
 
+@OptIn(ExperimentalStdlibApi::class)
 class ApiV1KtTest : ShouldSpec({
     "org.jetbrains.spark.api.org.jetbrains.spark.api.schema"{
         data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
 
-        val schema = schema(object : KTypeRef<Pair<String, Test<Int>>>() {}.type)
+        val schema = schema(typeOf<Pair<String, Test<Int>>>())
         var struct = Struct.fromJson(schema.prettyJson())!!
         var testField: DataType
         var typeValue: StructType
@@ -78,7 +81,7 @@ class ApiV1KtTest : ShouldSpec({
         data class Test2<T>(val vala2: T, val para2: Pair<T, Single<Double>>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
 
-        val schema = schema(object : KTypeRef<Pair<String, Test<Int>>>() {}.type)
+        val schema = schema(typeOf<Pair<String, Test<Int>>>())
         var struct = Struct.fromJson(schema.prettyJson())!!
         var testField: DataType
         var typeValue: StructType
@@ -146,7 +149,7 @@ class ApiV1KtTest : ShouldSpec({
     "org.jetbrains.spark.api.org.jetbrains.spark.api.schema without generics"{
         data class Test(val a: String, val b: Int, val c: Double)
 
-        val schema = schema(object : KTypeRef<Test>() {}.type)
+        val schema = schema(typeOf<Test>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
             struct.fields!!
@@ -157,7 +160,7 @@ class ApiV1KtTest : ShouldSpec({
         }
     }
     "type with list of ints"{
-        val schema = schema(object : KTypeRef<List<Int>>() {}.type)
+        val schema = schema(typeOf<List<Int>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
             struct.type shouldBe "array"
@@ -165,7 +168,7 @@ class ApiV1KtTest : ShouldSpec({
         }
     }
     "type with list of Pairs int to long"{
-        val schema = schema(object : KTypeRef<List<Pair<Int, Long>>>() {}.type)
+        val schema = schema(typeOf<List<Pair<Int, Long>>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
             struct.type shouldBe "array"
@@ -178,7 +181,7 @@ class ApiV1KtTest : ShouldSpec({
     "type with list of generic data class with E generic name"{
         data class Test<E>(val e: E)
 
-        val schema = schema(object : KTypeRef<List<Test<String>>>() {}.type)
+        val schema = schema(typeOf<List<Test<String>>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
             struct.type shouldBe "array"
@@ -188,7 +191,7 @@ class ApiV1KtTest : ShouldSpec({
         }
     }
     "type with list of list of int"{
-        val schema = schema(object : KTypeRef<List<List<Int>>>() {}.type)
+        val schema = schema(typeOf<List<List<Int>>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
             struct.type shouldBe "array"
@@ -200,7 +203,7 @@ class ApiV1KtTest : ShouldSpec({
         }
     }
     "Subtypes of list"{
-        val schema = schema(object : KTypeRef<ArrayList<Int>>() {}.type)
+        val schema = schema(typeOf<ArrayList<Int>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
             struct.type shouldBe "array"
@@ -211,7 +214,7 @@ class ApiV1KtTest : ShouldSpec({
         }
     }
     "Subtypes of list with nullable values"{
-        val schema = schema(object : KTypeRef<ArrayList<Int?>>() {}.type)
+        val schema = schema(typeOf<ArrayList<Int?>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
             struct.type shouldBe "array"

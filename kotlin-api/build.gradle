@@ -25,3 +25,7 @@ compileTestKotlin {
         freeCompilerArgs = ['-Xopt-in=kotlin.RequiresOptIn']
     }
 }
+
+test {
+    useJUnitPlatform()
+}

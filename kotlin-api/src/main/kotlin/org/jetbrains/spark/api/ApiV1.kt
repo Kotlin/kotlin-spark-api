@@ -44,12 +44,12 @@ inline fun <reified T : Any> SparkSession.toDS(list: List<T>): Dataset<T> =
 
 @OptIn(ExperimentalStdlibApi::class)
 inline fun <reified T : Any> genericRefEncoder(): Encoder<T> = when {
-    T::class.isData -> dataClassEncoder(schema(typeOf<T>()),T::class)
+    T::class.isData -> dataClassEncoder(schema(typeOf<T>()), T::class)
     else -> encoder(T::class)
 }
 
 fun <T : Any> dataClassEncoder(schema: DataType, kClass: KClass<T>): Encoder<T> {
-    val isStruct = schema is StructType
+    val isStruct = schema is StructType || schema is KDataTypeWrapper && schema.isData
     return ExpressionEncoder(
             if (isStruct) KotlinReflection.serializerForDataType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
             if (isStruct) KotlinReflection.deserializerForDataType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
@@ -81,7 +81,7 @@ inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(
 
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitivesSchema = knownDataTypes[type.classifier]
-    if (primitivesSchema != null) return primitivesSchema
+    if (primitivesSchema != null) return KDataTypeWrapper(primitivesSchema, false, (type.classifier!! as KClass<*>).java)
     val klass = type.classifier!! as KClass<*>
     val args = type.arguments
 
@@ -92,27 +92,41 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     return when {
         klass.isSubclassOf(Iterable::class) -> {
             val listParam = types.getValue(klass.typeParameters[0].name)
-            DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable)
+            KDataTypeWrapper(
+                    DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
+                    false,
+                    null
+            )
         }
         klass.isSubclassOf(Map::class) -> {
             val mapKeyParam = types.getValue(klass.typeParameters[0].name)
             val mapValueParam = types.getValue(klass.typeParameters[1].name)
-            DataTypes.createMapType(
-                    schema(mapKeyParam, types),
-                    schema(mapValueParam, types),
-                    mapValueParam.isMarkedNullable
+            KDataTypeWrapper(
+                    DataTypes.createMapType(
+                            schema(mapKeyParam, types),
+                            schema(mapValueParam, types),
+                            mapValueParam.isMarkedNullable
+                    ),
+                    false,
+                    null
             )
         }
-        else -> StructType(
-                klass
-                        .declaredMemberProperties
-                        .filter { it.findAnnotation<Transient>() == null }
-                        .map {
-                            val projectedType = types[it.returnType.toString()] ?: it.returnType
-                            val tpe = knownDataTypes[projectedType.classifier] ?: schema(projectedType, types)
-                            StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
-                        }
-                        .toTypedArray()
+        else -> KDataTypeWrapper(
+                StructType(
+                        klass
+                                .declaredMemberProperties
+                                .filter { it.findAnnotation<Transient>() == null }
+                                .map {
+                                    val projectedType = types[it.returnType.toString()] ?: it.returnType
+                                    val tpe = knownDataTypes[projectedType.classifier]
+                                            ?.let { dt -> KDataTypeWrapper(dt, false, (projectedType.classifier as KClass<*>).java) }
+                                            ?: schema(projectedType, types)
+                                    StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
+                                }
+                                .toTypedArray()
+                ),
+                true,
+                klass.java
         )
     }
 }

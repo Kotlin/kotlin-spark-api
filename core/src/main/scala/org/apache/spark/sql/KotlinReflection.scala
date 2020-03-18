@@ -9,7 +9,7 @@ import org.apache.spark.sql.catalyst.analysis.GetColumnByOrdinal
 import org.apache.spark.sql.catalyst.expressions.objects._
 import org.apache.spark.sql.catalyst.expressions.{Expression, _}
 import org.apache.spark.sql.catalyst.util.{ArrayData, MapData}
-import org.apache.spark.sql.catalyst.{InternalRow, ScalaReflection, WalkedTypePath}
+import org.apache.spark.sql.catalyst.{InternalRow, ScalaReflection, WalkedTypePath, expressions}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
 
@@ -154,25 +154,6 @@ object KotlinReflection extends ScalaReflection {
       (casted, typePath) => deserializerFor(tpe, casted, typePath))
   }
 
-  /**
-   * Returns an expression that can be used to deserialize a Spark SQL representation to an object
-   * of type `T` with a compatible schema. The Spark SQL representation is located at ordinal 0 of
-   * a row, i.e., `GetColumnByOrdinal(0, _)`. Nested classes will have their fields accessed using
-   * `UnresolvedExtractValue`.
-   *
-   * The returned expression is used by `ExpressionEncoder`. The encoder will resolve and bind this
-   * deserializer expression when using it.
-   */
-  def deserializerForDataType[T](cls:java.lang.Class[T], dt: DataType): Expression = {
-    val tpe = getType(cls)
-    val clsName = getClassNameFromType(tpe)
-    val walkedTypePath = WalkedTypePath().recordRoot(clsName)
-
-    // Assumes we are deserializing the first column of a row.
-    deserializerForWithNullSafetyAndUpcast(GetColumnByOrdinal(0, dt), dt,
-      nullable = true, walkedTypePath,
-      (casted, typePath) => deserializerFor(tpe, casted, typePath))
-  }
 
   /**
    * Returns an expression that can be used to deserialize an input expression to an object of type
@@ -185,19 +166,19 @@ object KotlinReflection extends ScalaReflection {
   private def deserializerFor(
                                tpe: `Type`,
                                path: Expression,
-                               walkedTypePath: WalkedTypePath): Expression = cleanUpReflectionObjects {
+                               walkedTypePath: WalkedTypePath,
+                               isData: Boolean = false,
+                               predefinedDt: DataType = null
+                             ): Expression = cleanUpReflectionObjects {
     baseType(tpe) match {
-      case t if !dataTypeFor(t).isInstanceOf[ObjectType] => path
-
-      case t if isSubtype(t, localTypeOf[Option[_]]) =>
-        val TypeRef(_, _, Seq(optType)) = t
-        val className = getClassNameFromType(optType)
-        val newTypePath = walkedTypePath.recordOption(className)
-        WrapOption(deserializerFor(optType, path, newTypePath), dataTypeFor(optType))
 
       case t if isSubtype(t, localTypeOf[java.lang.Integer]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Integer])
+
+      case t if isSubtype(t, localTypeOf[Int]) =>
+        createDeserializerForTypesSupportValueOf(path,
+          classOf[Int])
 
       case t if isSubtype(t, localTypeOf[java.lang.Long]) =>
         createDeserializerForTypesSupportValueOf(path,
@@ -284,30 +265,6 @@ object KotlinReflection extends ScalaReflection {
 
       // We serialize a `Set` to Catalyst array. When we deserialize a Catalyst array
       // to a `Set`, if there are duplicated elements, the elements will be de-duplicated.
-      case t if isSubtype(t, localTypeOf[Seq[_]]) ||
-        isSubtype(t, localTypeOf[scala.collection.Set[_]]) =>
-        val TypeRef(_, _, Seq(elementType)) = t
-        val Schema(dataType, elementNullable) = schemaFor(elementType)
-        val className = getClassNameFromType(elementType)
-        val newTypePath = walkedTypePath.recordArray(className)
-
-        val mapFunction: Expression => Expression = element => {
-          deserializerForWithNullSafetyAndUpcast(
-            element,
-            dataType,
-            nullable = elementNullable,
-            newTypePath,
-            (casted, typePath) => deserializerFor(elementType, casted, typePath))
-        }
-
-        val companion = t.dealias.typeSymbol.companion.typeSignature
-        val cls = companion.member(TermName("newBuilder")) match {
-          case NoSymbol if isSubtype(t, localTypeOf[Seq[_]]) => classOf[Seq[_]]
-          case NoSymbol if isSubtype(t, localTypeOf[scala.collection.Set[_]]) =>
-            classOf[scala.collection.Set[_]]
-          case _ => mirror.runtimeClass(t.typeSymbol.asClass)
-        }
-        UnresolvedMapObjects(mapFunction, path, Some(cls))
 
       case t if isSubtype(t, localTypeOf[Map[_, _]]) =>
         val TypeRef(_, _, Seq(keyType, valueType)) = t
@@ -342,34 +299,33 @@ object KotlinReflection extends ScalaReflection {
           dataType = ObjectType(udt.getClass))
         Invoke(obj, "deserialize", ObjectType(udt.userClass), path :: Nil)
 
-      case t if definedByConstructorParams(t) =>
-        val params = getConstructorParameters(t)
+      case _ if isData =>
+        val wrapper = predefinedDt.asInstanceOf[KDataTypeWrapper]
+        val structType = wrapper.dt.asInstanceOf[StructType]
+        val cls = wrapper.cls
+        val arguments = structType
+          .fields
+          .map(f => {
+            val dataType = f.dataType.asInstanceOf[KDataTypeWrapper]
+            val nullable = f.nullable
+            val clsName = getClassNameFromType(getType(dataType.cls))
+            val newTypePath = walkedTypePath.recordField(clsName, f.name)
 
-        val cls = getClassFromType(tpe)
+            // For tuples, we based grab the inner fields by ordinal instead of name.
+            val newPath = deserializerFor(
+              getType(dataType.cls),
+              addToPath(path, f.name, dataType.dt, newTypePath),
+              newTypePath,
+              dataType.isData,
+              if (dataType.isData) dataType else null
+            )
+            expressionWithNullSafety(
+              newPath,
+              nullable = nullable,
+              newTypePath
+            )
 
-        val arguments = params.zipWithIndex.map { case ((fieldName, fieldType), i) =>
-          val Schema(dataType, nullable) = schemaFor(fieldType)
-          val clsName = getClassNameFromType(fieldType)
-          val newTypePath = walkedTypePath.recordField(clsName, fieldName)
-
-          // For tuples, we based grab the inner fields by ordinal instead of name.
-          val newPath = if (cls.getName startsWith "scala.Tuple") {
-            deserializerFor(
-              fieldType,
-              addToPathOrdinal(path, i, dataType, newTypePath),
-              newTypePath)
-          } else {
-            deserializerFor(
-              fieldType,
-              addToPath(path, fieldName, dataType, newTypePath),
-              newTypePath)
-          }
-          expressionWithNullSafety(
-            newPath,
-            nullable = nullable,
-            newTypePath)
-        }
-
+          })
         val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
 
         org.apache.spark.sql.catalyst.expressions.If(
@@ -377,6 +333,12 @@ object KotlinReflection extends ScalaReflection {
           org.apache.spark.sql.catalyst.expressions.Literal.create(null, ObjectType(cls)),
           newInstance
         )
+
+      case _ =>
+        throw new UnsupportedOperationException(
+          s"No Encoder found for $tpe\n" + walkedTypePath)
+
+
     }
   }
 
@@ -434,13 +396,38 @@ object KotlinReflection extends ScalaReflection {
     mir.classSymbol(clazz).toType
   }
 
-  def serializerForDataType[T](cls: java.lang.Class[T], dt: DataType) = {
+  def deserializerForDataType(cls: java.lang.Class[_], dt: DataType): Expression = {
+    val tpe = getType(cls)
+    val clsName = getClassNameFromType(tpe)
+    val walkedTypePath = WalkedTypePath().recordRoot(clsName)
+    val isData = dt match {
+      case t: KDataTypeWrapper => t.isData
+      case _ => false
+    }
+
+    // Assumes we are deserializing the first column of a row.
+    deserializerForWithNullSafetyAndUpcast(
+      GetColumnByOrdinal(0, dt),
+      dt,
+      nullable = true,
+      walkedTypePath,
+      (casted, typePath) => deserializerFor(tpe, casted, typePath, isData, dt)
+    )
+  }
+
+
+  def serializerForDataType(cls: java.lang.Class[_], dt: DataType) = {
 
     val tpe = getType(cls)
     val clsName = getClassNameFromType(tpe)
     val walkedTypePath = WalkedTypePath().recordRoot(clsName)
-    val inputObject = BoundReference(0, dt, nullable = true)
-    serializerFor(inputObject, tpe, walkedTypePath)
+    val inputObject = BoundReference(0, dt.asInstanceOf[KDataTypeWrapper].dt, nullable = true)
+    val isData = dt match {
+      case t: KDataTypeWrapper => t.isData
+      case _ => false
+    }
+    val z = serializerFor(inputObject, tpe, walkedTypePath, isData = isData, predefinedDt = dt)
+    z
   }
 
   /**
@@ -451,7 +438,10 @@ object KotlinReflection extends ScalaReflection {
                              inputObject: Expression,
                              tpe: `Type`,
                              walkedTypePath: WalkedTypePath,
-                             seenTypeSet: Set[`Type`] = Set.empty): Expression = cleanUpReflectionObjects {
+                             seenTypeSet: Set[`Type`] = Set.empty,
+                             isData: Boolean = false,
+                             predefinedDt: DataType = null
+                           ): Expression = cleanUpReflectionObjects {
 
     def toCatalystArray(input: Expression, elementType: `Type`): Expression = {
       dataTypeFor(elementType) match {
@@ -476,7 +466,8 @@ object KotlinReflection extends ScalaReflection {
     }
 
     baseType(tpe) match {
-      case _ if !inputObject.dataType.isInstanceOf[ObjectType] => inputObject
+
+      case _ if !inputObject.dataType.isInstanceOf[ObjectType] && !isData => inputObject
 
       case t if isSubtype(t, localTypeOf[Option[_]]) =>
         val TypeRef(_, _, Seq(optType)) = t
@@ -555,6 +546,8 @@ object KotlinReflection extends ScalaReflection {
 
       case t if isSubtype(t, localTypeOf[java.lang.Integer]) =>
         createSerializerForInteger(inputObject)
+      case t if isSubtype(t, localTypeOf[Int]) =>
+        createSerializerForInteger(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Long]) => createSerializerForLong(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Double]) =>
         createSerializerForDouble(inputObject)
@@ -575,6 +568,36 @@ object KotlinReflection extends ScalaReflection {
           newInstance().asInstanceOf[UserDefinedType[_]]
         val udtClass = udt.getClass
         createSerializerForUserDefinedType(inputObject, udt, udtClass)
+
+      case _ if isData =>
+
+        val rootDt = predefinedDt.asInstanceOf[KDataTypeWrapper].dt.asInstanceOf[StructType]
+        val fields = rootDt
+          .fields
+          .toSeq
+          .map(it => {
+            val fieldName = it.name
+            val fieldTpe = getType(it.dataType.asInstanceOf[KDataTypeWrapper].cls)
+            val fieldDt = it.dataType.asInstanceOf[KDataTypeWrapper].dt
+            (fieldName, fieldTpe, fieldDt)
+          }).map { case (fieldName, fieldType, fieldDt) =>
+          if (javaKeywords.contains(fieldName)) {
+            throw new UnsupportedOperationException(s"`$fieldName` is a reserved keyword and " +
+              "cannot be used as field name\n" + walkedTypePath)
+          }
+
+          // SPARK-26730 inputObject won't be null with If's guard below. And KnownNotNul
+          // is necessary here. Because for a nullable nested inputObject with struct data
+          // type, e.g. StructType(IntegerType, StringType), it will return nullable=true
+          // for IntegerType without KnownNotNull. And that's what we do not expect to.
+          val fieldValue = Invoke(KnownNotNull(inputObject), s"get${fieldName.capitalize}", fieldDt,
+            returnNullable = !fieldType.typeSymbol.asClass.isPrimitive)
+          val clsName = getClassNameFromType(fieldType)
+          val newPath = walkedTypePath.recordField(clsName, fieldName)
+          (fieldName, serializerFor(fieldValue, fieldType, newPath, seenTypeSet))
+        }
+        createSerializerForObject(inputObject, fields)
+
 
       case t if definedByConstructorParams(t) =>
         if (seenTypeSet.contains(t)) {
@@ -600,6 +623,7 @@ object KotlinReflection extends ScalaReflection {
           (fieldName, serializerFor(fieldValue, fieldType, newPath, seenTypeSet + t))
         }
         createSerializerForObject(inputObject, fields)
+
 
       case _ =>
         throw new UnsupportedOperationException(
@@ -984,5 +1008,38 @@ trait ScalaReflection extends Logging {
     }
     params.flatten
   }
+
+}
+
+case class KDataTypeWrapper(val dt: DataType, val isData: Boolean, val cls: Class[_]) extends DataType {
+  override def defaultSize: Int = dt.defaultSize
+
+  override private[spark] def asNullable = dt.asNullable
+
+  override private[sql] def unapply(e: Expression) = dt.unapply(e)
+
+  override def typeName: String = dt.typeName
+
+  override private[sql] def jsonValue = dt.jsonValue
+
+  override def json: String = dt.json
+
+  override def prettyJson: String = dt.prettyJson
+
+  override def simpleString: String = dt.simpleString
+
+  override def catalogString: String = dt.catalogString
+
+  override private[sql] def simpleString(maxNumberFields: Int) = dt.simpleString(maxNumberFields)
+
+  override def sql: String = dt.sql
+
+  override private[spark] def sameType(other: DataType) = dt.sameType(other)
+
+  override private[spark] def existsRecursively(f: DataType => Boolean) = dt.existsRecursively(f)
+
+  private[sql] override def defaultConcreteType = dt.defaultConcreteType
+
+  private[sql] override def acceptsType(other: DataType) = dt.acceptsType(other)
 
 }

@@ -4,13 +4,13 @@ import org.apache.spark.sql.Encoders
 import org.apache.spark.sql.SparkSession
 import java.lang.StringBuilder
 
+data class Q<T>(val id: Int, val text: T)
 object Main {
-    data class Q<T>(val id: Int, val text: T)
 
     @JvmStatic
     fun main(args: Array<String>) {
-        println("hello")
-        val logFile = "/Users/vitaly.khudobakhshov/Documents/scaladays2019.txt"
+//        println("hello")
+//        val logFile = "/Users/vitaly.khudobakhshov/Documents/scaladays2019.txt"
         val spark = SparkSession
                 .builder()
                 .master("local[2]")
@@ -24,10 +24,10 @@ object Main {
 //
 //        println("Lines with a: $numAs, lines with b: $numBs")
 
-        val list = listOf(Q(1, "1"), Q(2, "22"), Q(3, StringBuilder("333")))
+//        val list = listOf(Q(1, "1"), Q(2, "22"), Q(3, "333"))
         val ds = spark
-                .toDS(list)
-                .map { (a, b) -> a to b.length }
+                .toDS(listOf(Q(1, 1 to "1"), Q(2, 2 to "22"), Q(3, 3 to "333")))
+                .map { (a, b) -> a to b.second.length }
                 .map { it to 1 }
                 .map { (a, b) -> Triple(a.first, a.second, b) }
                 .map { (a, b, c) -> a + b + c }
