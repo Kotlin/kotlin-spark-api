@@ -1,0 +1,12 @@
+allprojects {
+    group = 'org.apache.spark'
+    version = '0.1-SNAPSHOT'
+}
+
+subprojects {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+}
