@@ -1,8 +1,6 @@
 package org.jetbrains.spark.api
 
-import org.apache.spark.sql.Encoders
 import org.apache.spark.sql.SparkSession
-import java.lang.StringBuilder
 
 data class Q<T>(val id: Int, val text: T)
 object Main {
@@ -13,8 +11,9 @@ object Main {
 //        val logFile = "/Users/vitaly.khudobakhshov/Documents/scaladays2019.txt"
         val spark = SparkSession
                 .builder()
-                .master("local[2]")
-                .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+                .master("local")
+//                .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+                .config("spark.sql.codegen.wholeStage", false)
                 .appName("Simple Application").orCreate
 
 //        val logData = spark.read().textFile(logFile).cache()
@@ -25,7 +24,7 @@ object Main {
 //        println("Lines with a: $numAs, lines with b: $numBs")
 
 //        val list = listOf(Q(1, "1"), Q(2, "22"), Q(3, "333"))
-        val ds = spark
+        spark
                 .toDS(listOf(Q(1, 1 to "1"), Q(2, 2 to "22"), Q(3, 3 to "333")))
                 .map { (a, b) -> a to b.second.length }
                 .map { it to 1 }

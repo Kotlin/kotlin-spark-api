@@ -354,8 +354,7 @@ object MyJavaInference {
    * `BoundReference(0, _)`.
    */
   def serializerFor(beanClass: Class[_]): Expression = {
-    val inputObject = BoundReference(0, ObjectType(beanClass), nullable = true)
-    val nullSafeInput = AssertNotNull(inputObject, Seq("top level input bean"))
+    val nullSafeInput = AssertNotNull(BoundReference(0, ObjectType(beanClass), nullable = true), Seq("top level input bean"))
     serializerFor(nullSafeInput, TypeToken.of(beanClass))
   }
 
