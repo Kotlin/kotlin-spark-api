@@ -77,6 +77,10 @@ inline fun <reified R : Any> Dataset<Row>.cast(): Dataset<R> = `as`(genericRefEn
 
 inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
 
+fun <T> Dataset<T>.debugCodegen() = also { KotlinReflection.debugCodegen(it) }
+
+fun <T> Dataset<T>.debug() = also { KotlinReflection.debug(it) }
+
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitivesSchema = knownDataTypes[type.classifier]
     if (primitivesSchema != null) return KOtherTypeWrapper(primitivesSchema, false, (type.classifier!! as KClass<*>).java)

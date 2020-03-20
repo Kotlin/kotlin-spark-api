@@ -193,6 +193,7 @@ object KotlinReflection extends ScalaReflection {
                              ): Expression = cleanUpReflectionObjects {
     baseType(tpe) match {
 
+      //<editor-fold desc="Description">
       case t if isSubtype(t, localTypeOf[java.lang.Integer]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Integer])
@@ -230,6 +231,7 @@ object KotlinReflection extends ScalaReflection {
 
       case t if isSubtype(t, localTypeOf[java.sql.Date]) =>
         createDeserializerForSqlDate(path)
+      //</editor-fold>
 
       case t if isSubtype(t, localTypeOf[java.time.Instant]) =>
         createDeserializerForInstant(path)
@@ -347,11 +349,11 @@ object KotlinReflection extends ScalaReflection {
             )
 
           })
-        val newInstance = NewInstance(cls, arguments, predefinedDt.dt, propagateNull = false)
+        val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
 
         org.apache.spark.sql.catalyst.expressions.If(
           IsNull(path),
-          org.apache.spark.sql.catalyst.expressions.Literal.create(null, predefinedDt.dt),
+          org.apache.spark.sql.catalyst.expressions.Literal.create(null, ObjectType(cls)),
           newInstance
         )
 
@@ -1045,6 +1047,14 @@ trait ScalaReflection extends Logging {
     case _ => ObjectType(cls)
   }
 
+  def debugCodegen(df: Dataset[_]): Unit = {
+    import org.apache.spark.sql.execution.debug._
+    df.debugCodegen()
+  }
+  def debug(df: Dataset[_]): Unit = {
+    import org.apache.spark.sql.execution.debug._
+    df.debug()
+  }
 
 }
 

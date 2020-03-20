@@ -13,7 +13,7 @@ object Main {
                 .builder()
                 .master("local")
 //                .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-                .config("spark.sql.codegen.wholeStage", false)
+//                .config("spark.sql.codegen.wholeStage", false)
                 .appName("Simple Application").orCreate
 
 //        val logData = spark.read().textFile(logFile).cache()
@@ -24,17 +24,19 @@ object Main {
 //        println("Lines with a: $numAs, lines with b: $numBs")
 
 //        val list = listOf(Q(1, "1"), Q(2, "22"), Q(3, "333"))
+//
+//        println("TEST >>> $ds")
+//        val enc = KotlinEncoder.bean(Pair::class.java)
+//        val enc = Encoders.kryo(Pair::class.java)
         spark
                 .toDS(listOf(Q(1, 1 to "1"), Q(2, 2 to "22"), Q(3, 3 to "333")))
                 .map { (a, b) -> a to b.second.length }
                 .map { it to 1 }
                 .map { (a, b) -> Triple(a.first, a.second, b) }
                 .map { (a, b, c) -> a + b + c }
+                .debug()
+                .debugCodegen()
                 .forEach { println(it) }
-//
-//        println("TEST >>> $ds")
-//        val enc = KotlinEncoder.bean(Pair::class.java)
-//        val enc = Encoders.kryo(Pair::class.java)
 
 //        println(">>>  CT=" + enc.clsTag())
 //        println(">>>  SC=" + enc.schema())
