@@ -11,7 +11,7 @@ object Main {
 //        val logFile = "/Users/vitaly.khudobakhshov/Documents/scaladays2019.txt"
         val spark = SparkSession
                 .builder()
-                .master("local")
+                .master("local[2]")
 //                .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
 //                .config("spark.sql.codegen.wholeStage", false)
                 .appName("Simple Application").orCreate
@@ -28,14 +28,19 @@ object Main {
 //        println("TEST >>> $ds")
 //        val enc = KotlinEncoder.bean(Pair::class.java)
 //        val enc = Encoders.kryo(Pair::class.java)
-        spark
+        val triples = spark
                 .toDS(listOf(Q(1, 1 to "1"), Q(2, 2 to "22"), Q(3, 3 to "333")))
-                .map { (a, b) -> a to b.second.length }
+                .map { (a, b) -> a + b.first to b.second.length }
                 .map { it to 1 }
                 .map { (a, b) -> Triple(a.first, a.second, b) }
-                .map { (a, b, c) -> a + b + c }
-                .debug()
-                .debugCodegen()
+
+
+        val pairs = spark
+                .toDS(listOf(2 to "ад", 4 to "луна", 6 to "ягодка"))
+
+        triples
+                .leftJoin(pairs, triples.col("first").multiply(2).eq(pairs.col("first")))
+                .map { (triple, pair) -> Five(triple.first, triple.second, triple.third, pair?.first, pair?.second) }
                 .forEach { println(it) }
 
 //        println(">>>  CT=" + enc.clsTag())
@@ -46,4 +51,6 @@ object Main {
 //        println(rdd.take(1))
         spark.stop()
     }
+
+    data class Five<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
 }

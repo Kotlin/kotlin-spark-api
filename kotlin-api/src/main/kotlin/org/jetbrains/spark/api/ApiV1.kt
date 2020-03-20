@@ -7,6 +7,7 @@ import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.types.*
+import org.jetbrains.spark.extensions.KSparkExtensions
 import scala.reflect.ClassTag
 import java.math.BigDecimal
 import java.sql.Date
@@ -80,6 +81,14 @@ inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(
 fun <T> Dataset<T>.debugCodegen() = also { KotlinReflection.debugCodegen(it) }
 
 fun <T> Dataset<T>.debug() = also { KotlinReflection.debug(it) }
+
+@JvmName("colOfSet")
+fun <T> Dataset<T>.col(name: String) = KSparkExtensions.col(this, name)
+
+fun Column.eq(c: Column) = this.`$eq$eq$eq`(c)
+
+fun <L, R> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R?>> = joinWith(right, col, "left")
+        .map { it._1 to it._2 }
 
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitivesSchema = knownDataTypes[type.classifier]
