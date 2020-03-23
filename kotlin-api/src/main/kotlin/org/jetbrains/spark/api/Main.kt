@@ -1,5 +1,6 @@
 package org.jetbrains.spark.api
 
+import org.apache.spark.api.java.function.ReduceFunction
 import org.apache.spark.sql.SparkSession
 
 data class Q<T>(val id: Int, val text: T)
@@ -29,8 +30,8 @@ object Main {
 //        val enc = KotlinEncoder.bean(Pair::class.java)
 //        val enc = Encoders.kryo(Pair::class.java)
         val triples = spark
-                .toDS(listOf(Q(1, 1 to "1"), Q(2, 2 to "22"), Q(3, 3 to "333")))
-                .map { (a, b) -> a + b.first to b.second.length }
+                .toDS(listOf(Q(1, 1 to null), Q(2, 2 to "22"), Q(3, 3 to "333")))
+                .map { (a, b) -> a + b.first to b.second?.length }
                 .map { it to 1 }
                 .map { (a, b) -> Triple(a.first, a.second, b) }
 
@@ -40,8 +41,15 @@ object Main {
 
         triples
                 .leftJoin(pairs, triples.col("first").multiply(2).eq(pairs.col("first")))
+                .also { it.printSchema() }
                 .map { (triple, pair) -> Five(triple.first, triple.second, triple.third, pair?.first, pair?.second) }
-                .forEach { println(it) }
+                .groupByKey { it.a }
+                .reduceGroups(ReduceFunction { v1, v2 -> v1.copy(a = v1.a + v2.a, b = v1.a + v2.a) })
+                .repartition(1)
+                .also { it.printSchema() }
+                .debugCodegen()
+                .write()
+                .orc("/tmp/datasets-orc")
 
 //        println(">>>  CT=" + enc.clsTag())
 //        println(">>>  SC=" + enc.schema())

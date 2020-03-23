@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5a8a6090-c99a-4958-b903-35e6be07239a" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/core/src/main/scala/org/jetbrains/spark/extensions/KSparkExtensions.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/core/src/main/scala/org/apache/spark/sql/KotlinReflection.scala" beforeDir="false" afterPath="$PROJECT_DIR$/core/src/main/scala/org/apache/spark/sql/KotlinReflection.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/ApiV1.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/ApiV1.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/kotlin-api/src/main/kotlin/org/jetbrains/spark/api/Main.kt" afterDir="false" />
     </list>
@@ -124,7 +125,8 @@
       <updated>1584522145847</updated>
       <workItem from="1584522147904" duration="26178000" />
       <workItem from="1584601652149" duration="21988000" />
-      <workItem from="1584720519829" duration="7943000" />
+      <workItem from="1584720519829" duration="18512000" />
+      <workItem from="1584951623062" duration="599000" />
     </task>
     <servers />
   </component>
@@ -144,46 +146,46 @@
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
     <state x="1862" y="399" width="887" height="986" key="#com.intellij.ide.util.MemberChooser/0.0.3840.2102@0.0.3840.2102" timestamp="1584608391065" />
-    <state x="1512" y="752" width="1730" height="1046" key="#xdebugger.evaluate" timestamp="1584721855160">
+    <state x="1512" y="752" width="1730" height="1046" key="#xdebugger.evaluate" timestamp="1584797433571">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state x="1512" y="752" width="1730" height="1046" key="#xdebugger.evaluate/0.0.3840.2102@0.0.3840.2102" timestamp="1584721855160" />
-    <state width="3750" height="570" key="GridCell.Tab.0.bottom" timestamp="1584729110274">
+    <state x="1512" y="752" width="1730" height="1046" key="#xdebugger.evaluate/0.0.3840.2102@0.0.3840.2102" timestamp="1584797433571" />
+    <state width="3750" height="703" key="GridCell.Tab.0.bottom" timestamp="1584798308939">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="570" key="GridCell.Tab.0.bottom/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
-    <state width="3750" height="570" key="GridCell.Tab.0.center" timestamp="1584729110274">
+    <state width="3750" height="703" key="GridCell.Tab.0.bottom/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308939" />
+    <state width="3750" height="703" key="GridCell.Tab.0.center" timestamp="1584798308939">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="570" key="GridCell.Tab.0.center/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
-    <state width="3750" height="570" key="GridCell.Tab.0.left" timestamp="1584729110274">
+    <state width="3750" height="703" key="GridCell.Tab.0.center/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308939" />
+    <state width="3750" height="703" key="GridCell.Tab.0.left" timestamp="1584798308939">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="570" key="GridCell.Tab.0.left/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
-    <state width="3750" height="570" key="GridCell.Tab.0.right" timestamp="1584729110274">
+    <state width="3750" height="703" key="GridCell.Tab.0.left/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308939" />
+    <state width="3750" height="703" key="GridCell.Tab.0.right" timestamp="1584798308939">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="570" key="GridCell.Tab.0.right/0.0.3840.2102@0.0.3840.2102" timestamp="1584729110274" />
-    <state width="3750" height="703" key="GridCell.Tab.1.bottom" timestamp="1584722350195">
+    <state width="3750" height="703" key="GridCell.Tab.0.right/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308939" />
+    <state width="3750" height="703" key="GridCell.Tab.1.bottom" timestamp="1584798308879">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="703" key="GridCell.Tab.1.bottom/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
-    <state width="3750" height="703" key="GridCell.Tab.1.center" timestamp="1584722350195">
+    <state width="3750" height="703" key="GridCell.Tab.1.bottom/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308879" />
+    <state width="3750" height="703" key="GridCell.Tab.1.center" timestamp="1584798308879">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="703" key="GridCell.Tab.1.center/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
-    <state width="3750" height="703" key="GridCell.Tab.1.left" timestamp="1584722350195">
+    <state width="3750" height="703" key="GridCell.Tab.1.center/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308879" />
+    <state width="3750" height="703" key="GridCell.Tab.1.left" timestamp="1584798308879">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="703" key="GridCell.Tab.1.left/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
-    <state width="3750" height="703" key="GridCell.Tab.1.right" timestamp="1584722350195">
+    <state width="3750" height="703" key="GridCell.Tab.1.left/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308879" />
+    <state width="3750" height="703" key="GridCell.Tab.1.right" timestamp="1584798308879">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state width="3750" height="703" key="GridCell.Tab.1.right/0.0.3840.2102@0.0.3840.2102" timestamp="1584722350195" />
-    <state x="1445" y="585" width="1089" height="917" key="StructurePopup" timestamp="1584727874158">
+    <state width="3750" height="703" key="GridCell.Tab.1.right/0.0.3840.2102@0.0.3840.2102" timestamp="1584798308879" />
+    <state x="1445" y="585" width="1089" height="917" key="StructurePopup" timestamp="1584797832863">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state x="1445" y="585" width="1089" height="917" key="StructurePopup/0.0.3840.2102@0.0.3840.2102" timestamp="1584727874158" />
+    <state x="1445" y="585" width="1089" height="917" key="StructurePopup/0.0.3840.2102@0.0.3840.2102" timestamp="1584797832863" />
     <state width="1920" height="1051" key="XDebugger.FullValuePopup" timestamp="1584544847222">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
@@ -200,10 +202,10 @@
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
     <state x="1331" y="484" key="run.anything.popup/0.0.3840.2102@0.0.3840.2102" timestamp="1584724075154" />
-    <state x="1324" y="124" width="1188" height="1976" key="search.everywhere.popup" timestamp="1584726729815">
+    <state x="1324" y="124" width="1188" height="1976" key="search.everywhere.popup" timestamp="1584796839623">
       <screen x="0" y="0" width="3840" height="2102" />
     </state>
-    <state x="1324" y="124" width="1188" height="1976" key="search.everywhere.popup/0.0.3840.2102@0.0.3840.2102" timestamp="1584726729815" />
+    <state x="1324" y="124" width="1188" height="1976" key="search.everywhere.popup/0.0.3840.2102@0.0.3840.2102" timestamp="1584796839623" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -309,9 +311,10 @@
           <option name="timeStamp" value="78" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>jar://$MAVEN_REPOSITORY$/org/apache/spark/spark-catalyst_2.12/3.1.0-SNAPSHOT/spark-catalyst_2.12-3.1.0-SNAPSHOT-sources.jar!/org/apache/spark/sql/catalyst/SerializerBuildHelper.scala</url>
-          <line>187</line>
-          <option name="timeStamp" value="81" />
+          <condition expression="dt.nullable" language="Scala" />
+          <url>file://$PROJECT_DIR$/core/src/main/scala/org/apache/spark/sql/KotlinReflection.scala</url>
+          <line>205</line>
+          <option name="timeStamp" value="87" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -320,6 +323,7 @@
         <watch expression="((AssertNotNull)$this).canonicalized" custom="org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull" />
         <watch expression="inputTypesForMerging" language="Scala" />
         <watch expression="((AssertNotNull)$this).canonicalized" custom="org.apache.spark.sql.catalyst.expressions.objects.AssertNotNull" />
+        <watch expression="dt.nullable" language="Scala" />
       </configuration>
     </watches-manager>
   </component>

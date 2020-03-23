@@ -3,6 +3,7 @@ package org.jetbrains.spark.api
 import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.api.java.function.MapFunction
 import org.apache.spark.api.java.function.MapGroupsFunction
+import org.apache.spark.api.java.function.ReduceFunction
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -36,45 +37,53 @@ val ENCODERS = mapOf<KClass<out Any>, Encoder<out Any?>>(
 )
 
 
-fun <T : Any> encoder(c: KClass<T>): Encoder<T> = ENCODERS[c] as? Encoder<T>? ?: bean(c.java)
+inline fun <reified T> encoder(): Encoder<T> = ENCODERS[T::class] as? Encoder<T>? ?: bean(T::class.java)
 
-inline fun <reified T : Any> SparkSession.toDS(list: List<T>): Dataset<T> =
+inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
         createDataset(list, genericRefEncoder<T>())
 
+
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T : Any> genericRefEncoder(): Encoder<T> = when {
-    T::class.isData -> dataClassEncoder(schema(typeOf<T>()), T::class)
-    else -> encoder(T::class)
+inline fun <reified T> genericRefEncoder(): Encoder<T> = when {
+    isSupportedClass<T>() -> kotlinClassEncoder(schema(typeOf<T>()), T::class)
+    else -> encoder()
 }
 
-fun <T : Any> dataClassEncoder(schema: DataType, kClass: KClass<T>): Encoder<T> {
-    val isStruct = schema is StructType || schema is KDataTypeWrapper && schema.isData
+inline fun <reified T> isSupportedClass(): Boolean = T::class.isData
+        || T::class.isSubclassOf(Map::class)
+        || T::class.isSubclassOf(Iterable::class)
+
+fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
-            if (isStruct) KotlinReflection.serializerForDataType(kClass.java, schema as KDataTypeWrapper) else KotlinReflection.serializerForJavaType(kClass.java),
-            if (isStruct) KotlinReflection.deserializerForDataType(kClass.java, schema as KDataTypeWrapper) else KotlinReflection.serializerForJavaType(kClass.java),
+            if (schema is DataTypeWithClass) KotlinReflection.serializerForKotlinType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
+            if (schema is DataTypeWithClass) KotlinReflection.deserializerForKotlinType(kClass.java, schema as KDataTypeWrapper) else KotlinReflection.serializerForJavaType(kClass.java),
             ClassTag.apply(kClass.java)
     )
 }
 
-inline fun <T, reified R : Any> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
+inline fun <T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
         map(MapFunction(func), genericRefEncoder<R>())
 
-inline fun <T, reified R : Any> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>): Dataset<R> =
+inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>): Dataset<R> =
         flatMap(func, genericRefEncoder<R>())
 
-inline fun <T, reified R : Any> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyValueGroupedDataset<R, T> =
+inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyValueGroupedDataset<R, T> =
         groupByKey(MapFunction(func), genericRefEncoder<R>())
 
-inline fun <T, reified R : Any> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
+inline fun <T, reified R> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
         mapPartitions(func, genericRefEncoder<R>())
 
-inline fun <KEY, VALUE, reified R : Any> KeyValueGroupedDataset<KEY, VALUE>.mapValues(noinline func: (VALUE) -> R): KeyValueGroupedDataset<KEY, R> =
+inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapValues(noinline func: (VALUE) -> R): KeyValueGroupedDataset<KEY, R> =
         mapValues(MapFunction(func), genericRefEncoder<R>())
 
-inline fun <KEY, VALUE, reified R : Any> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(noinline func: (KEY, Iterator<VALUE>) -> R): Dataset<R> =
+inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(noinline func: (KEY, Iterator<VALUE>) -> R): Dataset<R> =
         mapGroups(MapGroupsFunction(func), genericRefEncoder<R>())
 
-inline fun <reified R : Any> Dataset<Row>.cast(): Dataset<R> = `as`(genericRefEncoder<R>())
+fun <KEY, VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroups(func: (VALUE, VALUE) -> VALUE): Dataset<Pair<KEY, VALUE>> =
+        reduceGroups(ReduceFunction(func))
+                .map { t -> t._1 to t._2 }
+
+inline fun <reified R> Dataset<Row>.cast(): Dataset<R> = `as`(genericRefEncoder<R>())
 
 inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
 
@@ -92,7 +101,7 @@ fun <L, R> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, 
 
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitivesSchema = knownDataTypes[type.classifier]
-    if (primitivesSchema != null) return KOtherTypeWrapper(primitivesSchema, false, (type.classifier!! as KClass<*>).java)
+    if (primitivesSchema != null) return KOtherTypeWrapper(primitivesSchema, false, (type.classifier!! as KClass<*>).java, type.isMarkedNullable)
     val klass = type.classifier!! as KClass<*>
     val args = type.arguments
 
@@ -106,7 +115,8 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KOtherTypeWrapper(
                     DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
                     false,
-                    null
+                    null,
+                    listParam.isMarkedNullable
             )
         }
         klass.isSubclassOf(Map::class) -> {
@@ -119,7 +129,8 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                             mapValueParam.isMarkedNullable
                     ),
                     false,
-                    null
+                    null,
+                    type.isMarkedNullable
             )
         }
         else -> KDataTypeWrapper(
@@ -130,14 +141,15 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                                 .map {
                                     val projectedType = types[it.returnType.toString()] ?: it.returnType
                                     val tpe = knownDataTypes[projectedType.classifier]
-                                            ?.let { dt -> KOtherTypeWrapper(dt, false, (projectedType.classifier as KClass<*>).java) }
+                                            ?.let { dt -> KOtherTypeWrapper(dt, false, (projectedType.classifier as KClass<*>).java, projectedType.isMarkedNullable) }
                                             ?: schema(projectedType, types)
                                     StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
                                 }
                                 .toTypedArray()
                 ),
                 true,
-                klass.java
+                klass.java,
+                type.isMarkedNullable
         )
     }
 }
