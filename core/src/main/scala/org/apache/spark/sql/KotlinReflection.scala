@@ -107,7 +107,7 @@ object KotlinReflection extends ScalaReflection {
           case "scala.Array" =>
             val TypeRef(_, _, Seq(elementType)) = tpe
             arrayClassFor(elementType)
-          case other =>
+          case _ =>
             val clazz = getClassFromType(tpe)
             ObjectType(clazz)
         }
@@ -198,15 +198,6 @@ object KotlinReflection extends ScalaReflection {
           classOf[java.lang.Integer])
 
       case t if isSubtype(t, localTypeOf[Int]) =>
-        predefinedDt match {
-          case None => createDeserializerForTypesSupportValueOf(path,
-            classOf[java.lang.Integer])
-
-          case Some(dt) => createDeserializerForTypesSupportValueOf(path,
-            if (dt.nullable) classOf[Option[java.lang.Integer]]
-            else classOf[java.lang.Integer])
-
-        }
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Integer])
 
@@ -336,16 +327,16 @@ object KotlinReflection extends ScalaReflection {
         val cls = wrapper.cls
         val arguments = structType
           .fields
-          .map(f => {
-            val dataType = f.dataType.asInstanceOf[DataTypeWithClass]
+          .map(field => {
+            val dataType = field.dataType.asInstanceOf[DataTypeWithClass]
             val nullable = dataType.nullable
             val clsName = getClassNameFromType(getType(dataType.cls))
-            val newTypePath = walkedTypePath.recordField(clsName, f.name)
+            val newTypePath = walkedTypePath.recordField(clsName, field.name)
 
             // For tuples, we based grab the inner fields by ordinal instead of name.
             val newPath = deserializerFor(
               getType(dataType.cls),
-              addToPath(path, f.name, dataType.dt, newTypePath),
+              addToPath(path, field.name, dataType.dt, newTypePath),
               newTypePath,
               if (dataType.isInstanceOf[DataTypeWithClass]) Some(dataType) else None
             )
@@ -884,6 +875,7 @@ object KotlinReflection extends ScalaReflection {
     }
   }
 
+  @scala.annotation.tailrec
   def javaBoxedType(dt: DataType): Class[_] = dt match {
     case _: DecimalType => classOf[Decimal]
     case BinaryType => classOf[Array[Byte]]
@@ -897,13 +889,6 @@ object KotlinReflection extends ScalaReflection {
     case _ => ScalaReflection.typeBoxedJavaMapping.getOrElse(dt, classOf[java.lang.Object])
   }
 
-  def expressionJavaClasses(arguments: Seq[Expression]): Seq[Class[_]] = {
-    if (arguments != Nil) {
-      arguments.map(e => dataTypeJavaClass(e.dataType))
-    } else {
-      Seq.empty
-    }
-  }
 }
 
 /**
@@ -1026,25 +1011,6 @@ trait ScalaReflection extends Logging {
     params.flatten
   }
 
-  /**
-   * Returns the Spark SQL DataType for a given java class.  Where this is not an exact mapping
-   * to a native type, an ObjectType is returned.
-   *
-   * Unlike `inferDataType`, this function doesn't do any massaging of types into the Spark SQL type
-   * system.  As a result, ObjectType will be returned for things like boxed Integers.
-   */
-  private def inferExternalType(cls: Class[_]): DataType = cls match {
-    case c if c == java.lang.Boolean.TYPE => BooleanType
-    case c if c == java.lang.Byte.TYPE => ByteType
-    case c if c == java.lang.Short.TYPE => ShortType
-    case c if c == java.lang.Integer.TYPE => IntegerType
-    case c if c == java.lang.Long.TYPE => LongType
-    case c if c == java.lang.Float.TYPE => FloatType
-    case c if c == java.lang.Double.TYPE => DoubleType
-    case c if c == classOf[Array[Byte]] => BinaryType
-    case _ => ObjectType(cls)
-  }
-
   def debugCodegen(df: Dataset[_]): Unit = {
     import org.apache.spark.sql.execution.debug._
     df.debugCodegen()
@@ -1063,7 +1029,10 @@ trait DataTypeWithClass {
   val nullable: Boolean
 }
 
-class KDataTypeWrapper(val dt: StructType, val isData: Boolean = true, val cls: Class[_], val nullable: Boolean) extends StructType with DataTypeWithClass {
+class KDataTypeWrapper(val dt: StructType
+                       , val cls: Class[_]
+                       , val isData: Boolean = true
+                       , val nullable: Boolean = true) extends StructType with DataTypeWithClass {
   override def fieldNames: Array[String] = dt.fieldNames
 
   override def names: Array[String] = dt.names

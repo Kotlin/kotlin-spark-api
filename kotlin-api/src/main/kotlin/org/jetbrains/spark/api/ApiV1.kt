@@ -21,7 +21,7 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.typeOf
 
 @JvmField
-val ENCODERS = mapOf<KClass<out Any>, Encoder<out Any?>>(
+val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
         Boolean::class to BOOLEAN(),
         Byte::class to BYTE(),
         Short::class to SHORT(),
@@ -37,8 +37,6 @@ val ENCODERS = mapOf<KClass<out Any>, Encoder<out Any?>>(
 )
 
 
-inline fun <reified T> encoder(): Encoder<T> = ENCODERS[T::class] as? Encoder<T>? ?: bean(T::class.java)
-
 inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
         createDataset(list, genericRefEncoder<T>())
 
@@ -46,7 +44,7 @@ inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
 @OptIn(ExperimentalStdlibApi::class)
 inline fun <reified T> genericRefEncoder(): Encoder<T> = when {
     isSupportedClass<T>() -> kotlinClassEncoder(schema(typeOf<T>()), T::class)
-    else -> encoder()
+    else -> ENCODERS[T::class] as? Encoder<T>? ?: bean(T::class.java)
 }
 
 inline fun <reified T> isSupportedClass(): Boolean = T::class.isData
@@ -61,8 +59,10 @@ fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     )
 }
 
-inline fun <T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
-        map(MapFunction(func), genericRefEncoder<R>())
+inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> {
+    val genericRefEncoder = genericRefEncoder<R>()
+    return map(MapFunction(func), genericRefEncoder)
+}
 
 inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>): Dataset<R> =
         flatMap(func, genericRefEncoder<R>())
@@ -96,12 +96,13 @@ fun <T> Dataset<T>.col(name: String) = KSparkExtensions.col(this, name)
 
 fun Column.eq(c: Column) = this.`$eq$eq$eq`(c)
 
-fun <L, R> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R?>> = joinWith(right, col, "left")
-        .map { it._1 to it._2 }
+inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R?>> {
+    return joinWith(right, col, "left").map { it._1 to it._2 }
+}
 
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
-    val primitivesSchema = knownDataTypes[type.classifier]
-    if (primitivesSchema != null) return KOtherTypeWrapper(primitivesSchema, false, (type.classifier!! as KClass<*>).java, type.isMarkedNullable)
+//    val primitiveSchema = knownDataTypes[type.classifier]
+//    if (primitiveSchema != null) return KOtherTypeWrapper(primitiveSchema, false, (type.classifier!! as KClass<*>).java, type.isMarkedNullable)
     val klass = type.classifier!! as KClass<*>
     val args = type.arguments
 
@@ -116,7 +117,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
                     false,
                     null,
-                    listParam.isMarkedNullable
+                    true
             )
         }
         klass.isSubclassOf(Map::class) -> {
@@ -130,7 +131,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     ),
                     false,
                     null,
-                    type.isMarkedNullable
+                    true
             )
         }
         else -> KDataTypeWrapper(
@@ -143,13 +144,13 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                                     val tpe = knownDataTypes[projectedType.classifier]
                                             ?.let { dt -> KOtherTypeWrapper(dt, false, (projectedType.classifier as KClass<*>).java, projectedType.isMarkedNullable) }
                                             ?: schema(projectedType, types)
-                                    StructField(it.name, tpe, it.returnType.isMarkedNullable, Metadata.empty())
+                                    StructField(it.name, tpe, projectedType.isMarkedNullable, Metadata.empty())
                                 }
                                 .toTypedArray()
                 ),
-                true,
                 klass.java,
-                type.isMarkedNullable
+                true,
+                true
         )
     }
 }
