@@ -1,7 +1,8 @@
-package org.jetbrains.spark.api
+package org.jetbrains.spark.api.examples
 
 import org.apache.spark.api.java.function.ReduceFunction
 import org.apache.spark.sql.SparkSession
+import org.jetbrains.spark.api.*
 
 data class Q<T>(val id: Int, val text: T)
 object Main {
@@ -43,4 +44,14 @@ object Main {
     }
 
     data class Five<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
+}
+
+inline fun withSpark(func: SparkSession.() -> Unit): SparkSession {
+    return SparkSession
+            .builder()
+            .master("local[2]")
+            .appName("Simple Application")
+            .orCreate
+            .apply(func)
+            .also { it.stop() }
 }

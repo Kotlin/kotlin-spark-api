@@ -40,21 +40,32 @@ val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
 inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
         createDataset(list, genericRefEncoder<T>())
 
+inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
+        createDataset(listOf(*t), genericRefEncoder<T>())
+
+inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
+        spark.createDataset(this, genericRefEncoder<T>())
+
 
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T> genericRefEncoder(): Encoder<T> = when {
-    isSupportedClass<T>() -> kotlinClassEncoder(schema(typeOf<T>()), T::class)
-    else -> ENCODERS[T::class] as? Encoder<T>? ?: bean(T::class.java)
+inline fun <reified T> genericRefEncoder(): Encoder<T> = encoder(typeOf<T>(), T::class)
+
+fun <T> encoder(type: KType, cls: KClass<*>): Encoder<T> {
+    @Suppress("UNCHECKED_CAST")
+    return when {
+        isSupportedClass(cls) -> kotlinClassEncoder(schema(type), cls)
+        else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
+    } as Encoder<T>
 }
 
-inline fun <reified T> isSupportedClass(): Boolean = T::class.isData
-        || T::class.isSubclassOf(Map::class)
-        || T::class.isSubclassOf(Iterable::class)
+private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
+        || cls.isSubclassOf(Map::class)
+        || cls.isSubclassOf(Iterable::class)
 
-fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
+private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
             if (schema is DataTypeWithClass) KotlinReflection.serializerForKotlinType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
-            if (schema is DataTypeWithClass) KotlinReflection.deserializerForKotlinType(kClass.java, schema as KDataTypeWrapper) else KotlinReflection.serializerForJavaType(kClass.java),
+            if (schema is DataTypeWithClass) KotlinReflection.deserializerForKotlinType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
             ClassTag.apply(kClass.java)
     )
 }
@@ -96,27 +107,28 @@ fun <T> Dataset<T>.col(name: String) = KSparkExtensions.col(this, name)
 
 fun Column.eq(c: Column) = this.`$eq$eq$eq`(c)
 
+infix fun Column.`==`(c: Column) = `$eq$eq$eq`(c)
+
 inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R?>> {
     return joinWith(right, col, "left").map { it._1 to it._2 }
 }
 
-fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
-//    val primitiveSchema = knownDataTypes[type.classifier]
-//    if (primitiveSchema != null) return KOtherTypeWrapper(primitiveSchema, false, (type.classifier!! as KClass<*>).java, type.isMarkedNullable)
-    val klass = type.classifier!! as KClass<*>
+private fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
+    val primitiveSchema = knownDataTypes[type.classifier]
+    if (primitiveSchema != null) return KOtherTypeWrapper(primitiveSchema, false, (type.classifier!! as KClass<*>).java, true)
+    val klass = type.classifier as? KClass<*> ?: throw IllegalArgumentException("Unsupported type $type")
     val args = type.arguments
 
     val types = transitiveMerge(map, klass.typeParameters.zip(args).map {
         it.first.name to it.second.type!!
     }.toMap())
-
     return when {
         klass.isSubclassOf(Iterable::class) -> {
             val listParam = types.getValue(klass.typeParameters[0].name)
             KOtherTypeWrapper(
                     DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
                     false,
-                    null,
+                    klass.java,
                     true
             )
         }
@@ -127,10 +139,10 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     DataTypes.createMapType(
                             schema(mapKeyParam, types),
                             schema(mapValueParam, types),
-                            mapValueParam.isMarkedNullable
+                            true
                     ),
                     false,
-                    null,
+                    klass.java,
                     true
             )
         }
@@ -159,6 +171,7 @@ private val knownDataTypes = mapOf(
         Byte::class to DataTypes.ByteType,
         Short::class to DataTypes.ShortType,
         Int::class to DataTypes.IntegerType,
+        java.lang.Integer::class to DataTypes.IntegerType.asNullable(),
         Long::class to DataTypes.LongType,
         Boolean::class to DataTypes.BooleanType,
         Float::class to DataTypes.FloatType,
