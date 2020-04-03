@@ -5,14 +5,12 @@ import java.beans.{Introspector, PropertyDescriptor}
 
 import org.apache.commons.lang3.reflect.ConstructorUtils
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.MyJavaInference.deserializerFor
 import org.apache.spark.sql.catalyst.DeserializerBuildHelper._
-import org.apache.spark.sql.catalyst.ScalaReflection.{dataTypeFor, deserializerFor, mirror, serializerFor}
 import org.apache.spark.sql.catalyst.SerializerBuildHelper._
-import org.apache.spark.sql.catalyst.analysis.{GetColumnByOrdinal, Resolver}
+import org.apache.spark.sql.catalyst.analysis.GetColumnByOrdinal
 import org.apache.spark.sql.catalyst.expressions.objects._
 import org.apache.spark.sql.catalyst.expressions.{Expression, _}
-import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, ArrayData, MapData, StringUtils}
+import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, ArrayData, MapData}
 import org.apache.spark.sql.catalyst.{InternalRow, ScalaReflection, WalkedTypePath}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
@@ -390,6 +388,28 @@ object KotlinReflection extends ScalaReflection {
                   "toJavaMap",
                   keyData :: valueData :: Nil,
                   returnNullable = false)
+              case ArrayType(elementType, containsNull) =>
+                val dataTypeWithClass = elementType.asInstanceOf[DataTypeWithClass]
+                val mapFunction: Expression => Expression = element => {
+                  // upcast the array element to the data type the encoder expected.
+                  val et = getType(dataTypeWithClass.cls)
+                  val className = getClassNameFromType(et)
+                  val newTypePath = walkedTypePath.recordArray(className)
+                  deserializerForWithNullSafetyAndUpcast(
+                    element,
+                    dataTypeWithClass.dt,
+                    nullable = containsNull,
+                    newTypePath,
+                    (casted, typePath) => {
+                      deserializerFor(et, casted, typePath, Some(dataTypeWithClass.dt).filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))
+                    })
+                }
+
+                UnresolvedMapObjects(mapFunction, path, customCollectionCls = Some(t.cls))
+
+              case _ =>
+                throw new UnsupportedOperationException(
+                  s"No Encoder found for $tpe\n" + walkedTypePath)
             }
         }
       case _ =>
@@ -683,6 +703,8 @@ object KotlinReflection extends ScalaReflection {
                     nullable = !valueType.typeSymbol.asClass.isPrimitive,
                     serializerFor(_, valueType, valuePath, seenTypeSet, Some(valueDT).filter(_.isInstanceOf[ComplexWrapper])))
                 )
+              case ArrayType(elementType, _) =>
+                toCatalystArray(inputObject, getType(elementType.asInstanceOf[DataTypeWithClass].cls))
               case _ =>
                 throw new UnsupportedOperationException(
                   s"No Encoder found for $tpe\n" + walkedTypePath)
@@ -1091,156 +1113,3 @@ trait ScalaReflection extends Logging {
 
 }
 
-trait DataTypeWithClass {
-  val dt: DataType
-  val cls: Class[_]
-  val nullable: Boolean
-}
-
-trait ComplexWrapper extends DataTypeWithClass
-
-class KDataTypeWrapper(val dt: StructType
-                       , val cls: Class[_]
-                       , val isData: Boolean = true
-                       , val nullable: Boolean = true) extends StructType with ComplexWrapper {
-  override def fieldNames: Array[String] = dt.fieldNames
-
-  override def names: Array[String] = dt.names
-
-  override def equals(that: Any): Boolean = dt.equals(that)
-
-  override def hashCode(): Int = dt.hashCode()
-
-  override def add(field: StructField): StructType = dt.add(field)
-
-  override def add(name: String, dataType: DataType): StructType = dt.add(name, dataType)
-
-  override def add(name: String, dataType: DataType, nullable: Boolean): StructType = dt.add(name, dataType, nullable)
-
-  override def add(name: String, dataType: DataType, nullable: Boolean, metadata: Metadata): StructType = dt.add(name, dataType, nullable, metadata)
-
-  override def add(name: String, dataType: DataType, nullable: Boolean, comment: String): StructType = dt.add(name, dataType, nullable, comment)
-
-  override def add(name: String, dataType: String): StructType = dt.add(name, dataType)
-
-  override def add(name: String, dataType: String, nullable: Boolean): StructType = dt.add(name, dataType, nullable)
-
-  override def add(name: String, dataType: String, nullable: Boolean, metadata: Metadata): StructType = dt.add(name, dataType, nullable, metadata)
-
-  override def add(name: String, dataType: String, nullable: Boolean, comment: String): StructType = dt.add(name, dataType, nullable, comment)
-
-  override def apply(name: String): StructField = dt.apply(name)
-
-  override def apply(names: Set[String]): StructType = dt.apply(names)
-
-  override def fieldIndex(name: String): Int = dt.fieldIndex(name)
-
-  override private[sql] def getFieldIndex(name: String) = dt.getFieldIndex(name)
-
-  override private[sql] def findNestedField(fieldNames: Seq[String], includeCollections: Boolean, resolver: Resolver) = dt.findNestedField(fieldNames, includeCollections, resolver)
-
-  override protected[sql] def toAttributes: Seq[AttributeReference] = dt.toAttributes
-
-  override def treeString: String = dt.treeString
-
-  override def treeString(maxDepth: Int): String = dt.treeString(maxDepth)
-
-  override def printTreeString(): Unit = dt.printTreeString()
-
-  override private[sql] def buildFormattedString(prefix: String, stringConcat: StringUtils.StringConcat, maxDepth: Int): Unit = dt.buildFormattedString(prefix, stringConcat, maxDepth)
-
-  private[sql] override def jsonValue = dt.jsonValue
-
-  override def apply(fieldIndex: Int): StructField = dt.apply(fieldIndex)
-
-  override def length: Int = dt.length
-
-  override def iterator: Iterator[StructField] = dt.iterator
-
-  override def defaultSize: Int = dt.defaultSize
-
-  override def simpleString: String = dt.simpleString
-
-  override def catalogString: String = dt.catalogString
-
-  override def sql: String = dt.sql
-
-  override def toDDL: String = dt.toDDL
-
-  private[sql] override def simpleString(maxNumberFields: Int) = dt.simpleString(maxNumberFields)
-
-  override private[sql] def merge(that: StructType) = dt.merge(that)
-
-  private[spark] override def asNullable = dt.asNullable
-
-  private[spark] override def existsRecursively(f: DataType => Boolean) = dt.existsRecursively(f)
-
-  override private[sql] lazy val interpretedOrdering = dt.interpretedOrdering
-
-  override def toString = s"KDataTypeWrapper(dt=$dt, cls=$cls, isData=$isData, nullable=$nullable)"
-}
-
-case class KComplexTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class[_], nullable: Boolean) extends DataType with ComplexWrapper {
-  override private[sql] def unapply(e: Expression) = dt.unapply(e)
-
-  override def typeName: String = dt.typeName
-
-  override private[sql] def jsonValue = dt.jsonValue
-
-  override def json: String = dt.json
-
-  override def prettyJson: String = dt.prettyJson
-
-  override def simpleString: String = dt.simpleString
-
-  override def catalogString: String = dt.catalogString
-
-  override private[sql] def simpleString(maxNumberFields: Int) = dt.simpleString(maxNumberFields)
-
-  override def sql: String = dt.sql
-
-  override private[spark] def sameType(other: DataType) = dt.sameType(other)
-
-  override private[spark] def existsRecursively(f: DataType => Boolean) = dt.existsRecursively(f)
-
-  private[sql] override def defaultConcreteType = dt.defaultConcreteType
-
-  private[sql] override def acceptsType(other: DataType) = dt.acceptsType(other)
-
-  override def defaultSize: Int = dt.defaultSize
-
-  override private[spark] def asNullable = dt.asNullable
-
-}
-
-case class KSimpleTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class[_], nullable: Boolean) extends DataType with DataTypeWithClass {
-  override private[sql] def unapply(e: Expression) = dt.unapply(e)
-
-  override def typeName: String = dt.typeName
-
-  override private[sql] def jsonValue = dt.jsonValue
-
-  override def json: String = dt.json
-
-  override def prettyJson: String = dt.prettyJson
-
-  override def simpleString: String = dt.simpleString
-
-  override def catalogString: String = dt.catalogString
-
-  override private[sql] def simpleString(maxNumberFields: Int) = dt.simpleString(maxNumberFields)
-
-  override def sql: String = dt.sql
-
-  override private[spark] def sameType(other: DataType) = dt.sameType(other)
-
-  override private[spark] def existsRecursively(f: DataType => Boolean) = dt.existsRecursively(f)
-
-  private[sql] override def defaultConcreteType = dt.defaultConcreteType
-
-  private[sql] override def acceptsType(other: DataType) = dt.acceptsType(other)
-
-  override def defaultSize: Int = dt.defaultSize
-
-  override private[spark] def asNullable = dt.asNullable
-}

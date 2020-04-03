@@ -1,5 +1,6 @@
 package org.jetbrains.spark.api
 
+import org.apache.spark.api.java.function.FlatMapFunction
 import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.api.java.function.MapFunction
 import org.apache.spark.api.java.function.MapGroupsFunction
@@ -80,6 +81,9 @@ inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Datas
 inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>): Dataset<R> =
         flatMap(func, genericRefEncoder<R>())
 
+inline fun <reified T, I : Iterable<T>> Dataset<I>.flatten(): Dataset<T> =
+        flatMap(FlatMapFunction { it.iterator() }, genericRefEncoder<T>())
+
 inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyValueGroupedDataset<R, T> =
         groupByKey(MapFunction(func), genericRefEncoder<R>())
 
@@ -115,6 +119,8 @@ inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, 
     return joinWith(right, col, "left").map { it._1 to it._2 }
 }
 
+inline fun <reified T> Dataset<T>.sort(columns: (Dataset<T>) -> Array<Column>) = sort(*columns(this))
+
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]
     if (primitiveSchema != null) return KSimpleTypeWrapper(primitiveSchema, false, (type.classifier!! as KClass<*>).java, true)
@@ -124,7 +130,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val types = transitiveMerge(map, klass.typeParameters.zip(args).map {
         it.first.name to it.second.type!!
     }.toMap())
-    val result: DataType = when {
+    return when {
         klass.isSubclassOf(Iterable::class) -> {
             val listParam = types.getValue(klass.typeParameters[0].name)
             KComplexTypeWrapper(
@@ -167,7 +173,6 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                 true
         )
     }
-    return result
 }
 
 private val knownDataTypes = mapOf(
