@@ -64,8 +64,10 @@ private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
-            if (schema is DataTypeWithClass) KotlinReflection.serializerForKotlinType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
-            if (schema is DataTypeWithClass) KotlinReflection.deserializerForKotlinType(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
+            if (schema is DataTypeWithClass) {
+                KotlinReflection.serializerFor(kClass.java, schema)
+            } else KotlinReflection.serializerForJavaType(kClass.java),
+            if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java, schema) else KotlinReflection.serializerForJavaType(kClass.java),
             ClassTag.apply(kClass.java)
     )
 }
@@ -113,19 +115,19 @@ inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, 
     return joinWith(right, col, "left").map { it._1 to it._2 }
 }
 
-private fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
+fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]
-    if (primitiveSchema != null) return KOtherTypeWrapper(primitiveSchema, false, (type.classifier!! as KClass<*>).java, true)
+    if (primitiveSchema != null) return KSimpleTypeWrapper(primitiveSchema, false, (type.classifier!! as KClass<*>).java, true)
     val klass = type.classifier as? KClass<*> ?: throw IllegalArgumentException("Unsupported type $type")
     val args = type.arguments
 
     val types = transitiveMerge(map, klass.typeParameters.zip(args).map {
         it.first.name to it.second.type!!
     }.toMap())
-    return when {
+    val result: DataType = when {
         klass.isSubclassOf(Iterable::class) -> {
             val listParam = types.getValue(klass.typeParameters[0].name)
-            KOtherTypeWrapper(
+            KComplexTypeWrapper(
                     DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
                     false,
                     klass.java,
@@ -135,7 +137,7 @@ private fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
         klass.isSubclassOf(Map::class) -> {
             val mapKeyParam = types.getValue(klass.typeParameters[0].name)
             val mapValueParam = types.getValue(klass.typeParameters[1].name)
-            KOtherTypeWrapper(
+            KComplexTypeWrapper(
                     DataTypes.createMapType(
                             schema(mapKeyParam, types),
                             schema(mapValueParam, types),
@@ -154,7 +156,7 @@ private fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                                 .map {
                                     val projectedType = types[it.returnType.toString()] ?: it.returnType
                                     val tpe = knownDataTypes[projectedType.classifier]
-                                            ?.let { dt -> KOtherTypeWrapper(dt, false, (projectedType.classifier as KClass<*>).java, projectedType.isMarkedNullable) }
+                                            ?.let { dt -> KSimpleTypeWrapper(dt, false, (projectedType.classifier as KClass<*>).java, projectedType.isMarkedNullable) }
                                             ?: schema(projectedType, types)
                                     StructField(it.name, tpe, projectedType.isMarkedNullable, Metadata.empty())
                                 }
@@ -165,6 +167,7 @@ private fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                 true
         )
     }
+    return result
 }
 
 private val knownDataTypes = mapOf(

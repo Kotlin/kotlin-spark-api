@@ -5,8 +5,9 @@ import java.beans.{Introspector, PropertyDescriptor}
 
 import org.apache.commons.lang3.reflect.ConstructorUtils
 import org.apache.spark.internal.Logging
-import org.apache.spark.sql.MyJavaInference.{deserializerFor, serializerFor}
+import org.apache.spark.sql.MyJavaInference.deserializerFor
 import org.apache.spark.sql.catalyst.DeserializerBuildHelper._
+import org.apache.spark.sql.catalyst.ScalaReflection.{dataTypeFor, deserializerFor, mirror, serializerFor}
 import org.apache.spark.sql.catalyst.SerializerBuildHelper._
 import org.apache.spark.sql.catalyst.analysis.{GetColumnByOrdinal, Resolver}
 import org.apache.spark.sql.catalyst.expressions.objects._
@@ -322,7 +323,7 @@ object KotlinReflection extends ScalaReflection {
           dataType = ObjectType(udt.getClass))
         Invoke(obj, "deserialize", ObjectType(udt.userClass), path :: Nil)
 
-      case _ if predefinedDt.isInstanceOf[Some[_]] =>
+      case _ if predefinedDt.isDefined =>
         predefinedDt.get match {
           case wrapper: KDataTypeWrapper =>
             val structType = wrapper.dt
@@ -340,7 +341,7 @@ object KotlinReflection extends ScalaReflection {
                   getType(dataType.cls),
                   addToPath(path, field.name, dataType.dt, newTypePath),
                   newTypePath,
-                  if (dataType.isInstanceOf[DataTypeWithClass]) Some(dataType) else None
+                  Some(dataType).filter(_.isInstanceOf[ComplexWrapper])
                 )
                 expressionWithNullSafety(
                   newPath,
@@ -357,7 +358,7 @@ object KotlinReflection extends ScalaReflection {
               newInstance
             )
 
-          case t: KOtherTypeWrapper =>
+          case t: ComplexWrapper =>
             t.dt match {
               case MapType(kt, vt, _) =>
                 val Seq(keyType, valueType) = Seq(kt, vt).map(_.asInstanceOf[DataTypeWithClass].cls).map(getType(_))
@@ -370,32 +371,25 @@ object KotlinReflection extends ScalaReflection {
                 val keyData =
                   Invoke(
                     UnresolvedMapObjects(
-                      p => deserializerFor(keyType, p, newTypePath, Some(keyDT)),
-                      MapKeys(path)
-                    ),
+                      p => deserializerFor(keyType, p, newTypePath, Some(keyDT).filter(_.isInstanceOf[ComplexWrapper])),
+                      MapKeys(path)),
                     "array",
-                    ObjectType(classOf[Array[keyDT.cls.type]]),
-                    returnNullable = !keyType.typeSymbol.asClass.isPrimitive || keyDT.nullable
-                  )
+                    ObjectType(classOf[Array[Any]]))
 
                 val valueData =
                   Invoke(
                     UnresolvedMapObjects(
-                      p => deserializerFor(valueType, p, newTypePath, Some(valueDT)),
-                      MapValues(path)
-                    ),
+                      p => deserializerFor(valueType, p, newTypePath, Some(valueDT).filter(_.isInstanceOf[ComplexWrapper])),
+                      MapValues(path)),
                     "array",
-                    ObjectType(classOf[Array[valueDT.cls.type]]),
-                    returnNullable = !valueType.typeSymbol.asClass.isPrimitive || valueDT.nullable
-                  )
+                    ObjectType(classOf[Array[Any]]))
 
                 StaticInvoke(
                   ArrayBasedMapData.getClass,
                   ObjectType(classOf[java.util.Map[_, _]]),
                   "toJavaMap",
                   keyData :: valueData :: Nil,
-                  returnNullable = t.nullable
-                )
+                  returnNullable = false)
             }
         }
       case _ =>
@@ -458,7 +452,7 @@ object KotlinReflection extends ScalaReflection {
     mir.classSymbol(clazz).toType
   }
 
-  def deserializerForKotlinType(cls: java.lang.Class[_], dt: DataTypeWithClass): Expression = {
+  def deserializerFor(cls: java.lang.Class[_], dt: DataTypeWithClass): Expression = {
     val tpe = getType(cls)
     val clsName = getClassNameFromType(tpe)
     val walkedTypePath = WalkedTypePath().recordRoot(clsName)
@@ -474,7 +468,7 @@ object KotlinReflection extends ScalaReflection {
   }
 
 
-  def serializerForKotlinType(cls: java.lang.Class[_], dt: DataTypeWithClass) = {
+  def serializerFor(cls: java.lang.Class[_], dt: DataTypeWithClass): Expression = {
 
     val tpe = getType(cls)
     val clsName = getClassNameFromType(tpe)
@@ -520,7 +514,7 @@ object KotlinReflection extends ScalaReflection {
     baseType(tpe) match {
 
       //<editor-fold desc="scala-like">
-      case _ if !inputObject.dataType.isInstanceOf[ObjectType] && !predefinedDt.isInstanceOf[Some[_]] => inputObject
+      case _ if !inputObject.dataType.isInstanceOf[ObjectType] && !predefinedDt.exists(_.isInstanceOf[ComplexWrapper]) => inputObject
 
       case t if isSubtype(t, localTypeOf[Option[_]]) =>
         val TypeRef(_, _, Seq(optType)) = t
@@ -599,7 +593,8 @@ object KotlinReflection extends ScalaReflection {
 
       case t if isSubtype(t, localTypeOf[java.lang.Integer]) =>
         createSerializerForInteger(inputObject)
-      case t if isSubtype(t, localTypeOf[Int]) => inputObject
+      case t if isSubtype(t, localTypeOf[Int]) =>
+        createSerializerForInteger(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Long]) => createSerializerForLong(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Double]) =>
         createSerializerForDouble(inputObject)
@@ -648,7 +643,7 @@ object KotlinReflection extends ScalaReflection {
         }
         createSerializerForObject(inputObject, fields)
 
-      case _ if predefinedDt.isInstanceOf[Some[_]] =>
+      case _ if predefinedDt.isDefined =>
         predefinedDt.get match {
           case dataType: KDataTypeWrapper =>
             val cls = dataType.cls
@@ -663,11 +658,11 @@ object KotlinReflection extends ScalaReflection {
                 prop.getReadMethod.getName,
                 inferExternalType(propClass))
               val newPath = walkedTypePath.recordField(propClass.getName, fieldName)
-              (fieldName, serializerFor(fieldValue, getType(propClass), newPath, seenTypeSet, if (propDt.isInstanceOf[KDataTypeWrapper]) Some(propDt) else None))
+              (fieldName, serializerFor(fieldValue, getType(propClass), newPath, seenTypeSet, if (propDt.isInstanceOf[ComplexWrapper]) Some(propDt) else None))
             }
             createSerializerForObject(inputObject, fields)
 
-          case otherTypeWrapper: KOtherTypeWrapper =>
+          case otherTypeWrapper: ComplexWrapper =>
             otherTypeWrapper.dt match {
               case MapType(kt, vt, _) =>
                 val Seq(keyType, valueType) = Seq(kt, vt).map(_.asInstanceOf[DataTypeWithClass].cls).map(getType(_))
@@ -680,14 +675,13 @@ object KotlinReflection extends ScalaReflection {
                 createSerializerForMap(
                   inputObject,
                   MapElementInformation(
-                    keyDT.dt,
+                    dataTypeFor(keyType),
                     nullable = !keyType.typeSymbol.asClass.isPrimitive,
-                    serializerFor(_, keyType, keyPath, seenTypeSet, Some(keyDT))
-                  ),
+                    serializerFor(_, keyType, keyPath, seenTypeSet, Some(keyDT).filter(_.isInstanceOf[ComplexWrapper]))),
                   MapElementInformation(
-                    valueDT.dt,
+                    dataTypeFor(valueType),
                     nullable = !valueType.typeSymbol.asClass.isPrimitive,
-                    serializerFor(_, valueType, valuePath, seenTypeSet, Some(valueDT)))
+                    serializerFor(_, valueType, valuePath, seenTypeSet, Some(valueDT).filter(_.isInstanceOf[ComplexWrapper])))
                 )
               case _ =>
                 throw new UnsupportedOperationException(
@@ -700,6 +694,7 @@ object KotlinReflection extends ScalaReflection {
           s"No Encoder found for $tpe\n" + walkedTypePath)
     }
   }
+
   def createDeserializerForString(path: Expression, returnNullable: Boolean): Expression = {
     Invoke(path, "toString", ObjectType(classOf[java.lang.String]),
       returnNullable = returnNullable)
@@ -1102,10 +1097,12 @@ trait DataTypeWithClass {
   val nullable: Boolean
 }
 
+trait ComplexWrapper extends DataTypeWithClass
+
 class KDataTypeWrapper(val dt: StructType
                        , val cls: Class[_]
                        , val isData: Boolean = true
-                       , val nullable: Boolean = true) extends StructType with DataTypeWithClass {
+                       , val nullable: Boolean = true) extends StructType with ComplexWrapper {
   override def fieldNames: Array[String] = dt.fieldNames
 
   override def names: Array[String] = dt.names
@@ -1179,9 +1176,44 @@ class KDataTypeWrapper(val dt: StructType
   private[spark] override def existsRecursively(f: DataType => Boolean) = dt.existsRecursively(f)
 
   override private[sql] lazy val interpretedOrdering = dt.interpretedOrdering
+
+  override def toString = s"KDataTypeWrapper(dt=$dt, cls=$cls, isData=$isData, nullable=$nullable)"
 }
 
-case class KOtherTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class[_], nullable: Boolean) extends DataType with DataTypeWithClass {
+case class KComplexTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class[_], nullable: Boolean) extends DataType with ComplexWrapper {
+  override private[sql] def unapply(e: Expression) = dt.unapply(e)
+
+  override def typeName: String = dt.typeName
+
+  override private[sql] def jsonValue = dt.jsonValue
+
+  override def json: String = dt.json
+
+  override def prettyJson: String = dt.prettyJson
+
+  override def simpleString: String = dt.simpleString
+
+  override def catalogString: String = dt.catalogString
+
+  override private[sql] def simpleString(maxNumberFields: Int) = dt.simpleString(maxNumberFields)
+
+  override def sql: String = dt.sql
+
+  override private[spark] def sameType(other: DataType) = dt.sameType(other)
+
+  override private[spark] def existsRecursively(f: DataType => Boolean) = dt.existsRecursively(f)
+
+  private[sql] override def defaultConcreteType = dt.defaultConcreteType
+
+  private[sql] override def acceptsType(other: DataType) = dt.acceptsType(other)
+
+  override def defaultSize: Int = dt.defaultSize
+
+  override private[spark] def asNullable = dt.asNullable
+
+}
+
+case class KSimpleTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class[_], nullable: Boolean) extends DataType with DataTypeWithClass {
   override private[sql] def unapply(e: Expression) = dt.unapply(e)
 
   override def typeName: String = dt.typeName

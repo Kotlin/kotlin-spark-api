@@ -36,9 +36,7 @@ object Main {
                 .repartition(1)
 //                .also { it.printSchema() }
 //                .debugCodegen()
-                .write()
-                .also { it.orc("/tmp/datasets-orc2") }
-                .also { it.csv("/tmp/datasets-csv2") }
+                .show()
 
         spark.stop()
     }
