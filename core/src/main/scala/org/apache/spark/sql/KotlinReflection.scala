@@ -398,7 +398,7 @@ object KotlinReflection extends ScalaReflection {
                   deserializerForWithNullSafetyAndUpcast(
                     element,
                     dataTypeWithClass.dt,
-                    nullable = containsNull,
+                    nullable = dataTypeWithClass.nullable,
                     newTypePath,
                     (casted, typePath) => {
                       deserializerFor(et, casted, typePath, Some(dataTypeWithClass.dt).filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))
@@ -509,8 +509,8 @@ object KotlinReflection extends ScalaReflection {
                              predefinedDt: Option[DataTypeWithClass] = None
                            ): Expression = cleanUpReflectionObjects {
 
-    def toCatalystArray(input: Expression, elementType: `Type`): Expression = {
-      dataTypeFor(elementType) match {
+    def toCatalystArray(input: Expression, elementType: `Type`, predefinedDt: Option[DataTypeWithClass] = None): Expression = {
+      predefinedDt.map(_.dt).getOrElse(dataTypeFor(elementType)) match {
         case dt: ObjectType =>
           val clsName = getClassNameFromType(elementType)
           val newPath = walkedTypePath.recordArray(clsName)
@@ -523,7 +523,7 @@ object KotlinReflection extends ScalaReflection {
           if (cls.isArray && cls.getComponentType.isPrimitive) {
             createSerializerForPrimitiveArray(input, dt)
           } else {
-            createSerializerForGenericArray(input, dt, nullable = schemaFor(elementType).nullable)
+            createSerializerForGenericArray(input, dt, nullable =predefinedDt.map(_.nullable).getOrElse(schemaFor(elementType).nullable))
           }
 
         case dt =>
@@ -670,13 +670,16 @@ object KotlinReflection extends ScalaReflection {
             val properties = getJavaBeanReadableProperties(cls)
             val fields = properties.map { prop =>
               val fieldName = prop.getName
-              val propClass = dataType.dt.fields.find(it => it.name == fieldName).map(it => it.dataType.asInstanceOf[DataTypeWithClass].cls).get
-              val propDt = dataType.dt.fields.find(it => it.name == fieldName).map(it => it.dataType.asInstanceOf[DataTypeWithClass]).get
+              val maybeField = dataType.dt.fields.find(it => it.name == fieldName)
+              val propClass = maybeField.map(it => it.dataType.asInstanceOf[DataTypeWithClass].cls).get
+              val propDt = maybeField.map(it => it.dataType.asInstanceOf[DataTypeWithClass]).get
 
               val fieldValue = Invoke(
                 inputObject,
                 prop.getReadMethod.getName,
-                inferExternalType(propClass))
+                inferExternalType(propClass),
+                returnNullable = propDt.nullable
+              )
               val newPath = walkedTypePath.recordField(propClass.getName, fieldName)
               (fieldName, serializerFor(fieldValue, getType(propClass), newPath, seenTypeSet, if (propDt.isInstanceOf[ComplexWrapper]) Some(propDt) else None))
             }
@@ -704,7 +707,7 @@ object KotlinReflection extends ScalaReflection {
                     serializerFor(_, valueType, valuePath, seenTypeSet, Some(valueDT).filter(_.isInstanceOf[ComplexWrapper])))
                 )
               case ArrayType(elementType, _) =>
-                toCatalystArray(inputObject, getType(elementType.asInstanceOf[DataTypeWithClass].cls))
+                toCatalystArray(inputObject, getType(elementType.asInstanceOf[DataTypeWithClass].cls), Some(elementType.asInstanceOf[DataTypeWithClass]))
               case _ =>
                 throw new UnsupportedOperationException(
                   s"No Encoder found for $tpe\n" + walkedTypePath)

@@ -44,12 +44,3 @@ object Main {
     data class Five<A, B, C, D, E>(val a: A, val b: B, val c: C, val d: D, val e: E)
 }
 
-inline fun withSpark(func: SparkSession.() -> Unit): SparkSession {
-    return SparkSession
-            .builder()
-            .master("local[2]")
-            .appName("Simple Application")
-            .orCreate
-            .apply(func)
-            .also { it.stop() }
-}

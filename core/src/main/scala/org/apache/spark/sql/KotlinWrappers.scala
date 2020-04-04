@@ -16,7 +16,6 @@ trait ComplexWrapper extends DataTypeWithClass
 
 class KDataTypeWrapper(val dt: StructType
                        , val cls: Class[_]
-                       , val isData: Boolean = true
                        , val nullable: Boolean = true) extends StructType with ComplexWrapper {
   override def fieldNames: Array[String] = dt.fieldNames
 
@@ -92,10 +91,10 @@ class KDataTypeWrapper(val dt: StructType
 
   override private[sql] lazy val interpretedOrdering = dt.interpretedOrdering
 
-  override def toString = s"KDataTypeWrapper(dt=$dt, cls=$cls, isData=$isData, nullable=$nullable)"
+  override def toString = s"KDataTypeWrapper(dt=$dt, cls=$cls, nullable=$nullable)"
 }
 
-case class KComplexTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class[_], nullable: Boolean) extends DataType with ComplexWrapper {
+case class KComplexTypeWrapper(dt: DataType, cls: Class[_], nullable: Boolean) extends DataType with ComplexWrapper {
   override private[sql] def unapply(e: Expression) = dt.unapply(e)
 
   override def typeName: String = dt.typeName
@@ -128,7 +127,7 @@ case class KComplexTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class
 
 }
 
-case class KSimpleTypeWrapper(dt: DataType, isData: Boolean = false, cls: Class[_], nullable: Boolean) extends DataType with DataTypeWithClass {
+case class KSimpleTypeWrapper(dt: DataType, cls: Class[_], nullable: Boolean) extends DataType with DataTypeWithClass {
   override private[sql] def unapply(e: Expression) = dt.unapply(e)
 
   override def typeName: String = dt.typeName
