@@ -2,7 +2,7 @@ package org.jetbrains.spark.api
 
 import org.apache.spark.sql.SparkSession
 
-inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[2]", appName: String = "Sample app", func: SparkSession.() -> Unit) {
+inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Sample app", func: SparkSession.() -> Unit) {
     SparkSession
             .builder()
             .master(master)
@@ -19,6 +19,9 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
                 }
             }
             .orCreate
+            .also {
+                it.sparkContext().setLogLevel("DEBUG")
+            }
             .apply(func)
             .also { it.stop() }
 }
