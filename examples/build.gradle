@@ -8,8 +8,8 @@ mainClassName = "org.jetbrains.aprk.api.examples.MapOperationsKt"
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    implementation 'org.apache.spark:spark-core_2.12:3.1.0-SNAPSHOT'
-    implementation 'org.apache.spark:spark-sql_2.12:3.1.0-SNAPSHOT'
+    implementation 'org.apache.spark:spark-core_2.12:3.0.0-preview2'
+    implementation 'org.apache.spark:spark-sql_2.12:3.0.0-preview2'
     implementation project(':kotlin-api')
 }
 
@@ -24,3 +24,4 @@ compileTestKotlin {
         jvmTarget = '1.8'
     }
 }
+

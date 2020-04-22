@@ -1,10 +1,22 @@
+buildscript {
+    repositories {
+        maven {
+            url 'https://repo.labs.intellij.net/central-proxy'
+        }
+    }
+    dependencies {
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.15.2"
+    }
+}
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.3.71' apply false
+    id 'org.jetbrains.kotlin.jvm' version '1.3.72' apply false
+    id 'maven'
 }
 
 allprojects {
-    group = 'org.apache.spark'
-    version = '0.1-SNAPSHOT'
+    group = 'org.jetbrains.kotlin.spark'
+    version = '0.0.1'
+    apply plugin: "com.jfrog.artifactory"
 }
 
 subprojects {
@@ -12,5 +24,23 @@ subprojects {
         mavenLocal()
         mavenCentral()
         jcenter()
+    }
+}
+
+artifactoryPublish.skip = true
+
+artifactory {
+    contextUrl = "https://repo.labs.intellij.net"
+    publish {
+        repository {
+            repoKey = 'big-data-ide'
+            maven = true
+        }
+    }
+    resolve {
+        repository {
+            repoKey = 'all'
+            maven = true
+        }
     }
 }

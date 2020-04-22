@@ -7,7 +7,6 @@ import org.jetbrains.spark.api.*
 data class Q<T>(val id: Int, val text: T)
 object Main {
 
-    @OptIn(ExperimentalStdlibApi::class)
     @JvmStatic
     fun main(args: Array<String>) {
 
@@ -34,9 +33,12 @@ object Main {
                 .reduceGroups(ReduceFunction { v1, v2 -> v1.copy(a = v1.a + v2.a, b = v1.a + v2.a) })
                 .map { it._2 }
                 .repartition(1)
-//                .also { it.printSchema() }
-//                .debugCodegen()
-                .show()
+                .cached {
+                    it.write()
+                            .also { it.csv("csvpath") }
+                            .also { it.orc("orcpath") }
+                }
+
 
         spark.stop()
     }

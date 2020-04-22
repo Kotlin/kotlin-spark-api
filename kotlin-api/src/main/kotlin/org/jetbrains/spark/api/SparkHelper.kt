@@ -2,7 +2,7 @@ package org.jetbrains.spark.api
 
 import org.apache.spark.sql.SparkSession
 
-inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Sample app", func: SparkSession.() -> Unit) {
+inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Sample app", func: KSparkSession.() -> Unit) {
     SparkSession
             .builder()
             .master(master)
@@ -19,9 +19,12 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
                 }
             }
             .orCreate
-            .also {
-                it.sparkContext().setLogLevel("DEBUG")
-            }
-            .apply(func)
+            .apply { KSparkSession(this).apply(func) }
             .also { it.stop() }
+}
+
+@Suppress("EXPERIMENTAL_FEATURE_WARNING")
+inline class KSparkSession(val spark: SparkSession) {
+    inline fun <reified T> List<T>.toDS() = toDS(spark)
+    inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
 }

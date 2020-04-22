@@ -51,7 +51,9 @@ class KDataTypeWrapper(val dt: StructType
 
   override private[sql] def getFieldIndex(name: String) = dt.getFieldIndex(name)
 
-  override private[sql] def findNestedField(fieldNames: Seq[String], includeCollections: Boolean, resolver: Resolver) = dt.findNestedField(fieldNames, includeCollections, resolver)
+  override private[sql] def findNestedField(fieldNames: Seq[String], includeCollections: Boolean) = dt.findNestedField(fieldNames, includeCollections)
+
+  override private[sql] def buildFormattedString(prefix: String, builder: StringBuilder): Unit = dt.buildFormattedString(prefix, builder)
 
   override protected[sql] def toAttributes: Seq[AttributeReference] = dt.toAttributes
 
@@ -60,8 +62,6 @@ class KDataTypeWrapper(val dt: StructType
   override def treeString(maxDepth: Int): String = dt.treeString(maxDepth)
 
   override def printTreeString(): Unit = dt.printTreeString()
-
-  override private[sql] def buildFormattedString(prefix: String, stringConcat: StringUtils.StringConcat, maxDepth: Int): Unit = dt.buildFormattedString(prefix, stringConcat, maxDepth)
 
   private[sql] override def jsonValue = dt.jsonValue
 
@@ -157,4 +157,9 @@ case class KSimpleTypeWrapper(dt: DataType, cls: Class[_], nullable: Boolean) ex
   override def defaultSize: Int = dt.defaultSize
 
   override private[spark] def asNullable = dt.asNullable
+}
+
+object helpme {
+
+  def listToSeq(i: java.util.List[_]): Seq[_] = Seq(i.toArray: _*)
 }

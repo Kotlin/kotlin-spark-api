@@ -96,7 +96,7 @@ fun <KEY, VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroups(func: (VALUE, V
         reduceGroups(ReduceFunction(func))
                 .map { t -> t._1 to t._2 }
 
-inline fun <reified R> Dataset<Row>.cast(): Dataset<R> = `as`(genericRefEncoder<R>())
+inline fun <reified R> Dataset<Row>.upcast(): Dataset<R> = `as`(genericRefEncoder<R>())
 
 inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
 
@@ -104,8 +104,10 @@ fun <T> Dataset<T>.debugCodegen() = also { KotlinReflection.debugCodegen(it) }
 
 fun <T> Dataset<T>.debug() = also { KotlinReflection.debug(it) }
 
-@JvmName("colOfSet")
-fun <T> Dataset<T>.col(name: String) = KSparkExtensions.col(this, name)
+fun <T, R> Dataset<T>.cached(func: (Dataset<T>) -> R): R {
+    val cache = this.cache()
+    return cache.let(func).also { cache.unpersist() }
+}
 
 fun Column.eq(c: Column) = this.`$eq$eq$eq`(c)
 

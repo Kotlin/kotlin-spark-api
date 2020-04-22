@@ -493,7 +493,7 @@ object KotlinReflection extends ScalaReflection {
     val tpe = getType(cls)
     val clsName = getClassNameFromType(tpe)
     val walkedTypePath = WalkedTypePath().recordRoot(clsName)
-    val inputObject = BoundReference(0, ObjectType(cls), nullable = dt.nullable)
+    val inputObject = BoundReference(0, ObjectType(cls), nullable = true)
     serializerFor(inputObject, tpe, walkedTypePath, predefinedDt = Some(dt))
   }
 

@@ -5,8 +5,8 @@ plugins {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation 'org.jetbrains.kotlin:kotlin-reflect:1.3.71'
-    implementation 'org.apache.spark:spark-core_2.12:3.1.0-SNAPSHOT'
-    implementation 'org.apache.spark:spark-sql_2.12:3.1.0-SNAPSHOT'
+    implementation 'org.apache.spark:spark-core_2.12:3.0.0-preview2'
+    implementation 'org.apache.spark:spark-sql_2.12:3.0.0-preview2'
     implementation project(':core')
     testImplementation 'io.kotlintest:kotlintest-runner-junit5:3.4.2'
     testImplementation 'com.beust:klaxon:5.0.1'
@@ -15,17 +15,18 @@ dependencies {
 compileKotlin {
     kotlinOptions {
         jvmTarget = '1.8'
-        freeCompilerArgs = ['-Xopt-in=kotlin.RequiresOptIn']
+        freeCompilerArgs = ['-Xopt-in=kotlin.RequiresOptIn', "-XXLanguage:+InlineClasses"]
     }
 }
 
 compileTestKotlin {
     kotlinOptions{
         jvmTarget = '1.8'
-        freeCompilerArgs = ['-Xopt-in=kotlin.RequiresOptIn']
+        freeCompilerArgs = ['-Xopt-in=kotlin.RequiresOptIn', "-XXLanguage:+InlineClasses"]
     }
 }
 
 test {
     useJUnitPlatform()
 }
+
