@@ -23,7 +23,7 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
             .also { it.stop() }
 }
 
-@Suppress("EXPERIMENTAL_FEATURE_WARNING")
+@Suppress("EXPERIMENTAL_FEATURE_WARNING", "unused")
 inline class KSparkSession(val spark: SparkSession) {
     inline fun <reified T> List<T>.toDS() = toDS(spark)
     inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)

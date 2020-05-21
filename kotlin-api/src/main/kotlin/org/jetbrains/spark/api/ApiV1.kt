@@ -1,15 +1,12 @@
+@file:Suppress("HasPlatformType", "unused")
+
 package org.jetbrains.spark.api
 
-import org.apache.spark.api.java.function.FlatMapFunction
-import org.apache.spark.api.java.function.ForeachFunction
-import org.apache.spark.api.java.function.MapFunction
-import org.apache.spark.api.java.function.MapGroupsFunction
-import org.apache.spark.api.java.function.ReduceFunction
+import org.apache.spark.api.java.function.*
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.types.*
-import org.jetbrains.spark.extensions.KSparkExtensions
 import scala.reflect.ClassTag
 import java.math.BigDecimal
 import java.sql.Date
@@ -96,7 +93,7 @@ fun <KEY, VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroups(func: (VALUE, V
         reduceGroups(ReduceFunction(func))
                 .map { t -> t._1 to t._2 }
 
-inline fun <reified R> Dataset<Row>.upcast(): Dataset<R> = `as`(genericRefEncoder<R>())
+inline fun <T, reified R> Dataset<T>.downcast(): Dataset<R> = `as`(genericRefEncoder<R>())
 
 inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
 
@@ -112,12 +109,33 @@ fun <T, R> Dataset<T>.cached(func: (Dataset<T>) -> R): R {
 fun Column.eq(c: Column) = this.`$eq$eq$eq`(c)
 
 infix fun Column.`==`(c: Column) = `$eq$eq$eq`(c)
+infix fun Column.`&&`(c: Column) = and(c)
+fun lit(a: Any) = functions.lit(a)
 
 inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R?>> {
     return joinWith(right, col, "left").map { it._1 to it._2 }
 }
 
+inline fun <reified L : Any?, reified R> Dataset<L>.rightJoin(right: Dataset<R>, col: Column): Dataset<Pair<L?, R>> {
+    return joinWith(right, col, "right").map { it._1 to it._2 }
+}
+
+inline fun <reified L, reified R> Dataset<L>.innerJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R>> {
+    return joinWith(right, col, "inner").map { it._1 to it._2 }
+}
+
+inline fun <reified L : Any?, reified R : Any?> Dataset<L>.fullJoin(right: Dataset<R>, col: Column): Dataset<Pair<L?, R?>> {
+    return joinWith(right, col, "full").map { it._1 to it._2 }
+}
+
 inline fun <reified T> Dataset<T>.sort(columns: (Dataset<T>) -> Array<Column>) = sort(*columns(this))
+
+inline fun <reified T, R> Dataset<T>.withCached(blockingUnpersist: Boolean = false, executeOnCached: Dataset<T>.() -> R): R {
+    val cached = this.cache()
+    return cached.executeOnCached().also { cached.unpersist(blockingUnpersist) }
+}
+
+fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply { show(numRows, truncate) }
 
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]

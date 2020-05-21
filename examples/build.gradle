@@ -25,3 +25,8 @@ compileTestKotlin {
     }
 }
 
+task sourceJar(type: Jar) {
+    from sourceSets.main.allJava
+}
+
+artifactoryPublish.dependsOn sourceJar
