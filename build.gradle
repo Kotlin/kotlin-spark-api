@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = 'org.jetbrains.kotlin.spark'
-    version = '0.0.2'
+    version = '0.0.5'
     apply plugin: "com.jfrog.artifactory"
     apply plugin: "maven-publish"
     apply plugin: "maven"
@@ -41,3 +41,4 @@ artifactory {
         }
     }
 }
+

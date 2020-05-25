@@ -102,7 +102,6 @@ examples:publishToMavenLocal
 kotlin-api:publishToMavenLocal
 examples:knows
 examples:shadowJar
-uploadArchives
 core:uploadArchives
 examples:uploadArchives
 kotlin-api:uploadArchives
@@ -258,7 +257,6 @@ publishToMavenLocal
 publishToMavenLocal
 knows
 shadowJar
-uploadArchives
 uploadArchives
 uploadArchives
 uploadArchives
