@@ -4,7 +4,7 @@
   <parent>
     <artifactId>kotlin-spark-api-parent</artifactId>
     <groupId>org.jetbrains.kotlin.spark</groupId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
   </parent>
   <artifactId>core</artifactId>
   <name>Kotlin Spark API: Scala core</name>

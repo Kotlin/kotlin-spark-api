@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jetbrains.kotlin.spark</groupId>
     <artifactId>kotlin-spark-api-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>kotlin-spark-api-parent</name>
     <url>http://maven.apache.org</url>
     <packaging>pom</packaging>
@@ -14,6 +14,15 @@
         <module>core</module>
     </modules>
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.9.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
