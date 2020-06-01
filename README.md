@@ -4,26 +4,23 @@
 
 Your next API to work with  [Spark](https://spark.apache.org/)
 
-One day this should become part of https://github.com/apache/spark of repository, consider this as beta-quality software.
+One day this should become part of https://github.com/apache/spark of repository. Consider this as beta-quality software.
 
 ## Goal
 
-This project adds missing layer of compatibility between [Kotlin](https://kotlinlang.org/) and [Spark](https://spark.apache.org/).
+This project adds a missing layer of compatibility between [Kotlin](https://kotlinlang.org/) and [Spark](https://spark.apache.org/).
 
-Despite Kotlin having first-class compatibility API Kotlin developers might want to use familiar features like data 
-classes and lambda expressions as simple expressions in curly braces or method references.
+Despite Kotlin having first-class compatibility API, Kotlin developers might want to use familiar features like data classes and lambda expressions as simple expressions in curly braces or method references.
 
 ## Non-goals
 
-There is no goal to replace any currently supported language or provide them with some functionality to support Kotlin 
-language.
+There is no goal to replace any currently supported language or provide them with some functionality to support Kotlin language.
 
 ## Installation
 
-Currently, there are no kotlin-spark-api artifacts in maven central, but you can obain copy using JitPack here: 
-[![](https://jitpack.io/v/JetBrains/kotlin-spark-api.svg)](https://jitpack.io/#JetBrains/kotlin-spark-api)
+Currently, there are no kotlin-spark-api artifacts in maven central, but you can obtain copy using JitPack here: [![](https://jitpack.io/v/JetBrains/kotlin-spark-api.svg)](https://jitpack.io/#JetBrains/kotlin-spark-api)
 
-There is support for `Maven`, `Gradle`, `SBT` and `leinengen` on JitPack.
+There is support for `Maven`, `Gradle`, `SBT`, and `leinengen` on JitPack.
 
 This project does not force you to use any concrete version of spark, but we've only tested it with spark `3.0.0-preview2`.
 We believe it should also work fine with version `2.4.5`
@@ -49,8 +46,7 @@ So if you're using Maven you'll hve to add following into your `pom.xml`:
 </dependency>
 ```
 
-`core` is being compiled against Scala version `2.12` and it means you have to use `2.12` build of spark if you want to 
-try out this project.
+`core` is being compiled against Scala version `2.12` and it means you have to use `2.12` build of spark if you want to try out this project.
 
 ## Usage
 
@@ -79,9 +75,8 @@ spark.toDS("a" to 1, "b" to 2)
 Indeed, this produces `Dataset<Pair<String, Int>>`. There are a couple more `toDS` methods which accept different arguments.
 
 Also, there are several interesting aliases in API, like `leftJoin`, `rightJoin` etc.
-Interesting fact about them that they're null-safe by design. For example, `leftJoin` is aware of nullability and returns 
-`Dataset<Pair<LEFT, RIGHT?>>`.
-Note that were forcing `RIGHT` to be nullable for you as developer to be able to handle this situation.
+Interesting fact about them that they're null-safe by design. For example, `leftJoin` is aware of nullability and returns `Dataset<Pair<LEFT, RIGHT?>>`.
+Note that were forcing `RIGHT` to be nullable for you as a developer to be able to handle this situation.
 
 We know that `NullPointerException`s are hard to debug in Spark And trying hard to make them happen as rare as possible.
 
@@ -89,10 +84,9 @@ We know that `NullPointerException`s are hard to debug in Spark And trying hard 
 
 ### `withSpark`
 
-We provide you with useful function `withSpark`, which accepts everything that may be needed to run spark — properties, 
-name, master location and so on. Also it accepts block, which should be launched in spark context.
+We provide you with useful function `withSpark`, which accepts everything that may be needed to run spark — properties, name, master location and so on. It also accepts a block of code to execute inside spark context.
 
-After work block ends `spark.stop()` is called automatically.
+After work block ends, `spark.stop()` is called automatically.
 
 ```kotlin
 withSpark {
@@ -108,8 +102,8 @@ withSpark {
 
 It may easily happen that we need to fork our computation to several paths. To compute things only once we should call `cache`
 method. But there it is hard to control when we're using cached `Dataset` and when not.
-Also it's easy to forget to unpersist cached data, which may make things to break unexpectadle or just take more memory
-then intended.
+It is also easy to forget to unpersist cached data, which may make break things unexpectably or take more memory
+than intended.
 
 To solve these problems we introduce `withCached` function
 
@@ -127,15 +121,14 @@ withSpark {
 }
 ```
 
-Here we're showing cached `Dataset` for debugging purposes then filtering it. `filter` method returns filtered `Dataset` 
-and then cached `Dataset` is being unpersisted so we have more memory to call `map` method and collect resulting `Dataset`.
+Here we're showing cached `Dataset` for debugging purposes then filtering it. The `filter` method returns filtered `Dataset` and then the cached `Dataset` is being unpersisted, so we have more memory to call the `map` method and collect the resulting `Dataset`.
 
 ## Examples
 
-You cn find more examples in [examples](https://github.com/JetBrains/kotlin-spark-api/tree/master/examples/src/main/kotlin/org/jetbrains/spark/api/examples) module.
+You can find more examples in [examples](https://github.com/JetBrains/kotlin-spark-api/tree/master/examples/src/main/kotlin/org/jetbrains/spark/api/examples) module.
 
 ## Issues and feedback
 
 Issues and any feedback are very welcome in `Issues` here.
 
-If you find that we missed some important feature — please report and we'll consider adding it.
+If you find that we missed some important features — please report it, and we'll consider adding them.
