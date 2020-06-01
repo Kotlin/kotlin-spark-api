@@ -1,10 +1,9 @@
 # Kotlin Spark API
 
----
 
 Your next API to work with  [Spark](https://spark.apache.org/)
 
-One day this should become part of https://github.com/apache/spark of repository. Consider this as beta-quality software.
+We are looking to have this as a part of https://github.com/apache/spark repository. Consider this as beta-quality software.
 
 ## Goal
 
