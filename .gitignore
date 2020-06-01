@@ -369,3 +369,5 @@ gradle-app.setting
 
 # End of https://www.gitignore.io/api/scala,gradle,kotlin
 
+csvpath/
+orcpath/

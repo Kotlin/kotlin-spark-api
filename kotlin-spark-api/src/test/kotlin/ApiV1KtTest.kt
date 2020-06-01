@@ -1,8 +1,26 @@
-import io.kotlintest.*
-import io.kotlintest.inspectors.forOne
-import io.kotlintest.matchers.collections.shouldHaveSize
-import io.kotlintest.matchers.instanceOf
-import io.kotlintest.specs.ShouldSpec
+/*-
+ * =LICENSE=
+ * Kotlin Spark API
+ * ----------
+ * Copyright (C) 2019 - 2020 JetBrains
+ * ----------
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =LICENSEEND=
+ */
+import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.inspectors.forOne
+import io.kotest.matchers.*
+import io.kotest.matchers.collections.shouldHaveSize
 import org.jetbrains.spark.api.schema
 import struct.model.DataType
 import struct.model.DataType.StructType
@@ -11,13 +29,13 @@ import struct.model.ElementType.ComplexElement
 import struct.model.ElementType.SimpleElement
 import struct.model.Struct
 import struct.model.StructField
-import java.util.ArrayList
+import java.util.*
 import kotlin.reflect.typeOf
 
 
 @OptIn(ExperimentalStdlibApi::class)
 class ApiV1KtTest : ShouldSpec({
-    "org.jetbrains.spark.api.org.jetbrains.spark.api.schema"{
+    context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema") {
         data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
 
@@ -76,7 +94,7 @@ class ApiV1KtTest : ShouldSpec({
             }
         }
     }
-    "org.jetbrains.spark.api.org.jetbrains.spark.api.schema with more complex data"{
+    context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema with more complex data") {
         data class Single<T>(val vala3: T)
         data class Test2<T>(val vala2: T, val para2: Pair<T, Single<Double>>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
@@ -146,7 +164,7 @@ class ApiV1KtTest : ShouldSpec({
         }
 
     }
-    "org.jetbrains.spark.api.org.jetbrains.spark.api.schema without generics"{
+    context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema without generics") {
         data class Test(val a: String, val b: Int, val c: Double)
 
         val schema = schema(typeOf<Test>())
@@ -159,7 +177,7 @@ class ApiV1KtTest : ShouldSpec({
             struct.fields.forOne { it.shouldBeDescribed("c", "double") }
         }
     }
-    "type with list of ints"{
+    context("type with list of ints") {
         val schema = schema(typeOf<List<Int>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
@@ -167,7 +185,7 @@ class ApiV1KtTest : ShouldSpec({
             struct.elementType!! shouldBe SimpleElement("integer")
         }
     }
-    "type with list of Pairs int to long"{
+    context("type with list of Pairs int to long") {
         val schema = schema(typeOf<List<Pair<Int, Long>>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
@@ -178,7 +196,7 @@ class ApiV1KtTest : ShouldSpec({
             elType.value.fields.forOne { it.shouldBeDescribed("second", "long") }
         }
     }
-    "type with list of generic data class with E generic name"{
+    context("type with list of generic data class with E generic name") {
         data class Test<E>(val e: E)
 
         val schema = schema(typeOf<List<Test<String>>>())
@@ -190,7 +208,7 @@ class ApiV1KtTest : ShouldSpec({
             elType.value.fields!!.forOne { it.shouldBeDescribed("e", "string") }
         }
     }
-    "type with list of list of int"{
+    context("type with list of list of int") {
         val schema = schema(typeOf<List<List<Int>>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
@@ -202,7 +220,7 @@ class ApiV1KtTest : ShouldSpec({
             el.value shouldBe "integer"
         }
     }
-    "Subtypes of list"{
+    context("Subtypes of list") {
         val schema = schema(typeOf<ArrayList<Int>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {
@@ -213,7 +231,7 @@ class ApiV1KtTest : ShouldSpec({
             elType.value shouldBe "integer"
         }
     }
-    "Subtypes of list with nullable values"{
+    context("Subtypes of list with nullable values") {
         val schema = schema(typeOf<ArrayList<Int?>>())
         val struct = Struct.fromJson(schema.prettyJson())!!
         should("return correct types too") {

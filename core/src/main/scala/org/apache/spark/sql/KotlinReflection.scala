@@ -1,16 +1,34 @@
-package org.apache.spark.sql
+/*-
+ * =LICENSE=
+ * Kotlin Spark API: Examples
+ * ----------
+ * Copyright (C) 2019 - 2020 JetBrains
+ * ----------
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =LICENSEEND=
+ */
 
+package org.apache.spark.sql
 
 import java.beans.{Introspector, PropertyDescriptor}
 
-import org.apache.commons.lang3.reflect.ConstructorUtils
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.DeserializerBuildHelper._
 import org.apache.spark.sql.catalyst.SerializerBuildHelper._
 import org.apache.spark.sql.catalyst.analysis.GetColumnByOrdinal
 import org.apache.spark.sql.catalyst.expressions.objects._
 import org.apache.spark.sql.catalyst.expressions.{Expression, _}
-import org.apache.spark.sql.catalyst.util.{ArrayBasedMapData, ArrayData, MapData}
+import org.apache.spark.sql.catalyst.util.ArrayBasedMapData
 import org.apache.spark.sql.catalyst.{InternalRow, ScalaReflection, WalkedTypePath}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
@@ -24,9 +42,9 @@ import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
 trait DefinedByConstructorParams
 
 /**
- * A default version of ScalaReflection that uses the runtime universe.
+ * KotlinReflection is heavily inspired by ScalaReflection and even extends it just to add several methods
  */
-object KotlinReflection extends ScalaReflection {
+object KotlinReflection extends KotlinReflection {
   /**
    * Returns the Spark SQL DataType for a given java class.  Where this is not an exact mapping
    * to a native type, an ObjectType is returned.
@@ -61,17 +79,8 @@ object KotlinReflection extends ScalaReflection {
   // Since the map values can be mutable, we explicitly import scala.collection.Map at here.
   import scala.collection.Map
 
-  /**
-   * Returns the Spark SQL DataType for a given scala type.  Where this is not an exact mapping
-   * to a native type, an ObjectType is returned. Special handling is also used for Arrays including
-   * those that hold primitive types.
-   *
-   * Unlike `schemaFor`, this function doesn't do any massaging of types into the Spark SQL type
-   * system.  As a result, ObjectType will be returned for things like boxed Integers
-   */
-  def dataTypeFor[T: TypeTag]: DataType = dataTypeFor(localTypeOf[T])
 
-  def isSubtype(t: universe.Type, t2: universe.Type) = t <:< t2
+  def isSubtype(t: universe.Type, t2: universe.Type): Boolean = t <:< t2
 
   /**
    * Synchronize to prevent concurrent usage of `<:<` operator.
@@ -442,32 +451,7 @@ object KotlinReflection extends ScalaReflection {
     serializerFor(inputObject, tpe, walkedTypePath)
   }
 
-  /**
-   * Returns an expression for serializing an object of type T to Spark SQL representation. The
-   * input object is located at ordinal 0 of a row, i.e., `BoundReference(0, _)`.
-   *
-   * If the given type is not supported, i.e. there is no encoder can be built for this type,
-   * an [[UnsupportedOperationException]] will be thrown with detailed error message to explain
-   * the type path walked so far and which class we are not supporting.
-   * There are 4 kinds of type path:
-   * * the root type: `root class: "abc.xyz.MyClass"`
-   * * the value type of [[Option]]: `option value class: "abc.xyz.MyClass"`
-   * * the element type of [[Array]] or [[Seq]]: `array element class: "abc.xyz.MyClass"`
-   * * the field of [[Product]]: `field (class: "abc.xyz.MyClass", name: "myField")`
-   */
-  def serializerForJavaType[T](cls: java.lang.Class[T]): Expression = ScalaReflection.cleanUpReflectionObjects {
-    val tpe = getType(cls)
-    val clsName = getClassNameFromType(tpe)
-    val walkedTypePath = WalkedTypePath().recordRoot(clsName)
-
-    // The input object to `ExpressionEncoder` is located at first column of an row.
-    val isPrimitive = tpe.typeSymbol.asClass.isPrimitive
-    val inputObject = BoundReference(0, dataTypeFor(tpe), nullable = !isPrimitive)
-
-    serializerFor(inputObject, tpe, walkedTypePath)
-  }
-
-  def getType[T](clazz: Class[T]) = {
+  def getType[T](clazz: Class[T]): universe.Type = {
     val mir = runtimeMirror(clazz.getClassLoader)
     mir.classSymbol(clazz).toType
   }
@@ -523,7 +507,7 @@ object KotlinReflection extends ScalaReflection {
           if (cls.isArray && cls.getComponentType.isPrimitive) {
             createSerializerForPrimitiveArray(input, dt)
           } else {
-            createSerializerForGenericArray(input, dt, nullable =predefinedDt.map(_.nullable).getOrElse(schemaFor(elementType).nullable))
+            createSerializerForGenericArray(input, dt, nullable = predefinedDt.map(_.nullable).getOrElse(schemaFor(elementType).nullable))
           }
 
         case dt =>
@@ -732,72 +716,12 @@ object KotlinReflection extends ScalaReflection {
       .filter(_.getReadMethod != null)
   }
 
-  /**
-   * Returns true if the given type is option of product type, e.g. `Option[Tuple2]`. Note that,
-   * we also treat [[DefinedByConstructorParams]] as product type.
-   */
-  def optionOfProductType(tpe: `Type`): Boolean = cleanUpReflectionObjects {
-    tpe.dealias match {
-      case t if isSubtype(t, localTypeOf[Option[_]]) =>
-        val TypeRef(_, _, Seq(optType)) = t
-        definedByConstructorParams(optType)
-      case _ => false
-    }
-  }
-
-  /**
-   * Returns the parameter names and types for the primary constructor of this class.
-   *
-   * Note that it only works for scala classes with primary constructor, and currently doesn't
-   * support inner class.
-   */
-  def getConstructorParameters(cls: Class[_]): Seq[(String, Type)] = {
-    val m = runtimeMirror(cls.getClassLoader)
-    val classSymbol = m.staticClass(cls.getName)
-    val t = classSymbol.selfType
-    getConstructorParameters(t)
-  }
-
-  /**
-   * Returns the parameter names for the primary constructor of this class.
-   *
-   * Logically we should call `getConstructorParameters` and throw away the parameter types to get
-   * parameter names, however there are some weird scala reflection problems and this method is a
-   * workaround to avoid getting parameter types.
-   */
-  def getConstructorParameterNames(cls: Class[_]): Seq[String] = {
-    val m = runtimeMirror(cls.getClassLoader)
-    val classSymbol = m.staticClass(cls.getName)
-    val t = classSymbol.selfType
-    constructParams(t).map(_.name.decodedName.toString)
-  }
-
-  /**
-   * Returns the parameter values for the primary constructor of this class.
-   */
-  def getConstructorParameterValues(obj: DefinedByConstructorParams): Seq[AnyRef] = {
-    getConstructorParameterNames(obj.getClass).map { name =>
-      obj.getClass.getMethod(name).invoke(obj)
-    }
-  }
-
   /*
    * Retrieves the runtime class corresponding to the provided type.
    */
   def getClassFromType(tpe: Type): Class[_] = mirror.runtimeClass(tpe.dealias.typeSymbol.asClass)
 
   case class Schema(dataType: DataType, nullable: Boolean)
-
-  /** Returns a Sequence of attributes for the given case class type. */
-  def attributesFor[T: TypeTag]: Seq[Attribute] = schemaFor[T] match {
-    case Schema(s: StructType, _) =>
-      s.toAttributes
-    case others =>
-      throw new UnsupportedOperationException(s"Attributes for type $others is not supported")
-  }
-
-  /** Returns a catalyst DataType and its nullability for the given Scala Type using reflection. */
-  def schemaFor[T: TypeTag]: Schema = schemaFor(localTypeOf[T])
 
   /** Returns a catalyst DataType and its nullability for the given Scala Type using reflection. */
   def schemaFor(tpe: `Type`): Schema = cleanUpReflectionObjects {
@@ -878,40 +802,6 @@ object KotlinReflection extends ScalaReflection {
   }
 
   /**
-   * Finds an accessible constructor with compatible parameters. This is a more flexible search than
-   * the exact matching algorithm in `Class.getConstructor`. The first assignment-compatible
-   * matching constructor is returned if it exists. Otherwise, we check for additional compatible
-   * constructors defined in the companion object as `apply` methods. Otherwise, it returns `None`.
-   */
-  def findConstructor[T](cls: Class[T], paramTypes: Seq[Class[_]]): Option[Seq[AnyRef] => T] = {
-    Option(ConstructorUtils.getMatchingAccessibleConstructor(cls, paramTypes: _*)) match {
-      case Some(c) => Some(x => c.newInstance(x: _*))
-      case None =>
-        val companion = mirror.staticClass(cls.getName).companion
-        val moduleMirror = mirror.reflectModule(companion.asModule)
-        val applyMethods = companion.asTerm.typeSignature
-          .member(universe.TermName("apply")).asTerm.alternatives
-        applyMethods.find { method =>
-          val params = method.typeSignature.paramLists.head
-          // Check that the needed params are the same length and of matching types
-          params.size == paramTypes.tail.size &&
-            params.zip(paramTypes.tail).forall { case (ps, pc) =>
-              ps.typeSignature.typeSymbol == mirror.classSymbol(pc)
-            }
-        }.map { applyMethodSymbol =>
-          val expectedArgsCount = applyMethodSymbol.typeSignature.paramLists.head.size
-          val instanceMirror = mirror.reflect(moduleMirror.instance)
-          val method = instanceMirror.reflectMethod(applyMethodSymbol.asMethod)
-          (_args: Seq[AnyRef]) => {
-            // Drop the "outer" argument if it is provided
-            val args = if (_args.size == expectedArgsCount) _args else _args.tail
-            method.apply(args: _*).asInstanceOf[T]
-          }
-        }
-    }
-  }
-
-  /**
    * Whether the fields of the given type is defined entirely by its constructor parameters.
    */
   def definedByConstructorParams(tpe: Type): Boolean = cleanUpReflectionObjects {
@@ -930,43 +820,6 @@ object KotlinReflection extends ScalaReflection {
     "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
     "throws", "transient", "true", "try", "void", "volatile", "while")
 
-  val typeJavaMapping = Map[DataType, Class[_]](
-    BooleanType -> classOf[Boolean],
-    ByteType -> classOf[Byte],
-    ShortType -> classOf[Short],
-    IntegerType -> classOf[Int],
-    LongType -> classOf[Long],
-    FloatType -> classOf[Float],
-    DoubleType -> classOf[Double],
-    StringType -> classOf[UTF8String],
-    DateType -> classOf[DateType.InternalType],
-    TimestampType -> classOf[TimestampType.InternalType],
-    BinaryType -> classOf[BinaryType.InternalType],
-    CalendarIntervalType -> classOf[CalendarInterval]
-  )
-
-  val typeBoxedJavaMapping = Map[DataType, Class[_]](
-    BooleanType -> classOf[java.lang.Boolean],
-    ByteType -> classOf[java.lang.Byte],
-    ShortType -> classOf[java.lang.Short],
-    IntegerType -> classOf[java.lang.Integer],
-    LongType -> classOf[java.lang.Long],
-    FloatType -> classOf[java.lang.Float],
-    DoubleType -> classOf[java.lang.Double],
-    DateType -> classOf[java.lang.Integer],
-    TimestampType -> classOf[java.lang.Long]
-  )
-
-  def dataTypeJavaClass(dt: DataType): Class[_] = {
-    dt match {
-      case _: DecimalType => classOf[Decimal]
-      case _: StructType => classOf[InternalRow]
-      case _: ArrayType => classOf[ArrayData]
-      case _: MapType => classOf[MapData]
-      case ObjectType(cls) => cls
-      case _ => typeJavaMapping.getOrElse(dt, classOf[java.lang.Object])
-    }
-  }
 
   @scala.annotation.tailrec
   def javaBoxedType(dt: DataType): Class[_] = dt match {
@@ -988,7 +841,7 @@ object KotlinReflection extends ScalaReflection {
  * Support for generating catalyst schemas for scala objects.  Note that unlike its companion
  * object, this trait able to work in both the runtime and the compile time (macro) universe.
  */
-trait ScalaReflection extends Logging {
+trait KotlinReflection extends Logging {
   /** The universe we work in (runtime or macro) */
   val universe: scala.reflect.api.Universe
 
@@ -1102,16 +955,6 @@ trait ScalaReflection extends Logging {
       }
     }
     params.flatten
-  }
-
-  def debugCodegen(df: Dataset[_]): Unit = {
-    import org.apache.spark.sql.execution.debug._
-    df.debugCodegen()
-  }
-
-  def debug(df: Dataset[_]): Unit = {
-    import org.apache.spark.sql.execution.debug._
-    df.debug()
   }
 
 }
