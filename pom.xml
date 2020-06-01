@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.jetbrains.kotlin.spark</groupId>
+    <artifactId>kotlin-spark-api-parent</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>kotlin-spark-api-parent</name>
+    <url>http://maven.apache.org</url>
+    <packaging>pom</packaging>
+    <modules>
+        <module>kotlin-spark-api</module>
+        <module>examples</module>
+        <module>core</module>
+    </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <executions>
+                    <execution>
+                        <id>first</id>
+                        <goals>
+                            <goal>update-file-header</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <roots>
+                        <root>src/main/</root>
+                        <root>src/test/</root>
+                    </roots>
+                    <licenseName>apache_v2</licenseName>
+                    <processStartTag>=LICENSE=</processStartTag>
+                    <processEndTag>=LICENSE END=</processEndTag>
+                    <sectionDelimiter>----------</sectionDelimiter>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>asm0dey</id>
+            <name>Pasha Finkelshteyn</name>
+            <email>asm0dey@jetbrains.com</email>
+            <timezone>GMT+3</timezone>
+        </developer>
+        <developer>
+            <id>vitay.khudobakhshov</id>
+            <name>Vitay Khudobakhshov</name>
+            <email>vitay.khudobakhshov@jetbrains.com</email>
+            <timezone>GMT+3</timezone>
+        </developer>
+    </developers>
+    <organization>
+        <name>JetBrains</name>
+        <url>https://www.jetbrains.com/</url>
+    </organization>
+    <inceptionYear>2019</inceptionYear>
+</project>
