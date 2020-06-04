@@ -35,7 +35,7 @@ So if you're using Maven you'll hve to add following into your `pom.xml`:
 </repositories>
 <dependency>
     <groupId>com.github.JetBrains.kotlin-spark-api</groupId>
-    <artifactId>core</artifactId>
+    <artifactId>kotlin-spark-api</artifactId>
     <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
