@@ -1,4 +1,4 @@
-#Quick Start Guide
+# Quick Start Guide
 
 This tutorial provides instructions to help you get started with Kotlin Spark API. We use an example similar to the official [Apache Spark 
 Quick Start Guide](https://spark.apache.org/docs/3.0.0-preview2/quick-start.html#self-contained-applications). 
