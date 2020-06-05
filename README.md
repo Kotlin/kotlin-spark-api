@@ -124,6 +124,7 @@ Here we're showing cached `Dataset` for debugging purposes then filtering it. Th
 ## Examples
 
 For more, check out [examples](https://github.com/JetBrains/kotlin-spark-api/tree/master/examples/src/main/kotlin/org/jetbrains/spark/api/examples) module.
+To get up and running quickly, check out this [tutorial](docs/quick-start-guide.md). 
 
 ## Issues and feedback
 
