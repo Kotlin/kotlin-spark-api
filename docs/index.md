@@ -5,6 +5,20 @@ Your next API to work with  [Spark](https://spark.apache.org/).
 
 We are looking to have this as a part of https://github.com/apache/spark repository. Consider this beta-quality software.
 
+<!-- toc -->
+
+- [Goal](#goal)
+- [Non-goals](#non-goals)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Useful helper methods](#useful-helper-methods)
+  * [`withSpark`](#withspark)
+  * [`withCached`](#withcached)
+- [Examples](#examples)
+- [Issues and feedback](#issues-and-feedback)
+
+<!-- tocstop -->
+
 ## Goal
 
 This project adds a missing layer of compatibility between [Kotlin](https://kotlinlang.org/) and [Spark](https://spark.apache.org/).
