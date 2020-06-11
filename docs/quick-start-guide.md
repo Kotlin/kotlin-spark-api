@@ -34,17 +34,18 @@ fun main() {
 }
 ``` 
 
-## Building the application with Maven
-
+## Building the application
 Because Kotlin Spark API is not part of the official Apache Spark distribution yet, it is not enough to add Spark 
-as a dependency in your pom.xml file. 
+as a dependency to your build file. 
 You need to: 
 - Add Spark as a dependency
 - Add Kotlin Spark API as a dependency
 - Add Kotlin Standard Library as a dependency
 
 When packaging your project into a jar file, you need to explicitly include Kotlin Spark API and Kotlin Standard Library 
-dependencies, for example, using `maven-shade-plugin`.
+dependencies. Here you can find an example of building your application with Maven, and with Gradle. 
+
+### Building the application with Maven
 
 Here's what the `pom.xml` looks like for this example:
 ```xml
@@ -148,17 +149,55 @@ Here's what the project structure should look like:
 
 Now you can package the application using Maven:
 `mvn package`
- 
-When done, you can execute the packaged application with `./bin/spark-submit`:
 
-`YOUR_SPARK_HOME/bin/spark-submit --class "SimpleApp" --master local YOUR_PROJECT/target/kotlin-spark-example-1.0-SNAPSHOT.jar`
+### Building the application with Gradle
+
+Here's what the `build.gradle` looks like for this example:
+
+```
+plugins {
+  id 'org.jetbrains.kotlin.jvm' version '1.3.72'
+  id 'com.github.johnrengelman.shadow' version '5.2.0'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+  mavenCentral()
+  maven { url = 'https://jitpack.io' }
+}
+
+dependencies {
+  // Kotlin stdlib
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.3.72'
+  // Kotlin Spark API
+  implementation 'com.github.JetBrains.kotlin-spark-api:kotlin-spark-api:0.1.0'
+  // Apache Spark
+  compileOnly 'org.apache.spark:spark-sql_2.12:3.0.0-preview2'
+}
+
+compileKotlin {
+  kotlinOptions.jvmTarget = '1.8'
+}
+
+shadowJar {
+  dependencies {
+    exclude(dependency {
+      it.moduleGroup == 'org.apache.spark' || it.moduleGroup == "org.scala-lang"
+    })
+  }
+}
+```
+
+Now you can package the application using Gradle:
+`gradle shadowJar`
+
+ 
+## Executing the application with spark-submit
+
+Once you have your jar, you can execute the packaged application with `./bin/spark-submit`:
+
+`YOUR_SPARK_HOME/bin/spark-submit --class "SimpleApp" --master local [path to your jar]`
 
 This example is also available as a [GitHub repo](https://github.com/MKhalusova/kotlin-spark-example), feel free to give it a try.
-
-
-
- 
-
-
- 
-   
