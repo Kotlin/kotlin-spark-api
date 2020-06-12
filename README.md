@@ -23,8 +23,7 @@ Currently, there are no kotlin-spark-api artifacts in maven central, but you can
 
 There is support for `Maven`, `Gradle`, `SBT`, and `leinengen` on JitPack.
 
-This project does not force you to use any specific version of Spark, but it has only been tested it with spark `3.0.0-preview2`.
-We believe it can work with Spark `2.4.5` but we cannot guarantee that.
+This project does not force you to use any specific version of Spark, but it has only been tested it with spark `3.0.0-preview2`. We believe it can work with Spark `2.4.5` but we cannot guarantee that.
 
 So if you're using Maven you'll have to add the following into your `pom.xml`:
 
@@ -43,11 +42,12 @@ So if you're using Maven you'll have to add the following into your `pom.xml`:
 <dependency>
     <groupId>org.apache.spark</groupId>
     <artifactId>spark-sql_2.12</artifactId>
-    <version>2.4.5</version>
+    <version>${spark.version}</version>
 </dependency>
 ```
 
-`core` is being compiled against Scala version `2.12` and it means you have to use `2.12` build of spark if you want to try out this project.
+Note that `core` is being compiled against Scala version `2.12` and it means you have to use `2.12` build of spark if you want to try out this project. 
+You can find a complete example with `pom.xml` and `build.gradle` in the [Quick Start Guide](docs/quick-start-guide.md).  
 
 ## Usage
 
