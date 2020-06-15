@@ -28,7 +28,7 @@ fun main() {
     withSpark {
         spark
                 .read()
-                .textFile(this::class.java.classLoader.getResource("voina-i-mir.txt")?.path)
+                .textFile(this::class.java.classLoader.getResource("the-catcher-in-the-rye.txt")?.path)
                 .map { it.split(Regex("\\s")) }
                 .flatten()
                 .cleanup()
@@ -44,4 +44,5 @@ fun main() {
 fun Dataset<String>.cleanup() =
         filter { it.isNotBlank() }
                 .map { it.trim(',', ' ', '\n', ':', '.', ';', '?', '!', '"', '\'', '\t', '　') }
+                .filter { !it.endsWith("n’t") }
                 .filter { it.length >= MEANINGFUL_WORD_LENGTH }

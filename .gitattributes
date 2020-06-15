@@ -1,2 +1,1 @@
 kotlin-spark-api/src/main/kotlin/org/jetbrains/spark/api/VarArities.kt linguist-generated
-examples/src/main/resources/voina-i-mir.txt filter=lfs diff=lfs merge=lfs -text
