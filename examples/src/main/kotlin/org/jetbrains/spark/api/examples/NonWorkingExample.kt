@@ -23,9 +23,11 @@ import org.jetbrains.spark.api.*
 
 /**
  * Currently doesn't work because of [[https://issues.apache.org/jira/browse/SPARK-31854]]
+ * But works with `spark.sql.codegen.wholeStage` turned off.
+ * Fixed in 2.4.7 and 3.0.0-preview3
  */
 fun main() {
-    withSpark(props = mapOf("spark.sql.codegen.wholeStage" to true)) {
+    withSpark(props = mapOf("spark.sql.codegen.wholeStage" to false)) {
         dsOf(1, null, 2)
                 .map { c(it) }
                 .show()

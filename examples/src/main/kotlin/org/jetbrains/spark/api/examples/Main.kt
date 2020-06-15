@@ -42,7 +42,7 @@ object Main {
 
 
         val pairs = spark
-                .toDS(listOf(2 to "ад", 4 to "луна", 6 to "ягодка"))
+                .toDS(listOf(2 to "hell", 4 to "moon", 6 to "berry"))
 
         triples
                 .leftJoin(pairs, triples.col("first").multiply(2).eq(pairs.col("first")))
