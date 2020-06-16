@@ -8,8 +8,7 @@ Prerequisites:
 - You need to have Java installed and have the JAVA_HOME environment variable pointing to the Java installation.
 - You need to have Apache Spark installed and have SPARK_HOME environment variable pointing to the Spark installation. 
 We recommend using Apache Spark 3.0.0-preview2 version. You can download it from the [Spark official website](https://spark.apache.org/downloads.html).
-
-Note: You can use Apache Spark 2.4.5, but we haven't tested Kotlin Spark API with it.   
+   
 
 ## Self-contained application
 
