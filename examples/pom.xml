@@ -7,7 +7,7 @@
     <parent>
         <artifactId>kotlin-spark-api-parent</artifactId>
         <groupId>org.jetbrains.kotlin.spark</groupId>
-        <version>0.1.0</version>
+        <version>0.2.0</version>
     </parent>
 
     <groupId>org.jetbrains.kotlin.spark.examples</groupId>
@@ -32,7 +32,6 @@
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.12</artifactId>
-            <version>3.0.0-preview2</version>
         </dependency>
 
     </dependencies>

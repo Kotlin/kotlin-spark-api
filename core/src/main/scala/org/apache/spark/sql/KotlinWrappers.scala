@@ -19,7 +19,9 @@
  */
 package org.apache.spark.sql
 
+import org.apache.spark.sql.catalyst.analysis.Resolver
 import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression}
+import org.apache.spark.sql.catalyst.util.StringUtils
 import org.apache.spark.sql.types.{DataType, Metadata, StructField, StructType}
 
 
@@ -68,9 +70,9 @@ class KDataTypeWrapper(val dt: StructType
 
   override private[sql] def getFieldIndex(name: String) = dt.getFieldIndex(name)
 
-  override private[sql] def findNestedField(fieldNames: Seq[String], includeCollections: Boolean) = dt.findNestedField(fieldNames, includeCollections)
+  override private[sql] def findNestedField(fieldNames: Seq[String], includeCollections: Boolean, resolver: Resolver) = dt.findNestedField(fieldNames, includeCollections, resolver)
 
-  override private[sql] def buildFormattedString(prefix: String, builder: StringBuilder): Unit = dt.buildFormattedString(prefix, builder)
+  override private[sql] def buildFormattedString(prefix: String, stringConcat: StringUtils.StringConcat, maxDepth: Int): Unit = dt.buildFormattedString(prefix, stringConcat, maxDepth)
 
   override protected[sql] def toAttributes: Seq[AttributeReference] = dt.toAttributes
 

@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jetbrains.kotlin.spark</groupId>
     <artifactId>kotlin-spark-api-parent</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
     <name>kotlin-spark-api-parent</name>
     <url>http://maven.apache.org</url>
     <packaging>pom</packaging>
@@ -13,6 +13,15 @@
         <module>examples</module>
         <module>core</module>
     </modules>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-sql_2.12</artifactId>
+                <version>3.0.0</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <build>
         <pluginManagement>
             <plugins>
