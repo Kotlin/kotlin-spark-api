@@ -1,13 +1,13 @@
 # Quick Start Guide
 
 This tutorial provides instructions to help you get started with Kotlin Spark API. We use an example similar to the official [Apache Spark 
-Quick Start Guide](https://spark.apache.org/docs/3.0.0-preview2/quick-start.html#self-contained-applications). 
+Quick Start Guide](https://spark.apache.org/docs/3.0.0/quick-start.html#self-contained-applications). 
 You'll learn what you need to set up your environment, how to write, package and execute a simple self-contained application.
  
 Prerequisites:
 - You need to have Java installed and have the JAVA_HOME environment variable pointing to the Java installation.
 - You need to have Apache Spark installed and have SPARK_HOME environment variable pointing to the Spark installation. 
-We recommend using Apache Spark 3.0.0-preview2 version. You can download it from the [Spark official website](https://spark.apache.org/downloads.html).
+We recommend using Apache Spark 3.0.0 version. You can download it from the [Spark official website](https://spark.apache.org/downloads.html).
    
 
 ## Self-contained application
@@ -80,12 +80,12 @@ Here's what the `pom.xml` looks like for this example:
         <dependency> <!-- Kotlin Spark API dependency -->
             <groupId>com.github.JetBrains.kotlin-spark-api</groupId>
             <artifactId>kotlin-spark-api</artifactId>
-            <version>0.1.0</version>
+            <version>0.2.0</version>
         </dependency>
         <dependency> <!-- Spark dependency -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.12</artifactId>
-            <version>3.0.0-preview2</version>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
 
@@ -171,9 +171,9 @@ dependencies {
   // Kotlin stdlib
   implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.3.72'
   // Kotlin Spark API
-  implementation 'com.github.JetBrains.kotlin-spark-api:kotlin-spark-api:0.1.0'
+  implementation 'com.github.JetBrains.kotlin-spark-api:kotlin-spark-api:0.2.0'
   // Apache Spark
-  compileOnly 'org.apache.spark:spark-sql_2.12:3.0.0-preview2'
+  compileOnly 'org.apache.spark:spark-sql_2.12:3.0.0'
 }
 
 compileKotlin {
