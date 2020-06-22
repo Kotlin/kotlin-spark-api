@@ -21,6 +21,7 @@
 
 package org.jetbrains.spark.api
 
+import org.apache.spark.SparkContext
 import org.apache.spark.api.java.function.*
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
@@ -140,6 +141,9 @@ inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(
  * It's hard to call `Dataset.debugCodegen` from kotlin, so here is utility for that
  */
 fun <T> Dataset<T>.debugCodegen() = also { KSparkExtensions.debugCodegen(it) }
+
+val SparkSession.sparkContext
+    get() = KSparkExtensions.sparkContext(this)
 
 /**
  * It's hard to call `Dataset.debug` from kotlin, so here is utility for that

@@ -19,6 +19,7 @@
  */
 package org.jetbrains.spark.extensions
 
+import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 
 object KSparkExtensions {
@@ -37,4 +38,6 @@ object KSparkExtensions {
     import org.apache.spark.sql.execution.debug._
     df.debug()
   }
+
+  def sparkContext(s:SparkSession): SparkContext = s.sparkContext
 }
