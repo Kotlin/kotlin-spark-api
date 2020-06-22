@@ -52,7 +52,7 @@
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-assertions-core-jvm</artifactId>
-            <version>4.0.6</version>
+            <version>4.0.7</version>
             <scope>test</scope>
         </dependency>
         <dependency>
