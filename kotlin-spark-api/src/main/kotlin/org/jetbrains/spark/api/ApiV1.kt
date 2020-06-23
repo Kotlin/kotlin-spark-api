@@ -21,6 +21,7 @@
 
 package org.jetbrains.spark.api
 
+import org.apache.spark.SparkContext
 import org.apache.spark.api.java.function.*
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
@@ -296,6 +297,12 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KDataTypeWrapper(structType, klass.java, true)
         }
     }
+}
+
+fun SparkContext.setLogLevel(level: SparkLogLevel) = setLogLevel(level.name)
+
+enum class SparkLogLevel {
+    ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
 }
 
 private val knownDataTypes = mapOf(

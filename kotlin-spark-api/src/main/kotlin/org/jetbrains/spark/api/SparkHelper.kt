@@ -20,6 +20,7 @@
 package org.jetbrains.spark.api
 
 import org.apache.spark.sql.SparkSession
+import org.jetbrains.spark.api.SparkLogLevel.ERROR
 
 /**
  * Wrapper for spark creation which allows to set different spark params
@@ -29,7 +30,8 @@ import org.apache.spark.sql.SparkSession
  * @param appName [SparkSession.Builder.appName]
  * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
  */
-inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Kotlin Spark Sample", func: KSparkSession.() -> Unit) {
+@JvmOverloads
+inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Kotlin Spark Sample", logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
     SparkSession
             .builder()
             .master(master)
@@ -46,7 +48,12 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
                 }
             }
             .orCreate
-            .apply { KSparkSession(this).apply(func) }
+            .apply {
+                KSparkSession(this).apply {
+                    sparkContext.setLogLevel(logLevel)
+                    func()
+                }
+            }
             .also { it.stop() }
 }
 
