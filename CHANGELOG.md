@@ -1,6 +1,6 @@
 # Changelog
 
-## n0.2.3 (23/06/2020)
+## 0.2.3 (23/06/2020)
 - [Updates version to 0.2.3](https://github.com/JetBrains/kotlin-spark-api/commit/91ee4faf392792642be5a8c58800b343df02da5b) - @asm0dey
 - [Fixes #21](https://github.com/JetBrains/kotlin-spark-api/commit/e8c1c5973087b3dd3f755d9d408893d3d2f19c94) - @asm0dey
 - [Updates kotest to 4.1.0 and moves it to property](https://github.com/JetBrains/kotlin-spark-api/commit/c26ad2e514421c4a1e8eaa10a76c035d8c0a0f11) - @asm0dey
