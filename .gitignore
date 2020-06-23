@@ -371,3 +371,5 @@ gradle-app.setting
 
 csvpath/
 orcpath/
+
+.env
