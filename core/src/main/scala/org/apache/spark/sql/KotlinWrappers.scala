@@ -178,6 +178,36 @@ case class KSimpleTypeWrapper(dt: DataType, cls: Class[_], nullable: Boolean) ex
   override private[spark] def asNullable = dt.asNullable
 }
 
+class KStructField(val getterName: String, val delegate: StructField) extends StructField {
+  override private[sql] def buildFormattedString(prefix: String, stringConcat: StringUtils.StringConcat, maxDepth: Int): Unit = delegate.buildFormattedString(prefix, stringConcat, maxDepth)
+
+  override def toString(): String = delegate.toString()
+
+  override private[sql] def jsonValue = delegate.jsonValue
+
+  override def withComment(comment: String): StructField = delegate.withComment(comment)
+
+  override def getComment(): Option[String] = delegate.getComment()
+
+  override def toDDL: String = delegate.toDDL
+
+  override def productElement(n: Int): Any = delegate.productElement(n)
+
+  override def productArity: Int = delegate.productArity
+
+  override def productIterator: Iterator[Any] = delegate.productIterator
+
+  override def productPrefix: String = delegate.productPrefix
+
+  override val dataType: DataType = delegate.dataType
+
+  override def canEqual(that: Any): Boolean = delegate.canEqual(that)
+
+  override val metadata: Metadata = delegate.metadata
+  override val name: String = delegate.name
+  override val nullable: Boolean = delegate.nullable
+}
+
 object helpme {
 
   def listToSeq(i: java.util.List[_]): Seq[_] = Seq(i.toArray: _*)

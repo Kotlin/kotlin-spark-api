@@ -21,7 +21,6 @@
 
 package org.jetbrains.spark.api
 
-import org.apache.spark.SparkContext
 import org.apache.spark.api.java.function.*
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
@@ -29,6 +28,7 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.types.*
 import org.jetbrains.spark.extensions.KSparkExtensions
 import scala.reflect.ClassTag
+import java.beans.PropertyDescriptor
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
@@ -281,20 +281,20 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     mapValueParam.isMarkedNullable
             )
         }
-        else -> KDataTypeWrapper(
-                StructType(
-                        klass
-                                .declaredMemberProperties
-                                .filter { it.findAnnotation<Transient>() == null }
-                                .map {
-                                    val projectedType = types[it.returnType.toString()] ?: it.returnType
-                                    StructField(it.name, schema(projectedType, types), projectedType.isMarkedNullable, Metadata.empty())
-                                }
-                                .toTypedArray()
-                ),
-                klass.java,
-                true
-        )
+        else -> {
+            val structType = StructType(
+                    klass
+                            .declaredMemberProperties
+                            .filter { it.findAnnotation<Transient>() == null }
+                            .map {
+                                val projectedType = types[it.returnType.toString()] ?: it.returnType
+                                val propertyDescriptor = PropertyDescriptor(it.name, klass.java, "is" + it.name.capitalize(), null)
+                                KStructField(propertyDescriptor.readMethod.name, StructField(it.name, schema(projectedType, types), projectedType.isMarkedNullable, Metadata.empty()))
+                            }
+                            .toTypedArray()
+            )
+            KDataTypeWrapper(structType, klass.java, true)
+        }
     }
 }
 

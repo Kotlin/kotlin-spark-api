@@ -653,10 +653,11 @@ object KotlinReflection extends KotlinReflection {
             val cls = dataType.cls
             val properties = getJavaBeanReadableProperties(cls)
             val fields = properties.map { prop =>
-              val fieldName = prop.getName
-              val maybeField = dataType.dt.fields.find(it => it.name == fieldName)
+
+              val maybeField = dataType.dt.fields.map(_.asInstanceOf[KStructField]).find(it => it.getterName == prop.getReadMethod.getName)
               if (maybeField.isEmpty)
-                throw new IllegalArgumentException(s"Field $fieldName is not found among available fields, which are: ${dataType.dt.fields.map(_.name).mkString(", ")}")
+                throw new IllegalArgumentException(s"Field ${prop.getName} is not found among available fields, which are: ${dataType.dt.fields.map(_.name).mkString(", ")}")
+              val fieldName = maybeField.get.name
               val propClass = maybeField.map(it => it.dataType.asInstanceOf[DataTypeWithClass].cls).get
               val propDt = maybeField.map(it => it.dataType.asInstanceOf[DataTypeWithClass]).get
 
