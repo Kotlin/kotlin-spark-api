@@ -299,6 +299,8 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     }
 }
 
+typealias SparkSession = org.apache.spark.sql.SparkSession
+
 fun SparkContext.setLogLevel(level: SparkLogLevel) = setLogLevel(level.name)
 
 enum class SparkLogLevel {

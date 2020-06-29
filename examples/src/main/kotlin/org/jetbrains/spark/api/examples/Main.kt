@@ -20,7 +20,6 @@
 package org.jetbrains.spark.api.examples
 
 import org.apache.spark.api.java.function.ReduceFunction
-import org.apache.spark.sql.SparkSession
 import org.jetbrains.spark.api.*
 
 data class Q<T>(val id: Int, val text: T)
