@@ -123,6 +123,10 @@ withSpark {
 
 Here we're showing cached `Dataset` for debugging purposes then filtering it. The `filter` method returns filtered `Dataset` and then the cached `Dataset` is being unpersisted, so we have more memory to call the `map` method and collect the resulting `Dataset`.
 
+### `toList` and `toArray`
+
+Kotlin uses `to` method on sequences to convert them to collections, so we have `toList` and `toArray` methods in our API for your code to look idiomatic. Usual `collect` method works too, but result should be casted to `Array` because `collect` returns Scala's array, which is not the same as Java/Kotlin one.
+
 ## Examples
 
 For more, check out [examples](https://github.com/JetBrains/kotlin-spark-api/tree/master/examples/src/main/kotlin/org/jetbrains/spark/api/examples) module.
