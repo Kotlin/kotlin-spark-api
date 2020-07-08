@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.0 (08/07/2020)
+- [Version bump to 0.3.0](https://github.com/JetBrains/kotlin-spark-api/commit/0d5bcf57575d8906a219b4143a67df8939c46b0c) - @asm0dey
+- [Inproves README — adds information on collection of data from Dataset](https://github.com/JetBrains/kotlin-spark-api/commit/d81b98622ac816c9224f980d92407249333cf6d0) - @asm0dey
+- [Fixes #27](https://github.com/JetBrains/kotlin-spark-api/commit/5c05b6f02e30289535fe5f2d45dc99ede3c1eff3) - @asm0dey
+- [Fixes #26](https://github.com/JetBrains/kotlin-spark-api/commit/ffdb41d418b53e9336b73d51f3e5237d09c06ef2) - @asm0dey
+- [Bump maven-site-plugin from 3.9.0 to 3.9.1](https://github.com/JetBrains/kotlin-spark-api/commit/ee5a4ea1512d756e19549bc50f5c73ecf61108d2) - @dependabot[bot]
+- [Create CODE_OF_CONDUCT.md](https://github.com/JetBrains/kotlin-spark-api/commit/96dcfbbf8882de0e8446db3c4485e9febccaf8c5) - @asm0dey
+- [Fixes changelog](https://github.com/JetBrains/kotlin-spark-api/commit/1121550089cbec91b8ac915260a9d3593bb0138b) - @asm0dey
+
+---
+
 ## 0.2.3 (23/06/2020)
 - [Updates version to 0.2.3](https://github.com/JetBrains/kotlin-spark-api/commit/91ee4faf392792642be5a8c58800b343df02da5b) - @asm0dey
 - [Fixes #21](https://github.com/JetBrains/kotlin-spark-api/commit/e8c1c5973087b3dd3f755d9d408893d3d2f19c94) - @asm0dey
