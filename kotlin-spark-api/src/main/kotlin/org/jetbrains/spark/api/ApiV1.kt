@@ -135,6 +135,8 @@ inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduc
                 .map { t -> t._1 to t._2 }
 
 inline fun <T, reified R> Dataset<T>.downcast(): Dataset<R> = `as`(encoder<R>())
+inline fun <reified R> Dataset<*>.`as`(): Dataset<R> = `as`(encoder<R>())
+inline fun <reified R> Dataset<*>.to(): Dataset<R> = `as`(encoder<R>())
 
 inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
 
@@ -244,6 +246,9 @@ inline fun <reified T, R> Dataset<T>.withCached(blockingUnpersist: Boolean = fal
     val cached = this.cache()
     return cached.executeOnCached().also { cached.unpersist(blockingUnpersist) }
 }
+
+inline fun <reified T> Dataset<Row>.toList() = KSparkExtensions.collectAsList(to<T>())
+inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Array<R>
 
 /**
  * Alternative to [Dataset.show] which returns surce dataset.

@@ -19,7 +19,6 @@
  */
 package org.jetbrains.spark.api
 
-import org.apache.spark.sql.SparkSession
 import org.jetbrains.spark.api.SparkLogLevel.ERROR
 
 /**

@@ -19,8 +19,12 @@
  */
 package org.jetbrains.spark.extensions
 
+import java.util
+
 import org.apache.spark.SparkContext
 import org.apache.spark.sql._
+
+import scala.collection.JavaConverters
 
 object KSparkExtensions {
   def col(d: Dataset[_], name: String): Column = d.col(name)
@@ -28,6 +32,9 @@ object KSparkExtensions {
   def col(name: String): Column = functions.col(name)
 
   def lit(literal: Any): Column = functions.lit(literal)
+
+  def collectAsList[T](ds: Dataset[T]): util.List[T] = JavaConverters.seqAsJavaList(ds.collect())
+
 
   def debugCodegen(df: Dataset[_]): Unit = {
     import org.apache.spark.sql.execution.debug._
@@ -39,5 +46,5 @@ object KSparkExtensions {
     df.debug()
   }
 
-  def sparkContext(s:SparkSession): SparkContext = s.sparkContext
+  def sparkContext(s: SparkSession): SparkContext = s.sparkContext
 }
