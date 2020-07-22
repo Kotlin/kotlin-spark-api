@@ -1,7 +1,7 @@
-# Kotlin Spark API
+# Kotlin for Apache Spark
 
 
-Your next API to work with  [Spark](https://spark.apache.org/).
+Your next API to work with  [Apache Spark](https://spark.apache.org/).
 
 We are looking to have this as a part of https://github.com/apache/spark repository. Consider this beta-quality software.
 
