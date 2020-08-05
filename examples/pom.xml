@@ -7,7 +7,7 @@
     <parent>
         <artifactId>kotlin-spark-api-parent</artifactId>
         <groupId>org.jetbrains.kotlin.spark</groupId>
-        <version>0.3.0</version>
+        <version>0.3.1</version>
     </parent>
 
     <groupId>org.jetbrains.kotlin.spark.examples</groupId>
