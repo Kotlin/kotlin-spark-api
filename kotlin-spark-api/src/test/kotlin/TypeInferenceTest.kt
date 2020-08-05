@@ -17,6 +17,12 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+import ch.tutteli.atrium.api.fluent.en_GB.contains
+import ch.tutteli.atrium.api.fluent.en_GB.inOrder
+import ch.tutteli.atrium.api.fluent.en_GB.only
+import ch.tutteli.atrium.api.fluent.en_GB.values
+import ch.tutteli.atrium.domain.builders.migration.asExpect
+import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.inspectors.forOne
 import io.kotest.matchers.*
@@ -34,7 +40,7 @@ import kotlin.reflect.typeOf
 
 
 @OptIn(ExperimentalStdlibApi::class)
-class ApiV1KtTest : ShouldSpec({
+class TypeInferenceTest : ShouldSpec({
     context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema") {
         data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
@@ -240,6 +246,15 @@ class ApiV1KtTest : ShouldSpec({
             struct.containsNull shouldBe true
             val elType = (struct.elementType as SimpleElement)
             elType.value shouldBe "integer"
+        }
+    }
+    context("data class with props in order lon → lat") {
+        data class Test(val lon: Double, val lat: Double)
+
+        val schema = schema(typeOf<Test>())
+        val struct = Struct.fromJson(schema.prettyJson())!!
+        should("Not change order of fields") {
+            expect(struct.fields!!.map { it.name }).asExpect().contains.inOrder.only.values("lon", "lat")
         }
     }
 })
