@@ -320,7 +320,9 @@ private val knownDataTypes = mapOf(
         Boolean::class to DataTypes.BooleanType,
         Float::class to DataTypes.FloatType,
         Double::class to DataTypes.DoubleType,
-        String::class to DataTypes.StringType
+        String::class to DataTypes.StringType,
+        LocalDate::class to `DateType$`.`MODULE$`,
+        Instant::class to `TimestampType$`.`MODULE$`
 )
 
 private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {

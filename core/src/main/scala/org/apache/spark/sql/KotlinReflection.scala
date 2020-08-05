@@ -213,24 +213,42 @@ object KotlinReflection extends KotlinReflection {
       case t if isSubtype(t, localTypeOf[java.lang.Long]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Long])
+      case t if isSubtype(t, localTypeOf[Long]) =>
+        createDeserializerForTypesSupportValueOf(path,
+          classOf[java.lang.Long])
 
       case t if isSubtype(t, localTypeOf[java.lang.Double]) =>
+        createDeserializerForTypesSupportValueOf(path,
+          classOf[java.lang.Double])
+      case t if isSubtype(t, localTypeOf[Double]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Double])
 
       case t if isSubtype(t, localTypeOf[java.lang.Float]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Float])
+      case t if isSubtype(t, localTypeOf[Float]) =>
+        createDeserializerForTypesSupportValueOf(path,
+          classOf[java.lang.Float])
 
       case t if isSubtype(t, localTypeOf[java.lang.Short]) =>
+        createDeserializerForTypesSupportValueOf(path,
+          classOf[java.lang.Short])
+      case t if isSubtype(t, localTypeOf[Short]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Short])
 
       case t if isSubtype(t, localTypeOf[java.lang.Byte]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Byte])
+      case t if isSubtype(t, localTypeOf[Byte]) =>
+        createDeserializerForTypesSupportValueOf(path,
+          classOf[java.lang.Byte])
 
       case t if isSubtype(t, localTypeOf[java.lang.Boolean]) =>
+        createDeserializerForTypesSupportValueOf(path,
+          classOf[java.lang.Boolean])
+      case t if isSubtype(t, localTypeOf[Boolean]) =>
         createDeserializerForTypesSupportValueOf(path,
           classOf[java.lang.Boolean])
 
@@ -600,13 +618,17 @@ object KotlinReflection extends KotlinReflection {
       case t if isSubtype(t, localTypeOf[Int]) =>
         createSerializerForInteger(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Long]) => createSerializerForLong(inputObject)
-      case t if isSubtype(t, localTypeOf[java.lang.Double]) =>
-        createSerializerForDouble(inputObject)
+      case t if isSubtype(t, localTypeOf[Long]) => createSerializerForLong(inputObject)
+      case t if isSubtype(t, localTypeOf[java.lang.Double]) => createSerializerForDouble(inputObject)
+      case t if isSubtype(t, localTypeOf[Double]) => createSerializerForDouble(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Float]) => createSerializerForFloat(inputObject)
+      case t if isSubtype(t, localTypeOf[Float]) => createSerializerForFloat(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Short]) => createSerializerForShort(inputObject)
+      case t if isSubtype(t, localTypeOf[Short]) => createSerializerForShort(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Byte]) => createSerializerForByte(inputObject)
-      case t if isSubtype(t, localTypeOf[java.lang.Boolean]) =>
-        createSerializerForBoolean(inputObject)
+      case t if isSubtype(t, localTypeOf[Byte]) => createSerializerForByte(inputObject)
+      case t if isSubtype(t, localTypeOf[java.lang.Boolean]) => createSerializerForBoolean(inputObject)
+      case t if isSubtype(t, localTypeOf[Boolean]) => createSerializerForBoolean(inputObject)
 
       case t if t.typeSymbol.annotations.exists(_.tree.tpe =:= typeOf[SQLUserDefinedType]) =>
         val udt = getClassFromType(t)
