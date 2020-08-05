@@ -33,12 +33,15 @@ import java.beans.PropertyDescriptor
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
+import java.time.Instant
+import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.declaredMemberProperties
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.typeOf
 
 @JvmField
@@ -287,20 +290,22 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     mapValueParam.isMarkedNullable
             )
         }
-        else -> {
+        klass.isData -> {
             val structType = StructType(
                     klass
-                            .declaredMemberProperties
+                            .primaryConstructor!!
+                            .parameters
                             .filter { it.findAnnotation<Transient>() == null }
                             .map {
-                                val projectedType = types[it.returnType.toString()] ?: it.returnType
-                                val propertyDescriptor = PropertyDescriptor(it.name, klass.java, "is" + it.name.capitalize(), null)
+                                val projectedType = types[it.type.toString()] ?: it.type
+                                val propertyDescriptor = PropertyDescriptor(it.name, klass.java, "is" + it.name?.capitalize(), null)
                                 KStructField(propertyDescriptor.readMethod.name, StructField(it.name, schema(projectedType, types), projectedType.isMarkedNullable, Metadata.empty()))
                             }
                             .toTypedArray()
             )
             KDataTypeWrapper(structType, klass.java, true)
         }
+        else -> throw IllegalArgumentException("$type is unsupported")
     }
 }
 

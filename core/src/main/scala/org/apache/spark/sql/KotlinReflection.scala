@@ -674,23 +674,22 @@ object KotlinReflection extends KotlinReflection {
           case dataType: KDataTypeWrapper =>
             val cls = dataType.cls
             val properties = getJavaBeanReadableProperties(cls)
-            val fields = properties.map { prop =>
-
-              val maybeField = dataType.dt.fields.map(_.asInstanceOf[KStructField]).find(it => it.getterName == prop.getReadMethod.getName)
-              if (maybeField.isEmpty)
-                throw new IllegalArgumentException(s"Field ${prop.getName} is not found among available fields, which are: ${dataType.dt.fields.map(_.name).mkString(", ")}")
-              val fieldName = maybeField.get.name
-              val propClass = maybeField.map(it => it.dataType.asInstanceOf[DataTypeWithClass].cls).get
-              val propDt = maybeField.map(it => it.dataType.asInstanceOf[DataTypeWithClass]).get
-
+            val structFields = dataType.dt.fields.map(_.asInstanceOf[KStructField])
+            val fields = structFields.map { structField =>
+              val maybeProp = properties.find(it => it.getReadMethod.getName == structField.getterName)
+              if (maybeProp.isEmpty) throw new IllegalArgumentException(s"Field ${structField.name} is not found among available props, which are: ${properties.map(_.getName).mkString(", ")}")
+              val fieldName = structField.name
+              val propClass = structField.dataType.asInstanceOf[DataTypeWithClass].cls
+              val propDt = structField.dataType.asInstanceOf[DataTypeWithClass]
               val fieldValue = Invoke(
                 inputObject,
-                prop.getReadMethod.getName,
+                maybeProp.get.getReadMethod.getName,
                 inferExternalType(propClass),
                 returnNullable = propDt.nullable
               )
               val newPath = walkedTypePath.recordField(propClass.getName, fieldName)
               (fieldName, serializerFor(fieldValue, getType(propClass), newPath, seenTypeSet, if (propDt.isInstanceOf[ComplexWrapper]) Some(propDt) else None))
+
             }
             createSerializerForObject(inputObject, fields)
 
