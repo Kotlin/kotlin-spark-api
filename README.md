@@ -1,31 +1,52 @@
-# Kotlin for Apache Spark
+# Kotlin for Apache® Spark™
 
+Your next API to work with  [Apache Spark](https://spark.apache.org/). 
 
-Your next API to work with  [Apache Spark](https://spark.apache.org/).
+This project adds a missing layer of compatibility between [Kotlin](https://kotlinlang.org/) and [Apache Spark](https://spark.apache.org/).
+It allows Kotlin developers to use familiar language features such as data classes, and lambda expressions as simple expressions in curly braces or method references. 
 
-We are looking to have this as a part of https://github.com/apache/spark repository. Consider this beta-quality software.
+We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache Spark](http://issues.apache.org/jira/browse/SPARK-32530#) to work with the community towards getting Kotlin support as a first-class citizen in Apache Spark. We encourage you to voice your opinions and participate in the discussion.
 
-Nice-looking rendered [README](https://jetbrains.github.io/kotlin-spark-api/)
+## Table of Contents
 
-## Goal
+- [Supported versions of Apache Spark](#supported-apache-spark)
+- [Releases](#releases)
+- [How to configure Kotlin for Apache Spark in your project](#how-to-configure-kotlin-for-apache-spark-in-your-project)
+- [Kotlin for Apache Spark features](#kotlin-for-apache-spark-features)
+- [Examples](#examples)
+- [Reporting issues/Support](#reporting-issuessupport)
+- [Code of Conduct](#code-of-conduct)
+- [License](#license)
 
-This project adds a missing layer of compatibility between [Kotlin](https://kotlinlang.org/) and [Spark](https://spark.apache.org/).
+## Supported versions of Apache Spark
 
-Despite Kotlin having first-class compatibility API, Kotlin developers may want to use familiar features like data classes and lambda expressions as simple expressions in curly braces or method references.
+<table>
+    <thead>
+        <tr>
+            <th>Apache Spark</th>
+            <th>Kotlin for Apache Spark</th>
+        </tr>
+    </thead>
+    <tbody align="center">
+        <tr>
+            <td>3.0.0</td>
+            <td>0.3 +</td>
+        </tr>
+    </tbody>
+</table>
 
-## Non-goals
+## Releases
 
-There is no goal to replace any currently supported language or provide other APIs with some functionality to support Kotlin language.
+The list of Kotlin for Apache Spark releases is available [here](https://github.com/JetBrains/kotlin-spark-api/releases/). 
+The `kotlin-spark-api` artifact can be obtained from [JitPack](https://jitpack.io/#JetBrains/kotlin-spark-api).
 
-## Installation
+[![](https://jitpack.io/v/JetBrains/kotlin-spark-api.svg)](https://jitpack.io/#JetBrains/kotlin-spark-api)
 
-Currently, there are no kotlin-spark-api artifacts in maven central, but you can obtain a copy using JitPack here: [![](https://jitpack.io/v/JetBrains/kotlin-spark-api.svg)](https://jitpack.io/#JetBrains/kotlin-spark-api)
+## How to configure Kotlin for Apache Spark in your project
 
-There is support for `Maven`, `Gradle`, `SBT`, and `leinengen` on JitPack.
-
-This project does not force you to use any specific version of Spark, but it has only been tested it with spark `3.0.0`. 
-
-So if you're using Maven you'll have to add the following into your `pom.xml`:
+You can add Kotlin for Apache Spark as a dependency to your project: `Maven`, `Gradle`, `SBT`, and `leinengen` are supported.
+ 
+Here's an example `pom.xml`:
 
 ```xml
 <repositories>
@@ -46,19 +67,17 @@ So if you're using Maven you'll have to add the following into your `pom.xml`:
 </dependency>
 ```
 
-Note that `core` is being compiled against Scala version `2.12` and it means you have to use `2.12` build of spark if you want to try out this project. 
-You can find a complete example with `pom.xml` and `build.gradle` in the [Quick Start Guide](docs/quick-start-guide.md).  
+Note that `core` is being compiled against Scala version `2.12`.  
+You can find a complete example with `pom.xml` and `build.gradle` in the [Quick Start Guide](docs/quick-start-guide.md).
 
-## Usage
-
-First (and hopefully last) thing you need to do is to add following import to your Kotlin file:
-
+Once you have configured the dependency, you only need to add the following import to your Kotlin file: 
 ```kotlin
 import org.jetbrains.spark.api.*
-```
+```   
 
-Then you can create a SparkSession:
+## Kotlin for Apache Spark features
 
+### Creating a SparkSession in Kotlin
 ```kotlin
 val spark = SparkSession
         .builder()
@@ -67,20 +86,17 @@ val spark = SparkSession
 
 ```
 
-To create a Dataset you can call `toDS` method:
-
+### Creating a Dataset in Kotlin
 ```kotlin
 spark.toDS("a" to 1, "b" to 2)
 ```
-
-Indeed, this produces `Dataset<Pair<String, Int>>`. There are a couple more `toDS` methods which accept different arguments.
-
-Also, there are several aliases in API, like `leftJoin`, `rightJoin` etc. These are null-safe by design. For example, `leftJoin` is aware of nullability and returns `Dataset<Pair<LEFT, RIGHT?>>`.
-Note that we are forcing `RIGHT` to be nullable for you as a developer to be able to handle this situation.
-
-We know that `NullPointerException`s are hard to debug in Spark, and we are trying hard to make them as rare as possible.
-
-## Useful helper methods
+The example above produces `Dataset<Pair<String, Int>>`.
+ 
+### Null safety
+There are several aliases in API, like `leftJoin`, `rightJoin` etc. These are null-safe by design. 
+For example, `leftJoin` is aware of nullability and returns `Dataset<Pair<LEFT, RIGHT?>>`.
+Note that we are forcing `RIGHT` to be nullable for you as a developer to be able to handle this situation. 
+`NullPointerException`s are hard to debug in Spark, and we doing our best to make them as rare as possible.
 
 ### `withSpark`
 
@@ -98,14 +114,13 @@ withSpark {
 
 `dsOf` is just one more way to create `Dataset` (`Dataset<Int>`) from varargs.
 
-### `withCached`
-
+### `withCached` function
 It can easily happen that we need to fork our computation to several paths. To compute things only once we should call `cache`
-method. But there it is hard to control when we're using cached `Dataset` and when not.
-It is also easy to forget to unpersist cached data, which can break things unexpectably or take more memory
+method. However, it becomes difficult to control when we're using cached `Dataset` and when not.
+It is also easy to forget to unpersist cached data, which can break things unexpectedly or take up more memory
 than intended.
 
-To solve these problems we introduce `withCached` function
+To solve these problems we've added `withCached` function
 
 ```kotlin
 withSpark {
@@ -121,19 +136,29 @@ withSpark {
 }
 ```
 
-Here we're showing cached `Dataset` for debugging purposes then filtering it. The `filter` method returns filtered `Dataset` and then the cached `Dataset` is being unpersisted, so we have more memory to call the `map` method and collect the resulting `Dataset`.
+Here we're showing cached `Dataset` for debugging purposes then filtering it. 
+The `filter` method returns filtered `Dataset` and then the cached `Dataset` is being unpersisted, so we have more memory t
+o call the `map` method and collect the resulting `Dataset`.
 
 ### `toList` and `toArray`
 
-Kotlin uses `to` method on sequences to convert them to collections, so we have `toList` and `toArray` methods in our API for your code to look idiomatic. Usual `collect` method works too, but result should be casted to `Array` because `collect` returns Scala's array, which is not the same as Java/Kotlin one.
+Kotlin uses `to` methods on sequences to convert them to collections, so we've added `toList` and `toArray` methods in our API
+ for your code to look idiomatic. You can still use the `collect` method as in Scala API, however the result should be casted to `Array`.
+  This is because `collect` returns a Scala array, which is not the same as Java/Kotlin one.
 
 ## Examples
 
 For more, check out [examples](https://github.com/JetBrains/kotlin-spark-api/tree/master/examples/src/main/kotlin/org/jetbrains/spark/api/examples) module.
 To get up and running quickly, check out this [tutorial](docs/quick-start-guide.md). 
 
-## Issues and feedback
+## Reporting issues/Support
+Please use [GitHub issues](https://github.com/JetBrains/kotlin-spark-api/issues) for filing feature requests and bug reports.
+You are also welcome to join [kotlin-spark channel](https://kotlinlang.slack.com/archives/C015B9ZRGJF) in the Kotlin Slack.
 
-Issues and any feedback are very welcome in `Issues` here.
+## Code of Conduct
+This project and the corresponding community is governed by the [JetBrains Open Source and Community Code of Conduct](https://confluence.jetbrains.com/display/ALL/JetBrains+Open+Source+and+Community+Code+of+Conduct). Please make sure you read it. 
 
-If you find that we missed some important features — let us know!
+## License
+Kotlin for Apache Spark is licensed under the [Apache 2.0 License](LICENSE).
+
+
