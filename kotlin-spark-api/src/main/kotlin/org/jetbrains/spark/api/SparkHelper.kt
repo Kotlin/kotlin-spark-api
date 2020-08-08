@@ -19,6 +19,7 @@
  */
 package org.jetbrains.spark.api
 
+import org.apache.spark.sql.SparkSession.Builder
 import org.jetbrains.spark.api.SparkLogLevel.ERROR
 
 /**
@@ -31,7 +32,7 @@ import org.jetbrains.spark.api.SparkLogLevel.ERROR
  */
 @JvmOverloads
 inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Kotlin Spark Sample", logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
-    SparkSession
+    val builder = SparkSession
             .builder()
             .master(master)
             .appName(appName)
@@ -46,6 +47,13 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
                     }
                 }
             }
+    withSpark(builder, logLevel, func)
+
+}
+
+@JvmOverloads
+inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
+    builder
             .orCreate
             .apply {
                 KSparkSession(this).apply {
