@@ -1,4 +1,4 @@
-/*-
+package org.jetbrains.spark.api/*-
  * =LICENSE=
  * Kotlin Spark API
  * ----------
@@ -18,7 +18,6 @@
  * =LICENSEEND=
  */
 import io.kotest.core.spec.style.AnnotationSpec
-import org.jetbrains.spark.api.schema
 import kotlin.reflect.typeOf
 
 @OptIn(ExperimentalStdlibApi::class)

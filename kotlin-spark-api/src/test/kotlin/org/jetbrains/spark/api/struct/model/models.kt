@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-package struct.model
+package org.jetbrains.spark.api.struct.model
 
 import com.beust.klaxon.*
 

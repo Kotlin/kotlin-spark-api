@@ -1,4 +1,4 @@
-/*-
+package org.jetbrains.spark.api/*-
  * =LICENSE=
  * Kotlin Spark API
  * ----------
@@ -38,8 +38,14 @@ class ApiTest : ShouldSpec({
             should("contain all generic primitives with complex schema") {
                 val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
                 val primitives2 = c(2, 2.0, 2.toFloat(), 2.toByte(), LocalDate.now().plusDays(1), false)
-                val tuples: List<Arity6<Int, Double, Float, Byte, LocalDate, Boolean>> = dsOf(primitives, primitives2).toArray<Arity6<Int, Double, Float, Byte, LocalDate, Boolean>>().toList()
+                val tuples = dsOf(primitives, primitives2).collectAsList()
                 expect(tuples).asExpect().contains.inAnyOrder.only.values(primitives, primitives2)
+            }
+            should("contain all generic primitives with complex nullable schema") {
+                val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
+                val nulls = c(null, null, null, null, null, null)
+                val tuples = dsOf(primitives, nulls).collectAsList()
+                expect(tuples).asExpect().contains.inAnyOrder.only.values(primitives, nulls)
             }
             should("handle cached operations") {
                 val result = dsOf(1, 2, 3, 4, 5)

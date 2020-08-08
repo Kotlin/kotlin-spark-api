@@ -28,7 +28,7 @@ data class Right(val id: Int, val value: Int)
 
 
 fun main() {
-    withSpark {
+    withSpark(logLevel = SparkLogLevel.INFO) {
         val first = dsOf(Left(1, "a"), Left(2, "b"))
         val second = dsOf(Right(1, 100), Right(3, 300))
         first
