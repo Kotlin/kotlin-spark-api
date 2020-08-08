@@ -1,76 +1,37 @@
-# Contributor Covenant Code of Conduct
+# JetBrains Open Source and Community Code of Conduct
 
-## Our Pledge
+This code of conduct outlines our expectations for all those who participate in our open source projects and communities (community programs), as well as the consequences for unacceptable behaviour. We invite all those who participate to help us create safe and positive experiences for everyone. Communities mirror the societies in which they exist and positive action is essential to counteract the many forms of inequality and abuses of power that exist in society. 
 
-In the interest of fostering an open and welcoming environment, we as
-contributors and maintainers pledge to making participation in our project and
-our community a harassment-free experience for everyone, regardless of age, body
-size, disability, ethnicity, sex characteristics, gender identity and expression,
-level of experience, education, socio-economic status, nationality, personal
-appearance, race, religion, or sexual identity and orientation.
+## How to behave
 
-## Our Standards
+The following behaviours are expected and requested of all community members:
 
-Examples of behavior that contributes to creating a positive environment
-include:
+* Participate in an authentic and active way. In doing so, you contribute to the health and longevity of this community.
+* Exercise consideration, respect and empathy in your speech and actions. Remember, we have all been through different stages of learning when adopting technologies.
+* Refrain from demeaning, discriminatory, or harassing behaviour and speech.
+* Disagreements on things are fine, argumentative behaviour or trolling are not.
 
-* Using welcoming and inclusive language
-* Being respectful of differing viewpoints and experiences
-* Gracefully accepting constructive criticism
-* Focusing on what is best for the community
-* Showing empathy towards other community members
+## How not to behave
 
-Examples of unacceptable behavior by participants include:
+* Do not perform threats of violence or use violent language directed against another person.
+* Do not make jokes of sexist, racist, homophobic, transphobic, ableist or otherwise discriminatory nature, or use language of this nature.
+* Do not post or display sexually explicit or violent material.
+* Do not post or threaten to post other people’s personally identifying information ("doxing").
+* Do not make personal insults, particularly those related to gender, sexual orientation, race, religion, or disability.
+* Do not engage in sexual attention. This includes, sexualised comments or jokes and sexual advances.
+* Do not advocate for, or encourage, any of the above behaviour.
 
-* The use of sexualized language or imagery and unwelcome sexual attention or
- advances
-* Trolling, insulting/derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or electronic
- address, without explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
- professional setting
 
-## Our Responsibilities
+Please take into account that online communities bring together people from many different cultures and backgrounds. It's important to understand that sometimes the combination of cultural differences and online interaction can lead to misunderstandings. That is why having empathy is very important.
 
-Project maintainers are responsible for clarifying the standards of acceptable
-behavior and are expected to take appropriate and fair corrective action in
-response to any instances of unacceptable behavior.
+## How to report issues
 
-Project maintainers have the right and responsibility to remove, edit, or
-reject comments, commits, code, wiki edits, issues, and other contributions
-that are not aligned to this Code of Conduct, or to ban temporarily or
-permanently any contributor for other behaviors that they deem inappropriate,
-threatening, offensive, or harmful.
+If someone is acting inappropriately or violating this Code of Conduct in any shape or form, and they are not receptive to your feedback or you prefer not to confront them, please reach out to JetBrains via codeofconduct@jetbrains.com 
 
-## Scope
+## Consequences of Unacceptable Behaviour
 
-This Code of Conduct applies both within project spaces and in public spaces
-when an individual is representing the project or its community. Examples of
-representing a project or community include using an official project e-mail
-address, posting via an official social media account, or acting as an appointed
-representative at an online or offline event. Representation of a project may be
-further defined and clarified by project maintainers.
+Unacceptable behaviour from any community member will not be tolerated. Anyone asked to stop unacceptable behaviour is expected to comply immediately. If a community member engages in unacceptable behaviour, JetBrains and/or community organisers may take any action they deem appropriate, up to and including a temporary ban or permanent expulsion from the community without warning.
 
-## Enforcement
+## License and attribution
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at asm0dey@jetbrains.com. All
-complaints will be reviewed and investigated and will result in a response that
-is deemed necessary and appropriate to the circumstances. The project team is
-obligated to maintain confidentiality with regard to the reporter of an incident.
-Further details of specific enforcement policies may be posted separately.
-
-Project maintainers who do not follow or enforce the Code of Conduct in good
-faith may face temporary or permanent repercussions as determined by other
-members of the project's leadership.
-
-## Attribution
-
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
-available at https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
-
-[homepage]: https://www.contributor-covenant.org
-
-For answers to common questions about this code of conduct, see
-https://www.contributor-covenant.org/faq
+The license is based off of The Citizen Code of Conduct is distributed by [Stumptown Syndicate](http://stumptownsyndicate.org/) under a [Creative Commons Attribution-ShareAlike license](http://creativecommons.org/licenses/by-sa/3.0/).
