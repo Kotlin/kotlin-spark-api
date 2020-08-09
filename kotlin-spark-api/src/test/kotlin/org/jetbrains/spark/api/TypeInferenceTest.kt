@@ -33,7 +33,7 @@ import kotlin.reflect.typeOf
 
 
 @OptIn(ExperimentalStdlibApi::class)
-    class TypeInferenceTest : ShouldSpec({
+class TypeInferenceTest : ShouldSpec({
     context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema") {
         data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
         data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)

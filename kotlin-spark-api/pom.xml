@@ -36,7 +36,7 @@
     <dependency>
       <groupId>org.jetbrains.kotlin.spark</groupId>
       <artifactId>core</artifactId>
-      <version>${parent.version}</version>
+      <version>${project.parent.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
@@ -129,7 +129,6 @@
         <configuration>
           <jdkVersion>8</jdkVersion>
         </configuration>
-        <dependencies></dependencies>
         <executions>
           <execution>
             <goals>
