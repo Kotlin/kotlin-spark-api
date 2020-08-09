@@ -21,19 +21,16 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
-import org.jetbrains.spark.api.*
 import java.time.LocalDate
 
 class ApiTest : ShouldSpec({
     context("integration tests") {
         withSpark {
             should("collect data classes with doubles correctly") {
-
                 val ll1 = LonLat(1.0, 2.0)
                 val ll2 = LonLat(3.0, 4.0)
                 val lonlats = dsOf(ll1, ll2).collectAsList()
-                expect(lonlats).asExpect().contains.inAnyOrder.only.values(ll1, ll2)
-
+                expect(lonlats).asExpect().contains.inAnyOrder.only.values(ll1.copy(), ll2.copy())
             }
             should("contain all generic primitives with complex schema") {
                 val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
@@ -51,9 +48,11 @@ class ApiTest : ShouldSpec({
                 val result = dsOf(1, 2, 3, 4, 5)
                         .map { it to (it + 2) }
                         .withCached {
-                            showDS()
+                            expect(collectAsList()).asExpect().contains.inAnyOrder.only.values(1 to 3, 2 to 4, 3 to 5, 4 to 6, 5 to 7)
 
-                            filter { it.first % 2 == 0 }.showDS()
+                            val next = filter { it.first % 2 == 0 }
+                            expect(next.collectAsList()).asExpect().contains.inAnyOrder.only.values(2 to 4, 4 to 6)
+                            next
                         }
                         .map { c(it.first, it.second, (it.first + it.second) * 2) }
                         .collectAsList()

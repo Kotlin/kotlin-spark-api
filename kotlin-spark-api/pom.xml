@@ -51,13 +51,13 @@
     </dependency>
     <dependency>
       <groupId>io.kotest</groupId>
-      <artifactId>kotest-assertions-core-jvm</artifactId>
+      <artifactId>kotest-runner-console-jvm</artifactId>
       <version>${kotest.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>io.kotest</groupId>
-      <artifactId>kotest-runner-console-jvm</artifactId>
+      <artifactId>kotest-extensions-allure-jvm</artifactId>
       <version>${kotest.version}</version>
       <scope>test</scope>
     </dependency>
@@ -125,15 +125,27 @@
       <plugin>
         <groupId>org.jetbrains.dokka</groupId>
         <artifactId>dokka-maven-plugin</artifactId>
-        <version>${dokka.version}</version>
+        <version>1.4.0-rc</version>
+        <configuration>
+          <jdkVersion>8</jdkVersion>
+        </configuration>
+        <dependencies></dependencies>
         <executions>
           <execution>
             <goals>
-              <goal>dokka</goal>
+              <goal>javadocJar</goal>
             </goals>
             <phase>pre-site</phase>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-maven</artifactId>
+        <version>2.10.0</version>
+        <configuration>
+          <resultsDirectory>${project.basedir}/allure-results</resultsDirectory>
+        </configuration>
       </plugin>
     </plugins>
   </build>

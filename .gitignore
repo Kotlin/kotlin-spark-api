@@ -182,6 +182,7 @@ hs_err_pid*
 ### Maven ###
 target/
 pom.xml.tag
+pom.xml.bak
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
@@ -373,3 +374,5 @@ csvpath/
 orcpath/
 
 .env
+/kotlin-spark-api/.allure/
+/kotlin-spark-api/allure-results/
