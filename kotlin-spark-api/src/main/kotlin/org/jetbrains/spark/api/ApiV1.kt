@@ -79,7 +79,7 @@ inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
         spark.createDataset(this, encoder<T>())
 
 /**
- * Main method of API, which gives you seamless integraion with Spark:
+ * Main method of API, which gives you seamless integration with Spark:
  * It creates encoder for any given supported type T
  *
  * Supported types are data classes, primitives, and Lists, Maps and Arrays containing them
@@ -220,7 +220,7 @@ inline fun <reified L : Any?, reified R : Any?> Dataset<L>.fullJoin(right: Datas
 }
 
 /**
- * Alias for [Dataset.sort] which forces user to provide sortedcolumns from source dataset
+ * Alias for [Dataset.sort] which forces user to provide sorted columns from the source dataset
  *
  * @receiver source [Dataset]
  * @param columns producer of sort columns
@@ -232,7 +232,7 @@ inline fun <reified T> Dataset<T>.sort(columns: (Dataset<T>) -> Array<Column>) =
  * This function creates block, where one can call any further computations on already cached dataset
  * Data will be unpersisted automatically at the end of computation
  *
- * it may be useful in many situatiions, for example when one needs to write data to several targets
+ * it may be useful in many situations, for example, when one needs to write data to several targets
  * ```kotlin
  * ds.withCached {
  *   write()
@@ -241,7 +241,7 @@ inline fun <reified T> Dataset<T>.sort(columns: (Dataset<T>) -> Array<Column>) =
  * }
  * ```
  *
- * @param blockingUnpersist if execution should be blocked until everyting persisted will be deleted
+ * @param blockingUnpersist if execution should be blocked until everything persisted will be deleted
  * @param executeOnCached Block which should be executed on cached dataset.
  * @return result of block execution for further usage. It may be anything including source or new dataset
  */
@@ -254,8 +254,8 @@ inline fun <reified T> Dataset<Row>.toList() = KSparkExtensions.collectAsList(to
 inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Array<R>
 
 /**
- * Alternative to [Dataset.show] which returns surce dataset.
- * Useful in debug purposes when you need to view contant of dataset as intermediate operation
+ * Alternative to [Dataset.show] which returns source dataset.
+ * Useful for debug purposes when you need to view content of a dataset as an intermediate operation
  */
 fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply { show(numRows, truncate) }
 

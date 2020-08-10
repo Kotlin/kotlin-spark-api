@@ -113,8 +113,8 @@ withSpark {
 ### `withCached`
 
 It can easily happen that we need to fork our computation to several paths. To compute things only once we should call `cache`
-method. But there it is hard to control when we're using cached `Dataset` and when not.
-It is also easy to forget to unpersist cached data, which can break things unexpectably or take more memory
+method. However, it becomes hard to control when we're using cached `Dataset` and when not.
+It is also easy to forget to unpersist cached data, which can break things unexpectedly or take more memory
 than intended.
 
 To solve these problems we introduce `withCached` function
