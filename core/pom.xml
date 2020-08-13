@@ -41,6 +41,7 @@
         <version>4.4.0</version>
         <executions>
           <execution>
+            <id>compile</id>
             <goals>
               <goal>compile</goal>
               <goal>testCompile</goal>
@@ -51,6 +52,13 @@
                 <arg>${project.build.directory}/.scala_dependencies</arg>
               </args>
             </configuration>
+          </execution>
+          <execution>
+            <id>docjar</id>
+            <goals>
+              <goal>doc-jar</goal>
+            </goals>
+            <phase>pre-integration-test</phase>
           </execution>
         </executions>
       </plugin>
