@@ -31,7 +31,7 @@ import org.jetbrains.spark.api.SparkLogLevel.ERROR
  * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
  */
 @JvmOverloads
-inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Kotlin Spark Sample", logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
+inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Kotlin Spark Sample", logLevel: SparkLogLevel = ERROR, propertiesToPass: List<String> = listOf(), func: KSparkSession.() -> Unit) {
     val builder = SparkSession
             .builder()
             .master(master)
@@ -46,6 +46,13 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
                         else -> throw IllegalArgumentException("Cannot set property ${it.key} because value $value of unsupported type ${value::class}")
                     }
                 }
+            }
+            .apply {
+                println("propertiesToPass = $propertiesToPass")
+                val toPass = propertiesToPass.joinToString(" ") { System.getProperty(it) }
+                println("toPass = $toPass")
+                config("spark.executor.extraJavaOptions", toPass)
+                config("spark.driver.extraJavaOptions", toPass)
             }
     withSpark(builder, logLevel, func)
 

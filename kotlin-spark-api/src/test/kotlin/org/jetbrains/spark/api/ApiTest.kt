@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 class ApiTest : ShouldSpec({
     context("integration tests") {
-        withSpark {
+        withSpark(propertiesToPass = listOf("jacoco.additional")) {
             should("collect data classes with doubles correctly") {
                 val ll1 = LonLat(1.0, 2.0)
                 val ll2 = LonLat(3.0, 4.0)
