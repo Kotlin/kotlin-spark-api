@@ -189,6 +189,44 @@ shadowJar {
 }
 ```
 
+build.gradle.kts (Kotlin DSL)
+```
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+  id ("org.jetbrains.kotlin.jvm") version "1.3.72"
+  id ("com.github.johnrengelman.shadow") version "5.2.0"
+}
+
+repositories {
+  mavenCentral()
+  maven (url = "https://jitpack.io")
+}
+
+dependencies {
+  // Kotlin stdlib
+  implementation ("org.jetbrains.kotlin:kotlin-stdlib:1.3.72")
+  // Kotlin Spark API
+  implementation ("com.github.JetBrains.kotlin-spark-api:kotlin-spark-api:0.3.1")
+  // Apache Spark
+  compileOnly ("org.apache.spark:spark-sql_2.12:3.0.0")
+}
+
+compileKotlin.kotlinOptions.jvmTarget = "1.8"
+
+tasks {
+  named<ShadowJar>("shadowJar") {
+    dependencies {
+      exclude{
+         it.moduleGroup == "org.apache.spark" || it.moduleGroup == "org.scala-lang"
+     }
+    }
+  }
+}
+```
+
+
 Now you can package the application using Gradle:
 `gradle shadowJar`
 
