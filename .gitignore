@@ -374,5 +374,5 @@ csvpath/
 orcpath/
 
 .env
-/kotlin-spark-api/.allure/
-/kotlin-spark-api/allure-results/
+/kotlin-spark-api-3.0.0_2.12/.allure/
+/kotlin-spark-api-3.0.0_2.12/allure-results/

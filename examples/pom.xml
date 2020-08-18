@@ -4,14 +4,15 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>org.jetbrains.kotlin.spark</groupId>
+    <groupId>org.jetbrains.kotlinx.spark</groupId>
     <artifactId>kotlin-spark-api-parent</artifactId>
-    <version>1.0.0-preview1</version>
+    <version>1.0.0-preview1-SNAPSHOT</version>
   </parent>
 
   <groupId>org.jetbrains.kotlin.spark.examples</groupId>
   <artifactId>examples</artifactId>
   <packaging>jar</packaging>
+  <description>Example of usage</description>
 
   <name>Kotlin Spark API: Examples</name>
 
@@ -22,8 +23,8 @@
 
   <dependencies>
     <dependency>
-      <groupId>org.jetbrains.kotlin.spark</groupId>
-      <artifactId>kotlin-spark-api</artifactId>
+      <groupId>org.jetbrains.kotlinx.spark</groupId>
+      <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
