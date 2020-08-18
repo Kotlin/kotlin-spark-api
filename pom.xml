@@ -3,9 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jetbrains.kotlin.spark</groupId>
   <artifactId>kotlin-spark-api-parent</artifactId>
-  <version>0.3.2</version>
+  <version>1.0.0-preview1</version>
   <packaging>pom</packaging>
   <name>kotlin-spark-api-parent</name>
+  <properties>
+    <kotlin.version>1.4.0</kotlin.version>
+  </properties>
   <modules>
     <module>kotlin-spark-api</module>
     <module>examples</module>
@@ -57,6 +60,26 @@
               <goal>update-file-header</goal>
             </goals>
             <phase>process-sources</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M3</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.5.4</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
           </execution>
         </executions>
       </plugin>
