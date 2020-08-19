@@ -1,4 +1,5 @@
-# Kotlin for Apache® Spark™
+# Kotlin for Apache® Spark™ [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.jetbrains.kotlinx.spark%20AND%20v:1.0.0-preview1)
+
 
 Your next API to work with  [Apache Spark](https://spark.apache.org/). 
 
@@ -26,27 +27,15 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 ## Supported versions of Apache Spark
 
-<table>
-    <thead>
-        <tr>
-            <th>Apache Spark</th>
-            <th>Kotlin for Apache Spark</th>
-        </tr>
-    </thead>
-    <tbody align="center">
-        <tr>
-            <td>3.0.0</td>
-            <td>0.3 +</td>
-        </tr>
-    </tbody>
-</table>
+| Apache Spark | Kotlin for Apache Spark |
+|:------------:|:-----------------------:|
+| 3.0.0        | 3.0.0_2.12 preview1+    |
 
 ## Releases
 
 The list of Kotlin for Apache Spark releases is available [here](https://github.com/JetBrains/kotlin-spark-api/releases/). 
-The `kotlin-spark-api` artifact can be obtained from [JitPack](https://jitpack.io/#JetBrains/kotlin-spark-api).
 
-[![](https://jitpack.io/v/JetBrains/kotlin-spark-api.svg)](https://jitpack.io/#JetBrains/kotlin-spark-api)
+[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22org.jetbrains.kotlinx.spark%22%20AND%20a:%22kotlin-spark-api-3.0.0_2.12%22)
 
 ## How to configure Kotlin for Apache Spark in your project
 
@@ -55,15 +44,9 @@ You can add Kotlin for Apache Spark as a dependency to your project: `Maven`, `G
 Here's an example `pom.xml`:
 
 ```xml
-<repositories>
-    <repository>
-        <id>jitpack.io</id>
-        <url>https://jitpack.io</url>
-    </repository>
-</repositories>
 <dependency>
     <groupId>com.github.JetBrains.kotlin-spark-api</groupId>
-    <artifactId>kotlin-spark-api</artifactId>
+    <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
     <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
@@ -78,7 +61,7 @@ You can find a complete example with `pom.xml` and `build.gradle` in the [Quick 
 
 Once you have configured the dependency, you only need to add the following import to your Kotlin file: 
 ```kotlin
-import org.jetbrains.spark.api.*
+import org.jetbrains.kotlinx.spark.api.*
 ```   
 
 ## Kotlin for Apache Spark features

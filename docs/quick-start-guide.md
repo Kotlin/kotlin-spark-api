@@ -19,7 +19,7 @@ location where Spark is installed:
 ```kotlin
 /* SimpleApp.kt */
 @file:JvmName("SimpleApp")
-import org.jetbrains.spark.api.*
+import org.jetbrains.kotlinx.spark.api.*
 
 fun main() {
     val logFile = "YOUR_SPARK_HOME/README.md" // Change to your Spark Home path
@@ -60,27 +60,20 @@ Here's what the `pom.xml` looks like for this example:
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.3.72</kotlin.version>
+        <kotlin.version>1.4.0</kotlin.version>
         <kotlin.code.style>official</kotlin.code.style>
     </properties>
-
-    <repositories> <!-- Kotlin Spark API is currently published on jitpack.io -->
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
-            <version>1.3.72</version>
+            <version>${kotlin.version}</version>
         </dependency>
         <dependency> <!-- Kotlin Spark API dependency -->
-            <groupId>com.github.JetBrains.kotlin-spark-api</groupId>
-            <artifactId>kotlin-spark-api</artifactId>
-            <version>0.3.1</version>
+            <groupId>org.jetbrains.kotlinx.spark</groupId>
+            <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
+            <version>1.0.0-preview1</version>
         </dependency>
         <dependency> <!-- Spark dependency -->
             <groupId>org.apache.spark</groupId>
@@ -104,7 +97,7 @@ Here's what the `pom.xml` looks like for this example:
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>com.github.JetBrains.kotlin-spark-api:*</include>
+                                    <include>org.jetbrains.kotlinx.spark:*</include>
                                     <include>org.jetbrains.kotlin:* </include>
                                 </includes>
                             </artifactSet>
@@ -116,7 +109,7 @@ Here's what the `pom.xml` looks like for this example:
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <version>1.3.72</version>
+                <version>${kotlin.version}</version>
                 <configuration>
                     <sourceDirs>src/main/kotlin</sourceDirs>
                     <jvmTarget>1.8</jvmTarget>
@@ -137,13 +130,12 @@ Here's what the `pom.xml` looks like for this example:
 ```  
 
 Here's what the project structure should look like:
-```
+```bash
 ./pom.xml
 ./src
 ./src/main
 ./src/main/kotlin
 ./src/main/kotlin/SimpleApp.kt
-
 ```
 
 Now you can package the application using Maven:
@@ -153,9 +145,9 @@ Now you can package the application using Maven:
 
 Here's what the `build.gradle` looks like for this example:
 
-```
+```groovy
 plugins {
-  id 'org.jetbrains.kotlin.jvm' version '1.3.72'
+  id 'org.jetbrains.kotlin.jvm' version '1.4.0'
   id 'com.github.johnrengelman.shadow' version '5.2.0'
 }
 
@@ -164,15 +156,13 @@ version = '1.0-SNAPSHOT'
 
 repositories {
   mavenCentral()
-  maven { url = 'https://jitpack.io' }
 }
 
 dependencies {
   // Kotlin stdlib
-  implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.3.72'
+  implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.0'
   // Kotlin Spark API
-  implementation 'com.github.JetBrains.kotlin-spark-api:kotlin-spark-api:0.3.1'
-  // Apache Spark
+  implementation 'org.jetbrains.kotlinx.spark:kotlin-spark-api-3.0.0_2.12:1.0.0-preview1'  // Apache Spark
   compileOnly 'org.apache.spark:spark-sql_2.12:3.0.0'
 }
 
