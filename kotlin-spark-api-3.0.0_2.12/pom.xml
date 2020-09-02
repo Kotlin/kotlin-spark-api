@@ -64,7 +64,7 @@
     <dependency>
       <groupId>ch.tutteli.atrium</groupId>
       <artifactId>atrium-fluent-en_GB</artifactId>
-      <version>0.12.0</version>
+      <version>0.13.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
