@@ -138,6 +138,7 @@ Here's what the project structure should look like:
 ./src/main/kotlin/SimpleApp.kt
 ```
 
+
 Now you can package the application using Maven:
 `mvn package`
 

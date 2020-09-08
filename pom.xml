@@ -9,18 +9,44 @@
   <description>Parent project for Kotlin for Apache Spark</description>
   <modules>
     <module>kotlin-spark-api-3.0.0_2.12</module>
+    <module>kotlin-spark-api-2.4.1_2.12</module>
     <module>examples</module>
     <module>core-3.0.0_2.12</module>
+    <module>core-2.4.1_2.12</module>
+    <module>kotlin-api-commons</module>
   </modules>
   <properties>
     <kotlin.version>1.4.0</kotlin.version>
+    <dokka.version>1.4.0</dokka.version>
+    <atrium.version>0.13.0</atrium.version>
+    <kotest.version>4.2.3</kotest.version>
   </properties>
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.apache.spark</groupId>
-        <artifactId>spark-sql_2.12</artifactId>
-        <version>3.0.0</version>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-stdlib-jdk8</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-reflect</artifactId>
+        <version>${kotlin.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlinx.spark</groupId>
+        <artifactId>kotlin-api-commons</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlinx.spark</groupId>
+        <artifactId>core-3.0.0_2.12</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlinx.spark</groupId>
+        <artifactId>core-2.4.1_2.12</artifactId>
+        <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -138,9 +164,9 @@
       <timezone>GMT+3</timezone>
     </developer>
     <developer>
-      <id>vitay.khudobakhshov</id>
-      <name>Vitay Khudobakhshov</name>
-      <email>vitay.khudobakhshov@jetbrains.com</email>
+      <id>vitaly.khudobakhshov</id>
+      <name>Vitaly Khudobakhshov</name>
+      <email>vitaly.khudobakhshov@jetbrains.com</email>
       <timezone>GMT+3</timezone>
     </developer>
   </developers>
