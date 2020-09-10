@@ -19,7 +19,7 @@
     <kotlin.version>1.4.10</kotlin.version>
     <dokka.version>1.4.0</dokka.version>
     <atrium.version>0.13.0</atrium.version>
-    <kotest.version>4.2.3</kotest.version>
+    <kotest.version>4.2.4</kotest.version>
   </properties>
   <dependencyManagement>
     <dependencies>
