@@ -16,7 +16,7 @@
     <module>kotlin-api-commons</module>
   </modules>
   <properties>
-    <kotlin.version>1.4.0</kotlin.version>
+    <kotlin.version>1.4.10</kotlin.version>
     <dokka.version>1.4.0</dokka.version>
     <atrium.version>0.13.0</atrium.version>
     <kotest.version>4.2.3</kotest.version>
