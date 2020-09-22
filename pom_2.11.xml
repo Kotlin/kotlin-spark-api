@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <name>Kotlin Spark API: Parent (Scala 2.11)</name>
+  <description>Parent project for Kotlin for Apache Spark</description>
+  <artifactId>kotlin-spark-api-parent_2.11</artifactId>
+  <parent>
+    <groupId>org.jetbrains.kotlinx.spark</groupId>
+    <artifactId>kotlin-spark-api-parent</artifactId>
+    <version>1.0.0-preview2-SNAPSHOT</version>
+    <relativePath>pom.xml</relativePath>
+  </parent>
+  <packaging>pom</packaging>
+
+  <properties>
+    <scala.version>2.11.12</scala.version>
+    <scala.compat.version>2.11</scala.compat.version>
+  </properties>
+
+  <modules>
+    <module>core/2.4/pom_2.11.xml</module>
+    <module>kotlin-spark-api/2.4/pom_2.11.xml</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.jetbrains.kotlinx.spark</groupId>
+        <artifactId>core-2.4_${scala.compat.version}</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlinx.spark</groupId>
+        <artifactId>core-3.0_${scala.compat.version}</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+</project>

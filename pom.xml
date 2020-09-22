@@ -1,26 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <name>Kotlin Spark API: Parent</name>
+  <description>Parent project for Kotlin for Apache Spark</description>
   <groupId>org.jetbrains.kotlinx.spark</groupId>
   <artifactId>kotlin-spark-api-parent</artifactId>
   <version>1.0.0-preview2-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>kotlin-spark-api-parent</name>
-  <description>Parent project for Kotlin for Apache Spark</description>
-  <modules>
-    <module>kotlin-spark-api-3.0.0_2.12</module>
-    <module>kotlin-spark-api-2.4.1_2.12</module>
-    <module>examples</module>
-    <module>core-3.0.0_2.12</module>
-    <module>core-2.4.1_2.12</module>
-    <module>kotlin-api-commons</module>
-  </modules>
+
   <properties>
-    <kotlin.version>1.4.10</kotlin.version>
-    <dokka.version>1.4.0</dokka.version>
+    <encoding>UTF-8</encoding>
+    <kotlin.code.style>official</kotlin.code.style>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+
+    <!-- Dependency versions -->
     <atrium.version>0.13.0</atrium.version>
+    <dokka.version>1.4.0</dokka.version>
     <kotest.version>4.2.5</kotest.version>
+    <kotlin.version>1.4.10</kotlin.version>
+    <spark2.version>2.4.0</spark2.version>
+    <spark3.version>3.0.1</spark3.version>
+
+    <!-- Plugin versions -->
+    <allure-maven.version>2.10.0</allure-maven.version>
+    <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+    <klaxon.version>5.4</klaxon.version>
+    <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
+    <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
+    <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+    <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+    <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
+    <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
+    <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
+    <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+    <nexus-staging-plugin.version>1.6.8</nexus-staging-plugin.version>
+    <scala-maven-plugin.version>4.4.0</scala-maven-plugin.version>
   </properties>
+
+  <modules>
+    <module>kotlin-spark-api/common</module>
+  </modules>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -35,33 +58,99 @@
       </dependency>
       <dependency>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-api-commons</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>core-3.0.0_2.12</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>core-2.4.1_2.12</artifactId>
+        <artifactId>kotlin-spark-api-common</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
+
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>io.qameta.allure</groupId>
+          <artifactId>allure-maven</artifactId>
+          <version>${allure-maven.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <goals>
+                <goal>report</goal>
+              </goals>
+              <phase>prepare-package</phase>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.jetbrains.kotlin</groupId>
+          <artifactId>kotlin-maven-plugin</artifactId>
+          <version>${kotlin.version}</version>
+          <executions>
+            <execution>
+              <id>compile</id>
+              <goals>
+                <goal>compile</goal>
+              </goals>
+              <phase>compile</phase>
+              <configuration>
+                <myIncremental>true</myIncremental>
+                <jvmTarget>1.8</jvmTarget>
+                <args>
+                  <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
+                  <arg>-XXLanguage:+InlineClasses</arg>
+                </args>
+              </configuration>
+            </execution>
+            <execution>
+              <id>test-compile</id>
+              <goals>
+                <goal>test-compile</goal>
+              </goals>
+              <phase>test-compile</phase>
+              <configuration>
+                <myIncremental>true</myIncremental>
+                <jvmTarget>1.8</jvmTarget>
+                <args>
+                  <arg>-Xopt-in=kotlin.RequiresOptIn</arg>
+                  <arg>-XXLanguage:+InlineClasses</arg>
+                </args>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+        </plugin>
+        <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.9.1</version>
+          <version>${maven-site-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M5</version>
+          <version>${maven-surefire-plugin.version}</version>
+          <configuration>
+            <enableProcessChecker>native</enableProcessChecker>
+          </configuration>
+        </plugin>
+        <plugin>
+          <!-- see http://davidb.github.com/scala-maven-plugin -->
+          <groupId>net.alchim31.maven</groupId>
+          <artifactId>scala-maven-plugin</artifactId>
+          <version>${scala-maven-plugin.version}</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -69,7 +158,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>2.0.0</version>
+        <version>${license-maven-plugin.version}</version>
         <configuration>
           <roots>
             <root>src/main/</root>
@@ -93,6 +182,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
+        <version>${maven-source-plugin.version}</version>
         <executions>
           <execution>
             <id>attach-sources</id>
@@ -105,7 +195,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M3</version>
+        <version>${maven-enforcer-plugin.version}</version>
         <executions>
           <execution>
             <id>enforce-maven</id>
@@ -124,6 +214,11 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${maven-deploy-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>
           <localCheckout>true</localCheckout>
@@ -134,7 +229,7 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.6.8</version>
+        <version>${nexus-staging-plugin.version}</version>
         <extensions>true</extensions>
         <configuration>
           <serverId>ossrh</serverId>
@@ -144,18 +239,21 @@
       </plugin>
     </plugins>
   </build>
+
   <url>http://maven.apache.org</url>
   <inceptionYear>2019</inceptionYear>
   <organization>
     <name>JetBrains</name>
     <url>https://www.jetbrains.com/</url>
   </organization>
+
   <licenses>
     <license>
       <name>Apache License, Version 2.0</name>
       <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
     </license>
   </licenses>
+
   <developers>
     <developer>
       <id>asm0dey</id>
@@ -185,7 +283,23 @@
       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
   </distributionManagement>
+
   <profiles>
+    <profile>
+      <id>scala-2.11</id>
+      <modules>
+        <module>pom_2.11.xml</module>
+      </modules>
+    </profile>
+    <profile>
+      <id>scala-2.12</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <modules>
+        <module>pom_2.12.xml</module>
+      </modules>
+    </profile>
     <profile>
       <id>release-sign</id>
       <activation>
@@ -199,7 +313,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.6</version>
+            <version>${maven-gpg-plugin.version}</version>
             <executions>
               <execution>
                 <id>sign-artifacts</id>
@@ -214,4 +328,18 @@
       </build>
     </profile>
   </profiles>
+
+  <repositories>
+    <repository>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com/</url>
+    </repository>
+  </repositories>
+  <pluginRepositories>
+    <pluginRepository>
+      <id>jcenter</id>
+      <name>JCenter</name>
+      <url>https://jcenter.bintray.com/</url>
+    </pluginRepository>
+  </pluginRepositories>
 </project>
