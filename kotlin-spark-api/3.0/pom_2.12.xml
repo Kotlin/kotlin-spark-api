@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <name>Kotlin Spark API: API for Spark 3.0+ (Scala 2.12)</name>
+  <artifactId>kotlin-spark-api-3.0</artifactId>
+  <description>Kotlin API compatible with spark 3.0.0 Kotlin for Apache Spark</description>
+  <parent>
+    <groupId>org.jetbrains.kotlinx.spark</groupId>
+    <artifactId>kotlin-spark-api-parent_2.12</artifactId>
+    <version>1.0.0-preview2-SNAPSHOT</version>
+    <relativePath>../../pom_2.12.xml</relativePath>
+  </parent>
+  <packaging>jar</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-reflect</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlinx.spark</groupId>
+      <artifactId>core-3.0_${scala.compat.version}</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlinx.spark</groupId>
+      <artifactId>kotlin-spark-api-common</artifactId>
+    </dependency>
+
+    <!-- Provided dependencies -->
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <!-- Test dependencies -->
+    <dependency>
+      <groupId>io.kotest</groupId>
+      <artifactId>kotest-runner-junit5-jvm</artifactId>
+      <version>${kotest.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.kotest</groupId>
+      <artifactId>kotest-extensions-allure-jvm</artifactId>
+      <version>${kotest.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.beust</groupId>
+      <artifactId>klaxon</artifactId>
+      <version>5.4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>ch.tutteli.atrium</groupId>
+      <artifactId>atrium-fluent-en_GB</artifactId>
+      <version>${atrium.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <sourceDirectory>src/main/kotlin</sourceDirectory>
+    <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+    <directory>target/${scala.compat.version}</directory>
+    <plugins>
+      <plugin>
+        <groupId>org.jetbrains.kotlin</groupId>
+        <artifactId>kotlin-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+      </plugin>
+      <!--<plugin>
+        <groupId>org.jetbrains.dokka</groupId>
+        <artifactId>dokka-maven-plugin</artifactId>
+        <version>${dokka.version}</version>
+        <configuration>
+          <jdkVersion>8</jdkVersion>
+        </configuration>
+        <executions>
+          <execution>
+            <id>dokka</id>
+            <goals>
+              <goal>dokka</goal>
+            </goals>
+            <phase>pre-site</phase>
+          </execution>
+          <execution>
+            <id>javadocjar</id>
+            <goals>
+              <goal>javadocJar</goal>
+            </goals>
+            <phase>pre-integration-test</phase>
+          </execution>
+        </executions>
+      </plugin>-->
+      <plugin>
+        <groupId>io.qameta.allure</groupId>
+        <artifactId>allure-maven</artifactId>
+        <configuration>
+          <resultsDirectory>${project.basedir}/allure-results/${scala.compat.version}</resultsDirectory>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
