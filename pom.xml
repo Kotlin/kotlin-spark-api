@@ -17,7 +17,7 @@
   </modules>
   <properties>
     <kotlin.version>1.4.10</kotlin.version>
-    <dokka.version>1.4.0</dokka.version>
+    <dokka.version>1.4.10</dokka.version>
     <atrium.version>0.13.0</atrium.version>
     <kotest.version>4.2.5</kotest.version>
   </properties>
