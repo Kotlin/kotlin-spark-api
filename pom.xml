@@ -21,7 +21,7 @@
     <kotest.version>4.2.5</kotest.version>
     <kotlin.version>1.4.10</kotlin.version>
     <spark2.version>2.4.0</spark2.version>
-    <spark3.version>3.0.1</spark3.version>
+    <spark3.version>3.0.0</spark3.version>
 
     <!-- Plugin versions -->
     <allure-maven.version>2.10.0</allure-maven.version>
