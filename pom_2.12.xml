@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <scala.version>2.12.12</scala.version>
+    <scala.version>2.12.10</scala.version>
     <scala.compat.version>2.12</scala.compat.version>
   </properties>
 
@@ -23,7 +23,8 @@
     <module>core/3.0/pom_2.12.xml</module>
     <module>kotlin-spark-api/2.4/pom_2.12.xml</module>
     <module>kotlin-spark-api/3.0/pom_2.12.xml</module>
-    <module>examples/pom_2.12.xml</module>
+    <module>examples/pom-2.4_2.12.xml</module>
+    <module>examples/pom-3.0_2.12.xml</module>
   </modules>
 
   <dependencyManagement>
