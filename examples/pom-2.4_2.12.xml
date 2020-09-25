@@ -29,7 +29,7 @@
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-    <directory>target/${scala.compat.version}</directory>
+    <directory>target/2.4/${scala.compat.version}</directory>
     <plugins>
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
