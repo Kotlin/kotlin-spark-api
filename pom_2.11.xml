@@ -21,6 +21,7 @@
   <modules>
     <module>core/2.4/pom_2.11.xml</module>
     <module>kotlin-spark-api/2.4/pom_2.11.xml</module>
+    <module>examples/pom-2.4_2.11.xml</module>
   </modules>
 
   <dependencyManagement>

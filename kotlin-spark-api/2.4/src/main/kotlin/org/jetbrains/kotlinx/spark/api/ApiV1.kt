@@ -33,6 +33,7 @@ import org.apache.spark.sql.types.*
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.collection.Seq
 import scala.reflect.ClassTag
+import scala.reflect.`ClassTag$`
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
 import java.sql.Date
@@ -115,7 +116,7 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
             false,
             serializer.flatten() as Seq<Expression>,
             if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java, schema) else JavaTypeInference.deserializerFor(kClass.java),
-            ClassTag.apply(kClass.java)
+            `ClassTag$`.`MODULE$`.apply(kClass.java)
     )
 }
 

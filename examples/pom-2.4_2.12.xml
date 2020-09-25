@@ -3,9 +3,9 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <name>Kotlin Spark API: Examples (Scala 2.12)</name>
+  <name>Kotlin Spark API: Examples for Spark 2.4+ (Scala 2.12)</name>
   <description>Example of usage</description>
-  <artifactId>examples_2.12</artifactId>
+  <artifactId>examples-2.4_2.12</artifactId>
   <parent>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
     <artifactId>kotlin-spark-api-parent_2.12</artifactId>
@@ -16,13 +16,13 @@
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.kotlinx.spark</groupId>
-      <artifactId>kotlin-spark-api-3.0</artifactId>
+      <artifactId>kotlin-spark-api-2.4_${scala.compat.version}</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-sql_${scala.compat.version}</artifactId>
-      <version>${spark3.version}</version>
+      <version>${spark2.version}</version>
     </dependency>
   </dependencies>
 
