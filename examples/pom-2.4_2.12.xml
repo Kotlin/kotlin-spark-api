@@ -22,13 +22,12 @@
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-sql_${scala.compat.version}</artifactId>
-      <version>${spark2.version}</version>
+      <version>${spark2-scala-2.12.version}</version>
     </dependency>
   </dependencies>
 
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
-    <testSourceDirectory>src/test/kotlin</testSourceDirectory>
     <directory>target/2.4/${scala.compat.version}</directory>
     <plugins>
       <plugin>
