@@ -47,9 +47,9 @@ Here's an example `pom.xml`:
 
 ```xml
 <dependency>
-    <groupId>com.github.JetBrains.kotlin-spark-api</groupId>
-    <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
-    <version>${kotlin-spark-api.version}</version>
+  <groupId>org.jetbrains.kotlinx.spark</groupId>
+  <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
+  <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
     <groupId>org.apache.spark</groupId>
