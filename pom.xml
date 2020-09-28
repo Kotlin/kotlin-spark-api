@@ -16,10 +16,11 @@
     <maven.compiler.target>1.8</maven.compiler.target>
 
     <!-- Dependency versions -->
-    <atrium.version>0.13.0</atrium.version>
-    <dokka.version>1.4.0</dokka.version>
-    <kotest.version>4.2.5</kotest.version>
+
     <kotlin.version>1.4.10</kotlin.version>
+    <dokka.version>1.4.10</dokka.version>
+    <atrium.version>0.13.0</atrium.version>
+    <kotest.version>4.2.5</kotest.version>
     <spark2.version>2.4.0</spark2.version>
     <spark3.version>3.0.0</spark3.version>
 
