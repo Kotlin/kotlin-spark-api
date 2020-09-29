@@ -258,7 +258,7 @@ object KotlinReflection {
           returnNullable = false)
 
 
-      case c if c.isArray && predefinedDt.isEmpty =>
+      case c if c.isArray =>
         val elementType = c.getComponentType
         val primitiveMethod = elementType match {
           case c if c == java.lang.Boolean.TYPE => Some("toBooleanArray")
@@ -271,16 +271,19 @@ object KotlinReflection {
           case _ => None
         }
 
+        val maybeType = predefinedDt.filter(_.dt.isInstanceOf[ArrayType]).map(_.dt.asInstanceOf[ArrayType].elementType)
         primitiveMethod.map { method =>
           Invoke(getPath, method, ObjectType(c))
         }.getOrElse {
           Invoke(
             MapObjects(
-              p => deserializerFor(typeToken.getComponentType, Some(p)),
+              p => {deserializerFor(typeToken.getComponentType, Some(p), maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))},
               getPath,
-              inferDataType(elementType)._1),
+              maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper].dt).getOrElse(inferDataType(elementType)._1)
+            ),
             "array",
-            ObjectType(c))
+            ObjectType(c)
+          )
         }
 
       case c if listType.isAssignableFrom(typeToken) && predefinedDt.isEmpty =>
@@ -343,7 +346,6 @@ object KotlinReflection {
                 val fieldName = field.asInstanceOf[KStructField].delegate.name
                 val newPath = addToPath(fieldName)
                 deserializerFor(TypeToken.of(fieldCls), Some(newPath), Some(dataType).filter(_.isInstanceOf[ComplexWrapper]))
-                //                val newTypePath = s"""- field (class: "$clsName", name: "$fieldName")""" +: walkedTypePath
 
               })
             val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)

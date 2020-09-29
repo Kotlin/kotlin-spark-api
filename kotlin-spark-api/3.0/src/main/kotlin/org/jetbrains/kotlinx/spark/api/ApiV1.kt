@@ -100,6 +100,7 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
 private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
         || cls.isSubclassOf(Map::class)
         || cls.isSubclassOf(Iterable::class)
+        || cls.java.isArray
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
@@ -258,6 +259,7 @@ inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Arr
  */
 fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply { show(numRows, truncate) }
 
+@OptIn(ExperimentalStdlibApi::class)
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]
     if (primitiveSchema != null) return KSimpleTypeWrapper(primitiveSchema, (type.classifier!! as KClass<*>).java, type.isMarkedNullable)
@@ -268,8 +270,19 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
         it.first.name to it.second.type!!
     }.toMap())
     return when {
-        klass.isSubclassOf(Iterable::class) -> {
-            val listParam = types.getValue(klass.typeParameters[0].name)
+        klass.isSubclassOf(Iterable::class) || klass.java.isArray -> {
+            val listParam = if(klass.java.isArray){
+                when (klass) {
+                    IntArray::class -> typeOf<Int>()
+                    LongArray::class -> typeOf<Long>()
+                    FloatArray::class -> typeOf<Float>()
+                    DoubleArray::class -> typeOf<Double>()
+                    BooleanArray::class -> typeOf<Boolean>()
+                    ShortArray::class -> typeOf<Short>()
+                    ByteArray::class -> typeOf<Byte>()
+                    else -> types.getValue(klass.typeParameters[0].name)
+                }
+            }else types.getValue(klass.typeParameters[0].name)
             KComplexTypeWrapper(
                     DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
                     klass.java,

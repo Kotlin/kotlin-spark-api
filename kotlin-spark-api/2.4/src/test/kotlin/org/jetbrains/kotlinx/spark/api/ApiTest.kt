@@ -25,7 +25,7 @@ import java.time.LocalDate
 
 class ApiTest : ShouldSpec({
     context("integration tests") {
-        withSpark(master = "local", props = mapOf("spark.sql.codegen.comments" to true)) {
+        withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
             should("collect data classes with doubles correctly") {
                 val ll1 = LonLat(1.0, 2.0)
                 val ll2 = LonLat(3.0, 4.0)
@@ -85,9 +85,79 @@ class ApiTest : ShouldSpec({
                         .only
                         .values(5, 6, 7, 8, 7, 8, 9)
             }
+            should("hadle strings converted to lists") {
+                data class Movie(val id: Long, val genres: String)
+                data class MovieExpanded(val id: Long, val genres: List<String>)
+
+                val comedies = listOf(Movie(1, "Comedy|Romance"), Movie(2, "Horror|Action")).toDS()
+                        .map { MovieExpanded(it.id, it.genres.split("|").toList()) }
+                        .filter { it.genres.contains("Comedy") }
+                        .collectAsList()
+                expect(comedies).asExpect().contains.inAnyOrder.only.values(MovieExpanded(1, listOf("Comedy", "Romance")))
+            }
+            should("handle strings converted to arrays") {
+                data class Movie(val id: Long, val genres: String)
+                data class MovieExpanded(val id: Long, val genres: Array<String>) {
+                    override fun equals(other: Any?): Boolean {
+                        if (this === other) return true
+                        if (javaClass != other?.javaClass) return false
+                        other as MovieExpanded
+                        return if (id != other.id) false else genres.contentEquals(other.genres)
+                    }
+
+                    override fun hashCode(): Int {
+                        var result = id.hashCode()
+                        result = 31 * result + genres.contentHashCode()
+                        return result
+                    }
+                }
+
+                val comedies = listOf(Movie(1, "Comedy|Romance"), Movie(2, "Horror|Action")).toDS()
+                        .map { MovieExpanded(it.id, it.genres.split("|").toTypedArray()) }
+                        .filter { it.genres.contains("Comedy") }
+                        .collectAsList()
+                expect(comedies).asExpect().contains.inAnyOrder.only.values(MovieExpanded(1, arrayOf("Comedy", "Romance")))
+            }
+            should("!handle arrays of generics") {
+
+                val result = listOf(Test(1, arrayOf(5.1 to 6, 6.1 to 7)))
+                        .toDS()
+                        .map { it.id to it.data.first { liEl -> liEl.first < 6 } }
+                        .map { it.second }
+                        .collectAsList()
+                expect(result).asExpect().contains.inOrder.only.values(5.1 to 6)
+            }
+            should("handle primitive arrays") {
+                val result = listOf(arrayOf(1, 2, 3, 4))
+                        .toDS()
+                        .map { it.map { ai -> ai + 1 } }
+                        .collectAsList()
+                        .flatten()
+                expect(result).asExpect().contains.inOrder.only.values(2, 3, 4, 5)
+
+            }
 
         }
     }
 })
 
 data class LonLat(val lon: Double, val lat: Double)
+data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Test<*>
+
+        if (id != other.id) return false
+        if (!data.contentEquals(other.data)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + data.contentHashCode()
+        return result
+    }
+}

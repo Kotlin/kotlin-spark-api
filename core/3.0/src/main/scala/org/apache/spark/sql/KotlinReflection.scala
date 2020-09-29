@@ -281,8 +281,14 @@ object KotlinReflection extends KotlinReflection {
         createDeserializerForScalaBigInt(path)
 
       case t if isSubtype(t, localTypeOf[Array[_]]) =>
-        val TypeRef(_, _, Seq(elementType)) = t
-        val Schema(dataType, elementNullable) = schemaFor(elementType)
+        var TypeRef(_, _, Seq(elementType)) = t
+        if (predefinedDt.isDefined && !elementType.dealias.typeSymbol.isClass)
+          elementType = getType(predefinedDt.get.asInstanceOf[KComplexTypeWrapper].dt.asInstanceOf[ArrayType].elementType.asInstanceOf[DataTypeWithClass].cls)
+        val Schema(dataType, elementNullable) = predefinedDt.map(it => {
+          val elementInfo = it.asInstanceOf[KComplexTypeWrapper].dt.asInstanceOf[ArrayType].elementType.asInstanceOf[DataTypeWithClass]
+          Schema(elementInfo.dt, elementInfo.nullable)
+        })
+          .getOrElse(schemaFor(elementType))
         val className = getClassNameFromType(elementType)
         val newTypePath = walkedTypePath.recordArray(className)
 
@@ -293,7 +299,7 @@ object KotlinReflection extends KotlinReflection {
             dataType,
             nullable = elementNullable,
             newTypePath,
-            (casted, typePath) => deserializerFor(elementType, casted, typePath))
+            (casted, typePath) => deserializerFor(elementType, casted, typePath, predefinedDt.map(_.asInstanceOf[KComplexTypeWrapper].dt.asInstanceOf[ArrayType].elementType).filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper])))
         }
 
         val arrayData = UnresolvedMapObjects(mapFunction, path)
@@ -513,6 +519,12 @@ object KotlinReflection extends KotlinReflection {
 
     def toCatalystArray(input: Expression, elementType: `Type`, predefinedDt: Option[DataTypeWithClass] = None): Expression = {
       predefinedDt.map(_.dt).getOrElse(dataTypeFor(elementType)) match {
+        case dt:StructType =>
+          val clsName = getClassNameFromType(elementType)
+          val newPath = walkedTypePath.recordArray(clsName)
+          createSerializerForMapObjects(input, ObjectType(predefinedDt.get.cls),
+            serializerFor(_, elementType, newPath, seenTypeSet, predefinedDt))
+
         case dt: ObjectType =>
           val clsName = getClassNameFromType(elementType)
           val newPath = walkedTypePath.recordArray(clsName)
@@ -528,8 +540,15 @@ object KotlinReflection extends KotlinReflection {
             createSerializerForGenericArray(input, dt, nullable = predefinedDt.map(_.nullable).getOrElse(schemaFor(elementType).nullable))
           }
 
+        case _: StringType =>
+          val clsName = getClassNameFromType(typeOf[String])
+          val newPath = walkedTypePath.recordArray(clsName)
+          createSerializerForMapObjects(input, ObjectType(classOf[String]),
+            serializerFor(_, elementType, newPath, seenTypeSet))
+
+
         case dt =>
-          createSerializerForGenericArray(input, dt, nullable = schemaFor(elementType).nullable)
+          createSerializerForGenericArray(input, dt, nullable = predefinedDt.map(_.nullable).getOrElse(schemaFor(elementType).nullable))
       }
     }
 
@@ -552,7 +571,7 @@ object KotlinReflection extends KotlinReflection {
         val TypeRef(_, _, Seq(elementType)) = t
         toCatalystArray(inputObject, elementType)
 
-      case t if isSubtype(t, localTypeOf[Array[_]]) =>
+      case t if isSubtype(t, localTypeOf[Array[_]]) && predefinedDt.isEmpty =>
         val TypeRef(_, _, Seq(elementType)) = t
         toCatalystArray(inputObject, elementType)
 

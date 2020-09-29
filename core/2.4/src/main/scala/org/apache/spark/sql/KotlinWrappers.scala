@@ -182,6 +182,21 @@ class KStructField(val getterName: String, val delegate: StructField) extends St
   override def getComment(): Option[String] = delegate.getComment()
 
   override def toDDL: String = delegate.toDDL
+
+  override def productElement(n: Int): Any = delegate.productElement(n)
+
+  override def productArity: Int = delegate.productArity
+
+  override def productIterator: Iterator[Any] = delegate.productIterator
+
+  override def productPrefix: String = delegate.productPrefix
+
+  override def canEqual(that: Any): Boolean = delegate.canEqual(that)
+
+  override val dataType: DataType = delegate.dataType
+  override val metadata: Metadata = delegate.metadata
+  override val nullable: Boolean = delegate.nullable
+  override val name: String = delegate.name
 }
 
 object helpme {
