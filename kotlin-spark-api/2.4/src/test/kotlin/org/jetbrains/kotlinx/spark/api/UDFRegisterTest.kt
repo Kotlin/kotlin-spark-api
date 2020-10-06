@@ -8,8 +8,6 @@ import scala.collection.JavaConversions
 import scala.collection.JavaConverters
 import scala.collection.mutable.WrappedArray
 
-private fun <T> scala.collection.Iterable<T>.asIterable(): Iterable<T> = JavaConversions.asJavaIterable(this)
-
 class UDFRegisterTest : ShouldSpec({
     context("org.jetbrains.kotlinx.spark.api.UDFRegister") {
         context("the function checkForValidType"){
