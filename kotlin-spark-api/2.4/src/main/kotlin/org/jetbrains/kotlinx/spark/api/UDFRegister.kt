@@ -44,7 +44,6 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
 /**
  * A wrapper for an UDF with 0 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper0(val udfName: String) {
     /**
@@ -67,7 +66,6 @@ inline fun <reified R> UDFRegistration.register(name: String, returnType: DataTy
 /**
  * A wrapper for an UDF with 1 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper1(val udfName: String) {
     /**
@@ -91,7 +89,6 @@ inline fun <reified T0, reified R> UDFRegistration.register(name: String, return
 /**
  * A wrapper for an UDF with 2 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper2(val udfName: String) {
     /**
@@ -116,7 +113,6 @@ inline fun <reified T0, reified T1, reified R> UDFRegistration.register(name: St
 /**
  * A wrapper for an UDF with 3 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper3(val udfName: String) {
     /**
@@ -142,7 +138,6 @@ inline fun <reified T0, reified T1, reified T2, reified R> UDFRegistration.regis
 /**
  * A wrapper for an UDF with 4 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper4(val udfName: String) {
     /**
@@ -169,7 +164,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified R> UDFRegist
 /**
  * A wrapper for an UDF with 5 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper5(val udfName: String) {
     /**
@@ -197,7 +191,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 6 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper6(val udfName: String) {
     /**
@@ -226,7 +219,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 7 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper7(val udfName: String) {
     /**
@@ -256,7 +248,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 8 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper8(val udfName: String) {
     /**
@@ -287,7 +278,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 9 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper9(val udfName: String) {
     /**
@@ -319,7 +309,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 10 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper10(val udfName: String) {
     /**
@@ -352,7 +341,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 11 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper11(val udfName: String) {
     /**
@@ -386,7 +374,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 12 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper12(val udfName: String) {
     /**
@@ -421,7 +408,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 13 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper13(val udfName: String) {
     /**
@@ -457,7 +443,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 14 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper14(val udfName: String) {
     /**
@@ -494,7 +479,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 15 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper15(val udfName: String) {
     /**
@@ -532,7 +516,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 16 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper16(val udfName: String) {
     /**
@@ -571,7 +554,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 17 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper17(val udfName: String) {
     /**
@@ -611,7 +593,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 18 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper18(val udfName: String) {
     /**
@@ -652,7 +633,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 19 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper19(val udfName: String) {
     /**
@@ -694,7 +674,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 20 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper20(val udfName: String) {
     /**
@@ -737,7 +716,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 21 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper21(val udfName: String) {
     /**
@@ -781,7 +759,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
 /**
  * A wrapper for an UDF with 22 arguments.
  * @property udfName the name of the UDF
- * @property returnType the return type of the UDF
  */
 class UDFWrapper22(val udfName: String) {
     /**
