@@ -23,6 +23,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkContext
 import org.apache.spark.api.java.function.*
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -58,6 +59,17 @@ val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
         Timestamp::class to TIMESTAMP(),
         ByteArray::class to BINARY()
 )
+
+
+/**
+ * Broadcast a read-only variable to the cluster, returning a
+ * [[org.apache.spark.broadcast.Broadcast]] object for reading it in distributed functions.
+ * The variable will be sent to each cluster only once.
+ *
+ * @param value value to broadcast to the Spark nodes
+ * @return `Broadcast` object, a read-only variable cached on each machine
+ */
+inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = broadcast(value, encoder<T>().clsTag())
 
 /**
  * Utility method to create dataset from list
@@ -271,7 +283,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     }.toMap())
     return when {
         klass.isSubclassOf(Iterable::class) || klass.java.isArray -> {
-            val listParam = if(klass.java.isArray){
+            val listParam = if (klass.java.isArray) {
                 when (klass) {
                     IntArray::class -> typeOf<Int>()
                     LongArray::class -> typeOf<Long>()
@@ -282,7 +294,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     ByteArray::class -> typeOf<Byte>()
                     else -> types.getValue(klass.typeParameters[0].name)
                 }
-            }else types.getValue(klass.typeParameters[0].name)
+            } else types.getValue(klass.typeParameters[0].name)
             KComplexTypeWrapper(
                     DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
                     klass.java,
