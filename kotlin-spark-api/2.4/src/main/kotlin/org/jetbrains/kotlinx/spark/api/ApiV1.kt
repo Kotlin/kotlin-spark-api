@@ -22,7 +22,6 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkContext
-import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.function.*
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.*
