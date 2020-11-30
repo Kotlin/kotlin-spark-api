@@ -19,8 +19,9 @@
  */
 package org.apache.spark.sql
 
+import org.apache.spark.sql.catalyst.{KotlinReflection, ScalaReflection}
 import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression}
-import org.apache.spark.sql.types.{DataType, Metadata, StructField, StructType}
+import org.apache.spark.sql.types.{DataType, Metadata, StructField, StructType, UserDefinedType}
 
 
 trait DataTypeWithClass {
@@ -166,6 +167,8 @@ case class KSimpleTypeWrapper(dt: DataType, cls: Class[_], nullable: Boolean) ex
   private[sql] override def acceptsType(other: DataType) = dt.acceptsType(other)
 
   override def defaultSize: Int = dt.defaultSize
+
+  override def toString: String = s"KSTW(${dt.toString})"
 
   override private[spark] def asNullable = dt.asNullable
 }

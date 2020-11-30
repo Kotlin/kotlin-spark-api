@@ -20,6 +20,7 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.SparkSession.Builder
+import org.apache.spark.sql.UDFRegistration
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 
 /**
@@ -78,4 +79,6 @@ inline class KSparkSession(val spark: SparkSession) {
     inline fun <reified T> List<T>.toDS() = toDS(spark)
     inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
     inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
+    val udf: UDFRegistration get() = spark.udf()
+
 }
