@@ -1,4 +1,4 @@
-@file:Suppress("DuplicatedCode")
+@file:Suppress("NOTHING_TO_INLINE", "DuplicatedCode", "MemberVisibilityCanBePrivate")
 
 package org.jetbrains.kotlinx.spark.api
 
@@ -6,16 +6,22 @@ import org.apache.spark.sql.Column
 import org.apache.spark.sql.UDFRegistration
 import org.apache.spark.sql.api.java.*
 import org.apache.spark.sql.functions
+import org.apache.spark.sql.types.DataType
 import scala.collection.mutable.WrappedArray
 import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.typeOf
 
 /**
+ * A shortcut for [KSparkSession.spark].udf()
+ */
+inline fun KSparkSession.udf(): UDFRegistration = spark.udf()
+
+/**
  * Checks if [this] is of a valid type for an UDF, otherwise it throws a [TypeOfUDFParameterNotSupportedException]
  */
 @PublishedApi
-internal fun KClass<*>.checkForValidType(parameterName: String) {
+internal fun KClass<*>.checkForValidType(parameterName: String){
     if (this == String::class || isSubclassOf(WrappedArray::class)) return // Most of the time we need strings or WrappedArrays
     if (isSubclassOf(Iterable::class) || java.isArray
             || isSubclassOf(Map::class) || isSubclassOf(Array::class)
@@ -23,7 +29,7 @@ internal fun KClass<*>.checkForValidType(parameterName: String) {
             || isSubclassOf(ShortArray::class) || isSubclassOf(IntArray::class)
             || isSubclassOf(LongArray::class) || isSubclassOf(FloatArray::class)
             || isSubclassOf(DoubleArray::class) || isSubclassOf(BooleanArray::class)
-    ) {
+    ){
         throw TypeOfUDFParameterNotSupportedException(this, parameterName)
     }
 }
@@ -31,7 +37,7 @@ internal fun KClass<*>.checkForValidType(parameterName: String) {
 /**
  * An exception thrown when the UDF is generated with illegal types for the parameters
  */
-class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: String) : IllegalArgumentException(
+class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: String): IllegalArgumentException(
         "Parameter $parameterName is subclass of ${kClass.qualifiedName}. If you need to process an array use ${WrappedArray::class.qualifiedName}."
 )
 
@@ -39,7 +45,7 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
  * A wrapper for an UDF with 0 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper0(private val udfName: String) {
+class UDFWrapper0(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -49,11 +55,11 @@ class UDFWrapper0(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified R> UDFRegistration.register(name: String, noinline func: () -> R): UDFWrapper0 {
-    register(name, UDF0(func), schema(typeOf<R>()))
+inline fun <reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF0<R>): UDFWrapper0 {
+    register(name, func, returnType)
     return UDFWrapper0(name)
 }
 
@@ -61,7 +67,7 @@ inline fun <reified R> UDFRegistration.register(name: String, noinline func: () 
  * A wrapper for an UDF with 1 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper1(private val udfName: String) {
+class UDFWrapper1(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -71,12 +77,12 @@ class UDFWrapper1(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified R> UDFRegistration.register(name: String, noinline func: (T0) -> R): UDFWrapper1 {
+inline fun <reified T0, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF1<T0, R>): UDFWrapper1 {
     T0::class.checkForValidType("T0")
-    register(name, UDF1(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper1(name)
 }
 
@@ -84,7 +90,7 @@ inline fun <reified T0, reified R> UDFRegistration.register(name: String, noinli
  * A wrapper for an UDF with 2 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper2(private val udfName: String) {
+class UDFWrapper2(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -94,13 +100,13 @@ class UDFWrapper2(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1) -> R): UDFWrapper2 {
+inline fun <reified T0, reified T1, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF2<T0, T1, R>): UDFWrapper2 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
-    register(name, UDF2(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper2(name)
 }
 
@@ -108,7 +114,7 @@ inline fun <reified T0, reified T1, reified R> UDFRegistration.register(name: St
  * A wrapper for an UDF with 3 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper3(private val udfName: String) {
+class UDFWrapper3(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -118,14 +124,14 @@ class UDFWrapper3(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2) -> R): UDFWrapper3 {
+inline fun <reified T0, reified T1, reified T2, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF3<T0, T1, T2, R>): UDFWrapper3 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
-    register(name, UDF3(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper3(name)
 }
 
@@ -133,7 +139,7 @@ inline fun <reified T0, reified T1, reified T2, reified R> UDFRegistration.regis
  * A wrapper for an UDF with 4 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper4(private val udfName: String) {
+class UDFWrapper4(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -143,15 +149,15 @@ class UDFWrapper4(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3) -> R): UDFWrapper4 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF4<T0, T1, T2, T3, R>): UDFWrapper4 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
-    register(name, UDF4(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper4(name)
 }
 
@@ -159,7 +165,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified R> UDFRegist
  * A wrapper for an UDF with 5 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper5(private val udfName: String) {
+class UDFWrapper5(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -169,16 +175,16 @@ class UDFWrapper5(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4) -> R): UDFWrapper5 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF5<T0, T1, T2, T3, T4, R>): UDFWrapper5 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
     T4::class.checkForValidType("T4")
-    register(name, UDF5(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper5(name)
 }
 
@@ -186,7 +192,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 6 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper6(private val udfName: String) {
+class UDFWrapper6(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -196,17 +202,17 @@ class UDFWrapper6(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5) -> R): UDFWrapper6 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF6<T0, T1, T2, T3, T4, T5, R>): UDFWrapper6 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
     T4::class.checkForValidType("T4")
     T5::class.checkForValidType("T5")
-    register(name, UDF6(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper6(name)
 }
 
@@ -214,7 +220,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 7 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper7(private val udfName: String) {
+class UDFWrapper7(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -224,10 +230,10 @@ class UDFWrapper7(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6) -> R): UDFWrapper7 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF7<T0, T1, T2, T3, T4, T5, T6, R>): UDFWrapper7 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -235,7 +241,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T4::class.checkForValidType("T4")
     T5::class.checkForValidType("T5")
     T6::class.checkForValidType("T6")
-    register(name, UDF7(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper7(name)
 }
 
@@ -243,7 +249,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 8 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper8(private val udfName: String) {
+class UDFWrapper8(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -253,10 +259,10 @@ class UDFWrapper8(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7) -> R): UDFWrapper8 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF8<T0, T1, T2, T3, T4, T5, T6, T7, R>): UDFWrapper8 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -265,7 +271,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T5::class.checkForValidType("T5")
     T6::class.checkForValidType("T6")
     T7::class.checkForValidType("T7")
-    register(name, UDF8(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper8(name)
 }
 
@@ -273,7 +279,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 9 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper9(private val udfName: String) {
+class UDFWrapper9(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -283,10 +289,10 @@ class UDFWrapper9(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8) -> R): UDFWrapper9 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF9<T0, T1, T2, T3, T4, T5, T6, T7, T8, R>): UDFWrapper9 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -296,7 +302,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T6::class.checkForValidType("T6")
     T7::class.checkForValidType("T7")
     T8::class.checkForValidType("T8")
-    register(name, UDF9(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper9(name)
 }
 
@@ -304,7 +310,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 10 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper10(private val udfName: String) {
+class UDFWrapper10(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -314,10 +320,10 @@ class UDFWrapper10(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R): UDFWrapper10 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF10<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, R>): UDFWrapper10 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -328,7 +334,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T7::class.checkForValidType("T7")
     T8::class.checkForValidType("T8")
     T9::class.checkForValidType("T9")
-    register(name, UDF10(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper10(name)
 }
 
@@ -336,7 +342,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 11 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper11(private val udfName: String) {
+class UDFWrapper11(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -346,10 +352,10 @@ class UDFWrapper11(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R): UDFWrapper11 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF11<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R>): UDFWrapper11 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -361,7 +367,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T8::class.checkForValidType("T8")
     T9::class.checkForValidType("T9")
     T10::class.checkForValidType("T10")
-    register(name, UDF11(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper11(name)
 }
 
@@ -369,7 +375,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 12 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper12(private val udfName: String) {
+class UDFWrapper12(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -379,10 +385,10 @@ class UDFWrapper12(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) -> R): UDFWrapper12 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF12<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R>): UDFWrapper12 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -395,7 +401,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T9::class.checkForValidType("T9")
     T10::class.checkForValidType("T10")
     T11::class.checkForValidType("T11")
-    register(name, UDF12(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper12(name)
 }
 
@@ -403,7 +409,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 13 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper13(private val udfName: String) {
+class UDFWrapper13(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -413,10 +419,10 @@ class UDFWrapper13(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) -> R): UDFWrapper13 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF13<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R>): UDFWrapper13 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -430,7 +436,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T10::class.checkForValidType("T10")
     T11::class.checkForValidType("T11")
     T12::class.checkForValidType("T12")
-    register(name, UDF13(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper13(name)
 }
 
@@ -438,7 +444,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 14 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper14(private val udfName: String) {
+class UDFWrapper14(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -448,10 +454,10 @@ class UDFWrapper14(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) -> R): UDFWrapper14 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF14<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R>): UDFWrapper14 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -466,7 +472,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T11::class.checkForValidType("T11")
     T12::class.checkForValidType("T12")
     T13::class.checkForValidType("T13")
-    register(name, UDF14(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper14(name)
 }
 
@@ -474,7 +480,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 15 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper15(private val udfName: String) {
+class UDFWrapper15(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -484,10 +490,10 @@ class UDFWrapper15(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) -> R): UDFWrapper15 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF15<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R>): UDFWrapper15 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -503,7 +509,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T12::class.checkForValidType("T12")
     T13::class.checkForValidType("T13")
     T14::class.checkForValidType("T14")
-    register(name, UDF15(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper15(name)
 }
 
@@ -511,7 +517,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 16 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper16(private val udfName: String) {
+class UDFWrapper16(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -521,10 +527,10 @@ class UDFWrapper16(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) -> R): UDFWrapper16 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF16<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R>): UDFWrapper16 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -541,7 +547,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T13::class.checkForValidType("T13")
     T14::class.checkForValidType("T14")
     T15::class.checkForValidType("T15")
-    register(name, UDF16(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper16(name)
 }
 
@@ -549,7 +555,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 17 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper17(private val udfName: String) {
+class UDFWrapper17(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -559,10 +565,10 @@ class UDFWrapper17(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) -> R): UDFWrapper17 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF17<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R>): UDFWrapper17 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -580,7 +586,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T14::class.checkForValidType("T14")
     T15::class.checkForValidType("T15")
     T16::class.checkForValidType("T16")
-    register(name, UDF17(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper17(name)
 }
 
@@ -588,7 +594,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 18 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper18(private val udfName: String) {
+class UDFWrapper18(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -598,10 +604,10 @@ class UDFWrapper18(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) -> R): UDFWrapper18 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF18<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R>): UDFWrapper18 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -620,7 +626,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T15::class.checkForValidType("T15")
     T16::class.checkForValidType("T16")
     T17::class.checkForValidType("T17")
-    register(name, UDF18(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper18(name)
 }
 
@@ -628,7 +634,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 19 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper19(private val udfName: String) {
+class UDFWrapper19(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -638,10 +644,10 @@ class UDFWrapper19(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) -> R): UDFWrapper19 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF19<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R>): UDFWrapper19 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -661,7 +667,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T16::class.checkForValidType("T16")
     T17::class.checkForValidType("T17")
     T18::class.checkForValidType("T18")
-    register(name, UDF19(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper19(name)
 }
 
@@ -669,7 +675,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 20 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper20(private val udfName: String) {
+class UDFWrapper20(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -679,10 +685,10 @@ class UDFWrapper20(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) -> R): UDFWrapper20 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF20<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R>): UDFWrapper20 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -703,7 +709,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T17::class.checkForValidType("T17")
     T18::class.checkForValidType("T18")
     T19::class.checkForValidType("T19")
-    register(name, UDF20(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper20(name)
 }
 
@@ -711,7 +717,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 21 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper21(private val udfName: String) {
+class UDFWrapper21(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -721,10 +727,10 @@ class UDFWrapper21(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) -> R): UDFWrapper21 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF21<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R>): UDFWrapper21 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -746,7 +752,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T18::class.checkForValidType("T18")
     T19::class.checkForValidType("T19")
     T20::class.checkForValidType("T20")
-    register(name, UDF21(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper21(name)
 }
 
@@ -754,7 +760,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for an UDF with 22 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper22(private val udfName: String) {
+class UDFWrapper22(val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
      */
@@ -764,10 +770,10 @@ class UDFWrapper22(private val udfName: String) {
 }
 
 /**
- * Registers the [func] with its [name] in [this]
+ * Registers the [func] with its [name] and [returnType] in [this]
  */
 @OptIn(ExperimentalStdlibApi::class)
-inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified T21, reified R> UDFRegistration.register(name: String, noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) -> R): UDFWrapper22 {
+inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified T21, reified R> UDFRegistration.register(name: String, returnType: DataType = schema(typeOf<R>()), func:UDF22<T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R>): UDFWrapper22 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
@@ -790,7 +796,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T19::class.checkForValidType("T19")
     T20::class.checkForValidType("T20")
     T21::class.checkForValidType("T21")
-    register(name, UDF22(func), schema(typeOf<R>()))
+    register(name, func, returnType)
     return UDFWrapper22(name)
 }
 
