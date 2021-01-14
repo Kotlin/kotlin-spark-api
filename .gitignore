@@ -181,11 +181,11 @@ hs_err_pid*
 
 ### Maven ###
 target/
-pom.xml.tag
-pom.xml.bak
-pom.xml.releaseBackup
-pom.xml.versionsBackup
-pom.xml.next
+pom*.xml.tag
+pom*.xml.bak
+pom*.xml.releaseBackup
+pom*.xml.versionsBackup
+pom*.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
