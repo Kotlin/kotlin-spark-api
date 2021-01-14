@@ -220,7 +220,7 @@
           <localCheckout>true</localCheckout>
           <pushChanges>false</pushChanges>
           <mavenExecutorId>forked-path</mavenExecutorId>
-          <releaseProfiles>scala-2.11,scala-2.12,performRelease</releaseProfiles>
+          <releaseProfiles>scala-2.11,scala-2.12,release-sign</releaseProfiles>
         </configuration>
       </plugin>
       <plugin>

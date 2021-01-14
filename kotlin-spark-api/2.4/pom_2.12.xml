@@ -80,7 +80,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
       </plugin>
-      <!--<plugin>
+      <plugin>
         <groupId>org.jetbrains.dokka</groupId>
         <artifactId>dokka-maven-plugin</artifactId>
         <version>${dokka.version}</version>
@@ -103,7 +103,7 @@
             <phase>pre-integration-test</phase>
           </execution>
         </executions>
-      </plugin>-->
+      </plugin>
       <plugin>
         <groupId>io.qameta.allure</groupId>
         <artifactId>allure-maven</artifactId>
