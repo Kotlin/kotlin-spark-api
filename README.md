@@ -29,7 +29,9 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 | Apache Spark | Scala |  Kotlin for Apache Spark |
 |:------------:|:-----------:|:------------:|
-| 3.0.0        | 2.12 | kotlin-spark-api-3.0.0_2.12:1.0.0-preview1    |
+| 3.0.0+        | 2.12 | kotlin-spark-api-3.0.0:1.0.0-preview2    |
+| 2.4.1+        | 2.12 | kotlin-spark-api-2.4_2.12:1.0.0-preview2 |
+| 2.4.1+        | 2.11 | kotlin-spark-api-2.4_2.11:1.0.0-preview2 |
 
 ## Releases
 
@@ -48,7 +50,7 @@ Here's an example `pom.xml`:
 ```xml
 <dependency>
   <groupId>org.jetbrains.kotlinx.spark</groupId>
-  <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
+  <artifactId>kotlin-spark-api-3.0.0</artifactId>
   <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
