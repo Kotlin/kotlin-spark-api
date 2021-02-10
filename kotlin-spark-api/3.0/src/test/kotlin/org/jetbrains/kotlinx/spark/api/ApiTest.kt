@@ -21,7 +21,10 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import org.apache.spark.sql.Dataset
 import java.io.Serializable
+import java.sql.Date
+import java.time.Instant
 import java.time.LocalDate
 
 class ApiTest : ShouldSpec({
@@ -168,6 +171,18 @@ class ApiTest : ShouldSpec({
                         .collectAsList()
 
                 expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
+            }
+            should("handle LocalDate Datasets") {
+                val dataset: Dataset<LocalDate> = dsOf(LocalDate.now(), LocalDate.now())
+                dataset.show()
+            }
+            should("handle Instant Datasets") {
+                val dataset: Dataset<Instant> = dsOf(Instant.now(), Instant.now())
+                dataset.show()
+            }
+            should("be able to serialize Date") {
+                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
+                dataset.show()
             }
         }
     }
