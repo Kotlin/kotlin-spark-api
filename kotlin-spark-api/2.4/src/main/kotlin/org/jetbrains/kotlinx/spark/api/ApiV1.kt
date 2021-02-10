@@ -364,6 +364,7 @@ private val knownDataTypes = mapOf(
         Double::class to DataTypes.DoubleType,
         String::class to DataTypes.StringType,
         LocalDate::class to `DateType$`.`MODULE$`,
+        Date::class to `DateType$`.`MODULE$`,
         Instant::class to `TimestampType$`.`MODULE$`
 )
 
