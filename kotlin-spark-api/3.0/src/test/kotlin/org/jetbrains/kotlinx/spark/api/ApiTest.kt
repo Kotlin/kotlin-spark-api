@@ -28,7 +28,6 @@ import java.time.LocalDate
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
 import scala.collection.mutable.Map as ScalaMutableMap
-import scala.collection.immutable.List as ScalaList
 
 class ApiTest : ShouldSpec({
     context("integration tests") {
