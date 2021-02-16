@@ -23,6 +23,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkContext
 import org.apache.spark.api.java.function.*
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.JavaTypeInference
@@ -62,6 +63,17 @@ val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
         Timestamp::class to TIMESTAMP(),
         ByteArray::class to BINARY()
 )
+
+/**
+ * Broadcast a read-only variable to the cluster, returning a
+ * [[org.apache.spark.broadcast.Broadcast]] object for reading it in distributed functions.
+ * The variable will be sent to each cluster only once.
+ *
+ * @param value value to broadcast to the Spark nodes
+ * @return `Broadcast` object, a read-only variable cached on each machine
+ */
+inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = broadcast(value, encoder<T>().clsTag())
+
 
 /**
  * Utility method to create dataset from list
@@ -268,6 +280,9 @@ inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Arr
  * Useful for debug purposes when you need to view content of a dataset as an intermediate operation
  */
 fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply { show(numRows, truncate) }
+
+@OptIn(ExperimentalStdlibApi::class)
+inline fun <reified T> schema(map: Map<String, KType> = mapOf()) = schema(typeOf<T>(), map)
 
 @OptIn(ExperimentalStdlibApi::class)
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {

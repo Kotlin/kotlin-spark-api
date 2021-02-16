@@ -21,6 +21,7 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import java.io.Serializable
 import java.time.LocalDate
 
 class ApiTest : ShouldSpec({
@@ -136,7 +137,25 @@ class ApiTest : ShouldSpec({
                 expect(result).asExpect().contains.inOrder.only.values(2, 3, 4, 5)
 
             }
+            @OptIn(ExperimentalStdlibApi::class)
+            should("broadcast variables") {
+                val largeList = (1..15).map { SomeClass(a = (it..15).toList().toIntArray(), b = it) }
+                val broadcast = spark.sparkContext.broadcast(largeList)
+                
+                val result: List<Int> = listOf(1, 2, 3, 4, 5)
+                        .toDS()
+                        .mapPartitions { iterator ->
+                            val receivedBroadcast = broadcast.value
+                            buildList {
+                                iterator.forEach {
+                                    this.add(it + receivedBroadcast[it].b)
+                                }
+                            }.iterator()
+                        }
+                        .collectAsList()
 
+                expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
+            }
         }
     }
 })
@@ -161,3 +180,6 @@ data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>) {
         return result
     }
 }
+
+// (data) class must be Serializable to be broadcast
+data class SomeClass(val a: IntArray, val b: Int) : Serializable

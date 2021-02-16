@@ -1,4 +1,4 @@
-# Kotlin for Apache® Spark™ [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.jetbrains.kotlinx.spark%20AND%20v:1.0.0-preview1)
+# Kotlin for Apache® Spark™ [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.jetbrains.kotlinx.spark%20AND%20v:1.0.0-preview1) [![official JetBrains project](http://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 
 Your next API to work with  [Apache Spark](https://spark.apache.org/). 
@@ -29,7 +29,9 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 | Apache Spark | Scala |  Kotlin for Apache Spark |
 |:------------:|:-----------:|:------------:|
-| 3.0.0        | 2.12 | kotlin-spark-api-3.0.0_2.12:1.0.0-preview1    |
+| 3.0.0+        | 2.12 | kotlin-spark-api-3.0.0:1.0.0-preview2    |
+| 2.4.1+        | 2.12 | kotlin-spark-api-2.4_2.12:1.0.0-preview2 |
+| 2.4.1+        | 2.11 | kotlin-spark-api-2.4_2.11:1.0.0-preview2 |
 
 ## Releases
 
@@ -48,7 +50,7 @@ Here's an example `pom.xml`:
 ```xml
 <dependency>
   <groupId>org.jetbrains.kotlinx.spark</groupId>
-  <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
+  <artifactId>kotlin-spark-api-3.0.0</artifactId>
   <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
