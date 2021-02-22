@@ -21,9 +21,11 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import org.apache.spark.sql.Dataset
 import io.kotest.matchers.shouldBe
 import scala.collection.Seq
 import java.io.Serializable
+import java.sql.Date
 import java.time.LocalDate
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
@@ -161,6 +163,11 @@ class ApiTest : ShouldSpec({
 
                 expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
             }
+
+            should("be able to serialize Date") {
+                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
+                dataset.show()
+            }
             should("Handle JavaConversions in Kotlin") {
                 // Test the iterator conversion
                 val scalaIterator: ScalaIterator<String> = listOf("test1", "test2").iterator().asScalaIterator()
@@ -195,6 +202,7 @@ class ApiTest : ShouldSpec({
                 val kotlinList: List<String> = scalaSeq.asKotlinList()
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
+
             }
         }
     }
