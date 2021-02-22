@@ -29,8 +29,31 @@ import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.types.*
 import org.jetbrains.kotinx.spark.extensions.KSparkExtensions
+import scala.Tuple1
+import scala.Tuple2
+import scala.Tuple3
+import scala.Tuple4
+import scala.Tuple5
+import scala.Tuple6
+import scala.Tuple7
+import scala.Tuple8
+import scala.Tuple9
+import scala.Tuple10
+import scala.Tuple11
+import scala.Tuple12
+import scala.Tuple13
+import scala.Tuple14
+import scala.Tuple15
+import scala.Tuple16
+import scala.Tuple17
+import scala.Tuple18
+import scala.Tuple19
+import scala.Tuple20
+import scala.Tuple21
+import scala.Tuple22
 import scala.reflect.ClassTag
 import java.beans.PropertyDescriptor
+import org.apache.spark.sql.catalyst.*
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
@@ -42,6 +65,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.typeOf
 
 @JvmField
@@ -106,6 +130,7 @@ inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::c
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     @Suppress("UNCHECKED_CAST")
     return when {
+        isTuple(cls) -> tupleEncoder(type)
         isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
         else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
     } as Encoder<T>
@@ -122,6 +147,46 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
             if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java, schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
             ClassTag.apply(kClass.java)
     )
+}
+
+private fun isTuple(cls: KClass<*>): Boolean = listOf(
+    Tuple1::class,
+    Tuple2::class,
+    Tuple3::class,
+    Tuple4::class,
+    Tuple5::class,
+    Tuple6::class,
+    Tuple7::class,
+    Tuple8::class,
+    Tuple9::class,
+    Tuple10::class,
+    Tuple11::class,
+    Tuple12::class,
+    Tuple13::class,
+    Tuple14::class,
+    Tuple15::class,
+    Tuple16::class,
+    Tuple17::class,
+    Tuple18::class,
+    Tuple19::class,
+    Tuple20::class,
+    Tuple21::class,
+    Tuple22::class,
+).any { cls.isSubclassOf(it) }
+
+@Suppress("UNCHECKED_CAST")
+private fun <T> tupleEncoder(type: KType): Encoder<T> {
+    val encoders: List<Encoder<Any>> = type.arguments.map {
+        generateEncoder(it.type!!, it.type!!.jvmErasure)
+    }
+
+    return when (encoders.size) {
+        2 -> tuple(encoders[0], encoders[1])
+        3 -> tuple(encoders[0], encoders[1], encoders[2])
+        4 -> tuple(encoders[0], encoders[1], encoders[2], encoders[3])
+        5 -> tuple(encoders[0], encoders[1], encoders[2], encoders[3], encoders[4])
+        else -> throw IllegalArgumentException("Cannot encode a tuple with ${encoders.size} arguments at the moment.")
+    } as Encoder<T>
 }
 
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =

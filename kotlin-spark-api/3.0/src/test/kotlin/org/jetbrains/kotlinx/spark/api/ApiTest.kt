@@ -23,6 +23,8 @@ import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import org.apache.spark.sql.Dataset
 import io.kotest.matchers.shouldBe
+import scala.Tuple2
+import scala.Tuple3
 import scala.collection.Seq
 import java.io.Serializable
 import java.sql.Date
@@ -224,6 +226,15 @@ class ApiTest : ShouldSpec({
                 val kotlinList: List<String> = scalaSeq.asKotlinList()
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
+            }
+            should("Be able to serialize Scala Tuples") {
+                val dataset = dsOf(
+                    Tuple2("a", Tuple3("a", 1, 5L)),
+                    Tuple2("b", Tuple3("b", 2, 6L)),
+                )
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first() shouldBe Tuple2("a", Tuple3("a", 1, 5L))
             }
         }
     }
