@@ -21,8 +21,13 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.shouldBe
+import scala.collection.Seq
 import java.io.Serializable
 import java.time.LocalDate
+import scala.collection.Iterator as ScalaIterator
+import scala.collection.Map as ScalaMap
+import scala.collection.mutable.Map as ScalaMutableMap
 
 class ApiTest : ShouldSpec({
     context("integration tests") {
@@ -168,6 +173,41 @@ class ApiTest : ShouldSpec({
                         .collectAsList()
 
                 expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
+            }
+            should("Handle JavaConversions in Kotlin") {
+                // Test the iterator conversion
+                val scalaIterator: ScalaIterator<String> = listOf("test1", "test2").iterator().asScalaIterator()
+                scalaIterator.next() shouldBe "test1"
+
+                val kotlinIterator: Iterator<String> = scalaIterator.asKotlinIterator()
+                kotlinIterator.next() shouldBe "test2"
+
+
+                val scalaMap: ScalaMap<Int, String> = mapOf(1 to "a", 2 to "b").asScalaMap()
+                scalaMap.get(1).get() shouldBe "a"
+                scalaMap.get(2).get() shouldBe "b"
+
+                val kotlinMap: Map<Int, String> = scalaMap.asKotlinMap()
+                kotlinMap[1] shouldBe "a"
+                kotlinMap[2] shouldBe "b"
+
+
+                val scalaMutableMap: ScalaMutableMap<Int, String> = mutableMapOf(1 to "a").asScalaMutableMap()
+                scalaMutableMap.get(1).get() shouldBe "a"
+
+                scalaMutableMap.put(2, "b")
+
+                val kotlinMutableMap: MutableMap<Int, String> = scalaMutableMap.asKotlinMutableMap()
+                kotlinMutableMap[1] shouldBe "a"
+                kotlinMutableMap[2] shouldBe "b"
+
+                val scalaSeq: Seq<String> = listOf("a", "b").iterator().asScalaIterator().toSeq()
+                scalaSeq.take(1).toList().last() shouldBe "a"
+                scalaSeq.take(2).toList().last() shouldBe "b"
+
+                val kotlinList: List<String> = scalaSeq.asKotlinList()
+                kotlinList.first() shouldBe "a"
+                kotlinList.last() shouldBe "b"
             }
         }
     }
