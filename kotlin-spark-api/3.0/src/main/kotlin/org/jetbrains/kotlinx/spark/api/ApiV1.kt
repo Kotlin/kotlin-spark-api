@@ -33,6 +33,7 @@ import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
 import org.jetbrains.kotinx.spark.extensions.KSparkExtensions
+import scala.*
 import scala.reflect.ClassTag
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
@@ -47,6 +48,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.typeOf
 
 @JvmField
@@ -131,6 +133,7 @@ inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::c
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     @Suppress("UNCHECKED_CAST")
     return when {
+        isTuple(cls) -> tupleEncoder(type)
         isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
         else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
     } as Encoder<T>
@@ -147,6 +150,45 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
             if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java, schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
             ClassTag.apply(kClass.java)
     )
+}
+
+private fun isTuple(cls: KClass<*>): Boolean = listOf(
+    Tuple1::class,
+    Tuple2::class,
+    Tuple3::class,
+    Tuple4::class,
+    Tuple5::class,
+    Tuple6::class,
+    Tuple7::class,
+    Tuple8::class,
+    Tuple9::class,
+    Tuple10::class,
+    Tuple11::class,
+    Tuple12::class,
+    Tuple13::class,
+    Tuple14::class,
+    Tuple15::class,
+    Tuple16::class,
+    Tuple17::class,
+    Tuple18::class,
+    Tuple19::class,
+    Tuple20::class,
+    Tuple21::class,
+    Tuple22::class,
+).any { cls.isSubclassOf(it) }
+
+@Suppress("UNCHECKED_CAST")
+private fun <T> tupleEncoder(type: KType): Encoder<T> {
+    val encoders: List<Encoder<Any>> = type.arguments.map {
+        generateEncoder(it.type!!, it.type!!.jvmErasure)
+    }
+    return when (encoders.size) {
+        2 -> tuple(encoders[0], encoders[1])
+        3 -> tuple(encoders[0], encoders[1], encoders[2])
+        4 -> tuple(encoders[0], encoders[1], encoders[2], encoders[3])
+        5 -> tuple(encoders[0], encoders[1], encoders[2], encoders[3], encoders[4])
+        else -> throw IllegalArgumentException("Cannot encode a tuple with ${encoders.size} arguments at the moment.")
+    } as Encoder<T>
 }
 
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
@@ -407,6 +449,20 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                             .toTypedArray()
             )
             KDataTypeWrapper(structType, klass.java, true)
+        }
+        klass.isSubclassOf(Product::class) -> {
+            throw IllegalArgumentException("$type is unsupported")
+            // TODO This should provide a datatype for products such as tuples but it does not work yet
+
+            val structType = DataTypes.createStructType(
+                type.arguments.mapIndexed { i, it ->
+                    val projectedType = it.type!!
+                    val name = "_${i + 1}"
+                    val structField = StructField(name, schema(projectedType, types), projectedType.isMarkedNullable, Metadata.empty())
+                    KStructField(name, structField)
+                }.toTypedArray()
+            )
+            KDataTypeWrapper(structType, klass.java, type.isMarkedNullable)
         }
         else -> throw IllegalArgumentException("$type is unsupported")
     }
