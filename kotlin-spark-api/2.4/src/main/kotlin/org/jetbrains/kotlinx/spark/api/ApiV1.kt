@@ -111,6 +111,7 @@ inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::c
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     @Suppress("UNCHECKED_CAST")
     return when {
+        isTuple(cls) -> tupleEncoder(type)
         isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
         else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
     } as Encoder<T>
