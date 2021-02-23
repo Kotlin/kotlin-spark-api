@@ -29,31 +29,9 @@ import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.types.*
 import org.jetbrains.kotinx.spark.extensions.KSparkExtensions
-import scala.Tuple1
-import scala.Tuple2
-import scala.Tuple3
-import scala.Tuple4
-import scala.Tuple5
-import scala.Tuple6
-import scala.Tuple7
-import scala.Tuple8
-import scala.Tuple9
-import scala.Tuple10
-import scala.Tuple11
-import scala.Tuple12
-import scala.Tuple13
-import scala.Tuple14
-import scala.Tuple15
-import scala.Tuple16
-import scala.Tuple17
-import scala.Tuple18
-import scala.Tuple19
-import scala.Tuple20
-import scala.Tuple21
-import scala.Tuple22
 import scala.reflect.ClassTag
 import java.beans.PropertyDescriptor
-import org.apache.spark.sql.catalyst.*
+import scala.*
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
@@ -179,7 +157,6 @@ private fun <T> tupleEncoder(type: KType): Encoder<T> {
     val encoders: List<Encoder<Any>> = type.arguments.map {
         generateEncoder(it.type!!, it.type!!.jvmErasure)
     }
-
     return when (encoders.size) {
         2 -> tuple(encoders[0], encoders[1])
         3 -> tuple(encoders[0], encoders[1], encoders[2])
@@ -395,6 +372,20 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                             .toTypedArray()
             )
             KDataTypeWrapper(structType, klass.java, true)
+        }
+        klass.isSubclassOf(Product::class) -> {
+            throw IllegalArgumentException("$type is unsupported")
+            // TODO This should provide a datatype for products such as tuples but it does not work yet
+
+            val structType = DataTypes.createStructType(
+                type.arguments.mapIndexed { i, it ->
+                    val projectedType = it.type!!
+                    val name = "_${i + 1}"
+                    val structField = StructField(name, schema(projectedType, types), projectedType.isMarkedNullable, Metadata.empty())
+                    KStructField(name, structField)
+                }.toTypedArray()
+            )
+            KDataTypeWrapper(structType, klass.java, type.isMarkedNullable)
         }
         else -> throw IllegalArgumentException("$type is unsupported")
     }
