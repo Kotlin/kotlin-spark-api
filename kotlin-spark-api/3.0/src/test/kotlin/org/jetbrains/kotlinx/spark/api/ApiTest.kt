@@ -23,6 +23,9 @@ import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import org.apache.spark.sql.Dataset
 import io.kotest.matchers.shouldBe
+import org.apache.spark.sql.Encoders
+import scala.Tuple2
+import scala.Tuple3
 import scala.collection.Seq
 import java.io.Serializable
 import java.sql.Date
@@ -225,9 +228,31 @@ class ApiTest : ShouldSpec({
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
             }
+            should("Be able to serialize Scala Tuples including data classes") {
+                val dataset = dsOf(
+                    Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
+                    Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
+                )
+
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
+            }
+            should("Be able to serialize data classes with tuples") {
+                val dataset = dsOf(
+                    DataClassWithTuple(Tuple2(5L, "test")),
+                    DataClassWithTuple(Tuple2(6L, "tessst")),
+                )
+
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first().tuple shouldBe Tuple2(5L, "test")
+            }
         }
     }
 })
+
+data class DataClassWithTuple(val tuple: Tuple2<Long, String>)
 
 data class LonLat(val lon: Double, val lat: Double)
 
