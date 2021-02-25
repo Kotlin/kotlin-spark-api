@@ -30,6 +30,9 @@ import org.apache.spark.sql.catalyst.JavaTypeInference
 import org.apache.spark.sql.catalyst.KotlinReflection
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.expressions.Expression
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
+import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.collection.Seq
@@ -42,6 +45,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
@@ -158,6 +162,58 @@ inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(
 inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroups(noinline func: (VALUE, VALUE) -> VALUE): Dataset<Pair<KEY, VALUE>> =
         reduceGroups(ReduceFunction(func))
                 .map { t -> t._1 to t._2 }
+
+inline fun <K, V, reified U> KeyValueGroupedDataset<K, V>.flatMapGroups(
+    noinline func: (key: K, values: Iterator<V>) -> Iterator<U>
+): Dataset<U> = flatMapGroups(
+    FlatMapGroupsFunction(func),
+    encoder<U>()
+)
+
+fun <S> GroupState<S>.getOrNull(): S? = if (exists()) get() else null
+
+operator fun <S> GroupState<S>.getValue(thisRef: Any?, property: KProperty<*>): S? = getOrNull()
+operator fun <S> GroupState<S>.setValue(thisRef: Any?, property: KProperty<*>, value: S?): Unit = update(value)
+
+
+inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWithState(
+    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U
+): Dataset<U> = mapGroupsWithState(
+    MapGroupsWithStateFunction(func),
+    encoder<S>(),
+    encoder<U>()
+)
+
+inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWithState(
+    timeoutConf: GroupStateTimeout,
+    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U
+): Dataset<U> = mapGroupsWithState(
+    MapGroupsWithStateFunction(func),
+    encoder<S>(),
+    encoder<U>(),
+    timeoutConf
+)
+
+inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.flatMapGroupsWithState(
+    outputMode: OutputMode,
+    timeoutConf: GroupStateTimeout,
+    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> Iterator<U>
+): Dataset<U> = flatMapGroupsWithState(
+    FlatMapGroupsWithStateFunction(func),
+    outputMode,
+    encoder<S>(),
+    encoder<U>(),
+    timeoutConf
+)
+
+inline fun <K, V, U, reified R> KeyValueGroupedDataset<K, V>.cogroup(
+    other: KeyValueGroupedDataset<K, U>,
+    noinline func: (key: K, left: Iterator<V>, right: Iterator<U>) -> Iterator<R>
+): Dataset<R> = cogroup(
+    other,
+    CoGroupFunction(func),
+    encoder<R>()
+)
 
 inline fun <T, reified R> Dataset<T>.downcast(): Dataset<R> = `as`(encoder<R>())
 inline fun <reified R> Dataset<*>.`as`(): Dataset<R> = `as`(encoder<R>())
