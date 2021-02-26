@@ -21,9 +21,13 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.Dataset
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Encoders
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.Tuple2
 import scala.Tuple3
 import scala.collection.Seq
@@ -180,7 +184,76 @@ class ApiTest : ShouldSpec({
 
                 expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
             }
+            should("perform operations on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
+                val flatMapped = groupedDataset.flatMapGroups { key, values ->
+                    val collected = values.asSequence().toList()
+
+                    if (collected.size > 1) collected.iterator()
+                    else emptyList<Pair<Int, String>>().iterator()
+                }
+
+                flatMapped.count() shouldBe 2
+
+                val mappedWithStateTimeoutConf = groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
+                    var s by state
+                    val collected = values.asSequence().toList()
+
+                    s = key
+                    s shouldBe key
+
+                    s!! to collected.map { it.second }
+                }
+
+                mappedWithStateTimeoutConf.count() shouldBe 2
+
+                val mappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
+                    var s by state
+                    val collected = values.asSequence().toList()
+
+                    s = key
+                    s shouldBe key
+
+                    s!! to collected.map { it.second }
+                }
+
+                mappedWithState.count() shouldBe 2
+
+                val flatMappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
+                    var s by state
+                    val collected = values.asSequence().toList()
+
+                    s = key
+                    s shouldBe key
+
+                    if (collected.size > 1) collected.iterator()
+                    else emptyList<Pair<Int, String>>().iterator()
+                }
+
+                flatMappedWithState.count() shouldBe 2
+            }
+            should("be able to cogroup grouped datasets") {
+                val groupedDataset1 = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val groupedDataset2 = listOf(1 to "d", 5 to "e", 3 to "f")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val cogrouped = groupedDataset1.cogroup(groupedDataset2) { key, left, right ->
+                    listOf(
+                        key to (left.asSequence() + right.asSequence())
+                            .map { it.second }
+                            .toList()
+                    ).iterator()
+                }
+
+                cogrouped.count() shouldBe 4
+            }
             should("handle LocalDate Datasets") {
                 val dataset: Dataset<LocalDate> = dsOf(LocalDate.now(), LocalDate.now())
                 dataset.show()
@@ -248,6 +321,7 @@ class ApiTest : ShouldSpec({
 //                val asList = dataset.takeAsList(2)
 //                asList.first().tuple shouldBe Tuple2(5L, "test")
 //            }
+
         }
     }
 })
