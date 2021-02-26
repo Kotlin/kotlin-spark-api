@@ -26,8 +26,6 @@ import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.Dataset
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Encoders
-import org.apache.spark.sql.streaming.GroupState
-import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.Tuple2
 import scala.Tuple3
 import scala.collection.Seq
