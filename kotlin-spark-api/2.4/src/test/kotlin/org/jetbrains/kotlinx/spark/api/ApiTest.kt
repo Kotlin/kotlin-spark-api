@@ -140,21 +140,24 @@ class ApiTest : ShouldSpec({
             @OptIn(ExperimentalStdlibApi::class)
             should("broadcast variables") {
                 val largeList = (1..15).map { SomeClass(a = (it..15).toList().toIntArray(), b = it) }
-                val broadcast = spark.sparkContext.broadcast(largeList)
-                
-                val result: List<Int> = listOf(1, 2, 3, 4, 5)
-                        .toDS()
-                        .mapPartitions { iterator ->
-                            val receivedBroadcast = broadcast.value
-                            buildList {
-                                iterator.forEach {
-                                    this.add(it + receivedBroadcast[it].b)
-                                }
-                            }.iterator()
-                        }
-                        .collectAsList()
+                val broadcast = spark.broadcast(largeList)
+                val broadcast2 = spark.broadcast(arrayOf(doubleArrayOf(1.0, 2.0, 3.0, 4.0)))
 
-                expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
+                val result: List<Double> = listOf(1, 2, 3, 4, 5)
+                    .toDS()
+                    .mapPartitions { iterator ->
+                        val receivedBroadcast = broadcast.value
+                        val receivedBroadcast2 = broadcast2.value
+
+                        buildList {
+                            iterator.forEach {
+                                this.add(it + receivedBroadcast[it].b * receivedBroadcast2[0][0])
+                            }
+                        }.iterator()
+                    }
+                    .collectAsList()
+
+                expect(result).asExpect().contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
             }
         }
     }

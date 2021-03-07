@@ -22,6 +22,7 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkContext
+import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.function.*
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.*
@@ -72,8 +73,11 @@ val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
  * @param value value to broadcast to the Spark nodes
  * @return `Broadcast` object, a read-only variable cached on each machine
  */
-inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = broadcast(value, encoder<T>().clsTag())
-
+inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
+    sparkContext.broadcast(value, encoder<T>().clsTag())
+} catch (e: ClassNotFoundException) {
+    JavaSparkContext(sparkContext).broadcast(value)
+}
 
 /**
  * Utility method to create dataset from list
