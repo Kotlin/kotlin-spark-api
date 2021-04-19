@@ -24,6 +24,7 @@ import io.kotest.core.spec.style.ShouldSpec
 import org.apache.spark.sql.Dataset
 import java.io.Serializable
 import java.sql.Date
+import java.sql.Timestamp
 import java.time.LocalDate
 
 class ApiTest : ShouldSpec({
@@ -158,8 +159,16 @@ class ApiTest : ShouldSpec({
 
                 expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
             }
-            should("be able to serialize Date") {
+            should("be able to serialize Date") { // uses knownDataTypes
                 val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
+                dataset.show()
+            }
+            should("handle Timestamp Datasets") { // uses encoder
+                val dataset = dsOf(Timestamp(0L))
+                dataset.show()
+            }
+            should("be able to serialize Timestamp") { // uses knownDataTypes
+                val dataset = dsOf(Timestamp(0L) to 2)
                 dataset.show()
             }
         }
