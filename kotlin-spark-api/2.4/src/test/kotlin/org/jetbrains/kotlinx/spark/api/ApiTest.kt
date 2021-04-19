@@ -30,6 +30,7 @@ import scala.Tuple3
 import scala.collection.Seq
 import java.io.Serializable
 import java.sql.Date
+import java.sql.Timestamp
 import java.time.LocalDate
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
@@ -169,6 +170,18 @@ class ApiTest : ShouldSpec({
                     .collectAsList()
 
                 expect(result).asExpect().contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
+            }
+            should("be able to serialize Date") { // uses knownDataTypes
+                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
+                dataset.show()
+            }
+            should("handle Timestamp Datasets") { // uses encoder
+                val dataset = dsOf(Timestamp(0L))
+                dataset.show()
+            }
+            should("be able to serialize Timestamp") { // uses knownDataTypes
+                val dataset = dsOf(Timestamp(0L) to 2)
+                dataset.show()
             }
             should("perform operations on grouped datasets") {
                 val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
