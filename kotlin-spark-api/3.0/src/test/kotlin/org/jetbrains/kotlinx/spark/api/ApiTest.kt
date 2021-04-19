@@ -256,18 +256,6 @@ class ApiTest : ShouldSpec({
 
                 cogrouped.count() shouldBe 4
             }
-            should("handle LocalDate Datasets") {
-                val dataset: Dataset<LocalDate> = dsOf(LocalDate.now(), LocalDate.now())
-                dataset.show()
-            }
-            should("handle Instant Datasets") {
-                val dataset: Dataset<Instant> = dsOf(Instant.now(), Instant.now())
-                dataset.show()
-            }
-            should("be able to serialize Date") {
-                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
-                dataset.show()
-            }
             should("handle LocalDate Datasets") { // uses encoder
                 val dataset: Dataset<LocalDate> = dsOf(LocalDate.now(), LocalDate.now())
                 dataset.show()
