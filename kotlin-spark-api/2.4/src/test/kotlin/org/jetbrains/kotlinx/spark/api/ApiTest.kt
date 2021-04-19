@@ -171,15 +171,15 @@ class ApiTest : ShouldSpec({
 
                 expect(result).asExpect().contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
             }
-            should("be able to serialize Date") { // uses knownDataTypes
+            should("be able to serialize Date 2.4") { // uses knownDataTypes
                 val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
                 dataset.show()
             }
-            should("handle Timestamp Datasets") { // uses encoder
+            should("handle Timestamp Datasets 2.4") { // uses encoder
                 val dataset = dsOf(Timestamp(0L))
                 dataset.show()
             }
-            should("be able to serialize Timestamp") { // uses knownDataTypes
+            should("be able to serialize Timestamp 2.4") { // uses knownDataTypes
                 val dataset = dsOf(Timestamp(0L) to 2)
                 dataset.show()
             }
