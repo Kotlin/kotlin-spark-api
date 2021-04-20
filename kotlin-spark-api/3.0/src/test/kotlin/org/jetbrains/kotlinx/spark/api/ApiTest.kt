@@ -346,6 +346,21 @@ class ApiTest : ShouldSpec({
                 val asList = dataset.takeAsList(2)
                 asList.first().tuple shouldBe Tuple2(5L, "test")
             }
+            should("Be able to serialize list with tuples") {
+                val dataset = dsOf(
+                    listOf(Tuple2(5L, Tuple2(6L, "tessst"))),
+                )
+
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first() shouldBe Tuple2(5L, "test")
+            }
+            should("Be able to serialize a list with data classes") {
+                val dataset = dsOf(
+                    listOf(SomeClass(intArrayOf(1, 2, 3), 4))
+                )
+                dataset.show()
+            }
         }
     }
 })

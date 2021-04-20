@@ -451,18 +451,34 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KDataTypeWrapper(structType, klass.java, true)
         }
         klass.isSubclassOf(Product::class) -> {
-            throw IllegalArgumentException("$type is unsupported")
+//            throw IllegalArgumentException("$type is unsupported")
             // TODO This should provide a datatype for products such as tuples but it does not work yet
 
-            val structType = DataTypes.createStructType(
-                type.arguments.mapIndexed { i, it ->
-                    val projectedType = it.type!!
-                    val name = "_${i + 1}"
-                    val structField = StructField(name, schema(projectedType, types), projectedType.isMarkedNullable, Metadata.empty())
-                    KStructField(name, structField)
-                }.toTypedArray()
+            val fields = type.arguments.mapIndexed { i, it ->
+                val projectedType = it.type!!
+                val name = "_${i + 1}"
+                val propertyDescriptor = PropertyDescriptor(name, klass.java, name, null)
+
+                val structField = StructField(
+                    name,
+                    schema(projectedType, types),
+                    projectedType.isMarkedNullable,
+                    Metadata.empty(),
+                )
+                KStructField(propertyDescriptor.readMethod.name, structField)
+            }.toTypedArray()
+
+            val structType = StructType(fields)
+            val res = KDataTypeWrapper(
+                structType,
+                klass.java,
+                true,
             )
-            KDataTypeWrapper(structType, klass.java, type.isMarkedNullable)
+            val fieldNames = res.fieldNames()
+            val names = res.names()
+            val treeString = res.treeString()
+
+            res
         }
         else -> throw IllegalArgumentException("$type is unsupported")
     }
