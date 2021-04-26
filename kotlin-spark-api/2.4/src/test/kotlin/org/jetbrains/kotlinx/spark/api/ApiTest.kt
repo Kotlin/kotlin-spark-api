@@ -24,11 +24,15 @@ import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
+import scala.collection.Seq
 import org.apache.spark.sql.Dataset
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
+import scala.collection.Iterator as ScalaIterator
+import scala.collection.Map as ScalaMap
+import scala.collection.mutable.Map as ScalaMutableMap
 
 class ApiTest : ShouldSpec({
     context("integration tests") {
@@ -146,21 +150,59 @@ class ApiTest : ShouldSpec({
             @OptIn(ExperimentalStdlibApi::class)
             should("broadcast variables") {
                 val largeList = (1..15).map { SomeClass(a = (it..15).toList().toIntArray(), b = it) }
-                val broadcast = spark.sparkContext.broadcast(largeList)
-                
-                val result: List<Int> = listOf(1, 2, 3, 4, 5)
-                        .toDS()
-                        .mapPartitions { iterator ->
-                            val receivedBroadcast = broadcast.value
-                            buildList {
-                                iterator.forEach {
-                                    this.add(it + receivedBroadcast[it].b)
-                                }
-                            }.iterator()
-                        }
-                        .collectAsList()
+                val broadcast = spark.broadcast(largeList)
+                val broadcast2 = spark.broadcast(arrayOf(doubleArrayOf(1.0, 2.0, 3.0, 4.0)))
 
-                expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
+                val result: List<Double> = listOf(1, 2, 3, 4, 5)
+                    .toDS()
+                    .mapPartitions { iterator ->
+                        val receivedBroadcast = broadcast.value
+                        val receivedBroadcast2 = broadcast2.value
+
+                        buildList {
+                            iterator.forEach {
+                                this.add(it + receivedBroadcast[it].b * receivedBroadcast2[0][0])
+                            }
+                        }.iterator()
+                    }
+                    .collectAsList()
+
+                expect(result).asExpect().contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
+            }
+            should("Handle JavaConversions in Kotlin") {
+                // Test the iterator conversion
+                val scalaIterator: ScalaIterator<String> = listOf("test1", "test2").iterator().asScalaIterator()
+                scalaIterator.next() shouldBe "test1"
+
+                val kotlinIterator: Iterator<String> = scalaIterator.asKotlinIterator()
+                kotlinIterator.next() shouldBe "test2"
+
+
+                val scalaMap: ScalaMap<Int, String> = mapOf(1 to "a", 2 to "b").asScalaMap()
+                scalaMap.get(1).get() shouldBe "a"
+                scalaMap.get(2).get() shouldBe "b"
+
+                val kotlinMap: Map<Int, String> = scalaMap.asKotlinMap()
+                kotlinMap[1] shouldBe "a"
+                kotlinMap[2] shouldBe "b"
+
+
+                val scalaMutableMap: ScalaMutableMap<Int, String> = mutableMapOf(1 to "a").asScalaMutableMap()
+                scalaMutableMap.get(1).get() shouldBe "a"
+
+                scalaMutableMap.put(2, "b")
+
+                val kotlinMutableMap: MutableMap<Int, String> = scalaMutableMap.asKotlinMutableMap()
+                kotlinMutableMap[1] shouldBe "a"
+                kotlinMutableMap[2] shouldBe "b"
+
+                val scalaSeq: Seq<String> = listOf("a", "b").iterator().asScalaIterator().toSeq()
+                scalaSeq.take(1).toList().last() shouldBe "a"
+                scalaSeq.take(2).toList().last() shouldBe "b"
+
+                val kotlinList: List<String> = scalaSeq.asKotlinList()
+                kotlinList.first() shouldBe "a"
+                kotlinList.last() shouldBe "b"
             }
             should("perform flat map on grouped datasets") {
                 val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
