@@ -24,7 +24,10 @@ import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
+import org.apache.spark.sql.Dataset
 import java.io.Serializable
+import java.sql.Date
+import java.sql.Timestamp
 import java.time.LocalDate
 
 class ApiTest : ShouldSpec({
@@ -228,6 +231,18 @@ class ApiTest : ShouldSpec({
                 }
 
                 cogrouped.count() shouldBe 4
+            }
+            should("be able to serialize Date 2.4") { // uses knownDataTypes
+                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
+                dataset.show()
+            }
+            should("handle Timestamp Datasets 2.4") { // uses encoder
+                val dataset = dsOf(Timestamp(0L))
+                dataset.show()
+            }
+            should("be able to serialize Timestamp 2.4") { // uses knownDataTypes
+                val dataset = dsOf(Timestamp(0L) to 2)
+                dataset.show()
             }
         }
     }

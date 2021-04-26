@@ -60,7 +60,9 @@ val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
         String::class to STRING(),
         BigDecimal::class to DECIMAL(),
         Date::class to DATE(),
+        LocalDate::class to LOCALDATE(), // 3.0 only
         Timestamp::class to TIMESTAMP(),
+        Instant::class to INSTANT(), // 3.0 only
         ByteArray::class to BINARY()
 )
 
@@ -407,6 +409,8 @@ private val knownDataTypes = mapOf(
         Double::class to DataTypes.DoubleType,
         String::class to DataTypes.StringType,
         LocalDate::class to `DateType$`.`MODULE$`,
+        Date::class to `DateType$`.`MODULE$`,
+        Timestamp::class to `TimestampType$`.`MODULE$`,
         Instant::class to `TimestampType$`.`MODULE$`
 )
 
