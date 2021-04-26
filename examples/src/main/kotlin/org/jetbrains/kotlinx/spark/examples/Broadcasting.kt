@@ -29,7 +29,7 @@ import java.io.Serializable
 data class SomeClass(val a: IntArray, val b: Int) : Serializable
 
 fun main() = withSpark {
-    val broadcastVariable = spark.sparkContext.broadcast(SomeClass(a = intArrayOf(5, 6), b = 3))
+    val broadcastVariable = spark.broadcast(SomeClass(a = intArrayOf(5, 6), b = 3))
     val result = listOf(1, 2, 3, 4, 5)
             .toDS()
             .map {
