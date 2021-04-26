@@ -22,6 +22,8 @@ import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
 import java.io.Serializable
@@ -215,6 +217,92 @@ class ApiTest : ShouldSpec({
                 val kotlinList: List<String> = scalaSeq.asKotlinList()
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
+            }
+            should("perform flat map on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val flatMapped = groupedDataset.flatMapGroups { key, values ->
+                    val collected = values.asSequence().toList()
+
+                    if (collected.size > 1) collected.iterator()
+                    else emptyList<Pair<Int, String>>().iterator()
+                }
+
+                flatMapped.count() shouldBe 2
+            }
+            should("perform map group with state and timeout conf on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val mappedWithStateTimeoutConf =
+                    groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
+                        var s by state
+                        val collected = values.asSequence().toList()
+
+                        s = key
+                        s shouldBe key
+
+                        s!! to collected.map { it.second }
+                    }
+
+                mappedWithStateTimeoutConf.count() shouldBe 2
+            }
+            should("perform map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val mappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
+                    var s by state
+                    val collected = values.asSequence().toList()
+
+                    s = key
+                    s shouldBe key
+
+                    s!! to collected.map { it.second }
+                }
+
+                mappedWithState.count() shouldBe 2
+            }
+            should("perform flat map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val flatMappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
+                    var s by state
+                    val collected = values.asSequence().toList()
+
+                    s = key
+                    s shouldBe key
+
+                    if (collected.size > 1) collected.iterator()
+                    else emptyList<Pair<Int, String>>().iterator()
+                }
+
+                flatMappedWithState.count() shouldBe 2
+            }
+            should("be able to cogroup grouped datasets") {
+                val groupedDataset1 = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val groupedDataset2 = listOf(1 to "d", 5 to "e", 3 to "f")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val cogrouped = groupedDataset1.cogroup(groupedDataset2) { key, left, right ->
+                    listOf(
+                        key to (left.asSequence() + right.asSequence())
+                            .map { it.second }
+                            .toList()
+                    ).iterator()
+                }
+
+                cogrouped.count() shouldBe 4
             }
             should("handle LocalDate Datasets") { // uses encoder
                 val dataset: Dataset<LocalDate> = dsOf(LocalDate.now(), LocalDate.now())
