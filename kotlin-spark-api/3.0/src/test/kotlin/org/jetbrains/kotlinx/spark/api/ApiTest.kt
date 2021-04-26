@@ -176,7 +176,7 @@ class ApiTest : ShouldSpec({
 
                 expect(result).asExpect().contains.inOrder.only.values(3, 5, 7, 9, 11)
             }
-            should("perform operations on grouped datasets") {
+            should("perform flat map on grouped datasets") {
                 val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
                     .toDS()
                     .groupByKey { it.first }
@@ -189,18 +189,29 @@ class ApiTest : ShouldSpec({
                 }
 
                 flatMapped.count() shouldBe 2
+            }
+            should("perform map group with state and timeout conf on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
-                val mappedWithStateTimeoutConf = groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
-                    var s by state
-                    val collected = values.asSequence().toList()
+                val mappedWithStateTimeoutConf =
+                    groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
+                        var s by state
+                        val collected = values.asSequence().toList()
 
-                    s = key
-                    s shouldBe key
+                        s = key
+                        s shouldBe key
 
-                    s!! to collected.map { it.second }
-                }
+                        s!! to collected.map { it.second }
+                    }
 
                 mappedWithStateTimeoutConf.count() shouldBe 2
+            }
+            should("perform map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
                 val mappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
                     var s by state
@@ -213,6 +224,11 @@ class ApiTest : ShouldSpec({
                 }
 
                 mappedWithState.count() shouldBe 2
+            }
+            should("perform flat map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
                 val flatMappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
                     var s by state
