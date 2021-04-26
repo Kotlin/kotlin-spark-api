@@ -64,7 +64,7 @@ val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
 
 /**
  * Broadcast a read-only variable to the cluster, returning a
- * [[org.apache.spark.broadcast.Broadcast]] object for reading it in distributed functions.
+ * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
  * The variable will be sent to each cluster only once.
  *
  * @param value value to broadcast to the Spark nodes
@@ -74,6 +74,22 @@ inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
     sparkContext.broadcast(value, encoder<T>().clsTag())
 } catch (e: ClassNotFoundException) {
     JavaSparkContext(sparkContext).broadcast(value)
+}
+
+/**
+ * Broadcast a read-only variable to the cluster, returning a
+ * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
+ * The variable will be sent to each cluster only once.
+ *
+ * @param value value to broadcast to the Spark nodes
+ * @return `Broadcast` object, a read-only variable cached on each machine
+ * @see broadcast
+ */
+@Deprecated("You can now use `spark.broadcast()` instead.", ReplaceWith("spark.broadcast(value)"), DeprecationLevel.WARNING)
+inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
+    broadcast(value, encoder<T>().clsTag())
+} catch (e: ClassNotFoundException) {
+    JavaSparkContext(this).broadcast(value)
 }
 
 /**
