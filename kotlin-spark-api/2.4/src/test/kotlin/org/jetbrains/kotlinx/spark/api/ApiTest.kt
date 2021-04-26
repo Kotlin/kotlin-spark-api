@@ -23,7 +23,10 @@ import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import scala.collection.Seq
+import org.apache.spark.sql.Dataset
 import java.io.Serializable
+import java.sql.Date
+import java.sql.Timestamp
 import java.time.LocalDate
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
@@ -195,6 +198,18 @@ class ApiTest : ShouldSpec({
                 val kotlinList: List<String> = scalaSeq.asKotlinList()
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
+            }
+            should("be able to serialize Date 2.4") { // uses knownDataTypes
+                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
+                dataset.show()
+            }
+            should("handle Timestamp Datasets 2.4") { // uses encoder
+                val dataset = dsOf(Timestamp(0L))
+                dataset.show()
+            }
+            should("be able to serialize Timestamp 2.4") { // uses knownDataTypes
+                val dataset = dsOf(Timestamp(0L) to 2)
+                dataset.show()
             }
         }
     }
