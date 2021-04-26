@@ -22,6 +22,7 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkContext
+import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.function.*
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.*
@@ -66,14 +67,33 @@ val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
 
 /**
  * Broadcast a read-only variable to the cluster, returning a
- * [[org.apache.spark.broadcast.Broadcast]] object for reading it in distributed functions.
+ * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
  * The variable will be sent to each cluster only once.
  *
  * @param value value to broadcast to the Spark nodes
  * @return `Broadcast` object, a read-only variable cached on each machine
  */
-inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = broadcast(value, encoder<T>().clsTag())
+inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
+    sparkContext.broadcast(value, encoder<T>().clsTag())
+} catch (e: ClassNotFoundException) {
+    JavaSparkContext(sparkContext).broadcast(value)
+}
 
+/**
+ * Broadcast a read-only variable to the cluster, returning a
+ * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
+ * The variable will be sent to each cluster only once.
+ *
+ * @param value value to broadcast to the Spark nodes
+ * @return `Broadcast` object, a read-only variable cached on each machine
+ * @see broadcast
+ */
+@Deprecated("You can now use `spark.broadcast()` instead.", ReplaceWith("spark.broadcast(value)"), DeprecationLevel.WARNING)
+inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
+    broadcast(value, encoder<T>().clsTag())
+} catch (e: ClassNotFoundException) {
+    JavaSparkContext(this).broadcast(value)
+}
 
 /**
  * Utility method to create dataset from list
