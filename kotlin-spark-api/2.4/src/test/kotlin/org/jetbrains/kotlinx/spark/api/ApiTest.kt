@@ -26,6 +26,8 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import scala.Product
+import scala.Tuple1
 import scala.Tuple2
 import scala.Tuple3
 import java.io.Serializable
@@ -329,26 +331,26 @@ class ApiTest : ShouldSpec({
                     Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
                     Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
                 )
-
                 dataset.show()
                 val asList = dataset.takeAsList(2)
                 asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
             }
             should("Be able to serialize data classes with tuples") {
                 val dataset = dsOf(
-                    DataClassWithTuple(Tuple2(5L, "test")),
-                    DataClassWithTuple(Tuple2(6L, "tessst")),
+                    DataClassWithTuple(Tuple3(5L, "test", Tuple1(""))),
+                    DataClassWithTuple(Tuple3(6L, "tessst", Tuple1(""))),
                 )
 
                 dataset.show()
                 val asList = dataset.takeAsList(2)
-                asList.first().tuple shouldBe Tuple2(5L, "test")
+                asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
             }
         }
     }
 })
 
-data class DataClassWithTuple(val tuple: Tuple2<Long, String>)
+data class DataClassWithTuple<T : Product>(val tuple: T)
+
 
 data class LonLat(val lon: Double, val lat: Double)
 data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>) {

@@ -133,7 +133,6 @@ inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::c
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     @Suppress("UNCHECKED_CAST")
     return when {
-        isTuple(cls) -> tupleEncoder(type)
         isSupportedClass(cls) -> kotlinClassEncoder(memoizedSchema(type), cls)
         else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
     } as Encoder<T>
@@ -151,45 +150,6 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
             if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java, schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
             ClassTag.apply(kClass.java)
     )
-}
-
-private fun isTuple(cls: KClass<*>): Boolean = listOf(
-    Tuple1::class,
-    Tuple2::class,
-    Tuple3::class,
-    Tuple4::class,
-    Tuple5::class,
-    Tuple6::class,
-    Tuple7::class,
-    Tuple8::class,
-    Tuple9::class,
-    Tuple10::class,
-    Tuple11::class,
-    Tuple12::class,
-    Tuple13::class,
-    Tuple14::class,
-    Tuple15::class,
-    Tuple16::class,
-    Tuple17::class,
-    Tuple18::class,
-    Tuple19::class,
-    Tuple20::class,
-    Tuple21::class,
-    Tuple22::class,
-).any { cls.isSubclassOf(it) }
-
-@Suppress("UNCHECKED_CAST")
-private fun <T> tupleEncoder(type: KType): Encoder<T> {
-    val encoders: List<Encoder<Any>> = type.arguments.map {
-        generateEncoder(it.type!!, it.type!!.jvmErasure)
-    }
-    return when (encoders.size) {
-        2 -> tuple(encoders[0], encoders[1])
-        3 -> tuple(encoders[0], encoders[1], encoders[2])
-        4 -> tuple(encoders[0], encoders[1], encoders[2], encoders[3])
-        5 -> tuple(encoders[0], encoders[1], encoders[2], encoders[3], encoders[4])
-        else -> throw IllegalArgumentException("Cannot encode a tuple with ${encoders.size} arguments at the moment.")
-    } as Encoder<T>
 }
 
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
@@ -452,20 +412,18 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KDataTypeWrapper(structType, klass.java, true)
         }
         klass.isSubclassOf(Product::class) -> {
-            //throw IllegalArgumentException("$type is unsupported")
-            // TODO This should provide a datatype for products such as tuples but it does not work yet
-
             val params = type.arguments.mapIndexed { i, it ->
                 "_${i + 1}" to it.type!!
             }
 
-            val structType = StructType(
+            val structType = DataTypes.createStructType(
                 params.map { (fieldName, fieldType) ->
                     val dataType = schema(fieldType, types)
-                    StructField(fieldName, dataType, true, Metadata.empty())
+                    KStructField(fieldName, StructField(fieldName, dataType, fieldType.isMarkedNullable, Metadata.empty()))
                 }.toTypedArray()
             )
-            KDataTypeWrapper(structType, klass.java, true)
+
+            KComplexTypeWrapper(structType, klass.java, true)
         }
         else -> throw IllegalArgumentException("$type is unsupported")
     }
