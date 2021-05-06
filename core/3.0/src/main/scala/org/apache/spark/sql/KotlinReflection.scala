@@ -20,8 +20,6 @@
 
 package org.apache.spark.sql
 
-import java.beans.{Introspector, PropertyDescriptor}
-
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.DeserializerBuildHelper._
 import org.apache.spark.sql.catalyst.SerializerBuildHelper._
@@ -32,6 +30,8 @@ import org.apache.spark.sql.catalyst.util.ArrayBasedMapData
 import org.apache.spark.sql.catalyst.{InternalRow, ScalaReflection, WalkedTypePath}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
+
+import java.beans.{Introspector, PropertyDescriptor}
 
 
 /**
@@ -354,6 +354,43 @@ object KotlinReflection extends KotlinReflection {
           dataType = ObjectType(udt.getClass))
         Invoke(obj, "deserialize", ObjectType(udt.userClass), path :: Nil)
 
+      // TODO new
+      case t if definedByConstructorParams(t) =>
+        val params = getConstructorParameters(t)
+
+        val cls = getClassFromType(tpe)
+
+        val arguments = params.zipWithIndex.map { case ((fieldName, fieldType), i) =>
+          val Schema(dataType, nullable) = schemaFor(fieldType)
+          val clsName = getClassNameFromType(fieldType)
+          val newTypePath = walkedTypePath.recordField(clsName, fieldName)
+
+          // For tuples, we based grab the inner fields by ordinal instead of name.
+          val newPath = if (cls.getName startsWith "scala.Tuple") {
+            deserializerFor(
+              fieldType,
+              addToPathOrdinal(path, i, dataType, newTypePath),
+              newTypePath)
+          } else {
+            deserializerFor(
+              fieldType,
+              addToPath(path, fieldName, dataType, newTypePath),
+              newTypePath)
+          }
+          expressionWithNullSafety(
+            newPath,
+            nullable = nullable,
+            newTypePath)
+        }
+
+        val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
+
+        org.apache.spark.sql.catalyst.expressions.If(
+          IsNull(path),
+          org.apache.spark.sql.catalyst.expressions.Literal.create(null, ObjectType(cls)),
+          newInstance
+        )
+
       case _ if predefinedDt.isDefined =>
         predefinedDt.get match {
           case wrapper: KDataTypeWrapper =>
@@ -519,7 +556,7 @@ object KotlinReflection extends KotlinReflection {
 
     def toCatalystArray(input: Expression, elementType: `Type`, predefinedDt: Option[DataTypeWithClass] = None): Expression = {
       predefinedDt.map(_.dt).getOrElse(dataTypeFor(elementType)) match {
-        case dt:StructType =>
+        case dt: StructType =>
           val clsName = getClassNameFromType(elementType)
           val newPath = walkedTypePath.recordArray(clsName)
           createSerializerForMapObjects(input, ObjectType(predefinedDt.get.cls),

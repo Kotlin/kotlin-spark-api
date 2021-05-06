@@ -142,6 +142,7 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
 private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
         || cls.isSubclassOf(Map::class)
         || cls.isSubclassOf(Iterable::class)
+        || cls.isSubclassOf(Product::class)
         || cls.java.isArray
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
@@ -451,34 +452,20 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KDataTypeWrapper(structType, klass.java, true)
         }
         klass.isSubclassOf(Product::class) -> {
-//            throw IllegalArgumentException("$type is unsupported")
+            //throw IllegalArgumentException("$type is unsupported")
             // TODO This should provide a datatype for products such as tuples but it does not work yet
 
-            val fields = type.arguments.mapIndexed { i, it ->
-                val projectedType = it.type!!
-                val name = "_${i + 1}"
-                val propertyDescriptor = PropertyDescriptor(name, klass.java, name, null)
+            val params = type.arguments.mapIndexed { i, it ->
+                "_${i + 1}" to it.type!!
+            }
 
-                val structField = StructField(
-                    name,
-                    schema(projectedType, types),
-                    projectedType.isMarkedNullable,
-                    Metadata.empty(),
-                )
-                KStructField(propertyDescriptor.readMethod.name, structField)
-            }.toTypedArray()
-
-            val structType = StructType(fields)
-            val res = KDataTypeWrapper(
-                structType,
-                klass.java,
-                true,
+            val structType = StructType(
+                params.map { (fieldName, fieldType) ->
+                    val dataType = schema(fieldType, types)
+                    StructField(fieldName, dataType, true, Metadata.empty())
+                }.toTypedArray()
             )
-            val fieldNames = res.fieldNames()
-            val names = res.names()
-            val treeString = res.treeString()
-
-            res
+            KDataTypeWrapper(structType, klass.java, true)
         }
         else -> throw IllegalArgumentException("$type is unsupported")
     }
