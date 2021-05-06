@@ -28,6 +28,8 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import scala.Tuple2
+import scala.Tuple3
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
@@ -303,6 +305,26 @@ class ApiTest : ShouldSpec({
             should("be able to serialize Timestamp 2.4") { // uses knownDataTypes
                 val dataset = dsOf(Timestamp(0L) to 2)
                 dataset.show()
+            }
+            should("Be able to serialize Scala Tuples including data classes") {
+                val dataset = dsOf(
+                    Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
+                    Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
+                )
+
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
+            }
+            should("Be able to serialize data classes with tuples") {
+                val dataset = dsOf(
+                    DataClassWithTuple(Tuple2(5L, "test")),
+                    DataClassWithTuple(Tuple2(6L, "tessst")),
+                )
+
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first().tuple shouldBe Tuple2(5L, "test")
             }
             should("Be able to serialize Scala Tuples including data classes") {
                 val dataset = dsOf(
