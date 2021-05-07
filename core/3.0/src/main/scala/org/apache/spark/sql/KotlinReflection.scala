@@ -20,8 +20,6 @@
 
 package org.apache.spark.sql
 
-import java.beans.{Introspector, PropertyDescriptor}
-
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.DeserializerBuildHelper._
 import org.apache.spark.sql.catalyst.SerializerBuildHelper._
@@ -32,6 +30,8 @@ import org.apache.spark.sql.catalyst.util.ArrayBasedMapData
 import org.apache.spark.sql.catalyst.{InternalRow, ScalaReflection, WalkedTypePath}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
+
+import java.beans.{Introspector, PropertyDescriptor}
 
 
 /**
@@ -440,11 +440,79 @@ object KotlinReflection extends KotlinReflection {
 
                 UnresolvedMapObjects(mapFunction, path, customCollectionCls = Some(t.cls))
 
+              case StructType(elementType: Array[StructField])  =>
+                val cls = t.cls
+
+                val arguments = elementType.map { field =>
+                    val dataType = field.dataType.asInstanceOf[DataTypeWithClass]
+                    val nullable = dataType.nullable
+                    val clsName = getClassNameFromType(getType(dataType.cls))
+                    val newTypePath = walkedTypePath.recordField(clsName, field.name)
+
+                    // For tuples, we based grab the inner fields by ordinal instead of name.
+                    val newPath = deserializerFor(
+                      getType(dataType.cls),
+                      addToPath(path, field.name, dataType.dt, newTypePath),
+                      newTypePath,
+                      Some(dataType).filter(_.isInstanceOf[ComplexWrapper])
+                    )
+                    expressionWithNullSafety(
+                      newPath,
+                      nullable = nullable,
+                      newTypePath
+                    )
+                  }
+                val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
+
+                org.apache.spark.sql.catalyst.expressions.If(
+                  IsNull(path),
+                  org.apache.spark.sql.catalyst.expressions.Literal.create(null, ObjectType(cls)),
+                  newInstance
+                )
+
+
               case _ =>
                 throw new UnsupportedOperationException(
                   s"No Encoder found for $tpe\n" + walkedTypePath)
             }
         }
+
+      case t if definedByConstructorParams(t) =>
+        val params = getConstructorParameters(t)
+
+        val cls = getClassFromType(tpe)
+
+        val arguments = params.zipWithIndex.map { case ((fieldName, fieldType), i) =>
+          val Schema(dataType, nullable) = schemaFor(fieldType)
+          val clsName = getClassNameFromType(fieldType)
+          val newTypePath = walkedTypePath.recordField(clsName, fieldName)
+
+          // For tuples, we based grab the inner fields by ordinal instead of name.
+          val newPath = if (cls.getName startsWith "scala.Tuple") {
+            deserializerFor(
+              fieldType,
+              addToPathOrdinal(path, i, dataType, newTypePath),
+              newTypePath)
+          } else {
+            deserializerFor(
+              fieldType,
+              addToPath(path, fieldName, dataType, newTypePath),
+              newTypePath)
+          }
+          expressionWithNullSafety(
+            newPath,
+            nullable = nullable,
+            newTypePath)
+        }
+
+        val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
+
+        org.apache.spark.sql.catalyst.expressions.If(
+          IsNull(path),
+          org.apache.spark.sql.catalyst.expressions.Literal.create(null, ObjectType(cls)),
+          newInstance
+        )
+
       case _ =>
         throw new UnsupportedOperationException(
           s"No Encoder found for $tpe\n" + walkedTypePath)
@@ -519,7 +587,7 @@ object KotlinReflection extends KotlinReflection {
 
     def toCatalystArray(input: Expression, elementType: `Type`, predefinedDt: Option[DataTypeWithClass] = None): Expression = {
       predefinedDt.map(_.dt).getOrElse(dataTypeFor(elementType)) match {
-        case dt:StructType =>
+        case dt: StructType =>
           val clsName = getClassNameFromType(elementType)
           val newPath = walkedTypePath.recordArray(clsName)
           createSerializerForMapObjects(input, ObjectType(predefinedDt.get.cls),
@@ -662,32 +730,6 @@ object KotlinReflection extends KotlinReflection {
         createSerializerForUserDefinedType(inputObject, udt, udtClass)
       //</editor-fold>
 
-
-      case t if definedByConstructorParams(t) =>
-        if (seenTypeSet.contains(t)) {
-          throw new UnsupportedOperationException(
-            s"cannot have circular references in class, but got the circular reference of class $t")
-        }
-
-        val params = getConstructorParameters(t)
-        val fields = params.map { case (fieldName, fieldType) =>
-          if (javaKeywords.contains(fieldName)) {
-            throw new UnsupportedOperationException(s"`$fieldName` is a reserved keyword and " +
-              "cannot be used as field name\n" + walkedTypePath)
-          }
-
-          // SPARK-26730 inputObject won't be null with If's guard below. And KnownNotNul
-          // is necessary here. Because for a nullable nested inputObject with struct data
-          // type, e.g. StructType(IntegerType, StringType), it will return nullable=true
-          // for IntegerType without KnownNotNull. And that's what we do not expect to.
-          val fieldValue = Invoke(KnownNotNull(inputObject), fieldName, dataTypeFor(fieldType),
-            returnNullable = !fieldType.typeSymbol.asClass.isPrimitive)
-          val clsName = getClassNameFromType(fieldType)
-          val newPath = walkedTypePath.recordField(clsName, fieldName)
-          (fieldName, serializerFor(fieldValue, fieldType, newPath, seenTypeSet + t))
-        }
-        createSerializerForObject(inputObject, fields)
-
       case _ if predefinedDt.isDefined =>
         predefinedDt.get match {
           case dataType: KDataTypeWrapper =>
@@ -735,12 +777,66 @@ object KotlinReflection extends KotlinReflection {
                 )
               case ArrayType(elementType, _) =>
                 toCatalystArray(inputObject, getType(elementType.asInstanceOf[DataTypeWithClass].cls), Some(elementType.asInstanceOf[DataTypeWithClass]))
+
+              case StructType(elementType: Array[StructField]) =>
+                val cls = otherTypeWrapper.cls
+                val names = elementType.map(_.name)
+
+                val beanInfo = Introspector.getBeanInfo(cls)
+                val methods = beanInfo.getMethodDescriptors.filter(it => names.contains(it.getName))
+
+
+                val fields = elementType.map { structField =>
+
+                  val maybeProp = methods.find(it => it.getName == structField.name)
+                  if (maybeProp.isEmpty) throw new IllegalArgumentException(s"Field ${structField.name} is not found among available props, which are: ${methods.map(_.getName).mkString(", ")}")
+                  val fieldName = structField.name
+                  val propClass = structField.dataType.asInstanceOf[DataTypeWithClass].cls
+                  val propDt = structField.dataType.asInstanceOf[DataTypeWithClass]
+                  val fieldValue = Invoke(
+                    inputObject,
+                    maybeProp.get.getName,
+                    inferExternalType(propClass),
+                    returnNullable = propDt.nullable
+                  )
+                  val newPath = walkedTypePath.recordField(propClass.getName, fieldName)
+                  (fieldName, serializerFor(fieldValue, getType(propClass), newPath, seenTypeSet, if (propDt.isInstanceOf[ComplexWrapper]) Some(propDt) else None))
+
+                }
+                createSerializerForObject(inputObject, fields)
+
               case _ =>
                 throw new UnsupportedOperationException(
                   s"No Encoder found for $tpe\n" + walkedTypePath)
 
             }
         }
+
+      case t if definedByConstructorParams(t) =>
+        if (seenTypeSet.contains(t)) {
+          throw new UnsupportedOperationException(
+            s"cannot have circular references in class, but got the circular reference of class $t")
+        }
+
+        val params = getConstructorParameters(t)
+        val fields = params.map { case (fieldName, fieldType) =>
+          if (javaKeywords.contains(fieldName)) {
+            throw new UnsupportedOperationException(s"`$fieldName` is a reserved keyword and " +
+              "cannot be used as field name\n" + walkedTypePath)
+          }
+
+          // SPARK-26730 inputObject won't be null with If's guard below. And KnownNotNul
+          // is necessary here. Because for a nullable nested inputObject with struct data
+          // type, e.g. StructType(IntegerType, StringType), it will return nullable=true
+          // for IntegerType without KnownNotNull. And that's what we do not expect to.
+          val fieldValue = Invoke(KnownNotNull(inputObject), fieldName, dataTypeFor(fieldType),
+            returnNullable = !fieldType.typeSymbol.asClass.isPrimitive)
+          val clsName = getClassNameFromType(fieldType)
+          val newPath = walkedTypePath.recordField(clsName, fieldName)
+          (fieldName, serializerFor(fieldValue, fieldType, newPath, seenTypeSet + t))
+        }
+        createSerializerForObject(inputObject, fields)
+
       case _ =>
         throw new UnsupportedOperationException(
           s"No Encoder found for $tpe\n" + walkedTypePath)

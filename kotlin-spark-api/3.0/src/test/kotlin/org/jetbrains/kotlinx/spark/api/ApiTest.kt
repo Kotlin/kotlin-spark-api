@@ -22,10 +22,14 @@ import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import scala.Tuple1
+import scala.Tuple2
+import scala.Tuple3
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import scala.Product
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
@@ -324,9 +328,30 @@ class ApiTest : ShouldSpec({
                 val dataset = dsOf(Timestamp(0L) to 2)
                 dataset.show()
             }
+            should("Be able to serialize Scala Tuples including data classes") {
+                val dataset = dsOf(
+                    Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
+                    Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
+                )
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
+            }
+            should("Be able to serialize data classes with tuples") {
+                val dataset = dsOf(
+                    DataClassWithTuple(Tuple3(5L, "test", Tuple1(""))),
+                    DataClassWithTuple(Tuple3(6L, "tessst", Tuple1(""))),
+                )
+
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
+            }
         }
     }
 })
+
+data class DataClassWithTuple<T : Product>(val tuple: T)
 
 data class LonLat(val lon: Double, val lat: Double)
 

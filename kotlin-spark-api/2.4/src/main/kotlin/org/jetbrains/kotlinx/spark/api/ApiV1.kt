@@ -36,6 +36,7 @@ import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
+import scala.*
 import scala.collection.Seq
 import scala.reflect.`ClassTag$`
 import java.beans.PropertyDescriptor
@@ -122,8 +123,6 @@ inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
  * It creates encoder for any given supported type T
  *
  * Supported types are data classes, primitives, and Lists, Maps and Arrays containing them
- * are you here?
- * Pavel??
  * @param T type, supported by Spark
  * @return generated encoder
  */
@@ -141,6 +140,7 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
 private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
         || cls.isSubclassOf(Map::class)
         || cls.isSubclassOf(Iterable::class)
+        || cls.isSubclassOf(Product::class)
         || cls.java.isArray
 
 @Suppress("UNCHECKED_CAST")
@@ -418,6 +418,20 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             )
             KDataTypeWrapper(structType, klass.java, true)
         }
+        klass.isSubclassOf(Product::class) -> {
+            val params = type.arguments.mapIndexed { i, it ->
+                "_${i + 1}" to it.type!!
+            }
+
+            val structType = DataTypes.createStructType(
+                params.map { (fieldName, fieldType) ->
+                    val dataType = schema(fieldType, types)
+                    KStructField(fieldName, StructField(fieldName, dataType, fieldType.isMarkedNullable, Metadata.empty()))
+                }.toTypedArray()
+            )
+
+            KComplexTypeWrapper(structType, klass.java, true)
+        }
         else -> throw IllegalArgumentException("$type is unsupported")
     }
 }
@@ -430,6 +444,8 @@ enum class SparkLogLevel {
     ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
 }
 
+val timestampDt = `TimestampType$`.`MODULE$`
+val dateDt = `DateType$`.`MODULE$`
 private val knownDataTypes = mapOf(
         Byte::class to DataTypes.ByteType,
         Short::class to DataTypes.ShortType,
@@ -439,10 +455,10 @@ private val knownDataTypes = mapOf(
         Float::class to DataTypes.FloatType,
         Double::class to DataTypes.DoubleType,
         String::class to DataTypes.StringType,
-        LocalDate::class to `DateType$`.`MODULE$`,
-        Date::class to `DateType$`.`MODULE$`,
-        Timestamp::class to `TimestampType$`.`MODULE$`,
-        Instant::class to `TimestampType$`.`MODULE$`
+        LocalDate::class to dateDt,
+        Date::class to dateDt,
+        Timestamp::class to timestampDt,
+        Instant::class to timestampDt
 )
 
 private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {

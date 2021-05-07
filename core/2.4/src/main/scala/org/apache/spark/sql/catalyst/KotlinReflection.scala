@@ -22,7 +22,6 @@ import java.lang.reflect.Type
 import java.lang.{Iterable => JIterable}
 import java.time.LocalDate
 import java.util.{Iterator => JIterator, List => JList, Map => JMap}
-
 import com.google.common.reflect.TypeToken
 import org.apache.spark.sql.catalyst.analysis.{GetColumnByOrdinal, UnresolvedAttribute, UnresolvedExtractValue}
 import org.apache.spark.sql.catalyst.expressions._
@@ -399,10 +398,38 @@ object KotlinReflection {
                   getPath,
                   customCollectionCls = Some(predefinedDt.get.cls))
 
+              case StructType(elementType: Array[StructField])  =>
+                val cls = t.cls
+
+                val arguments = elementType.map { field =>
+                  val dataType = field.dataType.asInstanceOf[DataTypeWithClass]
+                  val nullable = dataType.nullable
+                  val clsName = dataType.cls.getName
+                  val fieldName = field.asInstanceOf[KStructField].delegate.name
+                  val newPath = addToPath(fieldName)
+
+                  deserializerFor(
+                    TypeToken.of(dataType.cls),
+                    Some(newPath),
+                    Some(dataType).filter(_.isInstanceOf[ComplexWrapper])
+                  )
+                }
+                val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
+
+
+                if (path.nonEmpty) {
+                  expressions.If(
+                    IsNull(getPath),
+                    expressions.Literal.create(null, ObjectType(cls)),
+                    newInstance
+                  )
+                } else {
+                  newInstance
+                }
 
               case _ =>
                 throw new UnsupportedOperationException(
-                  s"No Encoder found for $typeToken")
+                  s"No Encoder found for $typeToken in deserializerFor\n" + path)
             }
         }
 
@@ -608,8 +635,34 @@ object KotlinReflection {
                 case ArrayType(elementType, _) =>
                   toCatalystArray(inputObject, TypeToken.of(elementType.asInstanceOf[DataTypeWithClass].cls), Some(elementType.asInstanceOf[DataTypeWithClass]))
 
+                case StructType(elementType: Array[StructField]) =>
+                  val cls = otherTypeWrapper.cls
+                  val names = elementType.map(_.name)
+
+                  val beanInfo = Introspector.getBeanInfo(cls)
+                  val methods = beanInfo.getMethodDescriptors.filter(it => names.contains(it.getName))
+
+                  val fields = elementType.map { structField =>
+
+                    val maybeProp = methods.find(it => it.getName == structField.name)
+                    if (maybeProp.isEmpty) throw new IllegalArgumentException(s"Field ${structField.name} is not found among available props, which are: ${methods.map(_.getName).mkString(", ")}")
+                    val fieldName = structField.name
+                    val propClass = structField.dataType.asInstanceOf[DataTypeWithClass].cls
+                    val propDt = structField.dataType.asInstanceOf[DataTypeWithClass]
+                    val fieldValue = Invoke(
+                      inputObject,
+                      maybeProp.get.getName,
+                      inferExternalType(propClass),
+                      returnNullable = propDt.nullable
+                    )
+                    expressions.Literal(fieldName) :: serializerFor(fieldValue, TypeToken.of(propClass), propDt match { case c: ComplexWrapper => Some(c) case _ => None }) :: Nil
+                  }
+                  val nonNullOutput = CreateNamedStruct(fields.flatten.seq)
+                  val nullOutput = expressions.Literal.create(null, nonNullOutput.dataType)
+                  expressions.If(IsNull(inputObject), nullOutput, nonNullOutput)
+
                 case _ =>
-                  throw new UnsupportedOperationException(s"No Encoder found for $typeToken.")
+                  throw new UnsupportedOperationException(s"No Encoder found for $typeToken in serializerFor. $otherTypeWrapper")
 
               }
 

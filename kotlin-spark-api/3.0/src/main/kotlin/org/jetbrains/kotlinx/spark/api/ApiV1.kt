@@ -33,6 +33,7 @@ import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
 import org.jetbrains.kotinx.spark.extensions.KSparkExtensions
+import scala.*
 import scala.reflect.ClassTag
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
@@ -47,6 +48,7 @@ import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.jvmErasure
 import kotlin.reflect.typeOf
 
 @JvmField
@@ -139,6 +141,7 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
 private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
         || cls.isSubclassOf(Map::class)
         || cls.isSubclassOf(Iterable::class)
+        || cls.isSubclassOf(Product::class)
         || cls.java.isArray
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
@@ -407,6 +410,20 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                             .toTypedArray()
             )
             KDataTypeWrapper(structType, klass.java, true)
+        }
+        klass.isSubclassOf(Product::class) -> {
+            val params = type.arguments.mapIndexed { i, it ->
+                "_${i + 1}" to it.type!!
+            }
+
+            val structType = DataTypes.createStructType(
+                params.map { (fieldName, fieldType) ->
+                    val dataType = schema(fieldType, types)
+                    KStructField(fieldName, StructField(fieldName, dataType, fieldType.isMarkedNullable, Metadata.empty()))
+                }.toTypedArray()
+            )
+
+            KComplexTypeWrapper(structType, klass.java, true)
         }
         else -> throw IllegalArgumentException("$type is unsupported")
     }

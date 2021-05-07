@@ -51,12 +51,6 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
 
 }
 
-/**
- * Pavel hello!
- * Hello, World!
- * How are you??
- *
- */
 @JvmOverloads
 inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
     builder
