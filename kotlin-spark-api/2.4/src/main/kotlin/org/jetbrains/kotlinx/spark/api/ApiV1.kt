@@ -352,6 +352,13 @@ inline fun <reified T> Dataset<Row>.toList() = KSparkExtensions.collectAsList(to
 inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Array<R>
 
 /**
+ * Selects column based on the column name and returns it as a [Column].
+ *
+ * @note The column name can also reference to a nested column like `a.b`.
+ */
+operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
+
+/**
  * Alternative to [Dataset.show] which returns source dataset.
  * Useful for debug purposes when you need to view content of a dataset as an intermediate operation
  */

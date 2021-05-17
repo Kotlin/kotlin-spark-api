@@ -325,6 +325,14 @@ class ApiTest : ShouldSpec({
                 val asList = dataset.takeAsList(2)
                 asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
             }
+            should("Access columns using invoke on datasets") {
+                val dataset = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 4),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+
+                dataset.col("a") shouldBe dataset("a")
+            }
         }
     }
 })
