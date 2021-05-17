@@ -42,14 +42,11 @@ import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
-import kotlin.reflect.KType
+import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmErasure
-import kotlin.reflect.typeOf
 
 @JvmField
 val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
@@ -384,6 +381,13 @@ operator fun Column.get(key: Any): Column = getItem(key)
 fun lit(a: Any) = functions.lit(a)
 
 /**
+ * Provides a type hint about the expected return value of this column.  This information can
+ * be used by operations such as `select` on a [Dataset] to automatically convert the
+ * results into the correct JVM types.
+ */
+inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
+
+/**
  * Alias for [Dataset.joinWith] which passes "left" argument
  * and respects the fact that in result of left join right relation is nullable
  *
@@ -478,6 +482,27 @@ inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Arr
  * @note The column name can also reference to a nested column like `a.b`.
  */
 operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
+
+/**
+ * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
+ * ```kotlin
+ *    val dataset: Dataset<YourClass> = ...
+ *    dataset.select( dataset.col(YourClass::a), dataset.col(YourClass::b) )
+ * ```
+ * @see invoke
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`<U>() as TypedColumn<T, U>
+
+/**
+ * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
+ * ```kotlin
+ *    val dataset: Dataset<YourClass> = ...
+ *    dataset.select( dataset(YourClass::a), dataset(YourClass::b) )
+ * ```
+ * @see col
+ */
+inline operator fun <T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
 
 /**
  * Alternative to [Dataset.show] which returns source dataset.

@@ -29,6 +29,7 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.TypedColumn
 import org.apache.spark.sql.functions.*
 import scala.Product
 import java.io.Serializable
@@ -36,6 +37,7 @@ import java.sql.Date
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
+import kotlin.reflect.KProperty1
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
 import scala.collection.mutable.Map as ScalaMutableMap
@@ -382,6 +384,18 @@ class ApiTest : ShouldSpec({
                 dataset("b") / dataset("b") shouldBe dataset("b").divide(dataset("b"))
                 dataset("b") % dataset("b") shouldBe dataset("b").mod(dataset("b"))
                 dataset("b")[0] shouldBe dataset("b").getItem(0)
+            }
+            should("Handle TypedColumns") {
+                val dataset = dsOf(
+                    SomeOtherClass(intArrayOf(1, 2, 3), 4, true),
+                    SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
+                )
+
+                val b = dataset.select(
+                    dataset.col(SomeOtherClass::b),
+                    dataset(SomeOtherClass::a),
+                )
+                b.show()
             }
         }
     }
