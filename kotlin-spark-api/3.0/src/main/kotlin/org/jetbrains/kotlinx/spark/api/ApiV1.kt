@@ -250,11 +250,136 @@ val SparkSession.sparkContext
  */
 fun <T> Dataset<T>.debug() = also { KSparkExtensions.debug(it) }
 
-fun Column.eq(c: Column) = this.`$eq$eq$eq`(c)
-
 @Suppress("FunctionName")
+@Deprecated("Changed to infix \"eq\" to be easier to type.", ReplaceWith("this eq c"))
 infix fun Column.`==`(c: Column) = `$eq$eq$eq`(c)
+
+@Deprecated("Changed to infix \"and\" to be easier to type.", ReplaceWith("this and c"))
 infix fun Column.`&&`(c: Column) = and(c)
+
+/**
+ * Unary minus, i.e. negate the expression.
+ * ```kotlin
+ *   // select the amount column and negates all values.
+ *   df.select( -df("amount") )
+ * ```
+ */
+operator fun Column.unaryMinus(): Column = `unary_$minus`()
+
+/**
+ * Inversion of boolean expression, i.e. NOT.
+ * ```kotlin
+ *   // select rows that are not active (isActive === false)
+ *   df.filter( !df("isActive") )
+ * ```
+ */
+operator fun Column.not(): Column = `unary_$bang`()
+
+/**
+ * Equality test.
+ * ```kotlin
+ *     df.filter( df("colA") eq df("colB") )
+ * ```
+ */
+infix fun Column.eq(other: Any): Column = `$eq$eq$eq`(other)
+
+/**
+ * Inequality test.
+ * ```kotlin
+ *     df.select( df("colA") neq df("colB") )
+ *     df.select( !(df("colA") eq df("colB")) )
+ * ```
+ */
+infix fun Column.neq(other: Any): Column = `$eq$bang$eq`(other)
+
+/**
+ * Greater than.
+ * ```kotlin
+ *     // The following selects people older than 21.
+ *     people.select( people("age") gt 21 )
+ * ```
+ */
+infix fun Column.gt(other: Any): Column = `$greater`(other)
+
+/**
+ * Less than.
+ * ```kotlin
+ *    // The following selects people younger than 21.
+ *    people.select( people("age") lt 21 )
+ * ```
+ */
+infix fun Column.lt(other: Any): Column = `$less`(other)
+
+/**
+ * Less than or equal to.
+ * ```kotlin
+ *    // The following selects people age 21 or younger than 21.
+ *    people.select( people("age") leq 21 )
+ * ```
+ */
+infix fun Column.leq(other: Any): Column = `$less$eq`(other)
+
+/**
+ * Greater than or equal to.
+ * ```kotlin
+ *    // The following selects people age 21 or older than 21..
+ *    people.select( people("age") geq 21 )
+ * ```
+ */
+infix fun Column.geq(other: Any): Column = `$greater$eq`(other)
+
+/**
+ * True if the current column is in the given [range].
+ */
+infix fun Column.inRangeOf(range: ClosedRange<*>): Column = between(range.start, range.endInclusive)
+
+/**
+ * Boolean OR.
+ * ```kotlin
+ *   // The following selects people that are in school or employed.
+ *   people.filter( people("inSchool") or people("isEmployed") )
+ * ```
+ */
+infix fun Column.or(other: Any): Column = `$bar$bar`(other)
+
+/**
+ * Boolean AND.
+ * ```kotlin
+ *   // The following selects people that are in school and employed.
+ *   people.filter( people("inSchool") and people("isEmployed") )
+ * ```
+ */
+infix fun Column.and(other: Any): Column = `$amp$amp`(other)
+
+/**
+ * Multiplication of this expression and another expression.
+ * ```kotlin
+ *     // The following multiplies a person's height by their weight.
+ *     people.select( people("height") * people("weight") )
+ * ```
+ */
+operator fun Column.times(other: Any): Column = `$times`(other)
+
+/**
+ * Division this expression by another expression.
+ * ```kotlin
+ *     // The following divides a person's height by their weight.
+ *     people.select( people("height") / people("weight") )
+ * ```
+ */
+operator fun Column.div(other: Any): Column = `$div`(other)
+
+/**
+ * Modulo (a.k.a. remainder) expression.
+ *
+ */
+operator fun Column.rem(other: Any): Column = `$percent`(other)
+
+/**
+ * An expression that gets an item at position `ordinal` out of an array,
+ * or gets a value by key `key` in a `MapType`.
+ */
+operator fun Column.get(key: Any): Column = getItem(key)
 
 fun lit(a: Any) = functions.lit(a)
 

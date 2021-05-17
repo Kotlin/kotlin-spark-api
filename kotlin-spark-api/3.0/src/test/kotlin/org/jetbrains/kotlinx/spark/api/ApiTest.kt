@@ -29,6 +29,7 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions.*
 import scala.Product
 import java.io.Serializable
 import java.sql.Date
@@ -355,6 +356,33 @@ class ApiTest : ShouldSpec({
 
                 dataset.col("a") shouldBe dataset("a")
             }
+            should("Use infix- and operator funs on columns") {
+                val dataset = dsOf(
+                    SomeOtherClass(intArrayOf(1, 2, 3), 4, true),
+                    SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
+                )
+
+                (dataset("a") == dataset("a")) shouldBe dataset("a").equals(dataset("a"))
+                (dataset("a") != dataset("a")) shouldBe !dataset("a").equals(dataset("a"))
+                (dataset("a") eq dataset("a")) shouldBe dataset("a").equalTo(dataset("a"))
+                (dataset("a") neq dataset("a")) shouldBe dataset("a").notEqual(dataset("a"))
+                !(dataset("a") eq dataset("a")) shouldBe dataset("a").notEqual(dataset("a"))
+                -dataset("b") shouldBe negate(dataset("b"))
+                !dataset("c") shouldBe not(dataset("c"))
+                dataset("b") gt 3 shouldBe dataset("b").gt(3)
+                dataset("b") lt 3 shouldBe dataset("b").lt(3)
+                dataset("b") leq 3 shouldBe dataset("b").leq(3)
+                dataset("b") geq 3 shouldBe dataset("b").geq(3)
+                dataset("b") inRangeOf 0..2 shouldBe dataset("b").between(0, 2)
+                dataset("c") or dataset("c") shouldBe dataset("c").or(dataset("c"))
+                dataset("c") and dataset("c") shouldBe dataset("c").and(dataset("c"))
+                dataset("b") + dataset("b") shouldBe dataset("b").plus(dataset("b"))
+                dataset("b") - dataset("b") shouldBe dataset("b").minus(dataset("b"))
+                dataset("b") * dataset("b") shouldBe dataset("b").multiply(dataset("b"))
+                dataset("b") / dataset("b") shouldBe dataset("b").divide(dataset("b"))
+                dataset("b") % dataset("b") shouldBe dataset("b").mod(dataset("b"))
+                dataset("b")[0] shouldBe dataset("b").getItem(0)
+            }
         }
     }
 })
@@ -365,3 +393,5 @@ data class LonLat(val lon: Double, val lat: Double)
 
 // (data) class must be Serializable to be broadcast
 data class SomeClass(val a: IntArray, val b: Int) : Serializable
+
+data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable
