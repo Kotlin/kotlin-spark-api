@@ -29,6 +29,7 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.TypedColumn
 import scala.Product
 import java.io.Serializable
 import java.sql.Date
@@ -352,6 +353,36 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(1, 2, 3), 3),
                     SomeClass(intArrayOf(1, 2, 4), 5),
                 )
+
+                val newDS2: Dataset<Pair<IntArray, Int>> = dataset.selectTyped(
+                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                )
+                newDS2.show()
+
+                val newDS3: Dataset<Triple<IntArray, Int, Int>> = dataset.selectTyped(
+                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                )
+                newDS3.show()
+
+                val newDS4: Dataset<Arity4<IntArray, Int, Int, Int>> = dataset.selectTyped(
+                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                )
+                newDS4.show()
+
+                val newDS5: Dataset<Arity5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
+                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                )
+                newDS5.show()
             }
         }
     }

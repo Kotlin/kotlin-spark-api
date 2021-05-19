@@ -353,6 +353,49 @@ inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Arr
  */
 fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply { show(numRows, truncate) }
 
+/**
+ * Returns a new Dataset by computing the given [Column] expressions for each element.
+ */
+fun <T, U1, U2> Dataset<T>.selectTyped(
+    c1: TypedColumn<T, U1>,
+    c2: TypedColumn<T, U2>,
+): Dataset<Pair<U1, U2>> =
+    select(c1, c2).map { Pair(it._1(), it._2()) }
+
+/**
+ * Returns a new Dataset by computing the given [Column] expressions for each element.
+ */
+fun <T, U1, U2, U3> Dataset<T>.selectTyped(
+    c1: TypedColumn<T, U1>,
+    c2: TypedColumn<T, U2>,
+    c3: TypedColumn<T, U3>,
+): Dataset<Triple<U1, U2, U3>> =
+    select(c1, c2, c3).map { Triple(it._1(), it._2(), it._3()) }
+
+/**
+ * Returns a new Dataset by computing the given [Column] expressions for each element.
+ */
+fun <T, U1, U2, U3, U4> Dataset<T>.selectTyped(
+    c1: TypedColumn<T, U1>,
+    c2: TypedColumn<T, U2>,
+    c3: TypedColumn<T, U3>,
+    c4: TypedColumn<T, U4>,
+): Dataset<Arity4<U1, U2, U3, U4>> =
+    select(c1, c2, c3, c4).map { Arity4(it._1(), it._2(), it._3(), it._4()) }
+
+/**
+ * Returns a new Dataset by computing the given [Column] expressions for each element.
+ */
+fun <T, U1, U2, U3, U4, U5> Dataset<T>.selectTyped(
+    c1: TypedColumn<T, U1>,
+    c2: TypedColumn<T, U2>,
+    c3: TypedColumn<T, U3>,
+    c4: TypedColumn<T, U4>,
+    c5: TypedColumn<T, U5>,
+): Dataset<Arity5<U1, U2, U3, U4, U5>> =
+    select(c1, c2, c3, c4, c5).map { Arity5(it._1(), it._2(), it._3(), it._4(), it._5()) }
+
+
 @OptIn(ExperimentalStdlibApi::class)
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]
