@@ -36,6 +36,7 @@ import java.sql.Date
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
+import kotlin.reflect.KProperty1
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
 import scala.collection.mutable.Map as ScalaMutableMap
@@ -358,38 +359,41 @@ class ApiTest : ShouldSpec({
                 val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder<IntArray>())
 
                 val newDS2: Dataset<Pair<IntArray, Int>> = dataset.selectTyped(
-                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col(SomeClass::a),
+                    dataset.col(SomeClass::b),
                 )
                 newDS2.show()
 
                 val newDS3: Dataset<Triple<IntArray, Int, Int>> = dataset.selectTyped(
-                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col(SomeClass::a),
+                    dataset.col(SomeClass::b),
+                    dataset.col(SomeClass::b),
                 )
                 newDS3.show()
 
                 val newDS4: Dataset<Arity4<IntArray, Int, Int, Int>> = dataset.selectTyped(
-                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col(SomeClass::a),
+                    dataset.col(SomeClass::b),
+                    dataset.col(SomeClass::b),
+                    dataset.col(SomeClass::b),
                 )
                 newDS4.show()
 
                 val newDS5: Dataset<Arity5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
-                    dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
-                    dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
+                    dataset.col(SomeClass::a),
+                    dataset.col(SomeClass::b),
+                    dataset.col(SomeClass::b),
+                    dataset.col(SomeClass::b),
+                    dataset.col(SomeClass::b),
                 )
                 newDS5.show()
             }
         }
     }
 })
+
+inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`(encoder<U>()) as TypedColumn<T, U>
+
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
