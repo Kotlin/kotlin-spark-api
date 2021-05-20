@@ -370,7 +370,8 @@ class ApiTest : ShouldSpec({
     }
 })
 
-inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`(encoder<U>()) as TypedColumn<T, U>
+inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`<U>(encoder<U>()) as TypedColumn<T, U>
+
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
