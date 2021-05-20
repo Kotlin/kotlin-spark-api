@@ -487,22 +487,33 @@ operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
- *    dataset.select( dataset.col(YourClass::a), dataset.col(YourClass::b) )
+ *    val columnA: TypedColumn<YourClass, TypeOfA> = dataset.col(YourClass::a)
  * ```
  * @see invoke
  */
+
 @Suppress("UNCHECKED_CAST")
-inline fun <T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`<U>() as TypedColumn<T, U>
+inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`<U>() as TypedColumn<T, U>
+
+/**
+ * Returns a [Column] based on the given class attribute, not connected to a dataset.
+ * ```kotlin
+ *    val dataset: Dataset<YourClass> = ...
+ *    val new: Dataset<TypeOfA, TypeOfB> = dataset.select( col(YourClass::a), col(YourClass::b) )
+ * ```
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> = functions.col(column.name).`as`<U>() as TypedColumn<T, U>
 
 /**
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
- *    dataset.select( dataset(YourClass::a), dataset(YourClass::b) )
+ *    val columnA: TypedColumn<YourClass, TypeOfA> = dataset(YourClass::a)
  * ```
  * @see col
  */
-inline operator fun <T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
+inline operator fun <reified T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
 
 /**
  * Alternative to [Dataset.show] which returns source dataset.

@@ -391,11 +391,27 @@ class ApiTest : ShouldSpec({
                     SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
                 )
 
-                val b = dataset.select(
+                // walking over all column creation methods
+                val b: Dataset<Tuple3<Int, IntArray, Boolean>> = dataset.select(
                     dataset.col(SomeOtherClass::b),
                     dataset(SomeOtherClass::a),
+                    col(SomeOtherClass::c),
                 )
                 b.show()
+            }
+            should("Handle some where queries using column operator functions") {
+                val dataset = dsOf(
+                    SomeOtherClass(intArrayOf(1, 2, 3), 4, true),
+                    SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
+                )
+                dataset.show()
+
+                val column = col("b").`as`<IntArray>()
+
+                val b = dataset.where(column gt 3 and col(SomeOtherClass::c))
+                b.show()
+
+                b.count() shouldBe 1
             }
         }
     }
