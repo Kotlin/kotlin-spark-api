@@ -326,6 +326,7 @@ class ApiTest : ShouldSpec({
                 val asList = dataset.takeAsList(2)
                 asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
             }
+            @Suppress("UNCHECKED_CAST")
             should("support dataset select") {
                 val dataset = dsOf(
                     SomeClass(intArrayOf(1, 2, 3), 3),
