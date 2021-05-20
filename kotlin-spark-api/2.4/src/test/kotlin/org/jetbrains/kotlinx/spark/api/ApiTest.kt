@@ -21,13 +21,15 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
-import org.apache.spark.sql.Dataset
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
+import scala.collection.Seq
+import org.apache.spark.sql.Dataset
+import scala.Product
+import scala.Tuple1
 import scala.Tuple2
 import scala.Tuple3
-import scala.collection.Seq
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
@@ -171,92 +173,6 @@ class ApiTest : ShouldSpec({
 
                 expect(result).asExpect().contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
             }
-            should("be able to serialize Date 2.4") { // uses knownDataTypes
-                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
-                dataset.show()
-            }
-            should("handle Timestamp Datasets 2.4") { // uses encoder
-                val dataset = dsOf(Timestamp(0L))
-                dataset.show()
-            }
-            should("be able to serialize Timestamp 2.4") { // uses knownDataTypes
-                val dataset = dsOf(Timestamp(0L) to 2)
-                dataset.show()
-            }
-            should("perform operations on grouped datasets") {
-                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
-                    .toDS()
-                    .groupByKey { it.first }
-
-                val flatMapped = groupedDataset.flatMapGroups { key, values ->
-                    val collected = values.asSequence().toList()
-
-                    if (collected.size > 1) collected.iterator()
-                    else emptyList<Pair<Int, String>>().iterator()
-                }
-
-                flatMapped.count() shouldBe 2
-
-                val mappedWithStateTimeoutConf = groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
-                    var s by state
-                    val collected = values.asSequence().toList()
-
-                    s = key
-                    s shouldBe key
-
-                    s!! to collected.map { it.second }
-                }
-
-                mappedWithStateTimeoutConf.count() shouldBe 2
-
-                val mappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
-                    var s by state
-                    val collected = values.asSequence().toList()
-
-                    s = key
-                    s shouldBe key
-
-                    s!! to collected.map { it.second }
-                }
-
-                mappedWithState.count() shouldBe 2
-
-                val flatMappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
-                    var s by state
-                    val collected = values.asSequence().toList()
-
-                    s = key
-                    s shouldBe key
-
-                    if (collected.size > 1) collected.iterator()
-                    else emptyList<Pair<Int, String>>().iterator()
-                }
-
-                flatMappedWithState.count() shouldBe 2
-            }
-            should("be able to cogroup grouped datasets") {
-                val groupedDataset1 = listOf(1 to "a", 1 to "b", 2 to "c")
-                    .toDS()
-                    .groupByKey { it.first }
-
-                val groupedDataset2 = listOf(1 to "d", 5 to "e", 3 to "f")
-                    .toDS()
-                    .groupByKey { it.first }
-
-                val cogrouped = groupedDataset1.cogroup(groupedDataset2) { key, left, right ->
-                    listOf(
-                        key to (left.asSequence() + right.asSequence())
-                            .map { it.second }
-                            .toList()
-                    ).iterator()
-                }
-
-                cogrouped.count() shouldBe 4
-            }
-            should("be able to serialize Date") {
-                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
-                dataset.show()
-            }
             should("Handle JavaConversions in Kotlin") {
                 // Test the iterator conversion
                 val scalaIterator: ScalaIterator<String> = listOf("test1", "test2").iterator().asScalaIterator()
@@ -291,33 +207,129 @@ class ApiTest : ShouldSpec({
                 val kotlinList: List<String> = scalaSeq.asKotlinList()
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
+            }
+            should("perform flat map on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
+                val flatMapped = groupedDataset.flatMapGroups { key, values ->
+                    val collected = values.asSequence().toList()
+
+                    if (collected.size > 1) collected.iterator()
+                    else emptyList<Pair<Int, String>>().iterator()
+                }
+
+                flatMapped.count() shouldBe 2
+            }
+            should("perform map group with state and timeout conf on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val mappedWithStateTimeoutConf =
+                    groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
+                        var s by state
+                        val collected = values.asSequence().toList()
+
+                        s = key
+                        s shouldBe key
+
+                        s!! to collected.map { it.second }
+                    }
+
+                mappedWithStateTimeoutConf.count() shouldBe 2
+            }
+            should("perform map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val mappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
+                    var s by state
+                    val collected = values.asSequence().toList()
+
+                    s = key
+                    s shouldBe key
+
+                    s!! to collected.map { it.second }
+                }
+
+                mappedWithState.count() shouldBe 2
+            }
+            should("perform flat map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val flatMappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
+                    var s by state
+                    val collected = values.asSequence().toList()
+
+                    s = key
+                    s shouldBe key
+
+                    if (collected.size > 1) collected.iterator()
+                    else emptyList<Pair<Int, String>>().iterator()
+                }
+
+                flatMappedWithState.count() shouldBe 2
+            }
+            should("be able to cogroup grouped datasets") {
+                val groupedDataset1 = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val groupedDataset2 = listOf(1 to "d", 5 to "e", 3 to "f")
+                    .toDS()
+                    .groupByKey { it.first }
+
+                val cogrouped = groupedDataset1.cogroup(groupedDataset2) { key, left, right ->
+                    listOf(
+                        key to (left.asSequence() + right.asSequence())
+                            .map { it.second }
+                            .toList()
+                    ).iterator()
+                }
+
+                cogrouped.count() shouldBe 4
+            }
+            should("be able to serialize Date 2.4") { // uses knownDataTypes
+                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
+                dataset.show()
+            }
+            should("handle Timestamp Datasets 2.4") { // uses encoder
+                val dataset = dsOf(Timestamp(0L))
+                dataset.show()
+            }
+            should("be able to serialize Timestamp 2.4") { // uses knownDataTypes
+                val dataset = dsOf(Timestamp(0L) to 2)
+                dataset.show()
             }
             should("Be able to serialize Scala Tuples including data classes") {
                 val dataset = dsOf(
                     Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
                     Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
                 )
-
                 dataset.show()
                 val asList = dataset.takeAsList(2)
                 asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
             }
-//            should("Be able to serialize data classes with tuples") {
-//                val dataset = dsOf(
-//                    DataClassWithTuple(Tuple2(5L, "test")),
-//                    DataClassWithTuple(Tuple2(6L, "tessst")),
-//                )
-//
-//                dataset.show()
-//                val asList = dataset.takeAsList(2)
-//                asList.first().tuple shouldBe Tuple2(5L, "test")
-//            }
+            should("Be able to serialize data classes with tuples") {
+                val dataset = dsOf(
+                    DataClassWithTuple(Tuple3(5L, "test", Tuple1(""))),
+                    DataClassWithTuple(Tuple3(6L, "tessst", Tuple1(""))),
+                )
+
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
+            }
         }
     }
 })
 
-data class DataClassWithTuple(val tuple: Tuple2<Long, String>)
+data class DataClassWithTuple<T : Product>(val tuple: T)
 
 
 data class LonLat(val lon: Double, val lat: Double)

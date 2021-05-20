@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-@file:Suppress("NOTHING_TO_INLINE", "RemoveExplicitTypeArguments")
+@file:Suppress("NOTHING_TO_INLINE", "RemoveExplicitTypeArguments", "unused")
 
 package org.jetbrains.kotlinx.spark.api
 

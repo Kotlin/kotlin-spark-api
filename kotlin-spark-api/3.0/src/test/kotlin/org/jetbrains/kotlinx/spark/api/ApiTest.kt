@@ -21,14 +21,15 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
-import org.apache.spark.sql.streaming.GroupState
-import org.apache.spark.sql.streaming.GroupStateTimeout
-import org.apache.spark.sql.Dataset
 import io.kotest.matchers.shouldBe
-import org.apache.spark.sql.Encoders
+import scala.Tuple1
 import scala.Tuple2
 import scala.Tuple3
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
+import org.apache.spark.sql.Dataset
+import scala.Product
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
@@ -186,7 +187,42 @@ class ApiTest : ShouldSpec({
 
                 expect(result).asExpect().contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
             }
-            should("perform operations on grouped datasets") {
+            should("Handle JavaConversions in Kotlin") {
+                // Test the iterator conversion
+                val scalaIterator: ScalaIterator<String> = listOf("test1", "test2").iterator().asScalaIterator()
+                scalaIterator.next() shouldBe "test1"
+
+                val kotlinIterator: Iterator<String> = scalaIterator.asKotlinIterator()
+                kotlinIterator.next() shouldBe "test2"
+
+
+                val scalaMap: ScalaMap<Int, String> = mapOf(1 to "a", 2 to "b").asScalaMap()
+                scalaMap.get(1).get() shouldBe "a"
+                scalaMap.get(2).get() shouldBe "b"
+
+                val kotlinMap: Map<Int, String> = scalaMap.asKotlinMap()
+                kotlinMap[1] shouldBe "a"
+                kotlinMap[2] shouldBe "b"
+
+
+                val scalaMutableMap: ScalaMutableMap<Int, String> = mutableMapOf(1 to "a").asScalaMutableMap()
+                scalaMutableMap.get(1).get() shouldBe "a"
+
+                scalaMutableMap.put(2, "b")
+
+                val kotlinMutableMap: MutableMap<Int, String> = scalaMutableMap.asKotlinMutableMap()
+                kotlinMutableMap[1] shouldBe "a"
+                kotlinMutableMap[2] shouldBe "b"
+
+                val scalaSeq: Seq<String> = listOf("a", "b").iterator().asScalaIterator().toSeq()
+                scalaSeq.take(1).toList().last() shouldBe "a"
+                scalaSeq.take(2).toList().last() shouldBe "b"
+
+                val kotlinList: List<String> = scalaSeq.asKotlinList()
+                kotlinList.first() shouldBe "a"
+                kotlinList.last() shouldBe "b"
+            }
+            should("perform flat map on grouped datasets") {
                 val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
                     .toDS()
                     .groupByKey { it.first }
@@ -199,18 +235,29 @@ class ApiTest : ShouldSpec({
                 }
 
                 flatMapped.count() shouldBe 2
+            }
+            should("perform map group with state and timeout conf on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
-                val mappedWithStateTimeoutConf = groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
-                    var s by state
-                    val collected = values.asSequence().toList()
+                val mappedWithStateTimeoutConf =
+                    groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
+                        var s by state
+                        val collected = values.asSequence().toList()
 
-                    s = key
-                    s shouldBe key
+                        s = key
+                        s shouldBe key
 
-                    s!! to collected.map { it.second }
-                }
+                        s!! to collected.map { it.second }
+                    }
 
                 mappedWithStateTimeoutConf.count() shouldBe 2
+            }
+            should("perform map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
                 val mappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
                     var s by state
@@ -223,6 +270,11 @@ class ApiTest : ShouldSpec({
                 }
 
                 mappedWithState.count() shouldBe 2
+            }
+            should("perform flat map group with state on grouped datasets") {
+                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                    .toDS()
+                    .groupByKey { it.first }
 
                 val flatMappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
                     var s by state
@@ -276,67 +328,30 @@ class ApiTest : ShouldSpec({
                 val dataset = dsOf(Timestamp(0L) to 2)
                 dataset.show()
             }
-            should("Handle JavaConversions in Kotlin") {
-                // Test the iterator conversion
-                val scalaIterator: ScalaIterator<String> = listOf("test1", "test2").iterator().asScalaIterator()
-                scalaIterator.next() shouldBe "test1"
-
-                val kotlinIterator: Iterator<String> = scalaIterator.asKotlinIterator()
-                kotlinIterator.next() shouldBe "test2"
-
-
-                val scalaMap: ScalaMap<Int, String> = mapOf(1 to "a", 2 to "b").asScalaMap()
-                scalaMap.get(1).get() shouldBe "a"
-                scalaMap.get(2).get() shouldBe "b"
-
-                val kotlinMap: Map<Int, String> = scalaMap.asKotlinMap()
-                kotlinMap[1] shouldBe "a"
-                kotlinMap[2] shouldBe "b"
-
-
-                val scalaMutableMap: ScalaMutableMap<Int, String> = mutableMapOf(1 to "a").asScalaMutableMap()
-                scalaMutableMap.get(1).get() shouldBe "a"
-
-                scalaMutableMap.put(2, "b")
-
-                val kotlinMutableMap: MutableMap<Int, String> = scalaMutableMap.asKotlinMutableMap()
-                kotlinMutableMap[1] shouldBe "a"
-                kotlinMutableMap[2] shouldBe "b"
-
-                val scalaSeq: Seq<String> = listOf("a", "b").iterator().asScalaIterator().toSeq()
-                scalaSeq.take(1).toList().last() shouldBe "a"
-                scalaSeq.take(2).toList().last() shouldBe "b"
-
-                val kotlinList: List<String> = scalaSeq.asKotlinList()
-                kotlinList.first() shouldBe "a"
-                kotlinList.last() shouldBe "b"
-            }
             should("Be able to serialize Scala Tuples including data classes") {
                 val dataset = dsOf(
                     Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
                     Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
                 )
-
                 dataset.show()
                 val asList = dataset.takeAsList(2)
                 asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
             }
-//            should("Be able to serialize data classes with tuples") {
-//                val dataset = dsOf(
-//                    DataClassWithTuple(Tuple2(5L, "test")),
-//                    DataClassWithTuple(Tuple2(6L, "tessst")),
-//                )
-//
-//                dataset.show()
-//                val asList = dataset.takeAsList(2)
-//                asList.first().tuple shouldBe Tuple2(5L, "test")
-//            }
+            should("Be able to serialize data classes with tuples") {
+                val dataset = dsOf(
+                    DataClassWithTuple(Tuple3(5L, "test", Tuple1(""))),
+                    DataClassWithTuple(Tuple3(6L, "tessst", Tuple1(""))),
+                )
 
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
+            }
         }
     }
 })
 
-data class DataClassWithTuple(val tuple: Tuple2<Long, String>)
+data class DataClassWithTuple<T : Product>(val tuple: T)
 
 data class LonLat(val lon: Double, val lat: Double)
 
