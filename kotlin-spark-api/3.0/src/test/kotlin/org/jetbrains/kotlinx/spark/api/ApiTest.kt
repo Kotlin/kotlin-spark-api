@@ -22,15 +22,16 @@ import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.TypedColumn
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
+import scala.Product
 import scala.Tuple1
 import scala.Tuple2
 import scala.Tuple3
-import org.apache.spark.sql.streaming.GroupState
-import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.TypedColumn
-import scala.Product
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
@@ -356,35 +357,35 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(1, 2, 4), 5),
                 )
 
-                val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder<IntArray>())
+                val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder())
 
-                val newDS2: Dataset<Pair<IntArray, Int>> = dataset.selectTyped(
-                    dataset.col(SomeClass::a),
-                    dataset.col(SomeClass::b),
+                val newDS2 = dataset.selectTyped(
+                    col(SomeClass::a), // NOTE: this only works on 3.0, returning a data class with an array in it
+                    col(SomeClass::b),
                 )
                 newDS2.show()
 
-                val newDS3: Dataset<Triple<IntArray, Int, Int>> = dataset.selectTyped(
-                    dataset.col(SomeClass::a),
-                    dataset.col(SomeClass::b),
-                    dataset.col(SomeClass::b),
+                val newDS3 = dataset.selectTyped(
+                    col(SomeClass::a),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
                 )
                 newDS3.show()
 
-                val newDS4: Dataset<Arity4<IntArray, Int, Int, Int>> = dataset.selectTyped(
-                    dataset.col(SomeClass::a),
-                    dataset.col(SomeClass::b),
-                    dataset.col(SomeClass::b),
-                    dataset.col(SomeClass::b),
+                val newDS4 = dataset.selectTyped(
+                    col(SomeClass::a),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
                 )
                 newDS4.show()
 
-                val newDS5: Dataset<Arity5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
-                    dataset.col(SomeClass::a),
-                    dataset.col(SomeClass::b),
-                    dataset.col(SomeClass::b),
-                    dataset.col(SomeClass::b),
-                    dataset.col(SomeClass::b),
+                val newDS5 = dataset.selectTyped(
+                    col(SomeClass::a),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
                 )
                 newDS5.show()
             }
@@ -392,7 +393,13 @@ class ApiTest : ShouldSpec({
     }
 })
 
-inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`<U>(encoder<U>()) as TypedColumn<T, U>
+/**
+ * TODO TEMP
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
+        col(column.name).`as`<U>(encoder<U>()) as TypedColumn<T, U>
+
 
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
