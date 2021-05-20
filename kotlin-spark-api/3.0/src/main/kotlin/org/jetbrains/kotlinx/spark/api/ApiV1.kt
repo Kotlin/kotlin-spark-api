@@ -356,7 +356,7 @@ fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply {
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
-fun <T, U1, U2> Dataset<T>.selectTyped(
+inline fun <reified T, reified U1, reified U2> Dataset<T>.selectTyped(
     c1: TypedColumn<T, U1>,
     c2: TypedColumn<T, U2>,
 ): Dataset<Pair<U1, U2>> =
@@ -365,7 +365,7 @@ fun <T, U1, U2> Dataset<T>.selectTyped(
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
-fun <T, U1, U2, U3> Dataset<T>.selectTyped(
+inline fun <reified T, reified U1, reified U2, reified U3> Dataset<T>.selectTyped(
     c1: TypedColumn<T, U1>,
     c2: TypedColumn<T, U2>,
     c3: TypedColumn<T, U3>,
@@ -375,7 +375,7 @@ fun <T, U1, U2, U3> Dataset<T>.selectTyped(
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
-fun <T, U1, U2, U3, U4> Dataset<T>.selectTyped(
+inline fun <reified T, reified U1, reified U2, reified U3, reified U4> Dataset<T>.selectTyped(
     c1: TypedColumn<T, U1>,
     c2: TypedColumn<T, U2>,
     c3: TypedColumn<T, U3>,
@@ -386,7 +386,7 @@ fun <T, U1, U2, U3, U4> Dataset<T>.selectTyped(
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
-fun <T, U1, U2, U3, U4, U5> Dataset<T>.selectTyped(
+inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U5> Dataset<T>.selectTyped(
     c1: TypedColumn<T, U1>,
     c2: TypedColumn<T, U2>,
     c3: TypedColumn<T, U3>,

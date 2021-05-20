@@ -354,6 +354,8 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(1, 2, 4), 5),
                 )
 
+                val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder<IntArray>())
+
                 val newDS2: Dataset<Pair<IntArray, Int>> = dataset.selectTyped(
                     dataset.col("a").`as`(encoder<IntArray>()) as TypedColumn<SomeClass, IntArray>,
                     dataset.col("b").`as`(encoder<Int>()) as TypedColumn<SomeClass, Int>,
