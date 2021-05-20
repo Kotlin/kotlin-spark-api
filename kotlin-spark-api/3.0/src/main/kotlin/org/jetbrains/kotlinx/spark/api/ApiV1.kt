@@ -499,8 +499,9 @@ inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): Type
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
- *    val new: Dataset<TypeOfA, TypeOfB> = dataset.select( col(YourClass::a), col(YourClass::b) )
+ *    val new: Dataset<Tuple2<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
  * ```
+ * TODO: change example to [Pair]s when merged
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> = functions.col(column.name).`as`<U>() as TypedColumn<T, U>
