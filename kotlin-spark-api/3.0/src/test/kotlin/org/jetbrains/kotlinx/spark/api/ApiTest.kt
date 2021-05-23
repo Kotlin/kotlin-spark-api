@@ -413,6 +413,27 @@ class ApiTest : ShouldSpec({
 
                 b.count() shouldBe 1
             }
+            should("Be able to serialize lists of data classes") {
+                val dataset = dsOf(
+                    listOf(SomeClass(intArrayOf(1, 2, 3), 4)),
+                    listOf(SomeClass(intArrayOf(3, 2, 1), 0)),
+                )
+                dataset.show()
+            }
+            should("Be able to serialize arrays of data classes") {
+                val dataset = dsOf(
+                    arrayOf(SomeClass(intArrayOf(1, 2, 3), 4)),
+                    arrayOf(SomeClass(intArrayOf(3, 2, 1), 0)),
+                )
+                dataset.show()
+            }
+            should("Be able to serialize lists of tuples") {
+                val dataset = dsOf(
+                    listOf(Tuple2(intArrayOf(1, 2, 3), 4)),
+                    listOf(Tuple2(intArrayOf(3, 2, 1), 0)),
+                )
+                dataset.show()
+            }
         }
     }
 })
