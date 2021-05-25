@@ -465,8 +465,6 @@ infix fun Column.inRangeOf(range: ClosedRange<*>): Column = between(range.start,
  *   // Kotlin:
  *   import org.jetbrains.kotlinx.spark.api.*
  *   people.filter( people("inSchool") or people("isEmployed") )
- *   // or
- *   people.filter( people("inSchool") `||` people("isEmployed") )
  *
  *   // Java:
  *   import static org.apache.spark.sql.functions.*;
@@ -474,25 +472,6 @@ infix fun Column.inRangeOf(range: ClosedRange<*>): Column = between(range.start,
  * ```
  */
 infix fun Column.or(other: Any): Column = `$bar$bar`(other)
-
-/**
- * Boolean OR.
- * ```
- *   // Scala: The following selects people that are in school or employed.
- *   people.filter( people("inSchool") || people("isEmployed") )
- *
- *   // Kotlin:
- *   import org.jetbrains.kotlinx.spark.api.*
- *   people.filter( people("inSchool") or people("isEmployed") )
- *   // or
- *   people.filter( people("inSchool") `||` people("isEmployed") )
- *
- *   // Java:
- *   import static org.apache.spark.sql.functions.*;
- *   people.filter( people.col("inSchool").or(people.col("isEmployed")) );
- * ```
- */
-infix fun Column.`||`(other: Any): Column = `$bar$bar`(other)
 
 /**
  * Boolean AND.

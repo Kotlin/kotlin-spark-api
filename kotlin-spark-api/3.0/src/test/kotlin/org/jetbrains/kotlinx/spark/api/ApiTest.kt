@@ -380,7 +380,6 @@ class ApiTest : ShouldSpec({
                 dataset("b") geq 3 shouldBe dataset("b").geq(3)
                 dataset("b") inRangeOf 0..2 shouldBe dataset("b").between(0, 2)
                 dataset("c") or dataset("c") shouldBe dataset("c").or(dataset("c"))
-                dataset("c").or(dataset("c")) shouldBe (dataset("c") `||` dataset("c"))
                 dataset("c") and dataset("c") shouldBe dataset("c").and(dataset("c"))
                 dataset("c").and(dataset("c")) shouldBe (dataset("c") `&&` dataset("c"))
                 dataset("b") + dataset("b") shouldBe dataset("b").plus(dataset("b"))
