@@ -441,13 +441,6 @@ class ApiTest : ShouldSpec({
     }
 })
 
-/**
- * TODO TEMP
- */
-@Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    col(column.name).`as`<U>(encoder<U>()) as TypedColumn<T, U>
-
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 

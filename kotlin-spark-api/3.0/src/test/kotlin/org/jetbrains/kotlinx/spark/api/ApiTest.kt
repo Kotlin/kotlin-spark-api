@@ -22,9 +22,6 @@ import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.TypedColumn
-import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.Product
@@ -35,7 +32,6 @@ import scala.collection.Seq
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.TypedColumn
 import org.apache.spark.sql.functions.*
-import scala.Product
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
@@ -484,15 +480,6 @@ class ApiTest : ShouldSpec({
         }
     }
 })
-
-/**
- * TODO TEMP
- */
-@Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
-        col(column.name).`as`<U>(encoder<U>()) as TypedColumn<T, U>
-
-
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
