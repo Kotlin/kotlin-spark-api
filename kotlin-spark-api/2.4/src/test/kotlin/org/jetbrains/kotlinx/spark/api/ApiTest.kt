@@ -26,6 +26,7 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions.*
 import scala.Product
 import scala.Tuple1
 import scala.Tuple2
@@ -325,6 +326,75 @@ class ApiTest : ShouldSpec({
                 val asList = dataset.takeAsList(2)
                 asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
             }
+            should("Access columns using invoke on datasets") {
+                val dataset = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 4),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+
+                dataset("b").`$greater$eq`(3)
+
+                dataset.col("a") shouldBe dataset("a")
+            }
+            should("Use infix- and operator funs on columns") {
+                val dataset = dsOf(
+                    SomeOtherClass(intArrayOf(1, 2, 3), 4, true),
+                    SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
+                )
+
+                (dataset("a") == dataset("a")) shouldBe dataset("a").equals(dataset("a"))
+                (dataset("a") != dataset("a")) shouldBe !dataset("a").equals(dataset("a"))
+                (dataset("a") eq dataset("a")) shouldBe dataset("a").equalTo(dataset("a"))
+                dataset("a").equalTo(dataset("a")) shouldBe (dataset("a") `===` dataset("a"))
+                (dataset("a") neq dataset("a")) shouldBe dataset("a").notEqual(dataset("a"))
+                dataset("a").notEqual(dataset("a")) shouldBe (dataset("a") `=!=` dataset("a"))
+                !(dataset("a") eq dataset("a")) shouldBe dataset("a").notEqual(dataset("a"))
+                dataset("a").notEqual(dataset("a")) shouldBe (!(dataset("a") `===` dataset("a")))
+                -dataset("b") shouldBe negate(dataset("b"))
+                !dataset("c") shouldBe not(dataset("c"))
+                dataset("b") gt 3 shouldBe dataset("b").gt(3)
+                dataset("b") lt 3 shouldBe dataset("b").lt(3)
+                dataset("b") leq 3 shouldBe dataset("b").leq(3)
+                dataset("b") geq 3 shouldBe dataset("b").geq(3)
+                dataset("b") inRangeOf 0..2 shouldBe dataset("b").between(0, 2)
+                dataset("c") or dataset("c") shouldBe dataset("c").or(dataset("c"))
+                dataset("c") and dataset("c") shouldBe dataset("c").and(dataset("c"))
+                dataset("c").and(dataset("c")) shouldBe (dataset("c") `&&` dataset("c"))
+                dataset("b") + dataset("b") shouldBe dataset("b").plus(dataset("b"))
+                dataset("b") - dataset("b") shouldBe dataset("b").minus(dataset("b"))
+                dataset("b") * dataset("b") shouldBe dataset("b").multiply(dataset("b"))
+                dataset("b") / dataset("b") shouldBe dataset("b").divide(dataset("b"))
+                dataset("b") % dataset("b") shouldBe dataset("b").mod(dataset("b"))
+                dataset("b")[0] shouldBe dataset("b").getItem(0)
+            }
+            should("Handle TypedColumns") {
+                val dataset = dsOf(
+                    SomeOtherClass(intArrayOf(1, 2, 3), 4, true),
+                    SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
+                )
+
+                // walking over all column creation methods
+                val b: Dataset<Tuple3<Int, IntArray, Boolean>> = dataset.select(
+                    dataset.col(SomeOtherClass::b),
+                    dataset(SomeOtherClass::a),
+                    col(SomeOtherClass::c),
+                )
+                b.show()
+            }
+            should("Handle some where queries using column operator functions") {
+                val dataset = dsOf(
+                    SomeOtherClass(intArrayOf(1, 2, 3), 4, true),
+                    SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
+                )
+                dataset.show()
+
+                val column = col("b").`as`<IntArray>()
+
+                val b = dataset.where(column gt 3 and col(SomeOtherClass::c))
+                b.show()
+
+                b.count() shouldBe 1
+            }
         }
     }
 })
@@ -355,3 +425,5 @@ data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>) {
 
 // (data) class must be Serializable to be broadcast
 data class SomeClass(val a: IntArray, val b: Int) : Serializable
+
+data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable

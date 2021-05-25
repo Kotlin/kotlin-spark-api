@@ -421,6 +421,7 @@ object KotlinReflection extends KotlinReflection {
                   "toJavaMap",
                   keyData :: valueData :: Nil,
                   returnNullable = false)
+
               case ArrayType(elementType, containsNull) =>
                 val dataTypeWithClass = elementType.asInstanceOf[DataTypeWithClass]
                 val mapFunction: Expression => Expression = element => {
@@ -434,7 +435,7 @@ object KotlinReflection extends KotlinReflection {
                     nullable = dataTypeWithClass.nullable,
                     newTypePath,
                     (casted, typePath) => {
-                      deserializerFor(et, casted, typePath, Some(dataTypeWithClass.dt).filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))
+                      deserializerFor(et, casted, typePath, Some(dataTypeWithClass).filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))
                     })
                 }
 

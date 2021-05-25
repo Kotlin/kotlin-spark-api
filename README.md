@@ -20,6 +20,7 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
     - [withSpark function](#withspark-function)
     - [withCached function](#withcached-function)
     - [toList and toArray](#tolist-and-toarray-methods)
+    - [Column infix/operator functions](#column-infixoperator-functions)
 - [Examples](#examples)
 - [Reporting issues/Support](#reporting-issuessupport)
 - [Code of Conduct](#code-of-conduct)
@@ -137,6 +138,57 @@ o call the `map` method and collect the resulting `Dataset`.
 
 For more idiomatic Kotlin code we've added `toList` and `toArray` methods in this API. You can still use the `collect` method as in Scala API, however the result should be casted to `Array`.
   This is because `collect` returns a Scala array, which is not the same as Java/Kotlin one.
+
+### Column infix/operator functions
+
+Similar to the Scala API for `Columns`, many of the operator functions could be ported over.
+For example:
+```kotlin
+dataset.select( col("colA") + 5 )
+dataset.select( col("colA") / col("colB") )
+
+dataset.where( col("colA") `===` 6 )
+// or alternatively
+dataset.where( col("colA") eq 6)
+```
+In short, all supported operators are:
+- `==`,
+- `!=`, 
+- `eq` / `` `===` ``,
+- `neq` / `` `=!=` ``,
+- `-col(...)`,
+- `!col(...)`,  
+- `gt`,
+- `lt`,
+- `geq`,  
+- `leq`,
+- `or`,
+- `and` / `` `&&` ``,
+- `+`,
+- `-`,
+- `*`,
+- `/`,
+- `%`
+
+Secondly, there are some quality of life additions as well:
+
+In Kotlin, Ranges are often
+used to solve inclusive/exclusive situations for a range. So, you can now do:
+```kotlin
+dataset.where( col("colA") inRangeOf 0..2 )
+```
+Also, for columns containing map- or array like types:
+```kotlin
+dataset.where( col("colB")[0] geq 5 )
+```
+
+Finally, thanks to Kotlin reflection, we can provide a type- and refactor safe way
+to create `TypedColumn`s and with those a new Dataset from pieces of another using the `selectTyped()` function, added to the API:
+```kotlin
+val dataset: Dataset<YourClass> = ...
+val newDataset: Dataset<Pair<TypeA, TypeB>> = dataset.selectTyped(col(YourClass::colA), col(YourClass::colB))
+```
+
 
 ## Examples
 
