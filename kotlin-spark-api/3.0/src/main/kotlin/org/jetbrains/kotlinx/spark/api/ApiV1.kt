@@ -248,133 +248,352 @@ val SparkSession.sparkContext
 fun <T> Dataset<T>.debug() = also { KSparkExtensions.debug(it) }
 
 @Suppress("FunctionName")
-@Deprecated("Changed to infix \"eq\" to be easier to type.", ReplaceWith("this eq c"))
+@Deprecated("Changed to \"`===`\" to better reflect Scala API.", ReplaceWith("this `===` c"))
 infix fun Column.`==`(c: Column) = `$eq$eq$eq`(c)
-
-@Deprecated("Changed to infix \"and\" to be easier to type.", ReplaceWith("this and c"))
-infix fun Column.`&&`(c: Column) = and(c)
 
 /**
  * Unary minus, i.e. negate the expression.
- * ```kotlin
- *   // select the amount column and negates all values.
+ * ```
+ *   // Scala: select the amount column and negates all values.
  *   df.select( -df("amount") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.select( -df("amount") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.select( negate(col("amount") );
  * ```
  */
 operator fun Column.unaryMinus(): Column = `unary_$minus`()
 
 /**
  * Inversion of boolean expression, i.e. NOT.
- * ```kotlin
- *   // select rows that are not active (isActive === false)
+ * ```
+ *   // Scala: select rows that are not active (isActive === false)
  *   df.filter( !df("isActive") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.select( !df("amount") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.filter( not(df.col("isActive")) );
  * ```
  */
 operator fun Column.not(): Column = `unary_$bang`()
 
 /**
  * Equality test.
- * ```kotlin
- *     df.filter( df("colA") eq df("colB") )
+ * ```
+ *   // Scala:
+ *   df.filter( df("colA") === df("colB") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.filter( df("colA") eq df("colB") )
+ *   // or
+ *   df.filter( df("colA") `===` df("colB") )
+ *
+ *   // Java
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.filter( col("colA").equalTo(col("colB")) );
  * ```
  */
 infix fun Column.eq(other: Any): Column = `$eq$eq$eq`(other)
 
 /**
+ * Equality test.
+ * ```
+ *   // Scala:
+ *   df.filter( df("colA") === df("colB") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.filter( df("colA") eq df("colB") )
+ *   // or
+ *   df.filter( df("colA") `===` df("colB") )
+ *
+ *   // Java
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.filter( col("colA").equalTo(col("colB")) );
+ * ```
+ */
+infix fun Column.`===`(other: Any): Column = `$eq$eq$eq`(other)
+
+/**
  * Inequality test.
- * ```kotlin
- *     df.select( df("colA") neq df("colB") )
- *     df.select( !(df("colA") eq df("colB")) )
+ * ```
+ *   // Scala:
+ *   df.select( df("colA") =!= df("colB") )
+ *   df.select( !(df("colA") === df("colB")) )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.select( df("colA") neq df("colB") )
+ *   df.select( !(df("colA") eq df("colB")) )
+ *   // or
+ *   df.select( df("colA") `=!=` df("colB") )
+ *   df.select( !(df("colA") `===` df("colB")) )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.filter( col("colA").notEqual(col("colB")) );
  * ```
  */
 infix fun Column.neq(other: Any): Column = `$eq$bang$eq`(other)
 
 /**
+ * Inequality test.
+ * ```
+ *   // Scala:
+ *   df.select( df("colA") =!= df("colB") )
+ *   df.select( !(df("colA") === df("colB")) )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.select( df("colA") neq df("colB") )
+ *   df.select( !(df("colA") eq df("colB")) )
+ *   // or
+ *   df.select( df("colA") `=!=` df("colB") )
+ *   df.select( !(df("colA") `===` df("colB")) )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.filter( col("colA").notEqual(col("colB")) );
+ * ```
+ */
+infix fun Column.`=!=`(other: Any): Column = `$eq$bang$eq`(other)
+
+/**
  * Greater than.
- * ```kotlin
- *     // The following selects people older than 21.
- *     people.select( people("age") gt 21 )
+ * ```
+ *   // Scala: The following selects people older than 21.
+ *   people.select( people("age") > 21 )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.select( people("age") gt 21 )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("age").gt(21) );
  * ```
  */
 infix fun Column.gt(other: Any): Column = `$greater`(other)
 
 /**
  * Less than.
- * ```kotlin
- *    // The following selects people younger than 21.
- *    people.select( people("age") lt 21 )
+ * ```
+ *   // Scala: The following selects people younger than 21.
+ *   people.select( people("age") < 21 )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.select( people("age") lt 21 )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("age").lt(21) );
  * ```
  */
 infix fun Column.lt(other: Any): Column = `$less`(other)
 
 /**
  * Less than or equal to.
- * ```kotlin
- *    // The following selects people age 21 or younger than 21.
- *    people.select( people("age") leq 21 )
+ * ```
+ *   // Scala: The following selects people age 21 or younger than 21.
+ *   people.select( people("age") <= 21 )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.select( people("age") leq 21 )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("age").leq(21) );
  * ```
  */
 infix fun Column.leq(other: Any): Column = `$less$eq`(other)
 
 /**
- * Greater than or equal to.
- * ```kotlin
- *    // The following selects people age 21 or older than 21..
- *    people.select( people("age") geq 21 )
+ * Greater than or equal to an expression.
+ * ```
+ *   // Scala: The following selects people age 21 or older than 21.
+ *   people.select( people("age") >= 21 )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.select( people("age") geq 21 )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("age").geq(21) );
  * ```
  */
 infix fun Column.geq(other: Any): Column = `$greater$eq`(other)
 
 /**
  * True if the current column is in the given [range].
+ * ```
+ *   // Scala:
+ *   df.where( df("colA").between(1, 5) )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.where( df("colA") inRangeOf 1..5 )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.where( df.col("colA").between(1, 5) );
+ * ```
  */
 infix fun Column.inRangeOf(range: ClosedRange<*>): Column = between(range.start, range.endInclusive)
 
 /**
  * Boolean OR.
- * ```kotlin
- *   // The following selects people that are in school or employed.
+ * ```
+ *   // Scala: The following selects people that are in school or employed.
+ *   people.filter( people("inSchool") || people("isEmployed") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
  *   people.filter( people("inSchool") or people("isEmployed") )
+ *   // or
+ *   people.filter( people("inSchool") `||` people("isEmployed") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.filter( people.col("inSchool").or(people.col("isEmployed")) );
  * ```
  */
 infix fun Column.or(other: Any): Column = `$bar$bar`(other)
 
 /**
+ * Boolean OR.
+ * ```
+ *   // Scala: The following selects people that are in school or employed.
+ *   people.filter( people("inSchool") || people("isEmployed") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.filter( people("inSchool") or people("isEmployed") )
+ *   // or
+ *   people.filter( people("inSchool") `||` people("isEmployed") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.filter( people.col("inSchool").or(people.col("isEmployed")) );
+ * ```
+ */
+infix fun Column.`||`(other: Any): Column = `$bar$bar`(other)
+
+/**
  * Boolean AND.
- * ```kotlin
- *   // The following selects people that are in school and employed.
+ * ```
+ *   // Scala: The following selects people that are in school and employed at the same time.
+ *   people.select( people("inSchool") && people("isEmployed") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
  *   people.filter( people("inSchool") and people("isEmployed") )
+ *   // or
+ *   people.filter( people("inSchool") `&&` people("isEmployed") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("inSchool").and(people.col("isEmployed")) );
  * ```
  */
 infix fun Column.and(other: Any): Column = `$amp$amp`(other)
 
 /**
+ * Boolean AND.
+ * ```
+ *   // Scala: The following selects people that are in school and employed at the same time.
+ *   people.select( people("inSchool") && people("isEmployed") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.filter( people("inSchool") and people("isEmployed") )
+ *   // or
+ *   people.filter( people("inSchool") `&&` people("isEmployed") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("inSchool").and(people.col("isEmployed")) );
+ * ```
+ */
+infix fun Column.`&&`(other: Any): Column = `$amp$amp`(other)
+
+/**
  * Multiplication of this expression and another expression.
- * ```kotlin
- *     // The following multiplies a person's height by their weight.
- *     people.select( people("height") * people("weight") )
+ * ```
+ *   // Scala: The following multiplies a person's height by their weight.
+ *   people.select( people("height") * people("weight") )
+ *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.select( people("height") * people("weight") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("height").multiply(people.col("weight")) );
  * ```
  */
 operator fun Column.times(other: Any): Column = `$times`(other)
 
 /**
  * Division this expression by another expression.
- * ```kotlin
- *     // The following divides a person's height by their weight.
- *     people.select( people("height") / people("weight") )
+ * ```
+ *   // Scala: The following divides a person's height by their weight.
+ *   people.select( people("height") / people("weight") )
+ *
+ *   // Kotlin
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   people.select( people("height") / people("weight") )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   people.select( people.col("height").divide(people.col("weight")) );
  * ```
  */
 operator fun Column.div(other: Any): Column = `$div`(other)
 
 /**
  * Modulo (a.k.a. remainder) expression.
+ * ```
+ *   // Scala:
+ *   df.where( df("colA") % 2 === 0 )
  *
+ *   // Kotlin:
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.where( df("colA") % 2 eq 0 )
+ *
+ *   // Java:
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.where( df.col("colA").mod(2).equalTo(0) );
+ * ```
  */
 operator fun Column.rem(other: Any): Column = `$percent`(other)
 
 /**
  * An expression that gets an item at position `ordinal` out of an array,
  * or gets a value by key `key` in a `MapType`.
+ * ```
+ *   // Scala:
+ *   df.where( df("arrayColumn").getItem(0) === 5 )
+ *
+ *   // Kotlin
+ *   import org.jetbrains.kotlinx.spark.api.*
+ *   df.where( df("arrayColumn")[0] eq 5 )
+ *
+ *   // Java
+ *   import static org.apache.spark.sql.functions.*;
+ *   df.where( df.col("arrayColumn").getItem(0).equalTo(5) );
+ * ```
  */
 operator fun Column.get(key: Any): Column = getItem(key)
 
