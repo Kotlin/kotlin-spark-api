@@ -26,6 +26,7 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.TypedColumn
 import org.apache.spark.sql.functions.*
 import scala.Product
 import scala.Tuple1
@@ -35,6 +36,7 @@ import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
+import kotlin.reflect.KProperty1
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
 import scala.collection.mutable.Map as ScalaMutableMap
@@ -326,6 +328,46 @@ class ApiTest : ShouldSpec({
                 val asList = dataset.takeAsList(2)
                 asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
             }
+            @Suppress("UNCHECKED_CAST")
+            should("support dataset select") {
+                val dataset = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 3),
+                    SomeClass(intArrayOf(1, 2, 4), 5),
+                )
+
+                val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder())
+
+                val newDS2 = dataset.selectTyped(
+//                    col(SomeClass::a), NOTE that this doesn't work on 2.4, returnting a data class with an array in it
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                )
+                newDS2.show()
+
+                val newDS3 = dataset.selectTyped(
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                )
+                newDS3.show()
+
+                val newDS4 = dataset.selectTyped(
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                )
+                newDS4.show()
+
+                val newDS5 = dataset.selectTyped(
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                )
+                newDS5.show()
+            }
             should("Access columns using invoke on datasets") {
                 val dataset = dsOf(
                     SomeClass(intArrayOf(1, 2, 3), 4),
@@ -398,6 +440,7 @@ class ApiTest : ShouldSpec({
         }
     }
 })
+
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 

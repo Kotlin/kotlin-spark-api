@@ -22,16 +22,16 @@ import ch.tutteli.atrium.domain.builders.migration.asExpect
 import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
+import scala.Product
 import scala.Tuple1
 import scala.Tuple2
 import scala.Tuple3
-import org.apache.spark.sql.streaming.GroupState
-import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.collection.Seq
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.TypedColumn
 import org.apache.spark.sql.functions.*
-import scala.Product
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
@@ -349,6 +349,45 @@ class ApiTest : ShouldSpec({
                 dataset.show()
                 val asList = dataset.takeAsList(2)
                 asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
+            }
+            @Suppress("UNCHECKED_CAST")
+            should("support dataset select") {
+                val dataset = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 3),
+                    SomeClass(intArrayOf(1, 2, 4), 5),
+                )
+
+                val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder())
+
+                val newDS2 = dataset.selectTyped(
+                    col(SomeClass::a), // NOTE: this only works on 3.0, returning a data class with an array in it
+                    col(SomeClass::b),
+                )
+                newDS2.show()
+
+                val newDS3 = dataset.selectTyped(
+                    col(SomeClass::a),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                )
+                newDS3.show()
+
+                val newDS4 = dataset.selectTyped(
+                    col(SomeClass::a),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                )
+                newDS4.show()
+
+                val newDS5 = dataset.selectTyped(
+                    col(SomeClass::a),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                    col(SomeClass::b),
+                )
+                newDS5.show()
             }
             should("Access columns using invoke on datasets") {
                 val dataset = dsOf(
