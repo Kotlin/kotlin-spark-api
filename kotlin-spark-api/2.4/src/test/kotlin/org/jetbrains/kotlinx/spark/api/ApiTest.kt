@@ -437,10 +437,42 @@ class ApiTest : ShouldSpec({
 
                 b.count() shouldBe 1
             }
+            should("Allow simple forEachPartition in datasets") {
+                val dataset = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 1),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+                dataset.forEachPartition {
+                    it.forEach {
+                        it.b shouldBe  1
+                    }
+                }
+            }
+            should("Have easier access to keys and values for key/value datasets") {
+                val dataset: Dataset<SomeClass> = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 1),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+                    .groupByKey { it.b }
+                    .reduceGroups(func = { a, b -> SomeClass(a.a + b.a, a.b) })
+                    .takeValues()
+
+                dataset.count() shouldBe 1
+            }
+            should("Be able to sort datasets with property reference") {
+                val dataset: Dataset<SomeClass> = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 2),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+                dataset.sort(SomeClass::b)
+                dataset.takeAsList(1).first().b shouldBe 2
+
+                dataset.sort(SomeClass::a, SomeClass::b)
+                dataset.takeAsList(1).first().b shouldBe 2
+            }
         }
     }
 })
-
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
