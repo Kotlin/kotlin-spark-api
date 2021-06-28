@@ -10,18 +10,17 @@
     <packaging>pom</packaging>
 
     <properties>
-        <kotlin.version>1.4.21</kotlin.version>
+        <kotlin.version>1.5.20</kotlin.version>
         <dokka.version>1.4.20</dokka.version>
         <atrium.version>0.13.0</atrium.version>
         <kotest.version>4.2.5</kotest.version>
-        <kotlin.version>1.4.21</kotlin.version>
         <spark2-scala-2.11.version>2.4.0</spark2-scala-2.11.version>
         <spark2-scala-2.12.version>2.4.1</spark2-scala-2.12.version>
         <spark3.version>3.0.0</spark3.version>
 
         <!-- Plugin versions -->
         <allure-maven.version>2.10.0</allure-maven.version>
-        <jacoco-maven-plugin.version>0.8.5</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
         <klaxon.version>5.4</klaxon.version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
@@ -342,17 +341,4 @@
         </profile>
     </profiles>
 
-    <repositories>
-        <repository>
-            <id>jcenter</id>
-            <url>https://jcenter.bintray.com/</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>jcenter</id>
-            <name>JCenter</name>
-            <url>https://jcenter.bintray.com/</url>
-        </pluginRepository>
-    </pluginRepositories>
 </project>

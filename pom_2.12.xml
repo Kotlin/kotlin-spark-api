@@ -14,7 +14,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <scala.version>2.12.10</scala.version>
+    <scala.version>2.12.14</scala.version>
     <scala.compat.version>2.12</scala.compat.version>
   </properties>
 
