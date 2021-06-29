@@ -31,22 +31,28 @@ import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
  * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
  */
 @JvmOverloads
-inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "local[*]", appName: String = "Kotlin Spark Sample", logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
+inline fun withSpark(
+    props: Map<String, Any> = emptyMap(),
+    master: String = "local[*]",
+    appName: String = "Kotlin Spark Sample",
+    logLevel: SparkLogLevel = ERROR,
+    func: KSparkSession.() -> Unit,
+) {
     val builder = SparkSession
-            .builder()
-            .master(master)
-            .appName(appName)
-            .apply {
-                props.forEach {
-                    when (val value = it.value) {
-                        is String -> config(it.key, value)
-                        is Boolean -> config(it.key, value)
-                        is Long -> config(it.key, value)
-                        is Double -> config(it.key, value)
-                        else -> throw IllegalArgumentException("Cannot set property ${it.key} because value $value of unsupported type ${value::class}")
-                    }
+        .builder()
+        .master(master)
+        .appName(appName)
+        .apply {
+            props.forEach {
+                when (val value = it.value) {
+                    is String -> config(it.key, value)
+                    is Boolean -> config(it.key, value)
+                    is Long -> config(it.key, value)
+                    is Double -> config(it.key, value)
+                    else -> throw IllegalArgumentException("Cannot set property ${it.key} because value $value of unsupported type ${value::class}")
                 }
             }
+        }
     withSpark(builder, logLevel, func)
 
 }
@@ -54,14 +60,14 @@ inline fun withSpark(props: Map<String, Any> = emptyMap(), master: String = "loc
 @JvmOverloads
 inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
     builder
-            .orCreate
-            .apply {
-                KSparkSession(this).apply {
-                    sparkContext.setLogLevel(logLevel)
-                    func()
-                }
+        .orCreate
+        .apply {
+            KSparkSession(this).apply {
+                sparkContext.setLogLevel(logLevel)
+                func()
             }
-            .also { it.stop() }
+        }
+        .also { it.stop() }
 }
 
 /**

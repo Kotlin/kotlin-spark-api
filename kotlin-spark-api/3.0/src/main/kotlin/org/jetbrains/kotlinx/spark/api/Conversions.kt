@@ -78,7 +78,8 @@ fun <A, B> Map<A, B>.asScalaMap(): ScalaMap<A, B> = JavaConverters.mapAsScalaMap
 /**
  * @see JavaConverters.mapAsScalaConcurrentMap for more information.
  */
-fun <A, B> ConcurrentMap<A, B>.asScalaConcurrentMap(): ScalaConcurrentMap<A, B> = JavaConverters.mapAsScalaConcurrentMap<A, B>(this)
+fun <A, B> ConcurrentMap<A, B>.asScalaConcurrentMap(): ScalaConcurrentMap<A, B> =
+    JavaConverters.mapAsScalaConcurrentMap<A, B>(this)
 
 /**
  * @see JavaConverters.dictionaryAsScalaMap for more information.
@@ -154,5 +155,6 @@ fun <A, B> ScalaMap<A, B>.asKotlinMap(): Map<A, B> = JavaConverters.mapAsJavaMap
 /**
  * @see JavaConverters.mapAsJavaConcurrentMap for more information.
  */
-fun <A, B> ScalaConcurrentMap<A, B>.asKotlinConcurrentMap(): ConcurrentMap<A, B> = JavaConverters.mapAsJavaConcurrentMap<A, B>(this)
+fun <A, B> ScalaConcurrentMap<A, B>.asKotlinConcurrentMap(): ConcurrentMap<A, B> =
+    JavaConverters.mapAsJavaConcurrentMap<A, B>(this)
 

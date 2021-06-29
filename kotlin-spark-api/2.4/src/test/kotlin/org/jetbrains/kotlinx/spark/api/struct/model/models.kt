@@ -19,27 +19,35 @@
  */
 package org.jetbrains.kotlinx.spark.api.struct.model
 
-import com.beust.klaxon.*
+import com.beust.klaxon.Converter
+import com.beust.klaxon.JsonObject
+import com.beust.klaxon.JsonValue
+import com.beust.klaxon.Klaxon
 
-private fun <T> Klaxon.convert(k: kotlin.reflect.KClass<*>, fromJson: (JsonValue) -> T, toJson: (T) -> String, isUnion: Boolean = false) =
-        this.converter(object : Converter {
-            @Suppress("UNCHECKED_CAST")
-            override fun toJson(value: Any) = toJson(value as T)
+private fun <T> Klaxon.convert(
+    k: kotlin.reflect.KClass<*>,
+    fromJson: (JsonValue) -> T,
+    toJson: (T) -> String,
+    isUnion: Boolean = false,
+) =
+    this.converter(object : Converter {
+        @Suppress("UNCHECKED_CAST")
+        override fun toJson(value: Any) = toJson(value as T)
 
-            override fun fromJson(jv: JsonValue) = fromJson(jv) as Any
-            override fun canConvert(cls: Class<*>) = cls == k.java || (isUnion && cls.superclass == k.java)
-        })
+        override fun fromJson(jv: JsonValue) = fromJson(jv) as Any
+        override fun canConvert(cls: Class<*>) = cls == k.java || (isUnion && cls.superclass == k.java)
+    })
 
 private val klaxon = Klaxon()
-        .convert(JsonObject::class, { it.obj!! }, { it.toJsonString() })
-        .convert(DataType::class, { DataType.fromJson(it) }, { it.toJson() }, true)
-        .convert(ElementType::class, { ElementType.fromJson(it) }, { it.toJson() }, true)
+    .convert(JsonObject::class, { it.obj!! }, { it.toJsonString() })
+    .convert(DataType::class, { DataType.fromJson(it) }, { it.toJson() }, true)
+    .convert(ElementType::class, { ElementType.fromJson(it) }, { it.toJson() }, true)
 
 data class Struct(
-        val type: String,
-        val fields: List<StructField>? = null,
-        val containsNull: Boolean? = null,
-        val elementType: ElementType? = null
+    val type: String,
+    val fields: List<StructField>? = null,
+    val containsNull: Boolean? = null,
+    val elementType: ElementType? = null,
 ) {
     public fun toJson() = klaxon.toJsonString(this)
 
@@ -49,10 +57,10 @@ data class Struct(
 }
 
 data class StructField(
-        val name: String,
-        val type: DataType,
-        val nullable: Boolean,
-        val metadata: Metadata
+    val name: String,
+    val type: DataType,
+    val nullable: Boolean,
+    val metadata: Metadata,
 )
 
 typealias Metadata = JsonObject

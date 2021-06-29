@@ -441,28 +441,28 @@ object KotlinReflection extends KotlinReflection {
 
                 UnresolvedMapObjects(mapFunction, path, customCollectionCls = Some(t.cls))
 
-              case StructType(elementType: Array[StructField])  =>
+              case StructType(elementType: Array[StructField]) =>
                 val cls = t.cls
 
                 val arguments = elementType.map { field =>
-                    val dataType = field.dataType.asInstanceOf[DataTypeWithClass]
-                    val nullable = dataType.nullable
-                    val clsName = getClassNameFromType(getType(dataType.cls))
-                    val newTypePath = walkedTypePath.recordField(clsName, field.name)
+                  val dataType = field.dataType.asInstanceOf[DataTypeWithClass]
+                  val nullable = dataType.nullable
+                  val clsName = getClassNameFromType(getType(dataType.cls))
+                  val newTypePath = walkedTypePath.recordField(clsName, field.name)
 
-                    // For tuples, we based grab the inner fields by ordinal instead of name.
-                    val newPath = deserializerFor(
-                      getType(dataType.cls),
-                      addToPath(path, field.name, dataType.dt, newTypePath),
-                      newTypePath,
-                      Some(dataType).filter(_.isInstanceOf[ComplexWrapper])
-                    )
-                    expressionWithNullSafety(
-                      newPath,
-                      nullable = nullable,
-                      newTypePath
-                    )
-                  }
+                  // For tuples, we based grab the inner fields by ordinal instead of name.
+                  val newPath = deserializerFor(
+                    getType(dataType.cls),
+                    addToPath(path, field.name, dataType.dt, newTypePath),
+                    newTypePath,
+                    Some(dataType).filter(_.isInstanceOf[ComplexWrapper])
+                  )
+                  expressionWithNullSafety(
+                    newPath,
+                    nullable = nullable,
+                    newTypePath
+                  )
+                }
                 val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
 
                 org.apache.spark.sql.catalyst.expressions.If(

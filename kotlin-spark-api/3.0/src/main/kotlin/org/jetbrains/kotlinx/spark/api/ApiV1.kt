@@ -33,7 +33,8 @@ import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
 import org.jetbrains.kotinx.spark.extensions.KSparkExtensions
-import scala.*
+import scala.Product
+import scala.Tuple2
 import scala.reflect.ClassTag
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
@@ -43,11 +44,41 @@ import java.time.Instant
 import java.time.LocalDate
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.Any
+import kotlin.Array
+import kotlin.Boolean
+import kotlin.BooleanArray
+import kotlin.Byte
+import kotlin.ByteArray
+import kotlin.Deprecated
+import kotlin.DeprecationLevel
+import kotlin.Double
+import kotlin.DoubleArray
+import kotlin.ExperimentalStdlibApi
+import kotlin.Float
+import kotlin.FloatArray
+import kotlin.IllegalArgumentException
+import kotlin.Int
+import kotlin.IntArray
+import kotlin.Long
+import kotlin.LongArray
+import kotlin.OptIn
+import kotlin.Pair
+import kotlin.ReplaceWith
+import kotlin.Short
+import kotlin.ShortArray
+import kotlin.String
+import kotlin.Suppress
+import kotlin.Triple
+import kotlin.Unit
+import kotlin.also
+import kotlin.apply
+import kotlin.invoke
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.jvmErasure
+import kotlin.to
 
 @JvmField
 val ENCODERS = mapOf<KClass<*>, Encoder<*>>(

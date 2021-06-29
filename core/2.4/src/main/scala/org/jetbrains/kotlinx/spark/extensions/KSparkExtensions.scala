@@ -19,11 +19,10 @@
  */
 package org.jetbrains.kotlinx.spark.extensions
 
-import java.util
-
 import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 
+import java.util
 import scala.collection.JavaConverters._
 
 object KSparkExtensions {

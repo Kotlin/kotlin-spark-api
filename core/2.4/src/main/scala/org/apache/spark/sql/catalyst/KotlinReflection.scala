@@ -17,11 +17,6 @@
 
 package org.apache.spark.sql.catalyst
 
-import java.beans.{Introspector, PropertyDescriptor}
-import java.lang.reflect.Type
-import java.lang.{Iterable => JIterable}
-import java.time.LocalDate
-import java.util.{Iterator => JIterator, List => JList, Map => JMap}
 import com.google.common.reflect.TypeToken
 import org.apache.spark.sql.catalyst.analysis.{GetColumnByOrdinal, UnresolvedAttribute, UnresolvedExtractValue}
 import org.apache.spark.sql.catalyst.expressions._
@@ -31,6 +26,11 @@ import org.apache.spark.sql.types._
 import org.apache.spark.sql.{ComplexWrapper, DataTypeWithClass, KDataTypeWrapper, KStructField}
 import org.apache.spark.unsafe.types.UTF8String
 
+import java.beans.{Introspector, PropertyDescriptor}
+import java.lang.reflect.Type
+import java.lang.{Iterable => JIterable}
+import java.time.LocalDate
+import java.util.{Iterator => JIterator, List => JList, Map => JMap}
 import scala.language.existentials
 
 /**
@@ -276,7 +276,9 @@ object KotlinReflection {
         }.getOrElse {
           Invoke(
             MapObjects(
-              p => {deserializerFor(typeToken.getComponentType, Some(p), maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))},
+              p => {
+                deserializerFor(typeToken.getComponentType, Some(p), maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))
+              },
               getPath,
               maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper].dt).getOrElse(inferDataType(elementType)._1)
             ),
@@ -398,7 +400,7 @@ object KotlinReflection {
                   getPath,
                   customCollectionCls = Some(predefinedDt.get.cls))
 
-              case StructType(elementType: Array[StructField])  =>
+              case StructType(elementType: Array[StructField]) =>
                 val cls = t.cls
 
                 val arguments = elementType.map { field =>
