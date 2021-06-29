@@ -1,4 +1,4 @@
-# Kotlin for Apache® Spark™ [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.jetbrains.kotlinx.spark%20AND%20v:1.0.0-preview1) [![official JetBrains project](http://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+# Kotlin for Apache® Spark™ [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.jetbrains.kotlinx.spark%20AND%20v:1.0.1) [![official JetBrains project](http://jb.gg/badges/incubator.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
 
 
 Your next API to work with  [Apache Spark](https://spark.apache.org/). 
@@ -21,6 +21,7 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
     - [withCached function](#withcached-function)
     - [toList and toArray](#tolist-and-toarray-methods)
     - [Column infix/operator functions](#column-infixoperator-functions)
+    - [`reduceGroups`](#reducegroups)
 - [Examples](#examples)
 - [Reporting issues/Support](#reporting-issuessupport)
 - [Code of Conduct](#code-of-conduct)
@@ -30,9 +31,9 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 | Apache Spark | Scala |  Kotlin for Apache Spark |
 |:------------:|:-----------:|:------------:|
-| 3.0.0+        | 2.12 | kotlin-spark-api-3.0.0:1.0.0-preview2    |
-| 2.4.1+        | 2.12 | kotlin-spark-api-2.4_2.12:1.0.0-preview2 |
-| 2.4.1+        | 2.11 | kotlin-spark-api-2.4_2.11:1.0.0-preview2 |
+| 3.0.0+        | 2.12 | kotlin-spark-api-3.0.0:1.0.1    |
+| 2.4.1+        | 2.12 | kotlin-spark-api-2.4_2.12:1.0.1 |
+| 2.4.1+        | 2.11 | kotlin-spark-api-2.4_2.11:1.0.1 |
 
 ## Releases
 
@@ -188,6 +189,12 @@ to create `TypedColumn`s and with those a new Dataset from pieces of another usi
 val dataset: Dataset<YourClass> = ...
 val newDataset: Dataset<Pair<TypeA, TypeB>> = dataset.selectTyped(col(YourClass::colA), col(YourClass::colB))
 ```
+
+### `reduceGroups`
+
+We had to implemet `reduceGroups` operator for Kotlin separately as `reduceGroupsK` function, because otherwise it caused resolution ambiguity between Kotlin, Scala and Java APIs, which was quite hard to solve.
+
+We have a special example of work with this function in the [Groups example](https://github.com/JetBrains/kotlin-spark-api/edit/main/examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/Group.kt).
 
 
 ## Examples
