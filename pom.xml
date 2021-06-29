@@ -12,8 +12,9 @@
     <properties>
         <kotlin.version>1.5.20</kotlin.version>
         <dokka.version>1.4.20</dokka.version>
-        <atrium.version>0.13.0</atrium.version>
-        <kotest.version>4.2.5</kotest.version>
+        <atrium.version>0.16.0</atrium.version>
+        <kotest.version>4.6.0</kotest.version>
+        <kotest-extension-allure.version>1.0.1</kotest-extension-allure.version>
         <spark2-scala-2.11.version>2.4.0</spark2-scala-2.11.version>
         <spark2-scala-2.12.version>2.4.1</spark2-scala-2.12.version>
         <spark3.version>3.0.0</spark3.version>
@@ -21,11 +22,11 @@
         <!-- Plugin versions -->
         <allure-maven.version>2.10.0</allure-maven.version>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
-        <klaxon.version>5.4</klaxon.version>
+        <klaxon.version>5.5</klaxon.version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
-        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+        <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
         <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
