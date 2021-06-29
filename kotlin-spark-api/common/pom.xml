@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
     <artifactId>kotlin-spark-api-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <relativePath>../..</relativePath>
   </parent>
 

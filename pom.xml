@@ -6,7 +6,7 @@
     <description>Parent project for Kotlin for Apache Spark</description>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
     <artifactId>kotlin-spark-api-parent</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -281,7 +281,7 @@
     <scm>
         <connection>scm:git:https://github.com/JetBrains/kotlin-spark-api.git</connection>
         <url>https://github.com/JetBrains/kotlin-spark-api</url>
-        <tag>1.0.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <repository>
