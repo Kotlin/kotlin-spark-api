@@ -11,7 +11,7 @@
 
     <properties>
         <kotlin.version>1.5.20</kotlin.version>
-        <dokka.version>1.4.20</dokka.version>
+        <dokka.version>1.4.32</dokka.version>
         <atrium.version>0.16.0</atrium.version>
         <kotest.version>4.6.0</kotest.version>
         <kotest-extension-allure.version>1.0.1</kotest-extension-allure.version>
@@ -25,7 +25,7 @@
         <klaxon.version>5.5</klaxon.version>
         <license-maven-plugin.version>2.0.0</license-maven-plugin.version>
         <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
-        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
         <maven-deploy-plugin.version>3.0.0-M1</maven-deploy-plugin.version>
         <maven-enforcer-plugin.version>3.0.0-M3</maven-enforcer-plugin.version>
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
@@ -33,7 +33,7 @@
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <nexus-staging-plugin.version>1.6.8</nexus-staging-plugin.version>
-        <scala-maven-plugin.version>4.4.0</scala-maven-plugin.version>
+        <scala-maven-plugin.version>4.5.3</scala-maven-plugin.version>
     </properties>
 
     <modules>
