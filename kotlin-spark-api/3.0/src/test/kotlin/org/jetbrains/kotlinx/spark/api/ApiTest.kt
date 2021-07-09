@@ -499,7 +499,7 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
                     .groupByKey { it.b }
-                    .reduceGroupsK(func = { a, b -> SomeClass(a.a + b.a, a.b) })
+                    .reduceGroupsK { a, b -> SomeClass(a.a + b.a, a.b) }
                     .takeValues()
 
                 dataset.count() shouldBe 1
@@ -514,6 +514,17 @@ class ApiTest : ShouldSpec({
 
                 dataset.sort(SomeClass::a, SomeClass::b)
                 dataset.takeAsList(1).first().b shouldBe 2
+            }
+            should("Have Kotlin ready functions in place of overload ambiguity") {
+                val dataset: Pair<Int, SomeClass> = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 1),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+                    .groupByKey { it.b }
+                    .reduceGroupsK { v1, v2 -> v1 }
+                    .reduceK { v1, v2 -> v1 }
+
+                dataset.second.a shouldBe intArrayOf(1, 2, 3)
             }
         }
     }
