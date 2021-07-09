@@ -478,9 +478,10 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(1, 2, 3), 1),
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
-                    .groupByKey { it.b }
-                    .reduceGroupsK { v1, v2 -> v1 }
-                    .reduceK { v1, v2 -> v1 }
+                    .groupByKey { it: SomeClass -> it.b }
+                    .reduceGroupsK { v1: SomeClass, v2: SomeClass -> v1 }
+                    .filter { it: Pair<Int, SomeClass> -> true } // not sure why this does work, but reduce doesn't
+                    .reduceK { v1: Pair<Int, SomeClass>, v2: Pair<Int, SomeClass> -> v1 }
 
                 dataset.second.a shouldBe intArrayOf(1, 2, 3)
             }

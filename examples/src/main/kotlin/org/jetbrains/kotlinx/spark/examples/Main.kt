@@ -48,8 +48,8 @@ object Main {
 //                .also { it.printSchema() }
             .map { (triple, pair) -> Five(triple.first, triple.second, triple.third, pair?.first, pair?.second) }
             .groupByKey { it.a }
-            .reduceGroups(ReduceFunction { v1, v2 -> v1.copy(a = v1.a + v2.a, b = v1.a + v2.a) })
-            .map { it._2 }
+            .reduceGroupsK { v1, v2 -> v1.copy(a = v1.a + v2.a, b = v1.a + v2.a) }
+            .map { it.second }
             .repartition(1)
             .withCached {
                 write()
