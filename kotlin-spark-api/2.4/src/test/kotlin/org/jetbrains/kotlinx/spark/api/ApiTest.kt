@@ -21,20 +21,21 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
-import org.apache.spark.sql.streaming.GroupState
-import org.apache.spark.sql.streaming.GroupStateTimeout
-import scala.collection.Seq
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.TypedColumn
 import org.apache.spark.sql.functions.*
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.Product
 import scala.Tuple1
 import scala.Tuple2
 import scala.Tuple3
+import scala.collection.Seq
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
+import kotlin.collections.Iterator
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
 import scala.collection.mutable.Map as ScalaMutableMap
@@ -457,7 +458,7 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
                     .groupByKey { it.b }
-                    .reduceGroupsK(func = { a, b -> SomeClass(a.a + b.a, a.b) })
+                    .reduceGroupsK { a, b -> SomeClass(a.a + b.a, a.b) }
                     .takeValues()
 
                 dataset.count() shouldBe 1
@@ -472,6 +473,18 @@ class ApiTest : ShouldSpec({
 
                 dataset.sort(SomeClass::a, SomeClass::b)
                 dataset.takeAsList(1).first().b shouldBe 2
+            }
+            should("Have Kotlin ready functions in place of overload ambiguity") {
+                val dataset: Pair<Int, SomeClass> = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 1),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+                    .groupByKey { it: SomeClass -> it.b }
+                    .reduceGroupsK { v1: SomeClass, v2: SomeClass -> v1 }
+                    .filter { it: Pair<Int, SomeClass> -> true } // not sure why this does work, but reduce doesn't
+                    .reduceK { v1: Pair<Int, SomeClass>, v2: Pair<Int, SomeClass> -> v1 }
+
+                dataset.second.a shouldBe intArrayOf(1, 2, 3)
             }
             should("Generate encoder correctly with complex enum data class") {
                 val dataset: Dataset<ComplexEnumDataClass> =
@@ -495,7 +508,7 @@ class ApiTest : ShouldSpec({
 
                 first.int shouldBe 1
                 first.string shouldBe "string"
-                first.strings shouldBe listOf("1","2")
+                first.strings shouldBe listOf("1", "2")
                 first.someEnum shouldBe SomeEnum.A
                 first.someOtherEnum shouldBe SomeOtherEnum.C
                 first.someEnums shouldBe listOf(SomeEnum.A, SomeEnum.B)
@@ -551,5 +564,5 @@ data class ComplexEnumDataClass(
     val someOtherEnums: List<SomeOtherEnum>,
     val someEnumArray: Array<SomeEnum>,
     val someOtherArray: Array<SomeOtherEnum>,
-    val enumMap: Map<SomeEnum, SomeOtherEnum>
+    val enumMap: Map<SomeEnum, SomeOtherEnum>,
 )

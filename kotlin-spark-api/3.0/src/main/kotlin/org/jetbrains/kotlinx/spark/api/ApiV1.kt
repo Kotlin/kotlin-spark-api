@@ -212,6 +212,13 @@ inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduc
     reduceGroups(ReduceFunction(func))
         .map { t -> t._1 to t._2 }
 
+/**
+ * (Kotlin-specific)
+ * Reduces the elements of this Dataset using the specified binary function. The given `func`
+ * must be commutative and associative or the result may be non-deterministic.
+ */
+inline fun <reified T> Dataset<T>.reduceK(noinline func: (T, T) -> T): T =
+    reduce(ReduceFunction(func))
 
 @JvmName("takeKeysTuple2")
 inline fun <reified T1, T2> Dataset<Tuple2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1() }

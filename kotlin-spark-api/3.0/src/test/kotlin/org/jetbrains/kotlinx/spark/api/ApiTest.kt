@@ -499,7 +499,7 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
                     .groupByKey { it.b }
-                    .reduceGroupsK(func = { a, b -> SomeClass(a.a + b.a, a.b) })
+                    .reduceGroupsK { a, b -> SomeClass(a.a + b.a, a.b) }
                     .takeValues()
 
                 dataset.count() shouldBe 1
@@ -514,6 +514,18 @@ class ApiTest : ShouldSpec({
 
                 dataset.sort(SomeClass::a, SomeClass::b)
                 dataset.takeAsList(1).first().b shouldBe 2
+            }
+            should("Have Kotlin ready functions in place of overload ambiguity") {
+                val dataset: Pair<Int, SomeClass> = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 1),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+                    .groupByKey { it: SomeClass -> it.b }
+                    .reduceGroupsK { v1: SomeClass, v2: SomeClass -> v1 }
+                    .filter { it: Pair<Int, SomeClass> -> true } // not sure why this does work, but reduce doesn't
+                    .reduceK { v1: Pair<Int, SomeClass>, v2: Pair<Int, SomeClass> -> v1 }
+
+                dataset.second.a shouldBe intArrayOf(1, 2, 3)
             }
             should("Generate encoder correctly with complex enum data class") {
                 val dataset: Dataset<ComplexEnumDataClass> =
@@ -537,7 +549,7 @@ class ApiTest : ShouldSpec({
 
                 first.int shouldBe 1
                 first.string shouldBe "string"
-                first.strings shouldBe listOf("1","2")
+                first.strings shouldBe listOf("1", "2")
                 first.someEnum shouldBe SomeEnum.A
                 first.someOtherEnum shouldBe SomeOtherEnum.C
                 first.someEnums shouldBe listOf(SomeEnum.A, SomeEnum.B)
@@ -559,6 +571,7 @@ data class SomeClass(val a: IntArray, val b: Int) : Serializable
 
 data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable
 
+
 enum class SomeEnum { A, B }
 
 enum class SomeOtherEnum(val value: Int) { C(1), D(2) }
@@ -573,5 +586,5 @@ data class ComplexEnumDataClass(
     val someOtherEnums: List<SomeOtherEnum>,
     val someEnumArray: Array<SomeEnum>,
     val someOtherArray: Array<SomeOtherEnum>,
-    val enumMap: Map<SomeEnum, SomeOtherEnum>
+    val enumMap: Map<SomeEnum, SomeOtherEnum>,
 )
