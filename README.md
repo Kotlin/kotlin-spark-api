@@ -21,7 +21,7 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
     - [withCached function](#withcached-function)
     - [toList and toArray](#tolist-and-toarray-methods)
     - [Column infix/operator functions](#column-infixoperator-functions)
-    - [`reduceGroups`](#reducegroups)
+    - [Overload Resolution Ambiguity](#overload-resolution-ambiguity)
 - [Examples](#examples)
 - [Reporting issues/Support](#reporting-issuessupport)
 - [Code of Conduct](#code-of-conduct)
@@ -190,9 +190,9 @@ val dataset: Dataset<YourClass> = ...
 val newDataset: Dataset<Pair<TypeA, TypeB>> = dataset.selectTyped(col(YourClass::colA), col(YourClass::colB))
 ```
 
-### `reduceGroups`
+### Overload resolution ambiguity
 
-We had to implemet `reduceGroups` operator for Kotlin separately as `reduceGroupsK` function, because otherwise it caused resolution ambiguity between Kotlin, Scala and Java APIs, which was quite hard to solve.
+We had to implement the functions `reduceGroups` and `reduce` for Kotlin separately as `reduceGroupsK` and `reduceK` respectively, because otherwise it caused resolution ambiguity between Kotlin, Scala and Java APIs, which was quite hard to solve.
 
 We have a special example of work with this function in the [Groups example](https://github.com/JetBrains/kotlin-spark-api/edit/main/examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/Group.kt).
 
