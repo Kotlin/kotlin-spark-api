@@ -484,6 +484,36 @@ class ApiTest : ShouldSpec({
                     .reduceK { v1: Pair<Int, SomeClass>, v2: Pair<Int, SomeClass> -> v1 }
 
                 dataset.second.a shouldBe intArrayOf(1, 2, 3)
+            should("Generate encoder correctly with complex enum data class") {
+                val dataset: Dataset<ComplexEnumDataClass> =
+                    dsOf(
+                        ComplexEnumDataClass(
+                            1,
+                            "string",
+                            listOf("1", "2"),
+                            SomeEnum.A,
+                            SomeOtherEnum.C,
+                            listOf(SomeEnum.A, SomeEnum.B),
+                            listOf(SomeOtherEnum.C, SomeOtherEnum.D),
+                            arrayOf(SomeEnum.A, SomeEnum.B),
+                            arrayOf(SomeOtherEnum.C, SomeOtherEnum.D),
+                            mapOf(SomeEnum.A to SomeOtherEnum.C)
+                        )
+                    )
+
+                dataset.show(false)
+                val first = dataset.takeAsList(1).first()
+
+                first.int shouldBe 1
+                first.string shouldBe "string"
+                first.strings shouldBe listOf("1","2")
+                first.someEnum shouldBe SomeEnum.A
+                first.someOtherEnum shouldBe SomeOtherEnum.C
+                first.someEnums shouldBe listOf(SomeEnum.A, SomeEnum.B)
+                first.someOtherEnums shouldBe listOf(SomeOtherEnum.C, SomeOtherEnum.D)
+                first.someEnumArray shouldBe arrayOf(SomeEnum.A, SomeEnum.B)
+                first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
+                first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
         }
     }
@@ -517,3 +547,20 @@ data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>) {
 data class SomeClass(val a: IntArray, val b: Int) : Serializable
 
 data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable
+
+enum class SomeEnum { A, B }
+
+enum class SomeOtherEnum(val value: Int) { C(1), D(2) }
+
+data class ComplexEnumDataClass(
+    val int: Int,
+    val string: String,
+    val strings: List<String>,
+    val someEnum: SomeEnum,
+    val someOtherEnum: SomeOtherEnum,
+    val someEnums: List<SomeEnum>,
+    val someOtherEnums: List<SomeOtherEnum>,
+    val someEnumArray: Array<SomeEnum>,
+    val someOtherArray: Array<SomeOtherEnum>,
+    val enumMap: Map<SomeEnum, SomeOtherEnum>
+)

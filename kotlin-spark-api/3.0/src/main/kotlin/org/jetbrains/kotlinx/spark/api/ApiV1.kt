@@ -858,6 +858,9 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
         it.first.name to it.second.type!!
     }.toMap())
     return when {
+        klass.isSubclassOf(Enum::class) -> {
+            KSimpleTypeWrapper(DataTypes.StringType, klass.java, type.isMarkedNullable)
+        }
         klass.isSubclassOf(Iterable::class) || klass.java.isArray -> {
             val listParam = if (klass.java.isArray) {
                 when (klass) {

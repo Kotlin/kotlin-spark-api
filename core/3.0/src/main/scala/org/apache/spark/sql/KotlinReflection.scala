@@ -336,6 +336,10 @@ object KotlinReflection extends KotlinReflection {
           mirror.runtimeClass(t.typeSymbol.asClass)
         )
 
+      case t if isSubtype(t, localTypeOf[java.lang.Enum[_]]) =>
+        createDeserializerForTypesSupportValueOf(
+          createDeserializerForString(path, returnNullable = false), Class.forName(t.toString))
+
       case t if t.typeSymbol.annotations.exists(_.tree.tpe =:= typeOf[SQLUserDefinedType]) =>
         val udt = getClassFromType(t).getAnnotation(classOf[SQLUserDefinedType]).udt().
           getConstructor().newInstance()
@@ -612,7 +616,7 @@ object KotlinReflection extends KotlinReflection {
         case _: StringType =>
           val clsName = getClassNameFromType(typeOf[String])
           val newPath = walkedTypePath.recordArray(clsName)
-          createSerializerForMapObjects(input, ObjectType(classOf[String]),
+          createSerializerForMapObjects(input, ObjectType(Class.forName(getClassNameFromType(elementType))),
             serializerFor(_, elementType, newPath, seenTypeSet))
 
 
@@ -717,6 +721,10 @@ object KotlinReflection extends KotlinReflection {
       case t if isSubtype(t, localTypeOf[Byte]) => createSerializerForByte(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Boolean]) => createSerializerForBoolean(inputObject)
       case t if isSubtype(t, localTypeOf[Boolean]) => createSerializerForBoolean(inputObject)
+
+      case t if isSubtype(t, localTypeOf[java.lang.Enum[_]]) =>
+        createSerializerForString(
+          Invoke(inputObject, "name", ObjectType(classOf[String]), returnNullable = false))
 
       case t if t.typeSymbol.annotations.exists(_.tree.tpe =:= typeOf[SQLUserDefinedType]) =>
         val udt = getClassFromType(t)
