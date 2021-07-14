@@ -537,7 +537,8 @@ class ApiTest : ShouldSpec({
                             listOf(SomeEnum.A, SomeEnum.B),
                             listOf(SomeOtherEnum.C, SomeOtherEnum.D),
                             arrayOf(SomeEnum.A, SomeEnum.B),
-                            arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
+                            arrayOf(SomeOtherEnum.C, SomeOtherEnum.D),
+                            mapOf(SomeEnum.A to SomeOtherEnum.C)
                         )
                     )
 
@@ -553,6 +554,7 @@ class ApiTest : ShouldSpec({
                 first.someOtherEnums shouldBe listOf(SomeOtherEnum.C, SomeOtherEnum.D)
                 first.someEnumArray shouldBe arrayOf(SomeEnum.A, SomeEnum.B)
                 first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
+                first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
         }
     }
@@ -583,4 +585,5 @@ data class ComplexEnumDataClass(
     val someOtherEnums: List<SomeOtherEnum>,
     val someEnumArray: Array<SomeEnum>,
     val someOtherArray: Array<SomeOtherEnum>,
+    val enumMap: Map<SomeEnum, SomeOtherEnum>
 )
