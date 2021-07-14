@@ -177,14 +177,10 @@ private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
-        if (schema is DataTypeWithClass) KotlinReflection.serializerFor(
-            kClass.java,
-            schema
-        ) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(
-            kClass.java,
-            schema
-        ) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) KotlinReflection.serializerFor(kClass.java,
+            schema) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java,
+            schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
         ClassTag.apply(kClass.java)
     )
 }
