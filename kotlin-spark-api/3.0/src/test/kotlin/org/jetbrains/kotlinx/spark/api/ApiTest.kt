@@ -515,16 +515,6 @@ class ApiTest : ShouldSpec({
                 dataset.sort(SomeClass::a, SomeClass::b)
                 dataset.takeAsList(1).first().b shouldBe 2
             }
-            should("Generate encoder correctly with data class with enum") {
-                val dataset: Dataset<DataClassWithEnum> = dsOf(1).map {
-                    DataClassWithEnum(it, SomeEnum.A, SomeOtherEnum.C)
-                }
-
-                val first = dataset.takeAsList(1).first()
-                first.a shouldBe 1
-                first.someEnum shouldBe SomeEnum.A
-                first.someOtherEnum shouldBe SomeOtherEnum.C
-            }
             should("Generate encoder correctly with complex enum data class") {
                 val dataset: Dataset<ComplexEnumDataClass> =
                     dsOf(
@@ -568,8 +558,6 @@ data class LonLat(val lon: Double, val lat: Double)
 data class SomeClass(val a: IntArray, val b: Int) : Serializable
 
 data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable
-
-data class DataClassWithEnum(val a: Int, val someEnum: SomeEnum, val someOtherEnum: SomeOtherEnum)
 
 enum class SomeEnum { A, B }
 
