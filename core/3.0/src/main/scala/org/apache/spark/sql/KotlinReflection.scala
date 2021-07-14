@@ -616,7 +616,7 @@ object KotlinReflection extends KotlinReflection {
         case _: StringType =>
           val clsName = getClassNameFromType(typeOf[String])
           val newPath = walkedTypePath.recordArray(clsName)
-          createSerializerForMapObjects(input, ObjectType(classOf[String]),
+          createSerializerForMapObjects(input, ObjectType(Class.forName(getClassNameFromType(elementType))),
             serializerFor(_, elementType, newPath, seenTypeSet))
 
 

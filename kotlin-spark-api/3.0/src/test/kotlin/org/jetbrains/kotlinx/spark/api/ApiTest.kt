@@ -525,7 +525,31 @@ class ApiTest : ShouldSpec({
                 first.someEnum shouldBe SomeEnum.A
                 first.someOtherEnum shouldBe SomeOtherEnum.C
             }
+            should("Generate encoder correctly with complex enum data class") {
+                val dataset: Dataset<ComplexEnumDataClass> =
+                    dsOf(
+                        ComplexEnumDataClass(
+                            1,
+                            "string",
+                            listOf("1", "2"),
+                            SomeEnum.A,
+                            SomeOtherEnum.C,
+                            listOf(SomeEnum.A, SomeEnum.B),
+                            listOf(SomeOtherEnum.C, SomeOtherEnum.D)
+                        )
+                    )
 
+                dataset.show(false)
+                val first = dataset.takeAsList(1).first()
+
+                first.int shouldBe 1
+                first.string shouldBe "string"
+                first.strings shouldBe listOf("1","2")
+                first.someEnum shouldBe SomeEnum.A
+                first.someOtherEnum shouldBe SomeOtherEnum.C
+                first.someEnums shouldBe listOf(SomeEnum.A, SomeEnum.B)
+                first.someOtherEnums shouldBe listOf(SomeOtherEnum.C, SomeOtherEnum.D)
+            }
         }
     }
 })
@@ -541,6 +565,16 @@ data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Seriali
 
 data class DataClassWithEnum(val a: Int, val someEnum: SomeEnum, val someOtherEnum: SomeOtherEnum)
 
-enum class SomeEnum { A }
+enum class SomeEnum { A, B }
 
-enum class SomeOtherEnum(val value: Int) { C(1) }
+enum class SomeOtherEnum(val value: Int) { C(1), D(2) }
+
+data class ComplexEnumDataClass(
+    val int: Int,
+    val string: String,
+    val strings: List<String>,
+    val someEnum: SomeEnum,
+    val someOtherEnum: SomeOtherEnum,
+    val someEnums: List<SomeEnum>,
+    val someOtherEnums: List<SomeOtherEnum>
+)
