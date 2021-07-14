@@ -177,10 +177,14 @@ private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
-        if (schema is DataTypeWithClass) KotlinReflection.serializerFor(kClass.java,
-            schema) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java,
-            schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) KotlinReflection.serializerFor(
+            kClass.java,
+            schema
+        ) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(
+            kClass.java,
+            schema
+        ) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
         ClassTag.apply(kClass.java)
     )
 }
@@ -851,6 +855,9 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
         it.first.name to it.second.type!!
     }.toMap())
     return when {
+        klass.isSubclassOf(Enum::class) -> {
+            KSimpleTypeWrapper(DataTypes.StringType, klass.java, type.isMarkedNullable)
+        }
         klass.isSubclassOf(Iterable::class) || klass.java.isArray -> {
             val listParam = if (klass.java.isArray) {
                 when (klass) {
