@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-package org.jetbrains.kotinx.spark.extensions
+package org.jetbrains.kotlinx.spark.extensions
 
 import org.apache.spark.SparkContext
 import org.apache.spark.sql._
