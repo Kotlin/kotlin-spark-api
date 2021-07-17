@@ -185,6 +185,163 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
     )
 }
 
+/**
+ * Allows `for (element in dataset)`.
+ */
+operator fun <T> Dataset<T>.iterator(): Iterator<T> = toLocalIterator()
+
+/**
+ * Returns `true` if [element] is found in the collection.
+ */
+operator fun <T> Dataset<T>.contains(element: T): Boolean {
+    return indexOf(element) >= 0L
+}
+
+/**
+ * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this collection.
+ */
+fun <T> Dataset<T>.elementAt(index: Long): T {
+    return elementAtOrElse(index) { throw IndexOutOfBoundsException("Collection doesn't contain element at index $index.") }
+}
+
+/**
+ * Returns an element at the given [index] or the result of calling the [defaultValue] function if the [index] is out of bounds of this collection.
+ */
+fun <T> Dataset<T>.elementAtOrElse(index: Long, defaultValue: (Long) -> T): T {
+    if (index < 0L)
+        return defaultValue(index)
+    val iterator = iterator()
+    var count = 0L
+    while (iterator.hasNext()) {
+        val element = iterator.next()
+        if (index == count++)
+            return element
+    }
+    return defaultValue(index)
+}
+
+/**
+ * Returns an element at the given [index] or `null` if the [index] is out of bounds of this collection.
+ */
+fun <T> Dataset<T>.elementAtOrNull(index: Long): T? {
+    if (index < 0L)
+        return null
+    val iterator = iterator()
+    var count = 0L
+    while (iterator.hasNext()) {
+        val element = iterator.next()
+        if (index == count++)
+            return element
+    }
+    return null
+}
+
+/**
+ * Returns the first element matching the given [predicate], or `null` if no such element was found.
+ */
+inline fun <T> Dataset<T>.find(predicate: (T) -> Boolean): T? {
+    return firstOrNull(predicate)
+}
+
+/**
+ * Returns the last element matching the given [predicate], or `null` if no such element was found.
+ */
+inline fun <T> Dataset<T>.findLast(predicate: (T) -> Boolean): T? {
+    return TODO()//lastOrNull(predicate)
+}
+
+/**
+ * Returns the first element matching the given [predicate].
+ * @throws [NoSuchElementException] if no such element is found.
+ */
+inline fun <reified T> Dataset<T>.first(predicate: (T) -> Boolean): T {
+    for (element in toLocalIterator()) if (predicate(element)) return element
+    throw NoSuchElementException("Collection contains no element matching the predicate.")
+}
+
+/**
+ * Returns the first non-null value produced by [transform] function being applied to elements of this collection in iteration order,
+ * or throws [NoSuchElementException] if no non-null value was produced.
+ */
+inline fun <reified T, R : Any> Dataset<T>.firstNotNullOf(transform: (T) -> R?): R {
+    return firstNotNullOfOrNull(transform) ?: throw NoSuchElementException("No element of the collection was transformed to a non-null value.")
+}
+
+/**
+ * Returns the first non-null value produced by [transform] function being applied to elements of this collection in iteration order,
+ * or `null` if no non-null value was produced.
+ */
+inline fun <reified T, R : Any> Dataset<T>.firstNotNullOfOrNull(transform: (T) -> R?): R? {
+    for (element in this) {
+        val result = transform(element)
+        if (result != null) {
+            return result
+        }
+    }
+    return null
+}
+
+/**
+ * Returns the first element, or `null` if the collection is empty.
+ */
+ fun <T> Dataset<T>.firstOrNull(): T? {
+    val iterator = iterator()
+    if (!iterator.hasNext())
+        return null
+    return iterator.next()
+}
+
+/**
+ * Returns the first element matching the given [predicate], or `null` if element was not found.
+ */
+inline fun <T> Dataset<T>.firstOrNull(predicate: (T) -> Boolean): T? {
+    for (element in this) if (predicate(element)) return element
+    return null
+}
+
+/**
+ * Returns first index of [element], or -1 if the collection does not contain element.
+ */
+fun <T> Dataset<T>.indexOf(element: T): Long {
+    var index = 0L
+    for (item in iterator()) {
+        if (element == item)
+            return index
+        index++
+    }
+    return -1L
+}
+
+/**
+ * Returns index of the first element matching the given [predicate], or -1 if the collection does not contain such element.
+ */
+inline fun <T> Dataset<T>.indexOfFirst(predicate: (T) -> Boolean): Long {
+    var index = 0L
+    for (item in this) {
+        if (predicate(item))
+            return index
+        index++
+    }
+    return -1L
+}
+
+/**
+ * Returns index of the last element matching the given [predicate], or -1 if the collection does not contain such element.
+ */
+inline fun <T> Dataset<T>.indexOfLast(predicate: (T) -> Boolean): Long {
+    // TODO might be able to improve
+    var lastIndex = -1L
+    var index = 0L
+    for (item in this) {
+        if (predicate(item))
+            lastIndex = index
+        index++
+    }
+    return lastIndex
+}
+
+
+
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
     map(MapFunction(func), encoder<R>())
 

@@ -558,6 +558,16 @@ class ApiTest : ShouldSpec({
                 first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
                 first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
+            should("Have more stdlib functions for Datasets") {
+                val dataset = listOf(1, 2, 3).toDS()
+                (1 in dataset) shouldBe true
+                dataset.indexOf(1) shouldBe 0L
+
+                dataset.first()
+
+
+
+            }
         }
     }
 })
