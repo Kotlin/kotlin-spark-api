@@ -561,9 +561,7 @@ class ApiTest : ShouldSpec({
             should("Have more stdlib functions for Datasets") {
                 val dataset = listOf(1, 2, 3).toDS()
                 (1 in dataset) shouldBe true
-                dataset.indexOf(1) shouldBe 0L
-
-                dataset.first()
+                dataset.tailAsList(2) shouldBe listOf(2, 3)
 
 
 

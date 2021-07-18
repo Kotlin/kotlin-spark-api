@@ -34,6 +34,7 @@ object KSparkExtensions {
 
   def collectAsList[T](ds: Dataset[T]): util.List[T] = JavaConverters.seqAsJavaList(ds.collect())
 
+  def tailAsList[T](ds: Dataset[T], n: Int): util.List[T] = util.Arrays.asList(ds.tail(n) : _*)
 
   def debugCodegen(df: Dataset[_]): Unit = {
     import org.apache.spark.sql.execution.debug._
