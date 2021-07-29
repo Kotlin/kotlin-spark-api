@@ -31,9 +31,9 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 | Apache Spark | Scala |  Kotlin for Apache Spark        |
 |:------------:|:-----:|:-------------------------------:|
-| 3.0.0+       | 2.12  | kotlin-spark-api-3.0.0:1.0.1    |
-| 2.4.1+       | 2.12  | kotlin-spark-api-2.4_2.12:1.0.1 |
-| 2.4.1+       | 2.11  | kotlin-spark-api-2.4_2.11:1.0.1 |
+| 3.0.0+       | 2.12  | kotlin-spark-api-3.0:1.0.2    |
+| 2.4.1+       | 2.12  | kotlin-spark-api-2.4_2.12:1.0.2 |
+| 2.4.1+       | 2.11  | kotlin-spark-api-2.4_2.11:1.0.2 |
 
 ## Releases
 
@@ -192,6 +192,9 @@ to create `TypedColumn`s and with those a new Dataset from pieces of another usi
 ```kotlin
 val dataset: Dataset<YourClass> = ...
 val newDataset: Dataset<Pair<TypeA, TypeB>> = dataset.selectTyped(col(YourClass::colA), col(YourClass::colB))
+
+// Alternatively, for instance when working with a Dataset<Row>
+val typedDataset: Dataset<Pair<String, Int>> = otherDataset.selectTyped(col("a").`as`<String>(), col("b").`as`<Int>())
 ```
 
 ### Overload resolution ambiguity

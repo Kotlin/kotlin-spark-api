@@ -972,11 +972,11 @@ fun lit(a: Any) = functions.lit(a)
  *
  * ```
  * val df: Dataset<Row> = ...
- * val typedColumn: Dataset<Int> = df.selectTyped( col("a").`as`<Row, Int>() )
+ * val typedColumn: Dataset<Int> = df.selectTyped( col("a").`as`<Int>() )
  * ```
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <S, reified T> Column.`as`(): TypedColumn<S, T> = `as`(encoder<T>()) as TypedColumn<S, T>
+inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
 
 /**
  * Alias for [Dataset.joinWith] which passes "left" argument
@@ -1091,19 +1091,18 @@ operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    col(column.name).`as`()
+    col(column.name).`as`<U>() as TypedColumn<T, U>
 
 /**
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
- *    val new: Dataset<Tuple2<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
+ *    val new: Dataset<Pair<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
  * ```
- * TODO: change example to [Pair]s when merged
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    col(column.name).`as`()
+    functions.col(column.name).`as`<U>() as TypedColumn<T, U>
 
 /**
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
@@ -1134,51 +1133,74 @@ fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply {
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-): Dataset<U1> = select(c1)
+    c1: TypedColumn<out Any, U1>,
+): Dataset<U1> = select(c1 as TypedColumn<T, U1>)
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
 ): Dataset<Pair<U1, U2>> =
-    select(c1, c2).map { Pair(it._1(), it._2()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+    ).map { Pair(it._1(), it._2()) }
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2, reified U3> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
-    c3: TypedColumn<T, U3>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
+    c3: TypedColumn<out Any, U3>,
 ): Dataset<Triple<U1, U2, U3>> =
-    select(c1, c2, c3).map { Triple(it._1(), it._2(), it._3()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+        c3 as TypedColumn<T, U3>,
+    ).map { Triple(it._1(), it._2(), it._3()) }
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2, reified U3, reified U4> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
-    c3: TypedColumn<T, U3>,
-    c4: TypedColumn<T, U4>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
+    c3: TypedColumn<out Any, U3>,
+    c4: TypedColumn<out Any, U4>,
 ): Dataset<Arity4<U1, U2, U3, U4>> =
-    select(c1, c2, c3, c4).map { Arity4(it._1(), it._2(), it._3(), it._4()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+        c3 as TypedColumn<T, U3>,
+        c4 as TypedColumn<T, U4>,
+    ).map { Arity4(it._1(), it._2(), it._3(), it._4()) }
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U5> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
-    c3: TypedColumn<T, U3>,
-    c4: TypedColumn<T, U4>,
-    c5: TypedColumn<T, U5>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
+    c3: TypedColumn<out Any, U3>,
+    c4: TypedColumn<out Any, U4>,
+    c5: TypedColumn<out Any, U5>,
 ): Dataset<Arity5<U1, U2, U3, U4, U5>> =
-    select(c1, c2, c3, c4, c5).map { Arity5(it._1(), it._2(), it._3(), it._4(), it._5()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+        c3 as TypedColumn<T, U3>,
+        c4 as TypedColumn<T, U4>,
+        c5 as TypedColumn<T, U5>,
+    ).map { Arity5(it._1(), it._2(), it._3(), it._4(), it._5()) }
 
 
 @OptIn(ExperimentalStdlibApi::class)
