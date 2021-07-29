@@ -362,7 +362,7 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(1, 2, 4), 5),
                 )
 
-                val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder())
+                val typedColumnA: TypedColumn<SomeClass, IntArray> = dataset.col("a").`as`<SomeClass, IntArray>()
 
                 val newDS2 = dataset.selectTyped(
                     col(SomeClass::a), // NOTE: this only works on 3.0, returning a data class with an array in it
@@ -454,7 +454,7 @@ class ApiTest : ShouldSpec({
                 )
                 dataset.show()
 
-                val column = col("b").`as`<IntArray>()
+                val column = col("b").`as`<SomeOtherClass, IntArray>()
 
                 val b = dataset.where(column gt 3 and col(SomeOtherClass::c))
                 b.show()

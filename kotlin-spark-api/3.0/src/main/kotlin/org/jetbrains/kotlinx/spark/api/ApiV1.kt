@@ -459,6 +459,23 @@ inline fun <reified T> Dataset<T>.dropWhile(noinline predicate: (T) -> Boolean):
     return drop(dropUntil.toInt() + 1)
 }
 
+/**
+ * Returns a list containing only elements matching the given [predicate].
+ * @param [predicate] function that takes the index of an element and the element itself
+ * and returns the result of predicate evaluation on the element.
+ *
+ */
+inline fun <T> Dataset<T>.filterIndexed(predicate: (index: Int, T) -> Boolean): Dataset<T> {
+    val index = getUniqueNewColumnName()
+
+    val indices = withColumn(index, monotonicallyIncreasingId())
+        .selectTyped(col(index).`as`<Row, Long>())
+
+    TODO()
+//    return filterIndexedTo(ArrayList<T>(), predicate)
+}
+
+
 
 /**
  * Returns `true` if collection has at least one element.
@@ -949,11 +966,17 @@ operator fun Column.get(key: Any): Column = getItem(key)
 fun lit(a: Any) = functions.lit(a)
 
 /**
- * Provides a type hint about the expected return value of this column.  This information can
+ * Provides a type hint about the expected return value of this column. This information can
  * be used by operations such as `select` on a [Dataset] to automatically convert the
  * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.selectTyped( col("a").`as`<Row, Int>() )
+ * ```
  */
-inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
+@Suppress("UNCHECKED_CAST")
+inline fun <S, reified T> Column.`as`(): TypedColumn<S, T> = `as`(encoder<T>()) as TypedColumn<S, T>
 
 /**
  * Alias for [Dataset.joinWith] which passes "left" argument
@@ -1068,7 +1091,7 @@ operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    col(column.name).`as`<U>() as TypedColumn<T, U>
+    col(column.name).`as`()
 
 /**
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
@@ -1080,7 +1103,7 @@ inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): Type
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    col(column.name).`as`<U>() as TypedColumn<T, U>
+    col(column.name).`as`()
 
 /**
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
@@ -1107,6 +1130,13 @@ fun <T> Dataset<T>.sort(col: KProperty1<T, *>, vararg cols: KProperty1<T, *>): D
  * Useful for debug purposes when you need to view content of a dataset as an intermediate operation
  */
 fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply { show(numRows, truncate) }
+
+/**
+ * Returns a new Dataset by computing the given [Column] expressions for each element.
+ */
+inline fun <reified T, reified U1> Dataset<T>.selectTyped(
+    c1: TypedColumn<T, U1>,
+): Dataset<U1> = select(c1)
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
