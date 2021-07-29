@@ -363,7 +363,7 @@ class ApiTest : ShouldSpec({
                 )
 
                 val newDS1WithAs: Dataset<IntArray> = dataset.selectTyped(
-                    col("a").`as`(),
+                    col("a").`as`<IntArray>(),
                 )
                 newDS1WithAs.show()
 
@@ -457,7 +457,7 @@ class ApiTest : ShouldSpec({
                 )
                 dataset.show()
 
-                val column = col("b").`as`<SomeOtherClass, IntArray>()
+                val column = col("b").`as`<IntArray>()
 
                 val b = dataset.where(column gt 3 and col(SomeOtherClass::c))
                 b.show()
