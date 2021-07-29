@@ -369,13 +369,20 @@ fun Dataset<*>.getUniqueNewColumnName(): String {
  */
 inline fun <reified T> Dataset<T>.drop(n: Int): Dataset<T> {
     require(n >= 0) { "Requested element count $n is less than zero." }
-    val index = getUniqueNewColumnName()
-    return withColumn(index, monotonicallyIncreasingId())
-        .orderBy(desc(index))
-        .dropLast(n)
-        .orderBy(index)
-        .drop(index)
-        .`as`<T>()
+    return when {
+        isEmpty -> this
+        n >= count() -> limit(0)
+        else -> {
+            val index = getUniqueNewColumnName()
+            withColumn(index, monotonicallyIncreasingId())
+                .orderBy(desc(index))
+                .dropLast(n)
+                .orderBy(index)
+                .drop(index)
+                .`as`<T>()
+        }
+    }
+
 }
 
 /**
@@ -385,19 +392,42 @@ inline fun <reified T> Dataset<T>.drop(n: Int): Dataset<T> {
  */
 fun <T> Dataset<T>.dropLast(n: Int): Dataset<T> {
     require(n >= 0) { "Requested element count $n is less than zero." }
-    return limit(
-        (count() - n).toInt().coerceAtLeast(0)
-    )
+    return when {
+        isEmpty -> this
+        n >= count() -> limit(0)
+        else -> limit(
+            (count() - n).toInt().coerceAtLeast(0)
+        )
+    }
+
 }
 
 /**
  * Returns a Dataset containing all elements except last elements that satisfy the given [predicate].
+ *
+ * TODO Add plugin toIterable warning
  */
-inline fun <T> Dataset<T>.dropLastWhile(predicate: (T) -> Boolean): Dataset<T> {
-    val reversedWithIndex = withColumn("index", monotonicallyIncreasingId())
-        .orderBy(desc("index"))
+inline fun <reified T> Dataset<T>.dropLastWhile(noinline predicate: (T) -> Boolean): Dataset<T> {
+    if (isEmpty) return this
 
-    TODO()
+    val filterApplied = map(predicate)
+        .withColumn(
+            getUniqueNewColumnName(),
+            monotonicallyIncreasingId(),
+        )
+
+    if (filterApplied.all { it.getBoolean(0) })
+        return limit(0)
+
+    if (filterApplied.all { !it.getBoolean(0) })
+        return this
+
+    val dropFrom = filterApplied
+        .lastOrNull { !it.getBoolean(0) }
+        ?.getLong(1)
+        ?: -1L
+
+    return dropLast(count().toInt() - (dropFrom.toInt() + 1))
 }
 
 /**
@@ -407,13 +437,57 @@ inline fun <T> Dataset<T>.dropLastWhile(predicate: (T) -> Boolean): Dataset<T> {
  * TODO Add plugin toIterable warning
  */
 inline fun <reified T> Dataset<T>.dropWhile(noinline predicate: (T) -> Boolean): Dataset<T> {
-    val dropUntil = map(predicate)
-        .withColumn(getUniqueNewColumnName(), monotonicallyIncreasingId())
+    if (isEmpty) return this
+
+    val filterApplied = map(predicate)
+        .withColumn(
+            getUniqueNewColumnName(),
+            monotonicallyIncreasingId(),
+        )
+
+    if (filterApplied.all { it.getBoolean(0) })
+        return limit(0)
+
+    if (filterApplied.all { !it.getBoolean(0) })
+        return this
+
+    val dropUntil = filterApplied
         .firstOrNull { it.getBoolean(0) }
         ?.getLong(1)
         ?: -1L
 
     return drop(dropUntil.toInt() + 1)
+}
+
+
+/**
+ * Returns `true` if collection has at least one element.
+ */
+fun Dataset<*>.any(): Boolean = !isEmpty
+
+/**
+ * Returns `true` if all elements match the given [predicate].
+ *
+ * TODO plugin (!any)
+ */
+inline fun <reified T> Dataset<T>.all(noinline predicate: (T) -> Boolean): Boolean {
+    if (isEmpty) return true
+
+    return map(predicate)
+        .reduceK { a, b -> a && b }
+}
+
+
+/**
+ * Returns `true` if at least one element matches the given [predicate].
+ *
+ * TODO plugin note to make it faster
+ */
+inline fun <reified T> Dataset<T>.any(noinline predicate: (T) -> Boolean): Boolean {
+    if (isEmpty) return false
+
+    return map(predicate)
+        .reduceK { a, b -> a || b }
 }
 
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
