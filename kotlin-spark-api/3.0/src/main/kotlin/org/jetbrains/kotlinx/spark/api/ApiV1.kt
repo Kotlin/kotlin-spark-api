@@ -465,14 +465,15 @@ inline fun <reified T> Dataset<T>.dropWhile(noinline predicate: (T) -> Boolean):
  * and returns the result of predicate evaluation on the element.
  *
  */
-inline fun <T> Dataset<T>.filterIndexed(predicate: (index: Int, T) -> Boolean): Dataset<T> {
-    val index = getUniqueNewColumnName()
-
-    val indices = withColumn(index, monotonicallyIncreasingId())
-        .selectTyped(col(index).`as`<Row, Long>())
-
+inline fun <reified T> Dataset<T>.filterIndexed(crossinline predicate: (index: Long, T) -> Boolean): Dataset<T> {
     TODO()
-//    return filterIndexedTo(ArrayList<T>(), predicate)
+    val indices = selectTyped(monotonicallyIncreasingId().`as`<Long>())
+        // TODO this needs to zip, not join
+    val joined = indices.leftJoin(this, col(indices.columns().first()) neq -1L)
+    val filterResults = joined.map { (index, value) -> predicate(index, value!!) }
+    val filtered = selectTyped(col(filterResults.columns().first()).`as`<T>())
+
+    return filtered
 }
 
 
