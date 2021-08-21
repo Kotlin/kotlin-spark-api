@@ -558,6 +558,13 @@ class ApiTest : ShouldSpec({
                 first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
                 first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
+
+            should("Generate encoder correctly with complex enum data class") {
+                val schema = encoder<NullFieldAbleDataClass>().schema()
+                schema.fields().forEach {
+                    it.nullable() shouldBe true
+                }
+            }
         }
     }
 })
@@ -587,4 +594,9 @@ data class ComplexEnumDataClass(
     val someEnumArray: Array<SomeEnum>,
     val someOtherArray: Array<SomeOtherEnum>,
     val enumMap: Map<SomeEnum, SomeOtherEnum>,
+)
+
+data class NullFieldAbleDataClass(
+    val optionList: List<Int>?,
+    val optionMap: Map<String, Int>?
 )
