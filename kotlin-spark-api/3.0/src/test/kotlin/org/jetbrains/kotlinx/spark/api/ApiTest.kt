@@ -559,7 +559,7 @@ class ApiTest : ShouldSpec({
                 first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
 
-            should("Generate encoder correctly with complex enum data class") {
+            should("Generate schema correctly with nullalble list and map") {
                 val schema = encoder<NullFieldAbleDataClass>().schema()
                 schema.fields().forEach {
                     it.nullable() shouldBe true
