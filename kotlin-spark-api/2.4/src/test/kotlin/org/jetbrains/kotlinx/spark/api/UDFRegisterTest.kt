@@ -120,5 +120,23 @@ class UDFRegisterTest : ShouldSpec({
                 }
             }
         }
+
+//        context("udf return data class") {
+//            withSpark(logLevel = SparkLogLevel.DEBUG) {
+//                should("return NormalClass") {
+//                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
+//                    udf.register<String, Int, NormalClass>("toNormalClass") { a, b ->
+//                       NormalClass(a,b)
+//                    }
+//                    spark.sql("select toNormalClass(first, second) from test2").show()
+//                }
+//            }
+//        }
+
     }
 })
+
+data class NormalClass(
+    val name: String,
+    val age: Int
+)
