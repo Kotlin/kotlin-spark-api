@@ -755,7 +755,7 @@ object KotlinReflection extends KotlinReflection {
                 inputObject,
                 maybeProp.get.getReadMethod.getName,
                 inferExternalType(propClass),
-                returnNullable = propDt.nullable
+                returnNullable = structField.nullable
               )
               val newPath = walkedTypePath.recordField(propClass.getName, fieldName)
               (fieldName, serializerFor(fieldValue, getType(propClass), newPath, seenTypeSet, if (propDt.isInstanceOf[ComplexWrapper]) Some(propDt) else None))
