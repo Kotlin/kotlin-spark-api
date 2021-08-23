@@ -2,6 +2,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.RowFactory
 import org.apache.spark.sql.types.DataTypes
 import org.junit.jupiter.api.assertThrows
@@ -107,6 +108,25 @@ class UDFRegisterTest : ShouldSpec({
                         .forEach { (text, textArray) ->
                             assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
                         }
+                }
+
+
+                should("succeed in dataset") {
+                    val dataset: Dataset<NormalClass> = listOf(NormalClass("a", 10), NormalClass("b", 20)).toDS()
+
+                    val udfWrapper = udf.register<String, Int, String>("nameConcatAge") { name, age ->
+                        "$name-$age"
+                    }
+
+                    val collectAsList = dataset.withColumn(
+                        "nameAndAge",
+                        udfWrapper(dataset.col("name"), dataset.col("age"))
+                    )
+                        .select("nameAndAge")
+                        .collectAsList()
+
+                    collectAsList[0][0] shouldBe "a-10"
+                    collectAsList[1][0] shouldBe "b-20"
                 }
             }
         }
