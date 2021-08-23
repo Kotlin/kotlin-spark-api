@@ -1,6 +1,7 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.RowFactory
 import org.apache.spark.sql.types.DataTypes
 import org.junit.jupiter.api.assertThrows
@@ -62,6 +63,15 @@ class UDFRegisterTest : ShouldSpec({
                         array.asIterable().joinToString(" ")
                     }
                 }
+
+                should("succeed when using three type udf and as result to udf return type") {
+                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test1")
+                    udf.register<String, Int, Int>("stringIntDiff") { a, b ->
+                        a[0].toInt() - b
+                    }
+                    val result = spark.sql("select stringIntDiff(first, second) from test1").`as`<Int>().collectAsList()
+                    result shouldBe listOf(96, 96)
+                }
             }
         }
 
@@ -97,26 +107,6 @@ class UDFRegisterTest : ShouldSpec({
                         .forEach { (text, textArray) ->
                             assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
                         }
-                }
-//                should("also work with datasets") {
-//                    val ds = listOf("a" to 1, "b" to 2).toDS()
-//                    val stringIntDiff = udf.register<String, Int, Arity1<Int>>("stringIntDiff") { a, b ->
-//                        c(a[0].toInt() - b)
-//                    }
-//                    val lst = ds.withColumn("new", stringIntDiff(ds.col("first"), ds.col("second")))
-//                        .select("new")
-//                        .collectAsList()
-//
-////                    val result = spark.sql("select stringIntDiff(first, second) from test1").`as`<Int>().collectAsList()
-////                    expect(result).asExpect().contains.inOrder.only.values(96, 96)
-//                }
-                should("also work with datasets") {
-                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test1")
-                    udf.register<String, Int, Int>("stringIntDiff") { a, b ->
-                        a[0].toInt() - b
-                    }
-                    spark.sql("select stringIntDiff(first, second) from test1").show()
-
                 }
             }
         }
