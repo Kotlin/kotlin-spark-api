@@ -13,6 +13,13 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.typeOf
 
+fun DataType.unWrapper(): DataType {
+    return when (this) {
+        is DataTypeWithClass -> DataType.fromJson(dt().json())
+        else -> this
+    }
+}
+
 /**
  * Checks if [this] is of a valid type for an UDF, otherwise it throws a [TypeOfUDFParameterNotSupportedException]
  */
@@ -55,7 +62,7 @@ class UDFWrapper0(private val udfName: String) {
  */
 @OptIn(ExperimentalStdlibApi::class)
 inline fun <reified R> UDFRegistration.register(name: String, noinline func: () -> R): UDFWrapper0 {
-    register(name, UDF0(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF0(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper0(name)
 }
 
@@ -78,7 +85,7 @@ class UDFWrapper1(private val udfName: String) {
 @OptIn(ExperimentalStdlibApi::class)
 inline fun <reified T0, reified R> UDFRegistration.register(name: String, noinline func: (T0) -> R): UDFWrapper1 {
     T0::class.checkForValidType("T0")
-    register(name, UDF1(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF1(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper1(name)
 }
 
@@ -105,7 +112,7 @@ inline fun <reified T0, reified T1, reified R> UDFRegistration.register(
 ): UDFWrapper2 {
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
-    register(name, UDF2(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF2(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper2(name)
 }
 
@@ -133,7 +140,7 @@ inline fun <reified T0, reified T1, reified T2, reified R> UDFRegistration.regis
     T0::class.checkForValidType("T0")
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
-    register(name, UDF3(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF3(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper3(name)
 }
 
@@ -162,7 +169,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified R> UDFRegist
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
-    register(name, UDF4(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF4(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper4(name)
 }
 
@@ -192,7 +199,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
     T4::class.checkForValidType("T4")
-    register(name, UDF5(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF5(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper5(name)
 }
 
@@ -230,7 +237,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T3::class.checkForValidType("T3")
     T4::class.checkForValidType("T4")
     T5::class.checkForValidType("T5")
-    register(name, UDF6(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF6(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper6(name)
 }
 
@@ -270,7 +277,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T4::class.checkForValidType("T4")
     T5::class.checkForValidType("T5")
     T6::class.checkForValidType("T6")
-    register(name, UDF7(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF7(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper7(name)
 }
 
@@ -312,7 +319,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T5::class.checkForValidType("T5")
     T6::class.checkForValidType("T6")
     T7::class.checkForValidType("T7")
-    register(name, UDF8(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF8(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper8(name)
 }
 
@@ -356,7 +363,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T6::class.checkForValidType("T6")
     T7::class.checkForValidType("T7")
     T8::class.checkForValidType("T8")
-    register(name, UDF9(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF9(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper9(name)
 }
 
@@ -414,7 +421,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T7::class.checkForValidType("T7")
     T8::class.checkForValidType("T8")
     T9::class.checkForValidType("T9")
-    register(name, UDF10(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF10(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper10(name)
 }
 
@@ -475,7 +482,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T8::class.checkForValidType("T8")
     T9::class.checkForValidType("T9")
     T10::class.checkForValidType("T10")
-    register(name, UDF11(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF11(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper11(name)
 }
 
@@ -539,7 +546,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T9::class.checkForValidType("T9")
     T10::class.checkForValidType("T10")
     T11::class.checkForValidType("T11")
-    register(name, UDF12(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF12(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper12(name)
 }
 
@@ -606,7 +613,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T10::class.checkForValidType("T10")
     T11::class.checkForValidType("T11")
     T12::class.checkForValidType("T12")
-    register(name, UDF13(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF13(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper13(name)
 }
 
@@ -676,7 +683,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T11::class.checkForValidType("T11")
     T12::class.checkForValidType("T12")
     T13::class.checkForValidType("T13")
-    register(name, UDF14(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF14(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper14(name)
 }
 
@@ -749,7 +756,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T12::class.checkForValidType("T12")
     T13::class.checkForValidType("T13")
     T14::class.checkForValidType("T14")
-    register(name, UDF15(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF15(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper15(name)
 }
 
@@ -825,7 +832,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T13::class.checkForValidType("T13")
     T14::class.checkForValidType("T14")
     T15::class.checkForValidType("T15")
-    register(name, UDF16(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF16(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper16(name)
 }
 
@@ -904,7 +911,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T14::class.checkForValidType("T14")
     T15::class.checkForValidType("T15")
     T16::class.checkForValidType("T16")
-    register(name, UDF17(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF17(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper17(name)
 }
 
@@ -986,7 +993,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T15::class.checkForValidType("T15")
     T16::class.checkForValidType("T16")
     T17::class.checkForValidType("T17")
-    register(name, UDF18(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF18(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper18(name)
 }
 
@@ -1071,7 +1078,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T16::class.checkForValidType("T16")
     T17::class.checkForValidType("T17")
     T18::class.checkForValidType("T18")
-    register(name, UDF19(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF19(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper19(name)
 }
 
@@ -1159,7 +1166,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T17::class.checkForValidType("T17")
     T18::class.checkForValidType("T18")
     T19::class.checkForValidType("T19")
-    register(name, UDF20(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF20(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper20(name)
 }
 
@@ -1250,7 +1257,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T18::class.checkForValidType("T18")
     T19::class.checkForValidType("T19")
     T20::class.checkForValidType("T20")
-    register(name, UDF21(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF21(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper21(name)
 }
 
@@ -1344,6 +1351,6 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
     T19::class.checkForValidType("T19")
     T20::class.checkForValidType("T20")
     T21::class.checkForValidType("T21")
-    register(name, UDF22(func), DataType.fromJson((schema(typeOf<R>()) as DataTypeWithClass).dt().json()))
+    register(name, UDF22(func), schema(typeOf<R>()).unWrapper())
     return UDFWrapper22(name)
 }
