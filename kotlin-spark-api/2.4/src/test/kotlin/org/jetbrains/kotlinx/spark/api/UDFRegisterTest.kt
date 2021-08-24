@@ -131,6 +131,7 @@ class UDFRegisterTest : ShouldSpec({
             }
         }
 
+        // get the same exception with: https://forums.databricks.com/questions/13361/how-do-i-create-a-udf-in-java-which-return-a-compl.html
 //        context("udf return data class") {
 //            withSpark(logLevel = SparkLogLevel.DEBUG) {
 //                should("return NormalClass") {
