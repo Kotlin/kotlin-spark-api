@@ -65,6 +65,15 @@ class UDFRegisterTest : ShouldSpec({
                     }
                 }
 
+                should("succeed when return a List") {
+                    udf.register<String, List<Int>>("StringToIntList") { a ->
+                        a.asIterable().map { it.toInt() }
+                    }
+
+                    val result = spark.sql("select StringToIntList('ab')").`as`<List<Int>>().collectAsList()
+                    result shouldBe listOf(listOf(97, 98))
+                }
+
                 should("succeed when using three type udf and as result to udf return type") {
                     listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test1")
                     udf.register<String, Int, Int>("stringIntDiff") { a, b ->
