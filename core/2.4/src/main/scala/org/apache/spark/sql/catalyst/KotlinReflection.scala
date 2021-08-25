@@ -271,16 +271,20 @@ object KotlinReflection {
         }
 
         val maybeType = predefinedDt.filter(_.dt.isInstanceOf[ArrayType]).map(_.dt.asInstanceOf[ArrayType].elementType)
+        val reifiedElementType = maybeType match {
+          case Some(dt: DataTypeWithClass) => dt.cls
+          case _ => c.getComponentType
+        }
         primitiveMethod.map { method =>
           Invoke(getPath, method, ObjectType(c))
         }.getOrElse {
           Invoke(
             MapObjects(
               p => {
-                deserializerFor(typeToken.getComponentType, Some(p), maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))
+                deserializerFor(TypeToken.of(reifiedElementType), Some(p), maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper]))
               },
               getPath,
-              maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper].dt).getOrElse(inferDataType(elementType)._1)
+              maybeType.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper].dt).getOrElse(inferDataType(reifiedElementType)._1)
             ),
             "array",
             ObjectType(c)
@@ -507,7 +511,7 @@ object KotlinReflection {
           input :: Nil,
           dataType = ArrayType(dataType, nullable))
       } else {
-        val next = predefinedDt.map(_.dt).filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper])
+        val next = predefinedDt.filter(_.isInstanceOf[ComplexWrapper]).map(_.asInstanceOf[ComplexWrapper])
         MapObjects(serializerFor(_, elementType, next), input, ObjectType(elementType.getRawType))
       }
     }
