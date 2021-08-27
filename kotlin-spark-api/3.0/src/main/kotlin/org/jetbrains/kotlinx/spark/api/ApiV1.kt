@@ -28,6 +28,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
+import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
@@ -74,6 +75,7 @@ import kotlin.Unit
 import kotlin.also
 import kotlin.apply
 import kotlin.invoke
+import kotlin.random.Random
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
@@ -185,6 +187,327 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
     )
 }
 
+/**
+ * Allows `for (element in dataset)`.
+ *
+ * Note that this creates an iterator which can consume lots of memory. `.forEach {}` might be more efficient.
+ * TODO: Add plugin inspection hint
+ */
+operator fun <T> Dataset<T>.iterator(): Iterator<T> = toLocalIterator()
+
+fun <T> Dataset<T>.toIterable(): Iterable<T> = Iterable<T> { toLocalIterator() }
+
+/**
+ * Returns `true` if [element] is found in the collection.
+ *
+ * Note: Converting the dataset to an [Iterable] first might be a faster but potentially more memory
+ * intensive solution. See [toIterable].
+ * TODO: Add plugin inspection hint
+ */
+inline operator fun <reified T> Dataset<T>.contains(element: T): Boolean = !filter { it == element }.isEmpty
+
+/**
+ * Returns the first element matching the given [predicate], or `null` if no such element was found.
+ *
+ * Note: Converting the dataset to an [Iterable] first might be a faster but potentially more memory
+ * intensive solution. See [toIterable].
+ * TODO: Add plugin inspection hint
+ */
+fun <T> Dataset<T>.find(predicate: (T) -> Boolean): T? {
+    return firstOrNull(predicate)
+}
+
+/**
+ * Returns the last element matching the given [predicate], or `null` if no such element was found.
+ * TODO: Add plugin inspection hint
+ */
+fun <T> Dataset<T>.findLast(predicate: (T) -> Boolean): T? {
+    return lastOrNull(predicate)
+}
+
+/**
+ * Returns the first element matching the given [predicate].
+ * @throws [NoSuchElementException] if no such element is found.
+ * TODO: Add plugin inspection hint
+ */
+fun <T> Dataset<T>.first(predicate: (T) -> Boolean): T =
+    filter(predicate).first()
+
+/**
+ * Returns the first non-null value produced by [transform] function being applied to elements of this collection in iteration order,
+ * or throws [NoSuchElementException] if no non-null value was produced.
+ * TODO: Add plugin inspection hint
+ */
+inline fun <reified T, reified R : Any> Dataset<T>.firstNotNullOf(noinline transform: (T) -> R?): R =
+    map(transform)
+        .filterNotNull()
+        .first()
+
+/**
+ * Returns the first non-null value produced by [transform] function being applied to elements of this collection in iteration order,
+ * or `null` if no non-null value was produced.
+ * TODO: Add plugin inspection hint
+ */
+inline fun <reified T, reified R : Any> Dataset<T>.firstNotNullOfOrNull(noinline transform: (T) -> R?): R? =
+    map(transform)
+        .filterNotNull()
+        .firstOrNull()
+
+/**
+ * Returns the first element, or `null` if the collection is empty.
+ */
+fun <T> Dataset<T>.firstOrNull(): T? = if (isEmpty) null else first()
+
+/**
+ * Returns the first element matching the given [predicate], or `null` if element was not found.
+ * TODO: Add plugin inspection hint
+ */
+fun <T> Dataset<T>.firstOrNull(predicate: (T) -> Boolean): T? = filter(predicate).firstOrNull()
+
+/**
+ * Returns the last element.
+ *
+ * @throws NoSuchElementException if the collection is empty.
+ */
+fun <T> Dataset<T>.last(): T = tailAsList(1).first()
+
+/**
+ * Returns the last element matching the given [predicate].
+ *
+ * @throws NoSuchElementException if no such element is found.
+ * TODO: Add plugin inspection hint
+ */
+fun <T> Dataset<T>.last(predicate: (T) -> Boolean): T = filter(predicate).last()
+
+/**
+ * Returns the last element, or `null` if the collection is empty.
+ * TODO: Add plugin inspection hint
+ */
+fun <T> Dataset<T>.lastOrNull(): T? = if (isEmpty) null else last()
+
+/**
+ * Returns the last element matching the given [predicate], or `null` if no such element was found.
+ * TODO: Add plugin inspection hint
+ */
+fun <T> Dataset<T>.lastOrNull(predicate: (T) -> Boolean): T? = filter(predicate).lastOrNull()
+
+/**
+ * Returns the last `n` rows in the Dataset as a list.
+ *
+ * Running tail requires moving data into the application's driver process, and doing so with
+ * a very large `n` can crash the driver process with OutOfMemoryError.
+ */
+fun <T> Dataset<T>.tailAsList(n: Int): List<T> = KSparkExtensions.tailAsList(this, n)
+
+/**
+ * Returns a random element from this Dataset using the specified source of randomness.
+ *
+ * @param seed seed for the random number generator
+ *
+ * @throws NoSuchElementException if this collection is empty.
+ */
+fun <T> Dataset<T>.random(seed: Long = Random.nextLong()): T =
+    randomOrNull(seed) ?: throw NoSuchElementException("Collection is empty.")
+
+/**
+ * Returns a random element from this collection using the specified source of randomness, or `null` if this collection is empty.
+ * @param seed seed for the random number generator
+ */
+fun <T> Dataset<T>.randomOrNull(seed: Long = Random.nextLong()): T? {
+    if (isEmpty)
+        return null
+
+    return toJavaRDD()
+        .takeSample(false, 1, seed)
+        .first()
+}
+
+/**
+ * Returns the single element, or throws an exception if the Dataset is empty or has more than one element.
+ */
+fun <T> Dataset<T>.single(): T {
+    if (isEmpty)
+        throw NoSuchElementException("Dataset is empty.")
+
+    val firstTwo: List<T> = takeAsList(2) // less heavy than count()
+    return when (firstTwo.size) {
+        1 -> firstTwo.first()
+        else -> throw IllegalArgumentException("Dataset has more than one element.")
+    }
+}
+
+/**
+ * Returns single element, or `null` if the Dataset is empty or has more than one element.
+ */
+fun <T> Dataset<T>.singleOrNull(): T? {
+    if (isEmpty)
+        return null
+
+    val firstTwo: List<T> = takeAsList(2) // less heavy than count()
+    return when (firstTwo.size) {
+        1 -> firstTwo.first()
+        else -> null
+    }
+}
+
+
+fun Dataset<*>.getUniqueNewColumnName(): String {
+    val rowKeys = columns()
+    val alphabet = 'a'..'z'
+    var colName = alphabet.random().toString()
+    while (colName in rowKeys) colName += alphabet.random()
+
+    return colName
+}
+
+/**
+ * Returns a Dataset containing all elements except first [n] elements.
+ *
+ * @throws IllegalArgumentException if [n] is negative.
+ *
+ * TODO make more efficient
+ */
+inline fun <reified T> Dataset<T>.drop(n: Int): Dataset<T> {
+    require(n >= 0) { "Requested element count $n is less than zero." }
+    return when {
+        isEmpty -> this
+        n >= count() -> limit(0)
+        else -> {
+            val index = getUniqueNewColumnName()
+            withColumn(index, monotonicallyIncreasingId())
+                .orderBy(desc(index))
+                .dropLast(n)
+                .orderBy(index)
+                .drop(index)
+                .`as`<T>()
+        }
+    }
+
+}
+
+/**
+ * Returns a Dataset containing all elements except last [n] elements.
+ *
+ * @throws IllegalArgumentException if [n] is negative.
+ */
+fun <T> Dataset<T>.dropLast(n: Int): Dataset<T> {
+    require(n >= 0) { "Requested element count $n is less than zero." }
+    return when {
+        isEmpty -> this
+        n >= count() -> limit(0)
+        else -> limit(
+            (count() - n).toInt().coerceAtLeast(0)
+        )
+    }
+
+}
+
+/**
+ * Returns a Dataset containing all elements except last elements that satisfy the given [predicate].
+ *
+ * TODO Add plugin toIterable warning
+ */
+inline fun <reified T> Dataset<T>.dropLastWhile(noinline predicate: (T) -> Boolean): Dataset<T> {
+    if (isEmpty) return this
+
+    val filterApplied = map(predicate)
+        .withColumn(
+            getUniqueNewColumnName(),
+            monotonicallyIncreasingId(),
+        )
+
+    if (filterApplied.all { it.getBoolean(0) })
+        return limit(0)
+
+    if (filterApplied.all { !it.getBoolean(0) })
+        return this
+
+    val dropFrom = filterApplied
+        .lastOrNull { !it.getBoolean(0) }
+        ?.getLong(1)
+        ?: -1L
+
+    return dropLast(count().toInt() - (dropFrom.toInt() + 1))
+}
+
+/**
+ * Returns a Dataset containing all elements except first elements that satisfy the given [predicate].
+ *
+ * TODO Can definitely be made more efficient
+ * TODO Add plugin toIterable warning
+ */
+inline fun <reified T> Dataset<T>.dropWhile(noinline predicate: (T) -> Boolean): Dataset<T> {
+    if (isEmpty) return this
+
+    val filterApplied = map(predicate)
+        .withColumn(
+            getUniqueNewColumnName(),
+            monotonicallyIncreasingId(),
+        )
+
+    if (filterApplied.all { it.getBoolean(0) })
+        return limit(0)
+
+    if (filterApplied.all { !it.getBoolean(0) })
+        return this
+
+    val dropUntil = filterApplied
+        .firstOrNull { it.getBoolean(0) }
+        ?.getLong(1)
+        ?: -1L
+
+    return drop(dropUntil.toInt() + 1)
+}
+
+/**
+ * Returns a list containing only elements matching the given [predicate].
+ * @param [predicate] function that takes the index of an element and the element itself
+ * and returns the result of predicate evaluation on the element.
+ *
+ */
+inline fun <reified T> Dataset<T>.filterIndexed(crossinline predicate: (index: Long, T) -> Boolean): Dataset<T> {
+    TODO()
+    val indices = selectTyped(monotonicallyIncreasingId().`as`<Long>())
+        // TODO this needs to zip, not join
+    val joined = indices.leftJoin(this, col(indices.columns().first()) neq -1L)
+    val filterResults = joined.map { (index, value) -> predicate(index, value!!) }
+    val filtered = selectTyped(col(filterResults.columns().first()).`as`<T>())
+
+    return filtered
+}
+
+
+
+/**
+ * Returns `true` if collection has at least one element.
+ */
+fun Dataset<*>.any(): Boolean = !isEmpty
+
+/**
+ * Returns `true` if all elements match the given [predicate].
+ *
+ * TODO plugin (!any)
+ */
+inline fun <reified T> Dataset<T>.all(noinline predicate: (T) -> Boolean): Boolean {
+    if (isEmpty) return true
+
+    return map(predicate)
+        .reduceK { a, b -> a && b }
+}
+
+
+/**
+ * Returns `true` if at least one element matches the given [predicate].
+ *
+ * TODO plugin note to make it faster
+ */
+inline fun <reified T> Dataset<T>.any(noinline predicate: (T) -> Boolean): Boolean {
+    if (isEmpty) return false
+
+    return map(predicate)
+        .reduceK { a, b -> a || b }
+}
+
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
     map(MapFunction(func), encoder<R>())
 
@@ -200,7 +523,8 @@ inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyVal
 inline fun <T, reified R> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
     mapPartitions(func, encoder<R>())
 
-fun <T> Dataset<T>.filterNotNull() = filter { it != null }
+@Suppress("UNCHECKED_CAST")
+fun <T> Dataset<T?>.filterNotNull(): Dataset<T> = filter { it != null } as Dataset<T>
 
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapValues(noinline func: (VALUE) -> R): KeyValueGroupedDataset<KEY, R> =
     mapValues(MapFunction(func), encoder<R>())
@@ -643,10 +967,16 @@ operator fun Column.get(key: Any): Column = getItem(key)
 fun lit(a: Any) = functions.lit(a)
 
 /**
- * Provides a type hint about the expected return value of this column.  This information can
+ * Provides a type hint about the expected return value of this column. This information can
  * be used by operations such as `select` on a [Dataset] to automatically convert the
  * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.selectTyped( col("a").`as`<Int>() )
+ * ```
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
 
 /**
@@ -768,9 +1098,8 @@ inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): Type
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
- *    val new: Dataset<Tuple2<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
+ *    val new: Dataset<Pair<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
  * ```
- * TODO: change example to [Pair]s when merged
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
@@ -805,44 +1134,74 @@ fun <T> Dataset<T>.showDS(numRows: Int = 20, truncate: Boolean = true) = apply {
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T, reified U1> Dataset<T>.selectTyped(
+    c1: TypedColumn<out Any, U1>,
+): Dataset<U1> = select(c1 as TypedColumn<T, U1>)
+
+/**
+ * Returns a new Dataset by computing the given [Column] expressions for each element.
+ */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
 ): Dataset<Pair<U1, U2>> =
-    select(c1, c2).map { Pair(it._1(), it._2()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+    ).map { Pair(it._1(), it._2()) }
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2, reified U3> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
-    c3: TypedColumn<T, U3>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
+    c3: TypedColumn<out Any, U3>,
 ): Dataset<Triple<U1, U2, U3>> =
-    select(c1, c2, c3).map { Triple(it._1(), it._2(), it._3()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+        c3 as TypedColumn<T, U3>,
+    ).map { Triple(it._1(), it._2(), it._3()) }
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2, reified U3, reified U4> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
-    c3: TypedColumn<T, U3>,
-    c4: TypedColumn<T, U4>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
+    c3: TypedColumn<out Any, U3>,
+    c4: TypedColumn<out Any, U4>,
 ): Dataset<Arity4<U1, U2, U3, U4>> =
-    select(c1, c2, c3, c4).map { Arity4(it._1(), it._2(), it._3(), it._4()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+        c3 as TypedColumn<T, U3>,
+        c4 as TypedColumn<T, U4>,
+    ).map { Arity4(it._1(), it._2(), it._3(), it._4()) }
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
  */
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U5> Dataset<T>.selectTyped(
-    c1: TypedColumn<T, U1>,
-    c2: TypedColumn<T, U2>,
-    c3: TypedColumn<T, U3>,
-    c4: TypedColumn<T, U4>,
-    c5: TypedColumn<T, U5>,
+    c1: TypedColumn<out Any, U1>,
+    c2: TypedColumn<out Any, U2>,
+    c3: TypedColumn<out Any, U3>,
+    c4: TypedColumn<out Any, U4>,
+    c5: TypedColumn<out Any, U5>,
 ): Dataset<Arity5<U1, U2, U3, U4, U5>> =
-    select(c1, c2, c3, c4, c5).map { Arity5(it._1(), it._2(), it._3(), it._4(), it._5()) }
+    select(
+        c1 as TypedColumn<T, U1>,
+        c2 as TypedColumn<T, U2>,
+        c3 as TypedColumn<T, U3>,
+        c4 as TypedColumn<T, U4>,
+        c5 as TypedColumn<T, U5>,
+    ).map { Arity5(it._1(), it._2(), it._3(), it._4(), it._5()) }
 
 
 @OptIn(ExperimentalStdlibApi::class)

@@ -362,22 +362,25 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(1, 2, 4), 5),
                 )
 
-                val typedColumnA: TypedColumn<Any, IntArray> = dataset.col("a").`as`(encoder())
+                val newDS1WithAs: Dataset<IntArray> = dataset.selectTyped(
+                    col("a").`as`<IntArray>(),
+                )
+                newDS1WithAs.show()
 
-                val newDS2 = dataset.selectTyped(
+                val newDS2: Dataset<Pair<IntArray, Int>> = dataset.selectTyped(
                     col(SomeClass::a), // NOTE: this only works on 3.0, returning a data class with an array in it
                     col(SomeClass::b),
                 )
                 newDS2.show()
 
-                val newDS3 = dataset.selectTyped(
+                val newDS3: Dataset<Triple<IntArray, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
                 )
                 newDS3.show()
 
-                val newDS4 = dataset.selectTyped(
+                val newDS4: Dataset<Arity4<IntArray, Int, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
@@ -385,7 +388,7 @@ class ApiTest : ShouldSpec({
                 )
                 newDS4.show()
 
-                val newDS5 = dataset.selectTyped(
+                val newDS5: Dataset<Arity5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
@@ -557,6 +560,12 @@ class ApiTest : ShouldSpec({
                 first.someEnumArray shouldBe arrayOf(SomeEnum.A, SomeEnum.B)
                 first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
                 first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
+            }
+            should("Have more stdlib functions for Datasets") {
+                val dataset = listOf(1, 2, 3).toDS().drop(2)
+                dataset.count() shouldBe 1L
+                (3 in dataset) shouldBe true
+
             }
         }
     }

@@ -192,6 +192,9 @@ to create `TypedColumn`s and with those a new Dataset from pieces of another usi
 ```kotlin
 val dataset: Dataset<YourClass> = ...
 val newDataset: Dataset<Pair<TypeA, TypeB>> = dataset.selectTyped(col(YourClass::colA), col(YourClass::colB))
+
+// Alternatively, for instance when working with a Dataset<Row>
+val typedDataset: Dataset<Pair<String, Int>> = otherDataset.selectTyped(col("a").`as`<String>(), col("b").`as`<Int>())
 ```
 
 ### Overload resolution ambiguity
