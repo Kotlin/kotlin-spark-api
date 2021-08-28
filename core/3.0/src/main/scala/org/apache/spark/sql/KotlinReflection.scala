@@ -592,7 +592,8 @@ object KotlinReflection extends KotlinReflection {
 
     def toCatalystArray(input: Expression, elementType: `Type`, predefinedDt: Option[DataTypeWithClass] = None): Expression = {
       predefinedDt.map(_.dt).getOrElse(dataTypeFor(elementType)) match {
-        case dt: StructType =>
+
+        case dt@(MapType(_, _, _) | ArrayType(_, _) | StructType(_)) =>
           val clsName = getClassNameFromType(elementType)
           val newPath = walkedTypePath.recordArray(clsName)
           createSerializerForMapObjects(input, ObjectType(predefinedDt.get.cls),
