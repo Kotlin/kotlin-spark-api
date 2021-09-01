@@ -87,33 +87,16 @@ class UDFRegisterTest : ShouldSpec({
 
         context("calling the UDF-Wrapper") {
             withSpark(logLevel = SparkLogLevel.DEBUG) {
-                should("succeed when using the right number of arguments") {
-                    val schema = DataTypes.createStructType(
-                        listOf(
-                            DataTypes.createStructField(
-                                "textArray",
-                                DataTypes.createArrayType(DataTypes.StringType),
-                                false
-                            ),
-                            DataTypes.createStructField("id", DataTypes.StringType, false)
-                        )
-                    )
-
-                    val rows = listOf(
-                        RowFactory.create(arrayOf("a", "b", "c"), "1"),
-                        RowFactory.create(arrayOf("d", "e", "f"), "2"),
-                        RowFactory.create(arrayOf("g", "h", "i"), "3"),
-                    )
-
-                    val testData = spark.createDataFrame(rows, schema)
+                should("succeed call UDF-Wrapper in withColumn") {
 
                     val stringArrayMerger = udf.register<WrappedArray<String>, String>("stringArrayMerger") {
                         it.asIterable().joinToString(" ")
                     }
 
-                    val newData = testData.withColumn("text", stringArrayMerger(testData.col("textArray")))
+                    val testData = dsOf(listOf("a", "b"))
+                    val newData = testData.withColumn("text", stringArrayMerger(testData.col("value")))
 
-                    newData.select("text").collectAsList().zip(newData.select("textArray").collectAsList())
+                    newData.select("text").collectAsList().zip(newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
                             assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
                         }
