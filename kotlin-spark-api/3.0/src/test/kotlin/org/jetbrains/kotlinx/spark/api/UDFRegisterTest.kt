@@ -22,8 +22,6 @@ package org.jetbrains.kotlinx.spark.api
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.RowFactory
-import org.apache.spark.sql.types.DataTypes
 import org.junit.jupiter.api.assertThrows
 import scala.collection.JavaConversions
 import scala.collection.mutable.WrappedArray
