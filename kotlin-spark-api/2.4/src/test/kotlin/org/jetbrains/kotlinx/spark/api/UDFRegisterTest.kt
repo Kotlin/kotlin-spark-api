@@ -26,8 +26,10 @@ import org.junit.jupiter.api.assertThrows
 import scala.collection.JavaConversions
 import scala.collection.mutable.WrappedArray
 
+@Suppress("unused")
 private fun <T> scala.collection.Iterable<T>.asIterable(): Iterable<T> = JavaConversions.asJavaIterable(this)
 
+@Suppress("unused")
 class UDFRegisterTest : ShouldSpec({
     context("org.jetbrains.kotlinx.spark.api.UDFRegister") {
         context("the function checkForValidType") {
