@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-@file:Suppress("DuplicatedCode")
+@file:Suppress("DuplicatedCode", "unused")
 
 package org.jetbrains.kotlinx.spark.api
 
