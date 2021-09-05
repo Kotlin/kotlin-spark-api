@@ -121,7 +121,10 @@ class UDFRegisterTest : ShouldSpec({
 
 
                 should("succeed in dataset") {
-                    val dataset: Dataset<NormalClass> = listOf(NormalClass("a", 10), NormalClass("b", 20)).toDS()
+                    val dataset: Dataset<NormalClass> = listOf(
+                        NormalClass(name="a", age =10),
+                        NormalClass(name="b", age =20)
+                    ).toDS()
 
                     val udfWrapper = udf.register<String, Int, String>("nameConcatAge") { name, age ->
                         "$name-$age"
@@ -140,23 +143,22 @@ class UDFRegisterTest : ShouldSpec({
             }
         }
 
-        // get the same exception with: https://forums.databricks.com/questions/13361/how-do-i-create-a-udf-in-java-which-return-a-compl.html
-//        context("udf return data class") {
-//            withSpark(logLevel = SparkLogLevel.DEBUG) {
-//                should("return NormalClass") {
-//                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
-//                    udf.register<String, Int, NormalClass>("toNormalClass") { a, b ->
-//                       NormalClass(a,b)
-//                    }
-//                    spark.sql("select toNormalClass(first, second) from test2").show()
-//                }
-//            }
-//        }
+        context("udf return data class") {
+            withSpark(logLevel = SparkLogLevel.DEBUG) {
+                should("return NormalClass") {
+                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
+                    udf.register<String, Int, NormalClass>("toNormalClass") { a, b ->
+                       NormalClass(b, a)
+                    }
+                    spark.sql("select toNormalClass(first, second) from test2").show()
+                }
+            }
+        }
 
     }
 })
 
 data class NormalClass(
-    val name: String,
-    val age: Int
+    val age: Int,
+    val name: String
 )

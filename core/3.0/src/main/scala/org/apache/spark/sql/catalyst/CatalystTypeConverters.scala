@@ -253,6 +253,18 @@ object CatalystTypeConverters {
         }
         new GenericInternalRow(ar)
 
+      case ktDataClass: Any if JvmClassMappingKt.getKotlinClass(ktDataClass.getClass).isData =>
+        import scala.collection.JavaConverters._
+        val klass: KClass[Any] = JvmClassMappingKt.getKotlinClass(ktDataClass.getClass).asInstanceOf[KClass[Any]]
+        val iter: Iterator[KProperty1[Any,_]] = KClasses.getDeclaredMemberProperties(klass).iterator().asScala
+        val ar = new Array[Any](structType.size)
+        var idx = 0
+        while (idx < structType.size) {
+          ar(idx) = converters(idx).toCatalyst(iter.next().get(ktDataClass))
+          idx += 1
+        }
+        new GenericInternalRow(ar)
+
       case other => throw new IllegalArgumentException(
         s"The value (${other.toString}) of the type (${other.getClass.getCanonicalName}) "
           + s"cannot be converted to ${structType.catalogString}")
