@@ -66,11 +66,13 @@ class ApiTest : ShouldSpec({
                 val result = dsOf(1, 2, 3, 4, 5)
                     .map { it to (it + 2) }
                     .withCached {
-                        expect(collectAsList()).contains.inAnyOrder.only.values(1 to 3,
+                        expect(collectAsList()).contains.inAnyOrder.only.values(
+                            1 to 3,
                             2 to 4,
                             3 to 5,
                             4 to 6,
-                            5 to 7)
+                            5 to 7
+                        )
 
                         val next = filter { it.first % 2 == 0 }
                         expect(next.collectAsList()).contains.inAnyOrder.only.values(2 to 4, 4 to 6)
@@ -109,8 +111,12 @@ class ApiTest : ShouldSpec({
                     .map { MovieExpanded(it.id, it.genres.split("|").toList()) }
                     .filter { it.genres.contains("Comedy") }
                     .collectAsList()
-                expect(comedies).contains.inAnyOrder.only.values(MovieExpanded(1,
-                    listOf("Comedy", "Romance")))
+                expect(comedies).contains.inAnyOrder.only.values(
+                    MovieExpanded(
+                        1,
+                        listOf("Comedy", "Romance")
+                    )
+                )
             }
             should("handle strings converted to arrays") {
                 data class Movie(val id: Long, val genres: String)
@@ -133,31 +139,27 @@ class ApiTest : ShouldSpec({
                     .map { MovieExpanded(it.id, it.genres.split("|").toTypedArray()) }
                     .filter { it.genres.contains("Comedy") }
                     .collectAsList()
-                expect(comedies).contains.inAnyOrder.only.values(MovieExpanded(1,
-                    arrayOf("Comedy", "Romance")))
+                expect(comedies).contains.inAnyOrder.only.values(
+                    MovieExpanded(
+                        1,
+                        arrayOf("Comedy", "Romance")
+                    )
+                )
             }
             should("handle arrays of generics") {
-                data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>) {
-                    override fun equals(other: Any?): Boolean {
-                        if (this === other) return true
-                        if (javaClass != other?.javaClass) return false
-
-                        other as Test<*>
-
-                        if (id != other.id) return false
-                        if (!data.contentEquals(other.data)) return false
-
-                        return true
-                    }
-
-                    override fun hashCode(): Int {
-                        var result = id.hashCode()
-                        result = 31 * result + data.contentHashCode()
-                        return result
-                    }
-                }
+                data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>)
 
                 val result = listOf(Test(1, arrayOf(5.1 to 6, 6.1 to 7)))
+                    .toDS()
+                    .map { it.id to it.data.firstOrNull { liEl -> liEl.first < 6 } }
+                    .map { it.second }
+                    .collectAsList()
+                expect(result).contains.inOrder.only.values(5.1 to 6)
+            }
+            should("handle lists of generics") {
+                data class Test<Z>(val id: Long, val data: List<Pair<Z, Int>>)
+
+                val result = listOf(Test(1, listOf(5.1 to 6, 6.1 to 7)))
                     .toDS()
                     .map { it.id to it.data.firstOrNull { liEl -> liEl.first < 6 } }
                     .map { it.second }
@@ -558,7 +560,31 @@ class ApiTest : ShouldSpec({
                 first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
                 first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
-
+            should("work with lists of maps") {
+                val result = dsOf(
+                    listOf(mapOf("a" to "b", "x" to "y")),
+                    listOf(mapOf("a" to "b", "x" to "y")),
+                    listOf(mapOf("a" to "b", "x" to "y"))
+                )
+                    .showDS()
+                    .map { it.last() }
+                    .map { it["x"] }
+                    .filterNotNull()
+                    .distinct()
+                    .collectAsList()
+                expect(result).contains.inOrder.only.value("y")
+            }
+            should("work with lists of lists") {
+                val result = dsOf(
+                    listOf(listOf(1, 2, 3)),
+                    listOf(listOf(1, 2, 3)),
+                    listOf(listOf(1, 2, 3))
+                )
+                    .map { it.last() }
+                    .map { it.first() }
+                    .reduceK { a, b -> a + b }
+                expect(result).toBe(3)
+            }
             should("Generate schema correctly with nullalble list and map") {
                 val schema = encoder<NullFieldAbleDataClass>().schema()
                 schema.fields().forEach {

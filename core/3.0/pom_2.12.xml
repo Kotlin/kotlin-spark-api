@@ -18,7 +18,10 @@
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-reflect</artifactId>
+    </dependency>
     <!-- Provided dependencies -->
     <dependency>
       <groupId>org.apache.spark</groupId>

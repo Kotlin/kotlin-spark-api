@@ -7,9 +7,9 @@ package org.jetbrains.kotlinx.spark.api/*-
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -517,8 +517,31 @@ class ApiTest : ShouldSpec({
                 first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
                 first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
-
-
+            should("work with lists of maps") {
+                val result = dsOf(
+                    listOf(mapOf("a" to "b", "x" to "y")),
+                    listOf(mapOf("a" to "b", "x" to "y")),
+                    listOf(mapOf("a" to "b", "x" to "y"))
+                )
+                    .showDS()
+                    .map { it.last() }
+                    .map { it["x"] }
+                    .filterNotNull()
+                    .distinct()
+                    .collectAsList()
+                expect(result).contains.inOrder.only.value("y")
+            }
+            should("work with lists of lists") {
+                val result = dsOf(
+                    listOf(listOf(1, 2, 3)),
+                    listOf(listOf(1, 2, 3)),
+                    listOf(listOf(1, 2, 3))
+                )
+                    .map { it.last() }
+                    .map { it.first() }
+                    .reduceK { a, b -> a + b }
+                expect(result).toBe(3)
+            }
             should("Generate schema correctly with nullalble list and map") {
                 val schema = encoder<NullFieldAbleDataClass>().schema()
                 schema.fields().forEach {

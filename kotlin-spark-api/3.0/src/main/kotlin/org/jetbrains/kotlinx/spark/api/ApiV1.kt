@@ -77,6 +77,7 @@ import kotlin.invoke
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.to
 
@@ -122,9 +123,11 @@ inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
  * @return `Broadcast` object, a read-only variable cached on each machine
  * @see broadcast
  */
-@Deprecated("You can now use `spark.broadcast()` instead.",
+@Deprecated(
+    "You can now use `spark.broadcast()` instead.",
     ReplaceWith("spark.broadcast(value)"),
-    DeprecationLevel.WARNING)
+    DeprecationLevel.WARNING
+)
 inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
     broadcast(value, encoder<T>().clsTag())
 } catch (e: ClassNotFoundException) {
@@ -177,10 +180,14 @@ private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
-        if (schema is DataTypeWithClass) KotlinReflection.serializerFor(kClass.java,
-            schema) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-        if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java,
-            schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) KotlinReflection.serializerFor(
+            kClass.java,
+            schema
+        ) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(
+            kClass.java,
+            schema
+        ) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
         ClassTag.apply(kClass.java)
     )
 }
@@ -200,7 +207,8 @@ inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyVal
 inline fun <T, reified R> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
     mapPartitions(func, encoder<R>())
 
-fun <T> Dataset<T>.filterNotNull() = filter { it != null }
+@Suppress("UNCHECKED_CAST")
+fun <T : Any> Dataset<T?>.filterNotNull(): Dataset<T> = filter { it != null } as Dataset<T>
 
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapValues(noinline func: (VALUE) -> R): KeyValueGroupedDataset<KEY, R> =
     mapValues(MapFunction(func), encoder<R>())
@@ -848,9 +856,11 @@ inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U
 @OptIn(ExperimentalStdlibApi::class)
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]
-    if (primitiveSchema != null) return KSimpleTypeWrapper(primitiveSchema,
+    if (primitiveSchema != null) return KSimpleTypeWrapper(
+        primitiveSchema,
         (type.classifier!! as KClass<*>).java,
-        type.isMarkedNullable)
+        type.isMarkedNullable
+    )
     val klass = type.classifier as? KClass<*> ?: throw IllegalArgumentException("Unsupported type $type")
     val args = type.arguments
 
@@ -901,15 +911,21 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     .filter { it.findAnnotation<Transient>() == null }
                     .map {
                         val projectedType = types[it.type.toString()] ?: it.type
-                        val propertyDescriptor = PropertyDescriptor(it.name,
+                        val propertyDescriptor = PropertyDescriptor(
+                            it.name,
                             klass.java,
                             "is" + it.name?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
-                            null)
-                        KStructField(propertyDescriptor.readMethod.name,
-                            StructField(it.name,
+                            null
+                        )
+                        KStructField(
+                            propertyDescriptor.readMethod.name,
+                            StructField(
+                                it.name,
                                 schema(projectedType, types),
                                 projectedType.isMarkedNullable,
-                                Metadata.empty()))
+                                Metadata.empty()
+                            )
+                        )
                     }
                     .toTypedArray()
             )
@@ -923,8 +939,10 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             val structType = DataTypes.createStructType(
                 params.map { (fieldName, fieldType) ->
                     val dataType = schema(fieldType, types)
-                    KStructField(fieldName,
-                        StructField(fieldName, dataType, fieldType.isMarkedNullable, Metadata.empty()))
+                    KStructField(
+                        fieldName,
+                        StructField(fieldName, dataType, fieldType.isMarkedNullable, Metadata.empty())
+                    )
                 }.toTypedArray()
             )
 
