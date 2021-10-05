@@ -887,7 +887,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KComplexTypeWrapper(
                 DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
                 klass.java,
-                listParam.isMarkedNullable
+                type.isMarkedNullable
             )
         }
         klass.isSubclassOf(Map::class) -> {
@@ -900,7 +900,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     true
                 ),
                 klass.java,
-                mapValueParam.isMarkedNullable
+                type.isMarkedNullable
             )
         }
         klass.isData -> {

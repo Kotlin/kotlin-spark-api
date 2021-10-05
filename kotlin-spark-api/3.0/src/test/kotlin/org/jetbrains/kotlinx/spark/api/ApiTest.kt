@@ -585,7 +585,12 @@ class ApiTest : ShouldSpec({
                     .reduceK { a, b -> a + b }
                 expect(result).toBe(3)
             }
-
+            should("Generate schema correctly with nullalble list and map") {
+                val schema = encoder<NullFieldAbleDataClass>().schema()
+                schema.fields().forEach {
+                    it.nullable() shouldBe true
+                }
+            }
         }
     }
 })
@@ -615,4 +620,9 @@ data class ComplexEnumDataClass(
     val someEnumArray: Array<SomeEnum>,
     val someOtherArray: Array<SomeOtherEnum>,
     val enumMap: Map<SomeEnum, SomeOtherEnum>,
+)
+
+data class NullFieldAbleDataClass(
+    val optionList: List<Int>?,
+    val optionMap: Map<String, Int>?
 )
