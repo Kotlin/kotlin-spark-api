@@ -18,9 +18,8 @@ package org.jetbrains.kotlinx.spark.api/*-
  * =LICENSEEND=
  */
 import ch.tutteli.atrium.api.fluent.en_GB.*
+import ch.tutteli.atrium.api.verbs.expect
 import ch.tutteli.atrium.creating.Expect
-import ch.tutteli.atrium.domain.builders.migration.asExpect
-import ch.tutteli.atrium.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import org.jetbrains.kotlinx.spark.api.struct.model.DataType.StructType
 import org.jetbrains.kotlinx.spark.api.struct.model.DataType.TypeName
@@ -28,7 +27,6 @@ import org.jetbrains.kotlinx.spark.api.struct.model.ElementType.ComplexElement
 import org.jetbrains.kotlinx.spark.api.struct.model.ElementType.SimpleElement
 import org.jetbrains.kotlinx.spark.api.struct.model.Struct
 import org.jetbrains.kotlinx.spark.api.struct.model.StructField
-import java.util.*
 import kotlin.reflect.typeOf
 
 
@@ -40,22 +38,22 @@ class TypeInferenceTest : ShouldSpec({
 
         val struct = Struct.fromJson(schema(typeOf<Pair<String, Test<Int>>>()).prettyJson())!!
         should("contain correct typings") {
-            expect(struct.fields).asExpect().notToBeNull().contains.inAnyOrder.only.entries(
-                    hasField("first", "string"),
-                    hasStruct("second",
-                            hasField("vala", "integer"),
-                            hasStruct("tripl1",
-                                    hasField("first", "integer"),
-                                    hasStruct("second",
-                                            hasField("vala2", "long"),
-                                            hasStruct("para2",
-                                                    hasField("first", "long"),
-                                                    hasField("second", "string")
-                                            )
-                                    ),
-                                    hasField("third", "integer")
+            expect(struct.fields).notToBeNull().contains.inAnyOrder.only.entries(
+                hasField("first", "string"),
+                hasStruct("second",
+                    hasField("vala", "integer"),
+                    hasStruct("tripl1",
+                        hasField("first", "integer"),
+                        hasStruct("second",
+                            hasField("vala2", "long"),
+                            hasStruct("para2",
+                                hasField("first", "long"),
+                                hasField("second", "string")
                             )
+                        ),
+                        hasField("third", "integer")
                     )
+                )
             )
         }
     }
@@ -66,24 +64,24 @@ class TypeInferenceTest : ShouldSpec({
 
         val struct = Struct.fromJson(schema(typeOf<Pair<String, Test<Int>>>()).prettyJson())!!
         should("contain correct typings") {
-            expect(struct.fields).asExpect().notToBeNull().contains.inAnyOrder.only.entries(
-                    hasField("first", "string"),
-                    hasStruct("second",
-                            hasField("vala", "integer"),
-                            hasStruct("tripl1",
-                                    hasField("first", "integer"),
-                                    hasStruct("second",
-                                            hasField("vala2", "long"),
-                                            hasStruct("para2",
-                                                    hasField("first", "long"),
-                                                    hasStruct("second",
-                                                            hasField("vala3", "double")
-                                                    )
-                                            )
-                                    ),
-                                    hasField("third", "integer")
+            expect(struct.fields).notToBeNull().contains.inAnyOrder.only.entries(
+                hasField("first", "string"),
+                hasStruct("second",
+                    hasField("vala", "integer"),
+                    hasStruct("tripl1",
+                        hasField("first", "integer"),
+                        hasStruct("second",
+                            hasField("vala2", "long"),
+                            hasStruct("para2",
+                                hasField("first", "long"),
+                                hasStruct("second",
+                                    hasField("vala3", "double")
+                                )
                             )
+                        ),
+                        hasField("third", "integer")
                     )
+                )
             )
         }
     }
@@ -92,17 +90,17 @@ class TypeInferenceTest : ShouldSpec({
 
         val struct = Struct.fromJson(schema(typeOf<Test>()).prettyJson())!!
         should("return correct types too") {
-            expect(struct.fields).asExpect().notToBeNull().contains.inAnyOrder.only.entries(
-                    hasField("a", "string"),
-                    hasField("b", "integer"),
-                    hasField("c", "double")
+            expect(struct.fields).notToBeNull().contains.inAnyOrder.only.entries(
+                hasField("a", "string"),
+                hasField("b", "integer"),
+                hasField("c", "double")
             )
         }
     }
     context("type with list of ints") {
         val struct = Struct.fromJson(schema(typeOf<List<Int>>()).prettyJson())!!
         should("return correct types too") {
-            expect(struct).asExpect {
+            expect(struct) {
                 isOfType("array")
                 feature { f(it::elementType) }.toBe(SimpleElement("integer"))
             }
@@ -111,12 +109,12 @@ class TypeInferenceTest : ShouldSpec({
     context("type with list of Pairs int to long") {
         val struct = Struct.fromJson(schema(typeOf<List<Pair<Int, Long>>>()).prettyJson())!!
         should("return correct types too") {
-            expect(struct).asExpect {
+            expect(struct) {
                 isOfType("array")
                 feature { f(it::elementType) }.notToBeNull().isA<ComplexElement> {
                     feature { f(it.value::fields) }.notToBeNull().contains.inAnyOrder.only.entries(
-                            hasField("first", "integer"),
-                            hasField("second", "long")
+                        hasField("first", "integer"),
+                        hasField("second", "long")
                     )
                 }
             }
@@ -127,11 +125,11 @@ class TypeInferenceTest : ShouldSpec({
 
         val struct = Struct.fromJson(schema(typeOf<List<Test<String>>>()).prettyJson())!!
         should("return correct types too") {
-            expect(struct).asExpect {
+            expect(struct) {
                 isOfType("array")
                 feature { f(it::elementType) }.notToBeNull().isA<ComplexElement> {
                     feature { f(it.value::fields) }.notToBeNull().contains.inAnyOrder.only.entries(
-                            hasField("e", "string")
+                        hasField("e", "string")
                     )
                 }
             }
@@ -140,7 +138,7 @@ class TypeInferenceTest : ShouldSpec({
     context("type with list of list of int") {
         val struct = Struct.fromJson(schema(typeOf<List<List<Int>>>()).prettyJson())!!
         should("return correct types too") {
-            expect(struct).asExpect {
+            expect(struct) {
                 isOfType("array")
                 feature { f(it::elementType) }.notToBeNull().isA<ComplexElement> {
                     feature { f(it.value::elementType) }.toBe(SimpleElement("integer"))
@@ -151,7 +149,7 @@ class TypeInferenceTest : ShouldSpec({
     context("Subtypes of list") {
         val struct = Struct.fromJson(schema(typeOf<ArrayList<Int>>()).prettyJson())!!
         should("return correct types too") {
-            expect(struct).asExpect {
+            expect(struct) {
                 isOfType("array")
                 feature { f(it::elementType) }.toBe(SimpleElement("integer"))
                 feature { f(it::containsNull) }.toBe(false)
@@ -161,7 +159,7 @@ class TypeInferenceTest : ShouldSpec({
     context("Subtypes of list with nullable values") {
         val struct = Struct.fromJson(schema(typeOf<ArrayList<Int?>>()).prettyJson())!!
         should("return correct types too") {
-            expect(struct).asExpect {
+            expect(struct) {
                 isOfType("array")
                 feature { f(it::elementType) }.toBe(SimpleElement("integer"))
                 feature { f(it::containsNull) }.toBe(true)
@@ -173,9 +171,9 @@ class TypeInferenceTest : ShouldSpec({
 
         val struct = Struct.fromJson(schema(typeOf<Test>()).prettyJson())!!
         should("Not change order of fields") {
-            expect(struct.fields).asExpect().notToBeNull().containsExactly(
-                    hasField("lon", "double"),
-                    hasField("lat", "double")
+            expect(struct.fields).notToBeNull().containsExactly(
+                hasField("lon", "double"),
+                hasField("lat", "double")
             )
         }
     }
@@ -185,11 +183,16 @@ private fun Expect<Struct>.isOfType(type: String) {
     feature { f(it::type) }.toBe(type)
 }
 
-private fun hasStruct(name: String, expectedField: Expect<StructField>.() -> Unit, vararg expectedFields: Expect<StructField>.() -> Unit): Expect<StructField>.() -> Unit {
+private fun hasStruct(
+    name: String,
+    expectedField: Expect<StructField>.() -> Unit,
+    vararg expectedFields: Expect<StructField>.() -> Unit,
+): Expect<StructField>.() -> Unit {
     return {
         feature { f(it::name) }.toBe(name)
         feature { f(it::type) }.isA<StructType> {
-            feature { f(it.value::fields) }.notToBeNull().contains.inAnyOrder.only.entries(expectedField, *expectedFields)
+            feature { f(it.value::fields) }.notToBeNull().contains.inAnyOrder.only.entries(expectedField,
+                *expectedFields)
         }
     }
 }

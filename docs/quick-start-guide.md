@@ -73,7 +73,7 @@ Here's what the `pom.xml` looks like for this example:
         <dependency> <!-- Kotlin Spark API dependency -->
             <groupId>org.jetbrains.kotlinx.spark</groupId>
             <artifactId>kotlin-spark-api-3.0.0_2.12</artifactId>
-            <version>1.0.0-preview1</version>
+            <version>1.0.1</version>
         </dependency>
         <dependency> <!-- Spark dependency -->
             <groupId>org.apache.spark</groupId>
@@ -163,7 +163,7 @@ dependencies {
   // Kotlin stdlib
   implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.0'
   // Kotlin Spark API
-  implementation 'org.jetbrains.kotlinx.spark:kotlin-spark-api-3.0.0_2.12:1.0.0-preview1'  // Apache Spark
+  implementation 'org.jetbrains.kotlinx.spark:kotlin-spark-api-3.0.0_2.12:1.0.1'  // Apache Spark
   compileOnly 'org.apache.spark:spark-sql_2.12:3.0.0'
 }
 
@@ -198,7 +198,7 @@ dependencies {
   // Kotlin stdlib
   implementation ("org.jetbrains.kotlin:kotlin-stdlib:1.4.0")
   // Kotlin Spark API
-  implementation ("org.jetbrains.kotlinx.spark:kotlin-spark-api-3.0.0_2.12:1.0.0-preview1")
+  implementation ("org.jetbrains.kotlinx.spark:kotlin-spark-api-3.0.0_2.12:1.0.1")
   // Apache Spark
   compileOnly ("org.apache.spark:spark-sql_2.12:3.0.0")
 }

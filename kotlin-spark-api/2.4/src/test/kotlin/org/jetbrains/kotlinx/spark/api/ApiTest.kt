@@ -18,25 +18,24 @@ package org.jetbrains.kotlinx.spark.api/*-
  * =LICENSEEND=
  */
 import ch.tutteli.atrium.api.fluent.en_GB.*
-import ch.tutteli.atrium.domain.builders.migration.asExpect
-import ch.tutteli.atrium.verbs.expect
+import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
-import org.apache.spark.sql.streaming.GroupState
-import org.apache.spark.sql.streaming.GroupStateTimeout
-import scala.collection.Seq
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.TypedColumn
 import org.apache.spark.sql.functions.*
+import org.apache.spark.sql.streaming.GroupState
+import org.apache.spark.sql.streaming.GroupStateTimeout
 import scala.Product
 import scala.Tuple1
 import scala.Tuple2
 import scala.Tuple3
+import scala.collection.Seq
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.LocalDate
-import kotlin.reflect.KProperty1
+import kotlin.collections.Iterator
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
 import scala.collection.mutable.Map as ScalaMutableMap
@@ -48,33 +47,37 @@ class ApiTest : ShouldSpec({
                 val ll1 = LonLat(1.0, 2.0)
                 val ll2 = LonLat(3.0, 4.0)
                 val lonlats = dsOf(ll1, ll2).collectAsList()
-                expect(lonlats).asExpect().contains.inAnyOrder.only.values(ll1.copy(), ll2.copy())
+                expect(lonlats).contains.inAnyOrder.only.values(ll1.copy(), ll2.copy())
             }
             should("contain all generic primitives with complex schema") {
                 val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
                 val primitives2 = c(2, 2.0, 2.toFloat(), 2.toByte(), LocalDate.now().plusDays(1), false)
                 val tuples = dsOf(primitives, primitives2).collectAsList()
-                expect(tuples).asExpect().contains.inAnyOrder.only.values(primitives, primitives2)
+                expect(tuples).contains.inAnyOrder.only.values(primitives, primitives2)
             }
             should("contain all generic primitives with complex nullable schema") {
                 val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
                 val nulls = c(null, null, null, null, null, null)
                 val tuples = dsOf(primitives, nulls).collectAsList()
-                expect(tuples).asExpect().contains.inAnyOrder.only.values(primitives, nulls)
+                expect(tuples).contains.inAnyOrder.only.values(primitives, nulls)
             }
             should("handle cached operations") {
                 val result = dsOf(1, 2, 3, 4, 5)
-                        .map { it to (it + 2) }
-                        .withCached {
-                            expect(collectAsList()).asExpect().contains.inAnyOrder.only.values(1 to 3, 2 to 4, 3 to 5, 4 to 6, 5 to 7)
+                    .map { it to (it + 2) }
+                    .withCached {
+                        expect(collectAsList()).contains.inAnyOrder.only.values(1 to 3,
+                            2 to 4,
+                            3 to 5,
+                            4 to 6,
+                            5 to 7)
 
-                            val next = filter { it.first % 2 == 0 }
-                            expect(next.collectAsList()).asExpect().contains.inAnyOrder.only.values(2 to 4, 4 to 6)
-                            next
-                        }
-                        .map { c(it.first, it.second, (it.first + it.second) * 2) }
-                        .collectAsList()
-                expect(result).asExpect().contains.inOrder.only.values(c(2, 4, 12), c(4, 6, 20))
+                        val next = filter { it.first % 2 == 0 }
+                        expect(next.collectAsList()).contains.inAnyOrder.only.values(2 to 4, 4 to 6)
+                        next
+                    }
+                    .map { c(it.first, it.second, (it.first + it.second) * 2) }
+                    .collectAsList()
+                expect(result).contains.inOrder.only.values(c(2, 4, 12), c(4, 6, 20))
             }
             should("handle join operations") {
                 data class Left(val id: Int, val name: String)
@@ -84,34 +87,34 @@ class ApiTest : ShouldSpec({
                 val first = dsOf(Left(1, "a"), Left(2, "b"))
                 val second = dsOf(Right(1, 100), Right(3, 300))
                 val result = first
-                        .leftJoin(second, first.col("id").eq(second.col("id")))
-                        .map { c(it.first.id, it.first.name, it.second?.value) }
-                        .collectAsList()
-                expect(result).asExpect().contains.inOrder.only.values(c(1, "a", 100), c(2, "b", null))
+                    .leftJoin(second, first.col("id").eq(second.col("id")))
+                    .map { c(it.first.id, it.first.name, it.second?.value) }
+                    .collectAsList()
+                expect(result).contains.inOrder.only.values(c(1, "a", 100), c(2, "b", null))
             }
             should("handle map operations") {
                 expect(
-                        dsOf(listOf(1, 2, 3, 4), listOf(3, 4, 5, 6))
-                                .flatMap { it.iterator() }
-                                .map { it + 4 }
-                                .filter { it < 10 }
-                                .collectAsList()
+                    dsOf(listOf(1, 2, 3, 4), listOf(3, 4, 5, 6))
+                        .flatMap { it.iterator() }
+                        .map { it + 4 }
+                        .filter { it < 10 }
+                        .collectAsList()
                 )
-                        .asExpect()
-                        .contains
-                        .inAnyOrder
-                        .only
-                        .values(5, 6, 7, 8, 7, 8, 9)
+                    .contains
+                    .inAnyOrder
+                    .only
+                    .values(5, 6, 7, 8, 7, 8, 9)
             }
             should("hadle strings converted to lists") {
                 data class Movie(val id: Long, val genres: String)
                 data class MovieExpanded(val id: Long, val genres: List<String>)
 
                 val comedies = listOf(Movie(1, "Comedy|Romance"), Movie(2, "Horror|Action")).toDS()
-                        .map { MovieExpanded(it.id, it.genres.split("|").toList()) }
-                        .filter { it.genres.contains("Comedy") }
-                        .collectAsList()
-                expect(comedies).asExpect().contains.inAnyOrder.only.values(MovieExpanded(1, listOf("Comedy", "Romance")))
+                    .map { MovieExpanded(it.id, it.genres.split("|").toList()) }
+                    .filter { it.genres.contains("Comedy") }
+                    .collectAsList()
+                expect(comedies).contains.inAnyOrder.only.values(MovieExpanded(1,
+                    listOf("Comedy", "Romance")))
             }
             should("handle strings converted to arrays") {
                 data class Movie(val id: Long, val genres: String)
@@ -131,27 +134,28 @@ class ApiTest : ShouldSpec({
                 }
 
                 val comedies = listOf(Movie(1, "Comedy|Romance"), Movie(2, "Horror|Action")).toDS()
-                        .map { MovieExpanded(it.id, it.genres.split("|").toTypedArray()) }
-                        .filter { it.genres.contains("Comedy") }
-                        .collectAsList()
-                expect(comedies).asExpect().contains.inAnyOrder.only.values(MovieExpanded(1, arrayOf("Comedy", "Romance")))
+                    .map { MovieExpanded(it.id, it.genres.split("|").toTypedArray()) }
+                    .filter { it.genres.contains("Comedy") }
+                    .collectAsList()
+                expect(comedies).contains.inAnyOrder.only.values(MovieExpanded(1,
+                    arrayOf("Comedy", "Romance")))
             }
             should("!handle arrays of generics") {
 
                 val result = listOf(Test(1, arrayOf(5.1 to 6, 6.1 to 7)))
-                        .toDS()
-                        .map { it.id to it.data.first { liEl -> liEl.first < 6 } }
-                        .map { it.second }
-                        .collectAsList()
-                expect(result).asExpect().contains.inOrder.only.values(5.1 to 6)
+                    .toDS()
+                    .map { it.id to it.data.first { liEl -> liEl.first < 6 } }
+                    .map { it.second }
+                    .collectAsList()
+                expect(result).contains.inOrder.only.values(5.1 to 6)
             }
             should("handle primitive arrays") {
                 val result = listOf(arrayOf(1, 2, 3, 4))
-                        .toDS()
-                        .map { it.map { ai -> ai + 1 } }
-                        .collectAsList()
-                        .flatten()
-                expect(result).asExpect().contains.inOrder.only.values(2, 3, 4, 5)
+                    .toDS()
+                    .map { it.map { ai -> ai + 1 } }
+                    .collectAsList()
+                    .flatten()
+                expect(result).contains.inOrder.only.values(2, 3, 4, 5)
 
             }
             @OptIn(ExperimentalStdlibApi::class)
@@ -174,7 +178,7 @@ class ApiTest : ShouldSpec({
                     }
                     .collectAsList()
 
-                expect(result).asExpect().contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
+                expect(result).contains.inOrder.only.values(3.0, 5.0, 7.0, 9.0, 11.0)
             }
             should("Handle JavaConversions in Kotlin") {
                 // Test the iterator conversion
@@ -444,7 +448,7 @@ class ApiTest : ShouldSpec({
                 )
                 dataset.forEachPartition {
                     it.forEach {
-                        it.b shouldBe  1
+                        it.b shouldBe 1
                     }
                 }
             }
@@ -454,7 +458,7 @@ class ApiTest : ShouldSpec({
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
                     .groupByKey { it.b }
-                    .reduceGroups(func = { a, b -> SomeClass(a.a + b.a, a.b) })
+                    .reduceGroupsK { a, b -> SomeClass(a.a + b.a, a.b) }
                     .takeValues()
 
                 dataset.count() shouldBe 1
@@ -469,6 +473,49 @@ class ApiTest : ShouldSpec({
 
                 dataset.sort(SomeClass::a, SomeClass::b)
                 dataset.takeAsList(1).first().b shouldBe 2
+            }
+            should("Have Kotlin ready functions in place of overload ambiguity") {
+                val dataset: Pair<Int, SomeClass> = dsOf(
+                    SomeClass(intArrayOf(1, 2, 3), 1),
+                    SomeClass(intArrayOf(4, 3, 2), 1),
+                )
+                    .groupByKey { it: SomeClass -> it.b }
+                    .reduceGroupsK { v1: SomeClass, v2: SomeClass -> v1 }
+                    .filter { it: Pair<Int, SomeClass> -> true } // not sure why this does work, but reduce doesn't
+                    .reduceK { v1: Pair<Int, SomeClass>, v2: Pair<Int, SomeClass> -> v1 }
+
+                dataset.second.a shouldBe intArrayOf(1, 2, 3)
+            }
+            should("Generate encoder correctly with complex enum data class") {
+                val dataset: Dataset<ComplexEnumDataClass> =
+                    dsOf(
+                        ComplexEnumDataClass(
+                            1,
+                            "string",
+                            listOf("1", "2"),
+                            SomeEnum.A,
+                            SomeOtherEnum.C,
+                            listOf(SomeEnum.A, SomeEnum.B),
+                            listOf(SomeOtherEnum.C, SomeOtherEnum.D),
+                            arrayOf(SomeEnum.A, SomeEnum.B),
+                            arrayOf(SomeOtherEnum.C, SomeOtherEnum.D),
+                            mapOf(SomeEnum.A to SomeOtherEnum.C)
+                        )
+                    )
+
+                dataset.show(false)
+                val first = dataset.takeAsList(1).first()
+
+                first.int shouldBe 1
+                first.string shouldBe "string"
+                first.strings shouldBe listOf("1", "2")
+                first.someEnum shouldBe SomeEnum.A
+                first.someOtherEnum shouldBe SomeOtherEnum.C
+                first.someEnums shouldBe listOf(SomeEnum.A, SomeEnum.B)
+                first.someOtherEnums shouldBe listOf(SomeOtherEnum.C, SomeOtherEnum.D)
+                first.someEnumArray shouldBe arrayOf(SomeEnum.A, SomeEnum.B)
+                first.someOtherArray shouldBe arrayOf(SomeOtherEnum.C, SomeOtherEnum.D)
+                first.enumMap shouldBe mapOf(SomeEnum.A to SomeOtherEnum.C)
             }
         }
     }
@@ -502,3 +549,20 @@ data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>) {
 data class SomeClass(val a: IntArray, val b: Int) : Serializable
 
 data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable
+
+enum class SomeEnum { A, B }
+
+enum class SomeOtherEnum(val value: Int) { C(1), D(2) }
+
+data class ComplexEnumDataClass(
+    val int: Int,
+    val string: String,
+    val strings: List<String>,
+    val someEnum: SomeEnum,
+    val someOtherEnum: SomeOtherEnum,
+    val someEnums: List<SomeEnum>,
+    val someOtherEnums: List<SomeOtherEnum>,
+    val someEnumArray: Array<SomeEnum>,
+    val someOtherArray: Array<SomeOtherEnum>,
+    val enumMap: Map<SomeEnum, SomeOtherEnum>,
+)

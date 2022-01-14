@@ -32,8 +32,9 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
-import org.jetbrains.kotinx.spark.extensions.KSparkExtensions
-import scala.*
+import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
+import scala.Product
+import scala.Tuple2
 import scala.reflect.ClassTag
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
@@ -41,29 +42,60 @@ import java.sql.Date
 import java.sql.Timestamp
 import java.time.Instant
 import java.time.LocalDate
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.Any
+import kotlin.Array
+import kotlin.Boolean
+import kotlin.BooleanArray
+import kotlin.Byte
+import kotlin.ByteArray
+import kotlin.Deprecated
+import kotlin.DeprecationLevel
+import kotlin.Double
+import kotlin.DoubleArray
+import kotlin.ExperimentalStdlibApi
+import kotlin.Float
+import kotlin.FloatArray
+import kotlin.IllegalArgumentException
+import kotlin.Int
+import kotlin.IntArray
+import kotlin.Long
+import kotlin.LongArray
+import kotlin.OptIn
+import kotlin.Pair
+import kotlin.ReplaceWith
+import kotlin.Short
+import kotlin.ShortArray
+import kotlin.String
+import kotlin.Suppress
+import kotlin.Triple
+import kotlin.Unit
+import kotlin.also
+import kotlin.apply
+import kotlin.invoke
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.jvm.jvmErasure
+import kotlin.to
 
 @JvmField
 val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
-        Boolean::class to BOOLEAN(),
-        Byte::class to BYTE(),
-        Short::class to SHORT(),
-        Int::class to INT(),
-        Long::class to LONG(),
-        Float::class to FLOAT(),
-        Double::class to DOUBLE(),
-        String::class to STRING(),
-        BigDecimal::class to DECIMAL(),
-        Date::class to DATE(),
-        LocalDate::class to LOCALDATE(), // 3.0 only
-        Timestamp::class to TIMESTAMP(),
-        Instant::class to INSTANT(), // 3.0 only
-        ByteArray::class to BINARY()
+    Boolean::class to BOOLEAN(),
+    Byte::class to BYTE(),
+    Short::class to SHORT(),
+    Int::class to INT(),
+    Long::class to LONG(),
+    Float::class to FLOAT(),
+    Double::class to DOUBLE(),
+    String::class to STRING(),
+    BigDecimal::class to DECIMAL(),
+    Date::class to DATE(),
+    LocalDate::class to LOCALDATE(), // 3.0 only
+    Timestamp::class to TIMESTAMP(),
+    Instant::class to INSTANT(), // 3.0 only
+    ByteArray::class to BINARY()
 )
 
 
@@ -90,7 +122,9 @@ inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
  * @return `Broadcast` object, a read-only variable cached on each machine
  * @see broadcast
  */
-@Deprecated("You can now use `spark.broadcast()` instead.", ReplaceWith("spark.broadcast(value)"), DeprecationLevel.WARNING)
+@Deprecated("You can now use `spark.broadcast()` instead.",
+    ReplaceWith("spark.broadcast(value)"),
+    DeprecationLevel.WARNING)
 inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
     broadcast(value, encoder<T>().clsTag())
 } catch (e: ClassNotFoundException) {
@@ -101,19 +135,19 @@ inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
  * Utility method to create dataset from list
  */
 inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
-        createDataset(list, encoder<T>())
+    createDataset(list, encoder<T>())
 
 /**
  * Utility method to create dataset from list
  */
 inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
-        createDataset(listOf(*t), encoder<T>())
+    createDataset(listOf(*t), encoder<T>())
 
 /**
  * Utility method to create dataset from list
  */
 inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
-        spark.createDataset(this, encoder<T>())
+    spark.createDataset(this, encoder<T>())
 
 /**
  * Main method of API, which gives you seamless integration with Spark:
@@ -143,38 +177,48 @@ private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
-            if (schema is DataTypeWithClass) KotlinReflection.serializerFor(kClass.java, schema) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
-            if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java, schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
-            ClassTag.apply(kClass.java)
+        if (schema is DataTypeWithClass) KotlinReflection.serializerFor(kClass.java,
+            schema) else KotlinReflection.serializerForType(KotlinReflection.getType(kClass.java)),
+        if (schema is DataTypeWithClass) KotlinReflection.deserializerFor(kClass.java,
+            schema) else KotlinReflection.deserializerForType(KotlinReflection.getType(kClass.java)),
+        ClassTag.apply(kClass.java)
     )
 }
 
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
-        map(MapFunction(func), encoder<R>())
+    map(MapFunction(func), encoder<R>())
 
 inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>): Dataset<R> =
-        flatMap(func, encoder<R>())
+    flatMap(func, encoder<R>())
 
 inline fun <reified T, I : Iterable<T>> Dataset<I>.flatten(): Dataset<T> =
-        flatMap(FlatMapFunction { it.iterator() }, encoder<T>())
+    flatMap(FlatMapFunction { it.iterator() }, encoder<T>())
 
 inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyValueGroupedDataset<R, T> =
-        groupByKey(MapFunction(func), encoder<R>())
+    groupByKey(MapFunction(func), encoder<R>())
 
 inline fun <T, reified R> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
-        mapPartitions(func, encoder<R>())
+    mapPartitions(func, encoder<R>())
 
 fun <T> Dataset<T>.filterNotNull() = filter { it != null }
 
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapValues(noinline func: (VALUE) -> R): KeyValueGroupedDataset<KEY, R> =
-        mapValues(MapFunction(func), encoder<R>())
+    mapValues(MapFunction(func), encoder<R>())
 
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(noinline func: (KEY, Iterator<VALUE>) -> R): Dataset<R> =
-        mapGroups(MapGroupsFunction(func), encoder<R>())
+    mapGroups(MapGroupsFunction(func), encoder<R>())
 
-inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroups(noinline func: (VALUE, VALUE) -> VALUE): Dataset<Pair<KEY, VALUE>> =
-        reduceGroups(ReduceFunction(func))
-                .map { t -> t._1 to t._2 }
+inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroupsK(noinline func: (VALUE, VALUE) -> VALUE): Dataset<Pair<KEY, VALUE>> =
+    reduceGroups(ReduceFunction(func))
+        .map { t -> t._1 to t._2 }
+
+/**
+ * (Kotlin-specific)
+ * Reduces the elements of this Dataset using the specified binary function. The given `func`
+ * must be commutative and associative or the result may be non-deterministic.
+ */
+inline fun <reified T> Dataset<T>.reduceK(noinline func: (T, T) -> T): T =
+    reduce(ReduceFunction(func))
 
 @JvmName("takeKeysTuple2")
 inline fun <reified T1, T2> Dataset<Tuple2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1() }
@@ -194,7 +238,7 @@ inline fun <T1, reified T2> Dataset<Arity2<T1, T2>>.takeValues(): Dataset<T2> = 
 
 
 inline fun <K, V, reified U> KeyValueGroupedDataset<K, V>.flatMapGroups(
-    noinline func: (key: K, values: Iterator<V>) -> Iterator<U>
+    noinline func: (key: K, values: Iterator<V>) -> Iterator<U>,
 ): Dataset<U> = flatMapGroups(
     FlatMapGroupsFunction(func),
     encoder<U>()
@@ -207,7 +251,7 @@ operator fun <S> GroupState<S>.setValue(thisRef: Any?, property: KProperty<*>, v
 
 
 inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWithState(
-    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U
+    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U,
 ): Dataset<U> = mapGroupsWithState(
     MapGroupsWithStateFunction(func),
     encoder<S>(),
@@ -216,7 +260,7 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
 
 inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWithState(
     timeoutConf: GroupStateTimeout,
-    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U
+    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U,
 ): Dataset<U> = mapGroupsWithState(
     MapGroupsWithStateFunction(func),
     encoder<S>(),
@@ -227,7 +271,7 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
 inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.flatMapGroupsWithState(
     outputMode: OutputMode,
     timeoutConf: GroupStateTimeout,
-    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> Iterator<U>
+    noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> Iterator<U>,
 ): Dataset<U> = flatMapGroupsWithState(
     FlatMapGroupsWithStateFunction(func),
     outputMode,
@@ -238,7 +282,7 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.flatMapGrou
 
 inline fun <K, V, U, reified R> KeyValueGroupedDataset<K, V>.cogroup(
     other: KeyValueGroupedDataset<K, U>,
-    noinline func: (key: K, left: Iterator<V>, right: Iterator<U>) -> Iterator<R>
+    noinline func: (key: K, left: Iterator<V>, right: Iterator<U>) -> Iterator<R>,
 ): Dataset<R> = cogroup(
     other,
     CoGroupFunction(func),
@@ -251,7 +295,8 @@ inline fun <reified R> Dataset<*>.to(): Dataset<R> = `as`(encoder<R>())
 
 inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
 
-inline fun <reified T> Dataset<T>.forEachPartition(noinline func: (Iterator<T>) -> Unit) = foreachPartition(ForeachPartitionFunction(func))
+inline fun <reified T> Dataset<T>.forEachPartition(noinline func: (Iterator<T>) -> Unit) =
+    foreachPartition(ForeachPartitionFunction(func))
 
 /**
  * It's hard to call `Dataset.debugCodegen` from kotlin, so here is utility for that
@@ -655,7 +700,10 @@ inline fun <reified L, reified R> Dataset<L>.innerJoin(right: Dataset<R>, col: C
  *
  * @return dataset of [Pair] where both elements are forced nullable
  */
-inline fun <reified L : Any?, reified R : Any?> Dataset<L>.fullJoin(right: Dataset<R>, col: Column): Dataset<Pair<L?, R?>> {
+inline fun <reified L : Any?, reified R : Any?> Dataset<L>.fullJoin(
+    right: Dataset<R>,
+    col: Column,
+): Dataset<Pair<L?, R?>> {
     return joinWith(right, col, "full").map { it._1 to it._2 }
 }
 
@@ -685,7 +733,10 @@ inline fun <reified T> Dataset<T>.sort(columns: (Dataset<T>) -> Array<Column>) =
  * @param executeOnCached Block which should be executed on cached dataset.
  * @return result of block execution for further usage. It may be anything including source or new dataset
  */
-inline fun <reified T, R> Dataset<T>.withCached(blockingUnpersist: Boolean = false, executeOnCached: Dataset<T>.() -> R): R {
+inline fun <reified T, R> Dataset<T>.withCached(
+    blockingUnpersist: Boolean = false,
+    executeOnCached: Dataset<T>.() -> R,
+): R {
     val cached = this.cache()
     return cached.executeOnCached().also { cached.unpersist(blockingUnpersist) }
 }
@@ -710,7 +761,8 @@ operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
  */
 
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> = col(column.name).`as`<U>() as TypedColumn<T, U>
+inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
+    col(column.name).`as`<U>() as TypedColumn<T, U>
 
 /**
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
@@ -721,7 +773,8 @@ inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): Type
  * TODO: change example to [Pair]s when merged
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> = functions.col(column.name).`as`<U>() as TypedColumn<T, U>
+inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
+    functions.col(column.name).`as`<U>() as TypedColumn<T, U>
 
 /**
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
@@ -795,7 +848,9 @@ inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U
 @OptIn(ExperimentalStdlibApi::class)
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]
-    if (primitiveSchema != null) return KSimpleTypeWrapper(primitiveSchema, (type.classifier!! as KClass<*>).java, type.isMarkedNullable)
+    if (primitiveSchema != null) return KSimpleTypeWrapper(primitiveSchema,
+        (type.classifier!! as KClass<*>).java,
+        type.isMarkedNullable)
     val klass = type.classifier as? KClass<*> ?: throw IllegalArgumentException("Unsupported type $type")
     val args = type.arguments
 
@@ -803,6 +858,9 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
         it.first.name to it.second.type!!
     }.toMap())
     return when {
+        klass.isSubclassOf(Enum::class) -> {
+            KSimpleTypeWrapper(DataTypes.StringType, klass.java, type.isMarkedNullable)
+        }
         klass.isSubclassOf(Iterable::class) || klass.java.isArray -> {
             val listParam = if (klass.java.isArray) {
                 when (klass) {
@@ -817,36 +875,43 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                 }
             } else types.getValue(klass.typeParameters[0].name)
             KComplexTypeWrapper(
-                    DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
-                    klass.java,
-                    listParam.isMarkedNullable
+                DataTypes.createArrayType(schema(listParam, types), listParam.isMarkedNullable),
+                klass.java,
+                listParam.isMarkedNullable
             )
         }
         klass.isSubclassOf(Map::class) -> {
             val mapKeyParam = types.getValue(klass.typeParameters[0].name)
             val mapValueParam = types.getValue(klass.typeParameters[1].name)
             KComplexTypeWrapper(
-                    DataTypes.createMapType(
-                            schema(mapKeyParam, types),
-                            schema(mapValueParam, types),
-                            true
-                    ),
-                    klass.java,
-                    mapValueParam.isMarkedNullable
+                DataTypes.createMapType(
+                    schema(mapKeyParam, types),
+                    schema(mapValueParam, types),
+                    true
+                ),
+                klass.java,
+                mapValueParam.isMarkedNullable
             )
         }
         klass.isData -> {
             val structType = StructType(
-                    klass
-                            .primaryConstructor!!
-                            .parameters
-                            .filter { it.findAnnotation<Transient>() == null }
-                            .map {
-                                val projectedType = types[it.type.toString()] ?: it.type
-                                val propertyDescriptor = PropertyDescriptor(it.name, klass.java, "is" + it.name?.capitalize(), null)
-                                KStructField(propertyDescriptor.readMethod.name, StructField(it.name, schema(projectedType, types), projectedType.isMarkedNullable, Metadata.empty()))
-                            }
-                            .toTypedArray()
+                klass
+                    .primaryConstructor!!
+                    .parameters
+                    .filter { it.findAnnotation<Transient>() == null }
+                    .map {
+                        val projectedType = types[it.type.toString()] ?: it.type
+                        val propertyDescriptor = PropertyDescriptor(it.name,
+                            klass.java,
+                            "is" + it.name?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() },
+                            null)
+                        KStructField(propertyDescriptor.readMethod.name,
+                            StructField(it.name,
+                                schema(projectedType, types),
+                                projectedType.isMarkedNullable,
+                                Metadata.empty()))
+                    }
+                    .toTypedArray()
             )
             KDataTypeWrapper(structType, klass.java, true)
         }
@@ -858,7 +923,8 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             val structType = DataTypes.createStructType(
                 params.map { (fieldName, fieldType) ->
                     val dataType = schema(fieldType, types)
-                    KStructField(fieldName, StructField(fieldName, dataType, fieldType.isMarkedNullable, Metadata.empty()))
+                    KStructField(fieldName,
+                        StructField(fieldName, dataType, fieldType.isMarkedNullable, Metadata.empty()))
                 }.toTypedArray()
             )
 
@@ -877,18 +943,18 @@ enum class SparkLogLevel {
 }
 
 private val knownDataTypes = mapOf(
-        Byte::class to DataTypes.ByteType,
-        Short::class to DataTypes.ShortType,
-        Int::class to DataTypes.IntegerType,
-        Long::class to DataTypes.LongType,
-        Boolean::class to DataTypes.BooleanType,
-        Float::class to DataTypes.FloatType,
-        Double::class to DataTypes.DoubleType,
-        String::class to DataTypes.StringType,
-        LocalDate::class to `DateType$`.`MODULE$`,
-        Date::class to `DateType$`.`MODULE$`,
-        Timestamp::class to `TimestampType$`.`MODULE$`,
-        Instant::class to `TimestampType$`.`MODULE$`
+    Byte::class to DataTypes.ByteType,
+    Short::class to DataTypes.ShortType,
+    Int::class to DataTypes.IntegerType,
+    Long::class to DataTypes.LongType,
+    Boolean::class to DataTypes.BooleanType,
+    Float::class to DataTypes.FloatType,
+    Double::class to DataTypes.DoubleType,
+    String::class to DataTypes.StringType,
+    LocalDate::class to `DateType$`.`MODULE$`,
+    Date::class to `DateType$`.`MODULE$`,
+    Timestamp::class to `TimestampType$`.`MODULE$`,
+    Instant::class to `TimestampType$`.`MODULE$`
 )
 
 private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {
@@ -900,7 +966,7 @@ private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<S
 class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
     private val values = ConcurrentHashMap<T, R>()
     override fun invoke(x: T) =
-            values.getOrPut(x, { f(x) })
+        values.getOrPut(x, { f(x) })
 }
 
 private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)

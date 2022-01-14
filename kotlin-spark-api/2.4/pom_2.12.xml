@@ -9,7 +9,7 @@
   <parent>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
     <artifactId>kotlin-spark-api-parent_2.12</artifactId>
-    <version>1.0.0-preview3-SNAPSHOT</version>
+    <version>1.0.3-SNAPSHOT</version>
     <relativePath>../../pom_2.12.xml</relativePath>
   </parent>
   <packaging>jar</packaging>
@@ -48,9 +48,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.kotest</groupId>
-      <artifactId>kotest-extensions-allure-jvm</artifactId>
-      <version>${kotest.version}</version>
+      <groupId>io.kotest.extensions</groupId>
+      <artifactId>kotest-extensions-allure</artifactId>
+      <version>${kotest-extension-allure.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

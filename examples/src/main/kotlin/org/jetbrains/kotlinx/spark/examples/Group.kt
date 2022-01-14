@@ -1,8 +1,8 @@
 /*-
  * =LICENSE=
- * Kotlin Spark API: Examples
+ * Kotlin Spark API: Examples for Spark 2.4+ (Scala 2.11)
  * ----------
- * Copyright (C) 2019 - 2020 JetBrains
+ * Copyright (C) 2019 - 2021 JetBrains
  * ----------
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,23 +21,11 @@ package org.jetbrains.kotlinx.spark.examples
 
 import org.jetbrains.kotlinx.spark.api.*
 
-
-data class Left(val id: Int, val name: String)
-
-data class Right(val id: Int, val value: Int)
-
-
 fun main() {
-    withSpark(logLevel = SparkLogLevel.INFO) {
-        val first = dsOf(Left(1, "a"), Left(2, "b"))
-        val second = dsOf(Right(1, 100), Right(3, 300))
-        first
-            .leftJoin(second, first.col("id").eq(second.col("id")))
-            .debugCodegen()
-            .also { it.show() }
-            .map { c(it.first.id, it.first.name, it.second?.value) }
+    withSpark {
+        dsOf(c(1, "a"), c(1, "b"), c(2, "c"))
+            .groupByKey { it._1 }
+            .reduceGroupsK { a, b -> c(a._1 + b._1, a._2 + b._2) }
             .show()
-
     }
 }
-

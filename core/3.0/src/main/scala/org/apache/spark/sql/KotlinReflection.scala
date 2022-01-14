@@ -336,6 +336,10 @@ object KotlinReflection extends KotlinReflection {
           mirror.runtimeClass(t.typeSymbol.asClass)
         )
 
+      case t if isSubtype(t, localTypeOf[java.lang.Enum[_]]) =>
+        createDeserializerForTypesSupportValueOf(
+          createDeserializerForString(path, returnNullable = false), Class.forName(t.toString))
+
       case t if t.typeSymbol.annotations.exists(_.tree.tpe =:= typeOf[SQLUserDefinedType]) =>
         val udt = getClassFromType(t).getAnnotation(classOf[SQLUserDefinedType]).udt().
           getConstructor().newInstance()
@@ -441,28 +445,28 @@ object KotlinReflection extends KotlinReflection {
 
                 UnresolvedMapObjects(mapFunction, path, customCollectionCls = Some(t.cls))
 
-              case StructType(elementType: Array[StructField])  =>
+              case StructType(elementType: Array[StructField]) =>
                 val cls = t.cls
 
                 val arguments = elementType.map { field =>
-                    val dataType = field.dataType.asInstanceOf[DataTypeWithClass]
-                    val nullable = dataType.nullable
-                    val clsName = getClassNameFromType(getType(dataType.cls))
-                    val newTypePath = walkedTypePath.recordField(clsName, field.name)
+                  val dataType = field.dataType.asInstanceOf[DataTypeWithClass]
+                  val nullable = dataType.nullable
+                  val clsName = getClassNameFromType(getType(dataType.cls))
+                  val newTypePath = walkedTypePath.recordField(clsName, field.name)
 
-                    // For tuples, we based grab the inner fields by ordinal instead of name.
-                    val newPath = deserializerFor(
-                      getType(dataType.cls),
-                      addToPath(path, field.name, dataType.dt, newTypePath),
-                      newTypePath,
-                      Some(dataType).filter(_.isInstanceOf[ComplexWrapper])
-                    )
-                    expressionWithNullSafety(
-                      newPath,
-                      nullable = nullable,
-                      newTypePath
-                    )
-                  }
+                  // For tuples, we based grab the inner fields by ordinal instead of name.
+                  val newPath = deserializerFor(
+                    getType(dataType.cls),
+                    addToPath(path, field.name, dataType.dt, newTypePath),
+                    newTypePath,
+                    Some(dataType).filter(_.isInstanceOf[ComplexWrapper])
+                  )
+                  expressionWithNullSafety(
+                    newPath,
+                    nullable = nullable,
+                    newTypePath
+                  )
+                }
                 val newInstance = NewInstance(cls, arguments, ObjectType(cls), propagateNull = false)
 
                 org.apache.spark.sql.catalyst.expressions.If(
@@ -612,7 +616,7 @@ object KotlinReflection extends KotlinReflection {
         case _: StringType =>
           val clsName = getClassNameFromType(typeOf[String])
           val newPath = walkedTypePath.recordArray(clsName)
-          createSerializerForMapObjects(input, ObjectType(classOf[String]),
+          createSerializerForMapObjects(input, ObjectType(Class.forName(getClassNameFromType(elementType))),
             serializerFor(_, elementType, newPath, seenTypeSet))
 
 
@@ -717,6 +721,10 @@ object KotlinReflection extends KotlinReflection {
       case t if isSubtype(t, localTypeOf[Byte]) => createSerializerForByte(inputObject)
       case t if isSubtype(t, localTypeOf[java.lang.Boolean]) => createSerializerForBoolean(inputObject)
       case t if isSubtype(t, localTypeOf[Boolean]) => createSerializerForBoolean(inputObject)
+
+      case t if isSubtype(t, localTypeOf[java.lang.Enum[_]]) =>
+        createSerializerForString(
+          Invoke(inputObject, "name", ObjectType(classOf[String]), returnNullable = false))
 
       case t if t.typeSymbol.annotations.exists(_.tree.tpe =:= typeOf[SQLUserDefinedType]) =>
         val udt = getClassFromType(t)

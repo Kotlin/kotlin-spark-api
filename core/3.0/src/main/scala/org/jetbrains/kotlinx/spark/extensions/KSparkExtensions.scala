@@ -17,13 +17,12 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-package org.jetbrains.kotinx.spark.extensions
-
-import java.util
+package org.jetbrains.kotlinx.spark.extensions
 
 import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 
+import java.util
 import scala.collection.JavaConverters
 
 object KSparkExtensions {
