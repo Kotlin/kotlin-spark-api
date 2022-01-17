@@ -15,8 +15,6 @@
         <atrium.version>0.16.0</atrium.version>
         <kotest.version>4.6.0</kotest.version>
         <kotest-extension-allure.version>1.0.1</kotest-extension-allure.version>
-        <spark2-scala-2.11.version>2.4.0</spark2-scala-2.11.version>
-        <spark2-scala-2.12.version>2.4.1</spark2-scala-2.12.version>
         <spark3.version>3.2.0</spark3.version>
 
         <!-- Plugin versions -->
@@ -231,7 +229,7 @@
                     <localCheckout>true</localCheckout>
                     <pushChanges>false</pushChanges>
                     <mavenExecutorId>forked-path</mavenExecutorId>
-                    <releaseProfiles>scala-2.11,scala-2.12,release-sign</releaseProfiles>
+                    <releaseProfiles>scala-2.12,release-sign</releaseProfiles>
                 </configuration>
             </plugin>
             <plugin>
@@ -295,15 +293,6 @@
     </distributionManagement>
 
     <profiles>
-        <profile>
-            <id>scala-2.11</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <modules>
-                <module>pom_2.11.xml</module>
-            </modules>
-        </profile>
         <profile>
             <id>scala-2.12</id>
             <activation>
