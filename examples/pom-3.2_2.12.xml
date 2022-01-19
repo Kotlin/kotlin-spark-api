@@ -3,37 +3,51 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <name>Kotlin Spark API: Examples for Spark 2.4+ (Scala 2.11)</name>
+  <name>Kotlin Spark API: Examples for Spark 3.2+ (Scala 2.12)</name>
   <description>Example of usage</description>
-  <artifactId>examples-2.4_2.11</artifactId>
+  <artifactId>examples-3.2_2.12</artifactId>
   <parent>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
-    <artifactId>kotlin-spark-api-parent_2.11</artifactId>
+    <artifactId>kotlin-spark-api-parent_2.12</artifactId>
     <version>1.0.3-SNAPSHOT</version>
-    <relativePath>../pom_2.11.xml</relativePath>
+    <relativePath>../pom_2.12.xml</relativePath>
   </parent>
 
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.kotlinx.spark</groupId>
-      <artifactId>kotlin-spark-api-2.4_${scala.compat.version}</artifactId>
+      <artifactId>kotlin-spark-api-3.2</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-sql_${scala.compat.version}</artifactId>
-      <version>${spark2-scala-2.11.version}</version>
+      <version>${spark3.version}</version>
     </dependency>
   </dependencies>
 
   <build>
     <sourceDirectory>src/main/kotlin</sourceDirectory>
     <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-    <directory>target/2.4/${scala.compat.version}</directory>
+    <directory>target/3.2/${scala.compat.version}</directory>
     <plugins>
       <plugin>
         <groupId>org.jetbrains.kotlin</groupId>
         <artifactId>kotlin-maven-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>compile</id>
+            <goals>
+              <goal>compile</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>test-compile</id>
+            <goals>
+              <goal>test-compile</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

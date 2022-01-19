@@ -19,7 +19,9 @@
  */
 package org.apache.spark.sql
 
+import org.apache.spark.sql.catalyst.analysis.Resolver
 import org.apache.spark.sql.catalyst.expressions.{AttributeReference, Expression}
+import org.apache.spark.sql.catalyst.util.StringUtils
 import org.apache.spark.sql.types.{DataType, Metadata, StructField, StructType}
 
 
@@ -68,13 +70,17 @@ class KDataTypeWrapper(val dt: StructType
 
   override private[sql] def getFieldIndex(name: String) = dt.getFieldIndex(name)
 
+  private[sql] def findNestedField(fieldNames: Seq[String], includeCollections: Boolean, resolver: Resolver) = dt.findNestedField(fieldNames, includeCollections, resolver)
+
+  override private[sql] def buildFormattedString(prefix: String, stringConcat: StringUtils.StringConcat, maxDepth: Int): Unit = dt.buildFormattedString(prefix, stringConcat, maxDepth)
+
   override protected[sql] def toAttributes: Seq[AttributeReference] = dt.toAttributes
 
   override def treeString: String = dt.treeString
 
-  override def printTreeString(): Unit = dt.printTreeString()
+  override def treeString(maxDepth: Int): String = dt.treeString(maxDepth)
 
-  override private[sql] def buildFormattedString(prefix: String, builder: StringBuilder): Unit = dt.buildFormattedString(prefix, builder)
+  override def printTreeString(): Unit = dt.printTreeString()
 
   private[sql] override def jsonValue = dt.jsonValue
 
@@ -103,6 +109,8 @@ class KDataTypeWrapper(val dt: StructType
   private[spark] override def existsRecursively(f: DataType => Boolean) = dt.existsRecursively(f)
 
   override private[sql] lazy val interpretedOrdering = dt.interpretedOrdering
+
+  override def toString = s"KDataTypeWrapper(dt=$dt, cls=$cls, nullable=$nullable)"
 }
 
 case class KComplexTypeWrapper(dt: DataType, cls: Class[_], nullable: Boolean) extends DataType with ComplexWrapper {
@@ -171,9 +179,9 @@ case class KSimpleTypeWrapper(dt: DataType, cls: Class[_], nullable: Boolean) ex
 }
 
 class KStructField(val getterName: String, val delegate: StructField) extends StructField {
-  override private[sql] def buildFormattedString(prefix: String, builder: StringBuilder): Unit = delegate.buildFormattedString(prefix, builder)
+  override private[sql] def buildFormattedString(prefix: String, stringConcat: StringUtils.StringConcat, maxDepth: Int): Unit = delegate.buildFormattedString(prefix, stringConcat, maxDepth)
 
-  override def toString(): String = f"KStructField(${delegate.toString()})"
+  override def toString(): String = delegate.toString()
 
   override private[sql] def jsonValue = delegate.jsonValue
 
@@ -191,12 +199,13 @@ class KStructField(val getterName: String, val delegate: StructField) extends St
 
   override def productPrefix: String = delegate.productPrefix
 
+  override val dataType: DataType = delegate.dataType
+
   override def canEqual(that: Any): Boolean = delegate.canEqual(that)
 
-  override val dataType: DataType = delegate.dataType
   override val metadata: Metadata = delegate.metadata
-  override val nullable: Boolean = delegate.nullable
   override val name: String = delegate.name
+  override val nullable: Boolean = delegate.nullable
 }
 
 object helpme {

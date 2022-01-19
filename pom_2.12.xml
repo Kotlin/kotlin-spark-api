@@ -14,29 +14,21 @@
   <packaging>pom</packaging>
 
   <properties>
-    <scala.version>2.12.14</scala.version>
+    <scala.version>2.12.15</scala.version>
     <scala.compat.version>2.12</scala.compat.version>
   </properties>
 
   <modules>
-    <module>core/2.4/pom_2.12.xml</module>
-    <module>core/3.0/pom_2.12.xml</module>
-    <module>kotlin-spark-api/2.4/pom_2.12.xml</module>
-    <module>kotlin-spark-api/3.0/pom_2.12.xml</module>
-    <module>examples/pom-2.4_2.12.xml</module>
-    <module>examples/pom-3.0_2.12.xml</module>
+    <module>core/3.2/pom_2.12.xml</module>
+    <module>kotlin-spark-api/3.2/pom_2.12.xml</module>
+    <module>examples/pom-3.2_2.12.xml</module>
   </modules>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>core-2.4_${scala.compat.version}</artifactId>
-        <version>${project.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>core-3.0_${scala.compat.version}</artifactId>
+        <artifactId>core-3.2_${scala.compat.version}</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
