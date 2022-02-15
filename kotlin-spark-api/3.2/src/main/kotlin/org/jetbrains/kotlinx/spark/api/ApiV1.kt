@@ -904,8 +904,6 @@ operator fun Column.get(key: Any): Column = getItem(key)
 // TODO deprecate?
 fun lit(a: Any): Column = functions.lit(a)
 
-fun typedLit(literal: Any): Column = functions.lit(literal)
-
 /**
  * Provides a type hint about the expected return value of this column. This information can
  * be used by operations such as `select` on a [Dataset] to automatically convert the
@@ -1012,12 +1010,14 @@ inline fun <reified T, R> Dataset<T>.withCached(
 }
 
 /**
- * TODO
+ * Collects the dataset as list where each item has been mapped to type [T].
  */
 inline fun <reified T> Dataset<*>.toList(): List<T> = to<T>().collectAsList() as List<T>
+
+/**
+ * Collects the dataset as Array where each item has been mapped to type [T].
+ */
 inline fun <reified T> Dataset<*>.toArray(): Array<T> = to<T>().collect() as Array<T>
-//inline fun <reified T> Dataset<Row>.toList() = KSparkExtensions.collectAsList(to<T>())
-//inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Array<R>
 
 /**
  * Selects column based on the column name and returns it as a [Column].
