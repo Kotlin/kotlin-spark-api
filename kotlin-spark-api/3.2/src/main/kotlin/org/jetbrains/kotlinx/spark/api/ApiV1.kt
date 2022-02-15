@@ -482,13 +482,69 @@ inline fun <K, V, U, reified R> KeyValueGroupedDataset<K, V>.cogroup(
     encoder<R>()
 )
 
+/** DEPRECATED: Use [as] or [to] for this. */
+@Deprecated(
+    message = "Deprecated, since we already have `as`() and to().",
+    replaceWith = ReplaceWith("this.to<R>()"),
+    level = DeprecationLevel.ERROR,
+)
 inline fun <T, reified R> Dataset<T>.downcast(): Dataset<R> = `as`(encoder<R>())
+
+/**
+ * (Kotlin-specific)
+ * Returns a new Dataset where each record has been mapped on to the specified type. The
+ * method used to map columns depend on the type of [R]:
+ * - When [R] is a class, fields for the class will be mapped to columns of the same name
+ *   (case sensitivity is determined by [spark.sql.caseSensitive]).
+ * - When [R] is a tuple, the columns will be mapped by ordinal (i.e. the first column will
+ *   be assigned to `_1`).
+ * - When [R] is a primitive type (i.e. [String], [Int], etc.), then the first column of the
+ *   `DataFrame` will be used.
+ *
+ * If the schema of the Dataset does not match the desired [R] type, you can use [Dataset.select]/[selectTyped]
+ * along with [Dataset.alias] or [as]/[to] to rearrange or rename as required.
+ *
+ * Note that [as]/[to] only changes the view of the data that is passed into typed operations,
+ * such as [map], and does not eagerly project away any columns that are not present in
+ * the specified class.
+ *
+ * @see to as alias for [as]
+ */
 inline fun <reified R> Dataset<*>.`as`(): Dataset<R> = `as`(encoder<R>())
+
+/**
+ * (Kotlin-specific)
+ * Returns a new Dataset where each record has been mapped on to the specified type. The
+ * method used to map columns depend on the type of [R]:
+ * - When [R] is a class, fields for the class will be mapped to columns of the same name
+ *   (case sensitivity is determined by [spark.sql.caseSensitive]).
+ * - When [R] is a tuple, the columns will be mapped by ordinal (i.e. the first column will
+ *   be assigned to `_1`).
+ * - When [R] is a primitive type (i.e. [String], [Int], etc.), then the first column of the
+ *   `DataFrame` will be used.
+ *
+ * If the schema of the Dataset does not match the desired [R] type, you can use [Dataset.select]/[selectTyped]
+ * along with [Dataset.alias] or [as]/[to] to rearrange or rename as required.
+ *
+ * Note that [as]/[to] only changes the view of the data that is passed into typed operations,
+ * such as [map], and does not eagerly project away any columns that are not present in
+ * the specified class.
+ *
+ * @see as as alias for [to]
+ */
 inline fun <reified R> Dataset<*>.to(): Dataset<R> = `as`(encoder<R>())
 
-inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit) = foreach(ForeachFunction(func))
+/**
+ * (Kotlin-specific)
+ * Applies a function [func] to all rows.
+ */
+inline fun <reified T> Dataset<T>.forEach(noinline func: (T) -> Unit): Unit = foreach(ForeachFunction(func))
 
-inline fun <reified T> Dataset<T>.forEachPartition(noinline func: (Iterator<T>) -> Unit) =
+/**
+ * (Kotlin-specific)
+ * Runs [func] on each partition of this Dataset.
+ */
+inline fun <reified T> Dataset<T>.forEachPartition(noinline func: (Iterator<T>) -> Unit): Unit =
     foreachPartition(ForeachPartitionFunction(func))
 
 /**
