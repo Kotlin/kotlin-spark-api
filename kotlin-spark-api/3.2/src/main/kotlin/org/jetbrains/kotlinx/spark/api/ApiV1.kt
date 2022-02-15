@@ -288,23 +288,63 @@ inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduc
 inline fun <reified T> Dataset<T>.reduceK(noinline func: (T, T) -> T): T =
     reduce(ReduceFunction(func))
 
+/**
+ * (Kotlin-specific)
+ * Maps the Dataset to only retain the "keys" or [Tuple2._1] values.
+ */
 @JvmName("takeKeysTuple2")
 inline fun <reified T1, T2> Dataset<Tuple2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1() }
 
+/**
+ * (Kotlin-specific)
+ * Maps the Dataset to only retain the "keys" or [Pair.first] values.
+ */
 inline fun <reified T1, T2> Dataset<Pair<T1, T2>>.takeKeys(): Dataset<T1> = map { it.first }
 
+/**
+ * (Kotlin-specific)
+ * Maps the Dataset to only retain the "keys" or [Arity2._1] values.
+ */
 @JvmName("takeKeysArity2")
 inline fun <reified T1, T2> Dataset<Arity2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1 }
 
+/**
+ * (Kotlin-specific)
+ * Maps the Dataset to only retain the "values" or [Tuple2._2] values.
+ */
 @JvmName("takeValuesTuple2")
 inline fun <T1, reified T2> Dataset<Tuple2<T1, T2>>.takeValues(): Dataset<T2> = map { it._2() }
 
+/**
+ * (Kotlin-specific)
+ * Maps the Dataset to only retain the "values" or [Pair.second] values.
+ */
 inline fun <T1, reified T2> Dataset<Pair<T1, T2>>.takeValues(): Dataset<T2> = map { it.second }
 
+/**
+ * (Kotlin-specific)
+ * Maps the Dataset to only retain the "values" or [Arity2._2] values.
+ */
 @JvmName("takeValuesArity2")
 inline fun <T1, reified T2> Dataset<Arity2<T1, T2>>.takeValues(): Dataset<T2> = map { it._2 }
 
-
+/**
+ * (Kotlin-specific)
+ * Applies the given function to each group of data. For each unique group, the function will
+ * be passed the group key and an iterator that contains all the elements in the group. The
+ * function can return an iterator containing elements of an arbitrary type which will be returned
+ * as a new [Dataset].
+ *
+ * This function does not support partial aggregation, and as a result requires shuffling all
+ * the data in the [Dataset]. If an application intends to perform an aggregation over each
+ * key, it is best to use the reduce function or an
+ * [org.apache.spark.sql.expressions.Aggregator].
+ *
+ * Internally, the implementation will spill to disk if any given group is too large to fit into
+ * memory.  However, users must take care to avoid materializing the whole iterator for a group
+ * (for example, by calling [toList]) unless they are sure that this is possible given the memory
+ * constraints of their cluster.
+ */
 inline fun <K, V, reified U> KeyValueGroupedDataset<K, V>.flatMapGroups(
     noinline func: (key: K, values: Iterator<V>) -> Iterator<U>,
 ): Dataset<U> = flatMapGroups(
@@ -312,12 +352,57 @@ inline fun <K, V, reified U> KeyValueGroupedDataset<K, V>.flatMapGroups(
     encoder<U>()
 )
 
+/**
+ * (Kotlin-specific)
+ * Returns the group state value if it exists, else [null].
+ * This is comparable to [GroupState.getOption], but instead utilises Kotlin's nullability features
+ * to get the same result.
+ */
 fun <S> GroupState<S>.getOrNull(): S? = if (exists()) get() else null
 
+/**
+ * (Kotlin-specific)
+ * Allows the group state object to be used as a delegate. Will be [null] if it does not exist.
+ *
+ * For example:
+ * ```kotlin
+ * groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
+ *     var s by state
+ *     ...
+ * }
+ * ```
+ */
 operator fun <S> GroupState<S>.getValue(thisRef: Any?, property: KProperty<*>): S? = getOrNull()
+
+/**
+ * (Kotlin-specific)
+ * Allows the group state object to be used as a delegate. Will be [null] if it does not exist.
+ *
+ * For example:
+ * ```kotlin
+ * groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
+ *     var s by state
+ *     ...
+ * }
+ * ```
+ */
 operator fun <S> GroupState<S>.setValue(thisRef: Any?, property: KProperty<*>, value: S?): Unit = update(value)
 
-
+/**
+ * (Kotlin-specific)
+ * Applies the given function to each group of data, while maintaining a user-defined per-group
+ * state. The result Dataset will represent the objects returned by the function.
+ * For a static batch Dataset, the function will be invoked once per group. For a streaming
+ * Dataset, the function will be invoked for each group repeatedly in every trigger, and
+ * updates to each group's state will be saved across invocations.
+ * See [org.apache.spark.sql.streaming.GroupState] for more details.
+ *
+ * @param S The type of the user-defined state. Must be encodable to Spark SQL types.
+ * @param U The type of the output objects. Must be encodable to Spark SQL types.
+ * @param func Function to be called on every group.
+ *
+ * See [Encoder] for more details on what types are encodable to Spark SQL.
+ */
 inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWithState(
     noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U,
 ): Dataset<U> = mapGroupsWithState(
@@ -326,6 +411,22 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
     encoder<U>()
 )
 
+/**
+ * (Kotlin-specific)
+ * Applies the given function to each group of data, while maintaining a user-defined per-group
+ * state. The result Dataset will represent the objects returned by the function.
+ * For a static batch Dataset, the function will be invoked once per group. For a streaming
+ * Dataset, the function will be invoked for each group repeatedly in every trigger, and
+ * updates to each group's state will be saved across invocations.
+ * See [org.apache.spark.sql.streaming.GroupState] for more details.
+ *
+ * @param S The type of the user-defined state. Must be encodable to Spark SQL types.
+ * @param U The type of the output objects. Must be encodable to Spark SQL types.
+ * @param func Function to be called on every group.
+ * @param timeoutConf Timeout configuration for groups that do not receive data for a while.
+ *
+ * See [Encoder] for more details on what types are encodable to Spark SQL.
+ */
 inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWithState(
     timeoutConf: GroupStateTimeout,
     noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U,
@@ -336,6 +437,23 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
     timeoutConf
 )
 
+/**
+ * (Kotlin-specific)
+ * Applies the given function to each group of data, while maintaining a user-defined per-group
+ * state. The result Dataset will represent the objects returned by the function.
+ * For a static batch Dataset, the function will be invoked once per group. For a streaming
+ * Dataset, the function will be invoked for each group repeatedly in every trigger, and
+ * updates to each group's state will be saved across invocations.
+ * See [GroupState] for more details.
+ *
+ * @param S The type of the user-defined state. Must be encodable to Spark SQL types.
+ * @param U The type of the output objects. Must be encodable to Spark SQL types.
+ * @param func Function to be called on every group.
+ * @param outputMode The output mode of the function.
+ * @param timeoutConf Timeout configuration for groups that do not receive data for a while.
+ *
+ * See [Encoder] for more details on what types are encodable to Spark SQL.
+ */
 inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.flatMapGroupsWithState(
     outputMode: OutputMode,
     timeoutConf: GroupStateTimeout,
@@ -348,6 +466,13 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.flatMapGrou
     timeoutConf
 )
 
+/**
+ * (Kotlin-specific)
+ * Applies the given function to each cogrouped data. For each unique group, the function will
+ * be passed the grouping key and 2 iterators containing all elements in the group from
+ * [Dataset] [this] and [other].  The function can return an iterator containing elements of an
+ * arbitrary type which will be returned as a new [Dataset].
+ */
 inline fun <K, V, U, reified R> KeyValueGroupedDataset<K, V>.cogroup(
     other: KeyValueGroupedDataset<K, U>,
     noinline func: (key: K, left: Iterator<V>, right: Iterator<U>) -> Iterator<R>,
