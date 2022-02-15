@@ -21,6 +21,7 @@
 
 package org.jetbrains.kotlinx.spark.api
 
+import org.apache.hadoop.shaded.org.apache.commons.math3.exception.util.ArgUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.function.*
@@ -192,15 +193,33 @@ private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder
     )
 }
 
+/**
+ * (Kotlin-specific)
+ * Returns a new Dataset that contains the result of applying [func] to each element.
+ */
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
     map(MapFunction(func), encoder<R>())
 
+/**
+ * (Kotlin-specific)
+ * Returns a new Dataset by first applying a function to all elements of this Dataset,
+ * and then flattening the results.
+ */
 inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>): Dataset<R> =
     flatMap(func, encoder<R>())
 
+/**
+ * (Kotlin-specific)
+ * Returns a new Dataset by flattening. This means that a Dataset of an iterable such as
+ * `listOf(listOf(1, 2, 3), listOf(4, 5, 6))` will be flattened to a Dataset of `listOf(1, 2, 3, 4, 5, 6).`
+ */
 inline fun <reified T, I : Iterable<T>> Dataset<I>.flatten(): Dataset<T> =
     flatMap(FlatMapFunction { it.iterator() }, encoder<T>())
 
+/**
+ * (Kotlin-specific)
+ * Returns a [KeyValueGroupedDataset] where the data is grouped by the given key [func].
+ */
 inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyValueGroupedDataset<R, T> =
     groupByKey(MapFunction(func), encoder<R>())
 
