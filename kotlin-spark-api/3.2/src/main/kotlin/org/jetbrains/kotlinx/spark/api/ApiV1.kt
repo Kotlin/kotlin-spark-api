@@ -211,7 +211,7 @@ inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>):
 /**
  * (Kotlin-specific)
  * Returns a new Dataset by flattening. This means that a Dataset of an iterable such as
- * `listOf(listOf(1, 2, 3), listOf(4, 5, 6))` will be flattened to a Dataset of `listOf(1, 2, 3, 4, 5, 6).`
+ * `listOf(listOf(1, 2, 3), listOf(4, 5, 6))` will be flattened to a Dataset of `listOf(1, 2, 3, 4, 5, 6)`.
  */
 inline fun <reified T, I : Iterable<T>> Dataset<I>.flatten(): Dataset<T> =
     flatMap(FlatMapFunction { it.iterator() }, encoder<T>())
@@ -223,18 +223,59 @@ inline fun <reified T, I : Iterable<T>> Dataset<I>.flatten(): Dataset<T> =
 inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyValueGroupedDataset<R, T> =
     groupByKey(MapFunction(func), encoder<R>())
 
+/**
+ * (Kotlin-specific)
+ * Returns a new Dataset that contains the result of applying [func] to each partition.
+ */
 inline fun <T, reified R> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
     mapPartitions(func, encoder<R>())
 
+/**
+ * (Kotlin-specific)
+ * Filters rows to eliminate [null] values.
+ */
 @Suppress("UNCHECKED_CAST")
 fun <T : Any> Dataset<T?>.filterNotNull(): Dataset<T> = filter { it != null } as Dataset<T>
 
+/**
+ * Returns a new [KeyValueGroupedDataset] where the given function [func] has been applied
+ * to the data. The grouping key is unchanged by this.
+ *
+ * ```kotlin
+ *   // Create values grouped by key from a Dataset<Arity2<K, V>>
+ *   ds.groupByKey { it._1 }.mapValues { it._2 }
+ * ```
+ */
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapValues(noinline func: (VALUE) -> R): KeyValueGroupedDataset<KEY, R> =
     mapValues(MapFunction(func), encoder<R>())
 
+/**
+ * (Kotlin-specific)
+ * Applies the given function to each group of data. For each unique group, the function will
+ * be passed the group key and an iterator that contains all the elements in the group. The
+ * function can return an element of arbitrary type which will be returned as a new [Dataset].
+ *
+ * This function does not support partial aggregation, and as a result requires shuffling all
+ * the data in the [Dataset]. If an application intends to perform an aggregation over each
+ * key, it is best to use the reduce function or an
+ * [org.apache.spark.sql.expressions.Aggregator].
+ *
+ * Internally, the implementation will spill to disk if any given group is too large to fit into
+ * memory.  However, users must take care to avoid materializing the whole iterator for a group
+ * (for example, by calling [toList]) unless they are sure that this is possible given the memory
+ * constraints of their cluster.
+ */
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(noinline func: (KEY, Iterator<VALUE>) -> R): Dataset<R> =
     mapGroups(MapGroupsFunction(func), encoder<R>())
 
+/**
+ * (Kotlin-specific)
+ * Reduces the elements of each group of data using the specified binary function.
+ * The given function must be commutative and associative or the result may be non-deterministic.
+ *
+ * Note that you need to use [reduceGroupsK] always instead of the Java- or Scala-specific
+ * [KeyValueGroupedDataset.reduceGroups] to make the compiler work.
+ */
 inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroupsK(noinline func: (VALUE, VALUE) -> VALUE): Dataset<Pair<KEY, VALUE>> =
     reduceGroups(ReduceFunction(func))
         .map { t -> t._1 to t._2 }
