@@ -37,6 +37,7 @@ import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.Product
 import scala.Tuple2
 import scala.reflect.ClassTag
+import scala.reflect.api.TypeTags.TypeTag
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
 import java.sql.Date
@@ -83,7 +84,7 @@ import kotlin.reflect.full.primaryConstructor
 import kotlin.to
 
 @JvmField
-val ENCODERS = mapOf<KClass<*>, Encoder<*>>(
+val ENCODERS: Map<KClass<*>, Encoder<*>> = mapOf(
     Boolean::class to BOOLEAN(),
     Byte::class to BYTE(),
     Short::class to SHORT(),
@@ -165,6 +166,9 @@ inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
 @OptIn(ExperimentalStdlibApi::class)
 inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::class)
 
+/**
+ * @see encoder
+ */
 fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     @Suppress("UNCHECKED_CAST")
     return when {
@@ -173,7 +177,8 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     } as Encoder<T>
 }
 
-private fun isSupportedClass(cls: KClass<*>): Boolean = cls.isData
+private fun isSupportedClass(cls: KClass<*>): Boolean =
+    cls.isData
         || cls.isSubclassOf(Map::class)
         || cls.isSubclassOf(Iterable::class)
         || cls.isSubclassOf(Product::class)
@@ -550,18 +555,25 @@ inline fun <reified T> Dataset<T>.forEachPartition(noinline func: (Iterator<T>) 
 /**
  * It's hard to call `Dataset.debugCodegen` from kotlin, so here is utility for that
  */
-fun <T> Dataset<T>.debugCodegen() = also { KSparkExtensions.debugCodegen(it) }
+fun <T> Dataset<T>.debugCodegen(): Dataset<T> = also { KSparkExtensions.debugCodegen(it) }
 
-val SparkSession.sparkContext
+/**
+ * Returns the Spark context associated with this Spark session.
+ */
+val SparkSession.sparkContext: SparkContext
     get() = KSparkExtensions.sparkContext(this)
 
 /**
  * It's hard to call `Dataset.debug` from kotlin, so here is utility for that
  */
-fun <T> Dataset<T>.debug() = also { KSparkExtensions.debug(it) }
+fun <T> Dataset<T>.debug(): Dataset<T> = also { KSparkExtensions.debug(it) }
 
 @Suppress("FunctionName")
-@Deprecated("Changed to \"`===`\" to better reflect Scala API.", ReplaceWith("this `===` c"))
+@Deprecated(
+    message = "Changed to \"`===`\" to better reflect Scala API.",
+    replaceWith = ReplaceWith("this `===` c"),
+    level = DeprecationLevel.ERROR,
+)
 infix fun Column.`==`(c: Column) = `$eq$eq$eq`(c)
 
 /**
@@ -889,7 +901,10 @@ operator fun Column.rem(other: Any): Column = `$percent`(other)
  */
 operator fun Column.get(key: Any): Column = getItem(key)
 
-fun lit(a: Any) = functions.lit(a)
+// TODO deprecate?
+fun lit(a: Any): Column = functions.lit(a)
+
+fun typedLit(literal: Any): Column = functions.lit(literal)
 
 /**
  * Provides a type hint about the expected return value of this column. This information can
@@ -996,8 +1011,13 @@ inline fun <reified T, R> Dataset<T>.withCached(
     return cached.executeOnCached().also { cached.unpersist(blockingUnpersist) }
 }
 
-inline fun <reified T> Dataset<Row>.toList() = KSparkExtensions.collectAsList(to<T>())
-inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Array<R>
+/**
+ * TODO
+ */
+inline fun <reified T> Dataset<*>.toList(): List<T> = to<T>().collectAsList() as List<T>
+inline fun <reified T> Dataset<*>.toArray(): Array<T> = to<T>().collect() as Array<T>
+//inline fun <reified T> Dataset<Row>.toList() = KSparkExtensions.collectAsList(to<T>())
+//inline fun <reified R> Dataset<*>.toArray(): Array<R> = to<R>().collect() as Array<R>
 
 /**
  * Selects column based on the column name and returns it as a [Column].
@@ -1014,7 +1034,6 @@ operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
  * ```
  * @see invoke
  */
-
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
     col(column.name).`as`<U>() as TypedColumn<T, U>
@@ -1129,6 +1148,14 @@ inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U
     ).map { Arity5(it._1(), it._2(), it._3(), it._4(), it._5()) }
 
 
+/**
+ * Not meant to be used by the user explicitly.
+ *
+ * This function generates the DataType schema for supported classes, including Kotlin data classes, [Map],
+ * [Iterable], [Product], [Array], and combinations of those.
+ *
+ * It's mainly used by [generateEncoder]/[encoder].
+ */
 @OptIn(ExperimentalStdlibApi::class)
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     val primitiveSchema = knownDataTypes[type.classifier]
@@ -1228,15 +1255,24 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
     }
 }
 
+/**
+ * The entry point to programming Spark with the Dataset and DataFrame API.
+ *
+ * @see org.apache.spark.sql.SparkSession
+ */
 typealias SparkSession = org.apache.spark.sql.SparkSession
 
-fun SparkContext.setLogLevel(level: SparkLogLevel) = setLogLevel(level.name)
+/**
+ * Control our logLevel. This overrides any user-defined log settings.
+ * @param level The desired log level as [SparkLogLevel].
+ */
+fun SparkContext.setLogLevel(level: SparkLogLevel): Unit = setLogLevel(level.name)
 
 enum class SparkLogLevel {
     ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
 }
 
-private val knownDataTypes = mapOf(
+private val knownDataTypes: Map<KClass<out Any>, DataType> = mapOf(
     Byte::class to DataTypes.ByteType,
     Short::class to DataTypes.ShortType,
     Int::class to DataTypes.IntegerType,
@@ -1248,7 +1284,7 @@ private val knownDataTypes = mapOf(
     LocalDate::class to `DateType$`.`MODULE$`,
     Date::class to `DateType$`.`MODULE$`,
     Timestamp::class to `TimestampType$`.`MODULE$`,
-    Instant::class to `TimestampType$`.`MODULE$`
+    Instant::class to `TimestampType$`.`MODULE$`,
 )
 
 private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {
@@ -1258,11 +1294,12 @@ private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<S
 }
 
 class Memoize1<in T, out R>(val f: (T) -> R) : (T) -> R {
+
     private val values = ConcurrentHashMap<T, R>()
-    override fun invoke(x: T) =
-        values.getOrPut(x, { f(x) })
+
+    override fun invoke(x: T): R = values.getOrPut(x) { f(x) }
 }
 
 private fun <T, R> ((T) -> R).memoize(): (T) -> R = Memoize1(this)
 
-private val memoizedSchema = { x: KType -> schema(x) }.memoize()
+private val memoizedSchema: (KType) -> DataType = { x: KType -> schema(x) }.memoize()
