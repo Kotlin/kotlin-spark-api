@@ -21,7 +21,6 @@ package org.jetbrains.kotlinx.spark.examples
 
 import org.jetbrains.kotlinx.spark.api.broadcast
 import org.jetbrains.kotlinx.spark.api.map
-import org.jetbrains.kotlinx.spark.api.sparkContext
 import org.jetbrains.kotlinx.spark.api.withSpark
 import java.io.Serializable
 
