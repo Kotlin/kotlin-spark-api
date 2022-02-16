@@ -901,7 +901,16 @@ operator fun Column.rem(other: Any): Column = `$percent`(other)
  */
 operator fun Column.get(key: Any): Column = getItem(key)
 
-// TODO deprecate?
+/**
+ * Creates a [Column] of literal value.
+ *
+ * The passed in object is returned directly if it is already a [Column].
+ * If the object is a Scala Symbol, it is converted into a [Column] also.
+ * Otherwise, a new [Column] is created to represent the literal value.
+ *
+ * This is just a shortcut to the function from [org.apache.spark.sql.functions].
+ * For all the functions, simply add `import org.apache.spark.sql.functions.*` to your file.
+ */
 fun lit(a: Any): Column = functions.lit(a)
 
 /**
