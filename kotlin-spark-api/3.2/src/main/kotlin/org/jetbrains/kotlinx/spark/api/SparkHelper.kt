@@ -19,22 +19,27 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
+import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 
 /**
- * Wrapper for spark creation which allows to set different spark params
+ * Wrapper for spark creation which allows setting different spark params.
  *
  * @param props spark options, value types are runtime-checked for type-correctness
- * @param master [SparkSession.Builder.master]
- * @param appName [SparkSession.Builder.appName]
+ * @param master Sets the Spark master URL to connect to, such as "local" to run locally, "local[4]" to
+ *  run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster. By default, it
+ *  tries to get the system value "spark.master", otherwise it uses "local[*]"
+ * @param appName Sets a name for the application, which will be shown in the Spark web UI.
+ *  If no application name is set, a randomly generated name will be used.
+ * @param logLevel Control our logLevel. This overrides any user-defined log settings.
  * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
  */
 @JvmOverloads
 inline fun withSpark(
     props: Map<String, Any> = emptyMap(),
-    master: String = "local[*]",
+    master: String = SparkConf().get("spark.master", "local[*]"),
     appName: String = "Kotlin Spark Sample",
     logLevel: SparkLogLevel = ERROR,
     func: KSparkSession.() -> Unit,
@@ -58,10 +63,17 @@ inline fun withSpark(
 
 }
 
+/**
+ * Wrapper for spark creation which allows setting different spark params.
+ *
+ * @param builder A [SparkSession.Builder] object, configured how you want.
+ * @param logLevel Control our logLevel. This overrides any user-defined log settings.
+ * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
+ */
 @JvmOverloads
 inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
     builder
-        .orCreate
+        .getOrCreate()
         .apply {
             KSparkSession(this).apply {
                 sparkContext.setLogLevel(logLevel)
