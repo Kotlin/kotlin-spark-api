@@ -35,7 +35,6 @@
     </properties>
 
     <modules>
-        <module>kotlin-spark-api/common</module>
         <module>dummy</module>
     </modules>
 
@@ -50,11 +49,6 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-reflect</artifactId>
                 <version>${kotlin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlinx.spark</groupId>
-                <artifactId>kotlin-spark-api-common</artifactId>
-                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
