@@ -3,10 +3,12 @@ name: Generate and publish docs
 on:
   push:
     branches:
-      - "origin/spark-3.2"
+#      - "origin/spark-3.2"
+      - "origin/more-documentation"
   pull_request:
     branches:
-      - "origin/spark-3.2"
+#      - "origin/spark-3.2"
+      - "origin/more-documentation"
 
 jobs:
   generate-and-publish-docs:
