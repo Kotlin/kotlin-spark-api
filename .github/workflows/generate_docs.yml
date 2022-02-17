@@ -3,10 +3,10 @@ name: Generate and publish docs
 on:
   push:
     branches:
-      - "spark-3.2"
+      - "origin/spark-3.2"
   pull_request:
     branches:
-      - "spark-3.2"
+      - "origin/spark-3.2"
 
 jobs:
   generate-and-publish-docs:
@@ -25,7 +25,7 @@ jobs:
       - name: Copy docs to "docs" branch
         env:
           SRC_FOLDER: "kotlin-spark-api/3.2/target/dokka"
-          TARGET_BRANCH: "docs"
+          TARGET_BRANCH: "origin/docs"
         run: |
           files=$(find $SRC_FOLDER -type f) # get the file list
           git config --global user.name 'GitHub Action'
