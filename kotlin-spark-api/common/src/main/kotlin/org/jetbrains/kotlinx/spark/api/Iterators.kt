@@ -57,9 +57,13 @@ class FilteringIterator<T>(
         done()
     }
 }
+
+/** Maps the values of the iterator lazily using [func]. */
 fun <T, R> Iterator<T>.map(func: (T) -> R): Iterator<R> = MappingIterator(this, func)
 
+/** Filters the values of the iterator lazily using [func]. */
 fun <T> Iterator<T>.filter(func: (T) -> Boolean): Iterator<T> = FilteringIterator(this, func)
 
+/** Partitions the values of the iterator lazily in groups of [size]. */
 fun <T> Iterator<T>.partition(size: Int): Iterator<List<T>> = PartitioningIterator(this, size)
 
