@@ -26,12 +26,10 @@ jobs:
       - name: Generate docs
         run: ./mvnw clean package site -Dmaven.test.skip=true
       - name: Copy docs to "docs" branch
-        uses: andstor/copycat-action@v3
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          src_path: "kotlin-spark-api/3.2/target/dokka"
-          src_branch: "more-documentation" # TODO make "spark-3.2"
-          dst_owner: "JetBrains"
-          dst_repo_name: "kotlin-spark-api"
-          dst_branch: "docs"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: docs
+          publish_dir: ./kotlin-spark-api/3.2/target/dokka
+
 
