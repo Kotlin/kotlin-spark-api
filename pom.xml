@@ -11,7 +11,7 @@
 
     <properties>
         <kotlin.version>1.5.30</kotlin.version>
-        <dokka.version>1.4.32</dokka.version>
+        <dokka.version>1.6.10</dokka.version>
         <atrium.version>0.16.0</atrium.version>
         <kotest.version>4.6.0</kotest.version>
         <kotest-extension-allure.version>1.0.1</kotest-extension-allure.version>
@@ -35,7 +35,6 @@
     </properties>
 
     <modules>
-        <module>kotlin-spark-api/common</module>
         <module>dummy</module>
     </modules>
 
@@ -50,11 +49,6 @@
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-reflect</artifactId>
                 <version>${kotlin.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jetbrains.kotlinx.spark</groupId>
-                <artifactId>kotlin-spark-api-common</artifactId>
-                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
