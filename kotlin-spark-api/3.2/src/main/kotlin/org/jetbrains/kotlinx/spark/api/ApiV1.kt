@@ -601,7 +601,7 @@ operator fun Column.unaryMinus(): Column = `unary_$minus`()
  *
  *   // Kotlin:
  *   import org.jetbrains.kotlinx.spark.api.*
- *   df.select( !df("amount") )
+ *   df.filter( !df("amount") )
  *
  *   // Java:
  *   import static org.apache.spark.sql.functions.*;
@@ -665,7 +665,7 @@ infix fun Column.`===`(other: Any): Column = `$eq$eq$eq`(other)
  *
  *   // Java:
  *   import static org.apache.spark.sql.functions.*;
- *   df.filter( col("colA").notEqual(col("colB")) );
+ *   df.select( col("colA").notEqual(col("colB")) );
  * ```
  */
 infix fun Column.neq(other: Any): Column = `$eq$bang$eq`(other)
@@ -687,7 +687,7 @@ infix fun Column.neq(other: Any): Column = `$eq$bang$eq`(other)
  *
  *   // Java:
  *   import static org.apache.spark.sql.functions.*;
- *   df.filter( col("colA").notEqual(col("colB")) );
+ *   df.select( col("colA").notEqual(col("colB")) );
  * ```
  */
 infix fun Column.`=!=`(other: Any): Column = `$eq$bang$eq`(other)
@@ -802,9 +802,9 @@ infix fun Column.or(other: Any): Column = `$bar$bar`(other)
  *
  *   // Kotlin:
  *   import org.jetbrains.kotlinx.spark.api.*
- *   people.filter( people("inSchool") and people("isEmployed") )
+ *   people.select( people("inSchool") and people("isEmployed") )
  *   // or
- *   people.filter( people("inSchool") `&&` people("isEmployed") )
+ *   people.select( people("inSchool") `&&` people("isEmployed") )
  *
  *   // Java:
  *   import static org.apache.spark.sql.functions.*;
@@ -821,9 +821,9 @@ infix fun Column.and(other: Any): Column = `$amp$amp`(other)
  *
  *   // Kotlin:
  *   import org.jetbrains.kotlinx.spark.api.*
- *   people.filter( people("inSchool") and people("isEmployed") )
+ *   people.select( people("inSchool") and people("isEmployed") )
  *   // or
- *   people.filter( people("inSchool") `&&` people("isEmployed") )
+ *   people.select( people("inSchool") `&&` people("isEmployed") )
  *
  *   // Java:
  *   import static org.apache.spark.sql.functions.*;
