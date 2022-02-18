@@ -3,11 +3,11 @@ name: Generate and publish docs
 on:
   push:
     branches:
-      - "more-documentation"
+      - "more-documentation" # TODO make "spark-3.2"
 #      - "spark-3.2"-
   pull_request:
     branches:
-      - "more-documentation"
+      - "more-documentation"  # TODO make "spark-3.2"
 #      - "spark-3.2"
 
 
@@ -26,17 +26,12 @@ jobs:
       - name: Generate docs
         run: ./mvnw clean package site -Dmaven.test.skip=true
       - name: Copy docs to "docs" branch
-        env:
-          SRC_FOLDER: "kotlin-spark-api/3.2/target/dokka"
-          TARGET_BRANCH: "origin/docs"
-        run: |
-          files=$(find $SRC_FOLDER -type f) # get the file list
-          git add -f ${SRC_FOLDER}/*
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-          git fetch                         # fetch branches
-          git checkout $TARGET_BRANCH       # checkout to your branch
-          git checkout ${GITHUB_REF##*/} -- $files # copy files from the source branch
-          git add -A
-          git diff-index --quiet HEAD ||  git commit -am "updated docs"  # commit to the repository (ignore if no modification)
-          git push origin $TARGET_BRANCH # push to remote branch
+        uses: andstor/copycat-action@v3
+        with:
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          src_path: "kotlin-spark-api/3.2/target/dokka"
+          src_branch: "more-documentation" # TODO make "spark-3.2"
+          dst_owner: "JetBrains"
+          dst_repo_name: "kotlin-spark-api"
+          dst_branch: "docs"
+
