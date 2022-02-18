@@ -3,12 +3,10 @@ name: Generate and publish docs
 on:
   push:
     branches:
-      - "more-documentation" # TODO make "spark-3.2"
-#      - "spark-3.2"-
+      - "spark-3.2"
   pull_request:
     branches:
-      - "more-documentation"  # TODO make "spark-3.2"
-#      - "spark-3.2"
+      - "spark-3.2"
 
 
 jobs:
