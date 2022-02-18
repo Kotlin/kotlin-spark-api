@@ -31,7 +31,7 @@ jobs:
           TARGET_BRANCH: "origin/docs"
         run: |
           files=$(find $SRC_FOLDER -type f) # get the file list
-          git add ${SRC_FOLDER}/*
+          git add -f ${SRC_FOLDER}/*
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git fetch                         # fetch branches
