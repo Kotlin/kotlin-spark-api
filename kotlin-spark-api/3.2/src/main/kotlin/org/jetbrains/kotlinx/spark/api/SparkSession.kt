@@ -209,59 +209,38 @@ inline fun withSparkStreaming(
     logLevel: SparkLogLevel = SparkLogLevel.ERROR,
     func: KSparkStreamingSession.() -> Unit,
 ) {
-    val conf = SparkConf()
-        .setMaster(master)
-        .setAppName(appName)
-        .apply {
-            props.forEach {
-                set(it.key, it.toString())
-            }
+    withSpark(
+        props = props,
+        master = master,
+        appName = appName,
+        logLevel = logLevel,
+    ) {
+        val ssc = JavaStreamingContext(sc, batchDuration)
+        KSparkStreamingSession(session = this, ssc = ssc).apply {
+            func()
+            ssc.start()
+            ssc.awaitTermination()
         }
-
-    val ssc = JavaStreamingContext(conf, batchDuration)
-    val spark = SparkSession.builder().config(conf).getOrCreate()
-
-    KSparkStreamingSession(spark, ssc).apply {
-        spark.sparkContext.setLogLevel(logLevel)
-        func()
-        ssc.start()
-        ssc.awaitTermination()
-        sc.stop()
-        spark.stop()
     }
 }
 
 /**
- * Broadcast a read-only variable to the cluster, returning a
- * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
- * The variable will be sent to each cluster only once.
- *
- * @param value value to broadcast to the Spark nodes
- * @return `Broadcast` object, a read-only variable cached on each machine
+ * This wrapper over [SparkSession] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
-    sparkContext.broadcast(value, encoder<T>().clsTag())
-} catch (e: ClassNotFoundException) {
-    JavaSparkContext(sparkContext).broadcast(value)
+open class KSparkSession(val spark: SparkSession) {
+
+    val sc: JavaSparkContext = JavaSparkContext(spark.sparkContext)
+
+    inline fun <reified T> List<T>.toDS() = toDS(spark)
+    inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
+    inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
+    inline fun <reified T> RDD<T>.toDS() = toDS(spark)
+    inline fun <reified T> JavaRDDLike<T, *>.toDS() = toDS(spark)
+    val udf: UDFRegistration get() = spark.udf()
 }
 
 /**
- * Broadcast a read-only variable to the cluster, returning a
- * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
- * The variable will be sent to each cluster only once.
- *
- * @param value value to broadcast to the Spark nodes
- * @return `Broadcast` object, a read-only variable cached on each machine
- * @see broadcast
+ * This wrapper over [SparkSession] and [JavaStreamingContext] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-@Deprecated(
-    "You can now use `spark.broadcast()` instead.",
-    ReplaceWith("spark.broadcast(value)"),
-    DeprecationLevel.WARNING
-)
-inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
-    broadcast(value, encoder<T>().clsTag())
-} catch (e: ClassNotFoundException) {
-    JavaSparkContext(this).broadcast(value)
-}
+class KSparkStreamingSession(spark: SparkSession, val ssc: JavaStreamingContext) : KSparkSession(spark)
 
