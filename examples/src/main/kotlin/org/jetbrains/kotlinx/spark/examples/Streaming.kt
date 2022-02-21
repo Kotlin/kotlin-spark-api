@@ -20,42 +20,29 @@
 package org.jetbrains.kotlinx.spark.examples
 
 import org.apache.spark.SparkConf
-import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.sql.Dataset
+import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.api.java.JavaStreamingContext
-import org.jetbrains.kotlinx.spark.api.withSpark
-import scala.Tuple2
-import java.io.Serializable
+import org.jetbrains.kotlinx.spark.api.*
 
-data class Row @JvmOverloads constructor(
-    var word: String = "",
-) : Serializable
+data class TestRow(
+    val word: String,
+)
 
-fun main() = withSpark {
+fun main() = withSparkStreaming(Durations.seconds(1)) {
 
-    val context = JavaStreamingContext(
-        SparkConf()
-            .setMaster("local[*]")
-            .setAppName("Test"),
-        Durations.seconds(1),
-    )
-
-    val lines = context.socketTextStream("localhost", 9999)
-
+    val lines = ssc.socketTextStream("localhost", 9999)
     val words = lines.flatMap { it.split(" ").iterator() }
 
     words.foreachRDD { rdd, time ->
+        val dataframe: Dataset<TestRow> = rdd.map { TestRow(it) }.toDS()
 
-        // todo convert rdd to dataset using kotlin data class?
-
-        val rowRdd = rdd.map { Row(it) }
-
-        val dataframe = spark.createDataFrame(rowRdd, Row::class.java)
-
+        dataframe
+            .groupByKey { it.word }
+            .count()
+            .show()
 
     }
 
-
-    context.start()
-    context.awaitTermination()
 }

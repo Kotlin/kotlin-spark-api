@@ -27,6 +27,8 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
+import org.apache.spark.streaming.Duration
+import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 
 /**
@@ -105,10 +107,57 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
     )
 }
 
+
 /**
- * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset]
+ * Wrapper for spark streaming creation. `spark: SparkSession` and `ssc: JavaStreamingContext` are provided, started,
+ * awaited, and stopped automatically.
+ *
+ * @param batchDuration The time interval at which streaming data will be divided into batches
+ * @param props spark options, value types are runtime-checked for type-correctness
+ * @param master Sets the Spark master URL to connect to, such as "local" to run locally, "local[4]" to
+ *  run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster. By default, it
+ *  tries to get the system value "spark.master", otherwise it uses "local[*]"
+ * @param appName Sets a name for the application, which will be shown in the Spark web UI.
+ *  If no application name is set, a randomly generated name will be used.
+ * @param logLevel Control our logLevel. This overrides any user-defined log settings.
+ * @param func function which will be executed in context of [KSparkStreamingSession] (it means that `this` inside block will point to [KSparkStreamingSession])
+ * todo: provide alternatives with path instead of batchDuration etc
  */
-class KSparkSession(val spark: SparkSession) {
+@JvmOverloads
+inline fun withSparkStreaming(
+    batchDuration: Duration,
+    props: Map<String, Any> = emptyMap(),
+    master: String = SparkConf().get("spark.master", "local[*]"),
+    appName: String = "Kotlin Spark Sample",
+    logLevel: SparkLogLevel = SparkLogLevel.ERROR,
+    func: KSparkStreamingSession.() -> Unit,
+) {
+    val conf = SparkConf()
+        .setMaster(master)
+        .setAppName(appName)
+        .apply {
+            props.forEach {
+                set(it.key, it.toString())
+            }
+        }
+
+    val ssc = JavaStreamingContext(conf, batchDuration)
+    val spark = SparkSession.builder().config(conf).getOrCreate()
+
+    KSparkStreamingSession(spark, ssc).apply {
+        spark.sparkContext.setLogLevel(logLevel)
+        func()
+        ssc.start()
+        ssc.awaitTermination()
+        sc.stop()
+        spark.stop()
+    }
+}
+
+/**
+ * This wrapper over [SparkSession] provides several additional methods to create [org.apache.spark.sql.Dataset]
+ */
+open class KSparkSession(val spark: SparkSession) {
 
     val sc: JavaSparkContext = JavaSparkContext(spark.sparkContext)
 
@@ -119,3 +168,9 @@ class KSparkSession(val spark: SparkSession) {
     inline fun <reified T> JavaRDDLike<T, *>.toDS() = toDS(spark)
     val udf: UDFRegistration get() = spark.udf()
 }
+
+/**
+ * This wrapper over [SparkSession] and [JavaStreamingContext] provides several additional methods to create [org.apache.spark.sql.Dataset]
+ */
+class KSparkStreamingSession(spark: SparkSession, val ssc: JavaStreamingContext) : KSparkSession(spark)
+
