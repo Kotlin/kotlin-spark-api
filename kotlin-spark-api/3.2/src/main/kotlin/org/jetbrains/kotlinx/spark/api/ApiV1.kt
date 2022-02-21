@@ -23,9 +23,11 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.hadoop.shaded.org.apache.commons.math3.exception.util.ArgUtils
 import org.apache.spark.SparkContext
+import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.function.*
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.*
 import org.apache.spark.sql.Encoders.*
 import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
@@ -153,6 +155,18 @@ inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
  */
 inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
     spark.createDataset(this, encoder<T>())
+
+/**
+ * Utility method to create dataset from RDD
+ */
+inline fun <reified T> RDD<T>.toDS(spark: SparkSession): Dataset<T> =
+    spark.createDataset(this, encoder<T>())
+
+/**
+ * Utility method to create dataset from JavaRDD
+ */
+inline fun <reified T> JavaRDD<T>.toDS(spark: SparkSession): Dataset<T> =
+    spark.createDataset(this.rdd(), encoder<T>())
 
 /**
  * Main method of API, which gives you seamless integration with Spark:
