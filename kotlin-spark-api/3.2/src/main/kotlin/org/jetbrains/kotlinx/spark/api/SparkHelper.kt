@@ -30,6 +30,7 @@ import org.apache.spark.sql.UDFRegistration
 import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
+import kotlin.math.log
 
 /**
  * Wrapper for spark creation which allows setting different spark params.
@@ -132,35 +133,25 @@ inline fun withSparkStreaming(
     logLevel: SparkLogLevel = SparkLogLevel.ERROR,
     func: KSparkStreamingSession.() -> Unit,
 ) {
-    val conf = SparkConf()
-        .setMaster(master)
-        .setAppName(appName)
-        .apply {
-            props.forEach {
-                set(it.key, it.toString())
-            }
+    withSpark(
+        props = props,
+        master = master,
+        appName = appName,
+        logLevel = logLevel,
+    ) {
+        val ssc = JavaStreamingContext(sc, batchDuration)
+        KSparkStreamingSession(session = this, ssc = ssc).apply {
+            func()
+            ssc.start()
+            ssc.awaitTermination()
         }
-
-    val ssc = JavaStreamingContext(conf, batchDuration)
-    val spark = SparkSession.builder().config(conf).getOrCreate()
-
-    KSparkStreamingSession(spark, ssc).apply {
-        spark.sparkContext.setLogLevel(logLevel)
-        func()
-        ssc.start()
-        ssc.awaitTermination()
-        sc.stop()
-        spark.stop()
     }
 }
 
 /**
  * This wrapper over [SparkSession] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-open class KSparkSession(val spark: SparkSession) {
-
-    val sc: JavaSparkContext = JavaSparkContext(spark.sparkContext)
-
+open class KSparkSession(val spark: SparkSession, val sc: JavaSparkContext = JavaSparkContext(spark.sparkContext)) {
     inline fun <reified T> List<T>.toDS() = toDS(spark)
     inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
     inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
@@ -172,5 +163,5 @@ open class KSparkSession(val spark: SparkSession) {
 /**
  * This wrapper over [SparkSession] and [JavaStreamingContext] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-class KSparkStreamingSession(spark: SparkSession, val ssc: JavaStreamingContext) : KSparkSession(spark)
+class KSparkStreamingSession(session: KSparkSession, val ssc: JavaStreamingContext) : KSparkSession(session.spark, session.sc)
 
