@@ -30,6 +30,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
+import org.apache.spark.unsafe.types.CalendarInterval
 import scala.Product
 import scala.Tuple1
 import scala.Tuple2
@@ -38,8 +39,10 @@ import scala.collection.Seq
 import java.io.Serializable
 import java.sql.Date
 import java.sql.Timestamp
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Period
 import kotlin.collections.Iterator
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap
@@ -330,6 +333,10 @@ class ApiTest : ShouldSpec({
                 val dataset: Dataset<Instant> = dsOf(Instant.now(), Instant.now())
                 dataset.show()
             }
+            should("Be able to serialize Instant") { // uses knownDataTypes
+                val dataset = dsOf(Instant.now() to Instant.now())
+                dataset.show()
+            }
             should("be able to serialize Date") { // uses knownDataTypes
                 val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
                 dataset.show()
@@ -340,6 +347,30 @@ class ApiTest : ShouldSpec({
             }
             should("be able to serialize Timestamp") { // uses knownDataTypes
                 val dataset = dsOf(Timestamp(0L) to 2)
+                dataset.show()
+            }
+            should("handle Duration Datasets") { // uses encoder
+                val dataset = dsOf(Duration.ZERO)
+                dataset.show()
+            }
+            should("handle Period Datasets") { // uses encoder
+                val dataset = dsOf(Period.ZERO)
+                dataset.show()
+            }
+            should("handle binary datasets") { // uses encoder
+                val dataset = dsOf(byteArrayOf(1, 0, 1, 0))
+                dataset.show()
+            }
+            should("be able to serialize binary") { // uses knownDataTypes
+                val dataset = dsOf(byteArrayOf(1, 0, 1, 0) to 2)
+                dataset.show()
+            }
+            should("be able to serialize CalendarInterval") { // uses knownDataTypes
+                val dataset = dsOf(CalendarInterval(1, 0, 0L) to 2)
+                dataset.show()
+            }
+            should("be able to serialize null") { // uses knownDataTypes
+                val dataset: Dataset<Pair<Nothing?, Int>> = dsOf(null to 2)
                 dataset.show()
             }
             should("Be able to serialize Scala Tuples including data classes") {
