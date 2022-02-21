@@ -21,7 +21,10 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkConf
 import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.api.java.JavaRDDLike
+import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
@@ -80,9 +83,10 @@ inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KS
             KSparkSession(this).apply {
                 sparkContext.setLogLevel(logLevel)
                 func()
+                sc.stop()
+                spark.stop()
             }
         }
-        .also { it.stop() }
 }
 
 /**
@@ -104,13 +108,14 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
 /**
  * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-@JvmInline
-@Suppress("EXPERIMENTAL_FEATURE_WARNING", "unused")
-value class KSparkSession(val spark: SparkSession) {
+class KSparkSession(val spark: SparkSession) {
+
+    val sc: JavaSparkContext = JavaSparkContext(spark.sparkContext)
+
     inline fun <reified T> List<T>.toDS() = toDS(spark)
     inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
     inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
     inline fun <reified T> RDD<T>.toDS() = toDS(spark)
-    inline fun <reified T> JavaRDD<T>.toDS() = toDS(spark)
+    inline fun <reified T> JavaRDDLike<T, *>.toDS() = toDS(spark)
     val udf: UDFRegistration get() = spark.udf()
 }

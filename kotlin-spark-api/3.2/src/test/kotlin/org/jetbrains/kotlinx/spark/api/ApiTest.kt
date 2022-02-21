@@ -21,6 +21,11 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.apache.spark.api.java.JavaDoubleRDD
+import org.apache.spark.api.java.JavaPairRDD
+import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.streaming.GroupState
@@ -592,6 +597,43 @@ class ApiTest : ShouldSpec({
                 schema.fields().forEach {
                     it.nullable() shouldBe true
                 }
+            }
+            should("Easily convert a (Java)RDD to a Dataset") {
+                // scala RDD
+                val rdd0: RDD<Int> = sc.parallelize(
+                    listOf(1, 2, 3, 4, 5, 6)
+                ).rdd()
+                val dataset0: Dataset<Int> = rdd0.toDS()
+                dataset0.show()
+
+                dataset0.toList<Int>() shouldBe listOf(1, 2, 3, 4, 5, 6)
+
+                // normal JavaRDD
+                val rdd1: JavaRDD<Int> = sc.parallelize(
+                    listOf(1, 2, 3, 4, 5, 6)
+                )
+                val dataset1: Dataset<Int> = rdd1.toDS()
+                dataset1.show()
+
+                dataset1.toList<Int>() shouldBe listOf(1, 2, 3, 4, 5, 6)
+
+                // JavaDoubleRDD
+                val rdd2: JavaDoubleRDD = sc.parallelizeDoubles(
+                    listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+                )
+                val dataset2: Dataset<Double> = rdd2.toDS()
+                dataset2.show()
+
+                dataset2.toList<Double>() shouldBe listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+
+                // JavaPairRDD
+                val rdd3: JavaPairRDD<Int, Double> = sc.parallelizePairs(
+                    listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
+                )
+                val dataset3: Dataset<Tuple2<Int, Double>> = rdd3.toDS()
+                dataset3.show()
+
+                dataset3.toList<Tuple2<Int, Double>>() shouldBe listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
             }
         }
     }
