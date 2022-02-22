@@ -21,7 +21,6 @@
 
 package org.jetbrains.kotlinx.spark.api
 
-import org.apache.hadoop.shaded.org.apache.commons.math3.exception.util.ArgUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.function.*
@@ -33,14 +32,12 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
-import org.apache.spark.sql.types.DataTypes.DateType
 import org.apache.spark.unsafe.types.CalendarInterval
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.Product
 import scala.Tuple2
-import scala.concurrent.duration.`Duration$`
 import scala.reflect.ClassTag
-import scala.reflect.api.TypeTags.TypeTag
+import scala.reflect.api.StandardDefinitions
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
 import java.sql.Date
@@ -1178,6 +1175,12 @@ inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U
  */
 @OptIn(ExperimentalStdlibApi::class)
 fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
+    if (type.classifier == ByteArray::class) return KComplexTypeWrapper(
+        DataTypes.BinaryType,
+        ByteArray::class.java,
+        type.isMarkedNullable,
+    )
+
     val primitiveSchema = knownDataTypes[type.classifier]
     if (primitiveSchema != null) return KSimpleTypeWrapper(
         primitiveSchema,
@@ -1203,7 +1206,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     DoubleArray::class -> typeOf<Double>()
                     BooleanArray::class -> typeOf<Boolean>()
                     ShortArray::class -> typeOf<Short>()
-                    ByteArray::class -> typeOf<Byte>()
+//                    ByteArray::class -> typeOf<Byte>()
                     else -> types.getValue(klass.typeParameters[0].name)
                 }
             } else types.getValue(klass.typeParameters[0].name)
@@ -1306,6 +1309,7 @@ private val knownDataTypes: Map<KClass<out Any>, DataType> = mapOf(
     Timestamp::class to DataTypes.TimestampType,
     Instant::class to DataTypes.TimestampType,
     ByteArray::class to DataTypes.BinaryType,
+    Decimal::class to DecimalType.SYSTEM_DEFAULT(),
     CalendarInterval::class to DataTypes.CalendarIntervalType,
     Nothing::class to DataTypes.NullType,
 )

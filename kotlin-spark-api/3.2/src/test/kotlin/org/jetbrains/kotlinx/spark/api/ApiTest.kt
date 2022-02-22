@@ -353,11 +353,11 @@ class ApiTest : ShouldSpec({
                 dataset.show()
             }
             should("handle binary datasets") { // uses encoder
-                val dataset = dsOf(byteArrayOf(1, 0, 1, 0))
+                val dataset = dsOf("Hello there".encodeToByteArray())
                 dataset.show()
             }
             should("be able to serialize binary") { // uses knownDataTypes
-                val dataset = dsOf(byteArrayOf(1, 0, 1, 0) to 2)
+                val dataset = dsOf(c(byteArrayOf(1, 0, 12), 1, intArrayOf(1, 2, 3)))
                 dataset.show()
             }
             should("be able to serialize CalendarInterval") { // uses knownDataTypes
