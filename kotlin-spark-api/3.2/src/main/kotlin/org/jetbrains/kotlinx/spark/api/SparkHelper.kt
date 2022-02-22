@@ -83,7 +83,6 @@ inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KS
             KSparkSession(this).apply {
                 sparkContext.setLogLevel(logLevel)
                 func()
-                sc.stop()
                 spark.stop()
             }
         }
@@ -110,7 +109,7 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
  */
 class KSparkSession(val spark: SparkSession) {
 
-    val sc: JavaSparkContext = JavaSparkContext(spark.sparkContext)
+    val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
 
     inline fun <reified T> List<T>.toDS() = toDS(spark)
     inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)

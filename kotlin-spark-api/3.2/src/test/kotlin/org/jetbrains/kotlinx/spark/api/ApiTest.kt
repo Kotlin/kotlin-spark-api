@@ -634,10 +634,32 @@ class ApiTest : ShouldSpec({
                 dataset3.show()
 
                 dataset3.toList<Tuple2<Int, Double>>() shouldBe listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
+
+                // Kotlin Serializable data class RDD
+                val rdd4 = sc.parallelize(
+                    listOf(SomeClass(intArrayOf(1, 2), 0))
+                )
+                val dataset4 = rdd4.toDS()
+                dataset4.show()
+
+                dataset4.toList<SomeClass>().first().let { (a, b) ->
+                    a contentEquals intArrayOf(1, 2) shouldBe true
+                    b shouldBe 0
+                }
+
+                // Arity
+                val rdd5 = sc.parallelize(
+                    listOf(c(1.0, 4))
+                )
+                val dataset5 = rdd5.toDS()
+                dataset5.show()
+
+                dataset5.toList<Arity2<Double, Int>>() shouldBe listOf(c(1.0, 4))
             }
         }
     }
 })
+
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
