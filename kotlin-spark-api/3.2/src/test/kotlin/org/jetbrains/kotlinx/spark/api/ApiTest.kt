@@ -25,6 +25,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
+import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
 import scala.Product
 import scala.Tuple1
@@ -32,6 +33,7 @@ import scala.Tuple2
 import scala.Tuple3
 import scala.collection.Seq
 import java.io.Serializable
+import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.Duration
@@ -358,6 +360,22 @@ class ApiTest : ShouldSpec({
             }
             should("be able to serialize binary") { // uses knownDataTypes
                 val dataset = dsOf(c("Hello there".encodeToByteArray(), 1, intArrayOf(1, 2, 3)))
+                dataset.show()
+            }
+            should("handle Decimal datasets") { // uses encoder
+                val dataset = dsOf(Decimal().set(50))
+                dataset.show()
+            }
+            should("be able to serialize Decimal") { // uses knownDataTypes
+                val dataset = dsOf(c(Decimal().set(50), 12))
+                dataset.show()
+            }
+            should("handle BigDecimal datasets") { // uses encoder
+                val dataset = dsOf(BigDecimal.TEN)
+                dataset.show()
+            }
+            should("be able to serialize BigDecimal") { // uses knownDataTypes
+                val dataset = dsOf(c(BigDecimal.TEN, 12))
                 dataset.show()
             }
             should("be able to serialize CalendarInterval") { // uses knownDataTypes

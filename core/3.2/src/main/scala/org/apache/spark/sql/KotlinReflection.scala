@@ -64,6 +64,8 @@ object KotlinReflection extends KotlinReflection {
         case c if c == java.lang.Float.TYPE => FloatType
         case c if c == java.lang.Double.TYPE => DoubleType
         case c if c == classOf[Array[Byte]] => BinaryType
+        case c if c == classOf[Decimal] => DecimalType.SYSTEM_DEFAULT
+        case c if c == classOf[CalendarInterval] => CalendarIntervalType
         case _ => ObjectType(cls)
     }
 
@@ -221,7 +223,7 @@ object KotlinReflection extends KotlinReflection {
                     !dataTypeFor(t).isInstanceOf[ObjectType]
                 } catch {
                     case _: Throwable => false
-                }) && !predefinedDt.exists(_.isInstanceOf[ComplexWrapper]) || tpe == localTypeOf[Array[Byte]] => {
+                }) && !predefinedDt.exists(_.isInstanceOf[ComplexWrapper]) => {
                 path
             }
 
@@ -753,9 +755,8 @@ object KotlinReflection extends KotlinReflection {
         baseType(tpe) match {
 
             //<editor-fold desc="scala-like">
-            case _ if !inputObject.dataType.isInstanceOf[ObjectType] && (!predefinedDt.exists {
-                _.isInstanceOf[ComplexWrapper]
-            } || tpe == localTypeOf[Array[Byte]]) => {
+            case _ if !inputObject.dataType.isInstanceOf[ObjectType] &&
+                !predefinedDt.exists(_.isInstanceOf[ComplexWrapper]) => {
                 inputObject
             }
             case t if isSubtype(t, localTypeOf[Option[_]]) => {
