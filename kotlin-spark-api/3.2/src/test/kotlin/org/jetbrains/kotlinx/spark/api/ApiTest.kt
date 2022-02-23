@@ -604,7 +604,6 @@ class ApiTest : ShouldSpec({
                     listOf(1, 2, 3, 4, 5, 6)
                 ).rdd()
                 val dataset0: Dataset<Int> = rdd0.toDS()
-                dataset0.show()
 
                 dataset0.toList<Int>() shouldBe listOf(1, 2, 3, 4, 5, 6)
 
@@ -613,7 +612,6 @@ class ApiTest : ShouldSpec({
                     listOf(1, 2, 3, 4, 5, 6)
                 )
                 val dataset1: Dataset<Int> = rdd1.toDS()
-                dataset1.show()
 
                 dataset1.toList<Int>() shouldBe listOf(1, 2, 3, 4, 5, 6)
 
@@ -622,7 +620,6 @@ class ApiTest : ShouldSpec({
                     listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
                 )
                 val dataset2: Dataset<Double> = rdd2.toDS()
-                dataset2.show()
 
                 dataset2.toList<Double>() shouldBe listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
 
@@ -631,7 +628,6 @@ class ApiTest : ShouldSpec({
                     listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
                 )
                 val dataset3: Dataset<Tuple2<Int, Double>> = rdd3.toDS()
-                dataset3.show()
 
                 dataset3.toList<Tuple2<Int, Double>>() shouldBe listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
 
@@ -640,7 +636,6 @@ class ApiTest : ShouldSpec({
                     listOf(SomeClass(intArrayOf(1, 2), 0))
                 )
                 val dataset4 = rdd4.toDS()
-                dataset4.show()
 
                 dataset4.toList<SomeClass>().first().let { (a, b) ->
                     a contentEquals intArrayOf(1, 2) shouldBe true
@@ -652,7 +647,6 @@ class ApiTest : ShouldSpec({
                     listOf(c(1.0, 4))
                 )
                 val dataset5 = rdd5.toDS()
-                dataset5.show()
 
                 dataset5.toList<Arity2<Double, Int>>() shouldBe listOf(c(1.0, 4))
             }
