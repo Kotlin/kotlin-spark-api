@@ -36,6 +36,7 @@ import org.apache.spark.unsafe.types.CalendarInterval
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.Product
 import scala.Tuple2
+import scala.concurrent.duration.`Duration$`
 import scala.reflect.ClassTag
 import scala.reflect.api.StandardDefinitions
 import java.beans.PropertyDescriptor
@@ -1306,7 +1307,6 @@ private val knownDataTypes: Map<KClass<out Any>, DataType> = mapOf(
     Decimal::class to DecimalType.SYSTEM_DEFAULT(),
     BigDecimal::class to DecimalType.SYSTEM_DEFAULT(),
     CalendarInterval::class to DataTypes.CalendarIntervalType,
-    Nothing::class to DataTypes.NullType,
 )
 
 private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {

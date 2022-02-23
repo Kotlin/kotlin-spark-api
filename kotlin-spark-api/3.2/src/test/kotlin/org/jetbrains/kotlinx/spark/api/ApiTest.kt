@@ -20,6 +20,7 @@ package org.jetbrains.kotlinx.spark.api/*-
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.*
@@ -323,68 +324,97 @@ class ApiTest : ShouldSpec({
                 cogrouped.count() shouldBe 4
             }
             should("handle LocalDate Datasets") { // uses encoder
-                val dataset: Dataset<LocalDate> = dsOf(LocalDate.now(), LocalDate.now())
-                dataset.show()
+                val dates = listOf(LocalDate.now(), LocalDate.now())
+                val dataset: Dataset<LocalDate> = dates.toDS()
+                dataset.collectAsList() shouldBe dates
             }
             should("handle Instant Datasets") { // uses encoder
-                val dataset: Dataset<Instant> = dsOf(Instant.now(), Instant.now())
-                dataset.show()
+                val instants = listOf(Instant.now(), Instant.now())
+                val dataset: Dataset<Instant> = instants.toDS()
+                dataset.collectAsList() shouldBe instants
             }
             should("Be able to serialize Instant") { // uses knownDataTypes
-                val dataset = dsOf(Instant.now() to Instant.now())
-                dataset.show()
+                val instantPair = Instant.now() to Instant.now()
+                val dataset = dsOf(instantPair)
+                dataset.collectAsList() shouldBe listOf(instantPair)
             }
             should("be able to serialize Date") { // uses knownDataTypes
-                val dataset: Dataset<Pair<Date, Int>> = dsOf(Date.valueOf("2020-02-10") to 5)
-                dataset.show()
+                val datePair = Date.valueOf("2020-02-10") to 5
+                val dataset: Dataset<Pair<Date, Int>> = dsOf(datePair)
+                dataset.collectAsList() shouldBe listOf(datePair)
             }
             should("handle Timestamp Datasets") { // uses encoder
-                val dataset = dsOf(Timestamp(0L))
-                dataset.show()
+                val timeStamps = listOf(Timestamp(0L), Timestamp(1L))
+                val dataset = timeStamps.toDS()
+                dataset.collectAsList() shouldBe timeStamps
             }
             should("be able to serialize Timestamp") { // uses knownDataTypes
-                val dataset = dsOf(Timestamp(0L) to 2)
-                dataset.show()
+                val timestampPair = Timestamp(0L) to 2
+                val dataset = dsOf(timestampPair)
+                dataset.collectAsList() shouldBe listOf(timestampPair)
             }
             should("handle Duration Datasets") { // uses encoder
                 val dataset = dsOf(Duration.ZERO)
-                dataset.show()
+                dataset.collectAsList() shouldBe listOf(Duration.ZERO)
             }
             should("handle Period Datasets") { // uses encoder
-                val dataset = dsOf(Period.ZERO)
-                dataset.show()
+                val periods = listOf(Period.ZERO, Period.ofDays(2))
+                val dataset = periods.toDS()
+
+                dataset.show(false)
+
+                dataset.collectAsList().let {
+                    it[0] shouldBe Period.ZERO
+
+                    // TODO this is also broken in Scala. It reports a Period of 0 instead of 2 days
+//                    it[1] shouldBe Period.ofDays(2)
+                    it[1] shouldBe Period.ofDays(0)
+                }
+
             }
             should("handle binary datasets") { // uses encoder
-                val dataset = dsOf("Hello there".encodeToByteArray())
-                dataset.show()
+                val byteArray = "Hello there".encodeToByteArray()
+                val dataset = dsOf(byteArray)
+                dataset.collectAsList() shouldBe listOf(byteArray)
             }
             should("be able to serialize binary") { // uses knownDataTypes
-                val dataset = dsOf(c("Hello there".encodeToByteArray(), 1, intArrayOf(1, 2, 3)))
-                dataset.show()
-            }
-            should("handle Decimal datasets") { // uses encoder
-                val dataset = dsOf(Decimal().set(50))
-                dataset.show()
+                val byteArrayTriple = c("Hello there".encodeToByteArray(), 1, intArrayOf(1, 2, 3))
+                val dataset = dsOf(byteArrayTriple)
+
+                val (a, b, c) = dataset.collectAsList().single()
+                a contentEquals "Hello there".encodeToByteArray() shouldBe true
+                b shouldBe 1
+                c contentEquals intArrayOf(1, 2, 3) shouldBe true
             }
             should("be able to serialize Decimal") { // uses knownDataTypes
-                val dataset = dsOf(c(Decimal().set(50), 12))
-                dataset.show()
+                val decimalPair = c(Decimal().set(50), 12)
+                val dataset = dsOf(decimalPair)
+                dataset.collectAsList() shouldBe listOf(decimalPair)
             }
             should("handle BigDecimal datasets") { // uses encoder
-                val dataset = dsOf(BigDecimal.TEN)
-                dataset.show()
+                val decimals = listOf(BigDecimal.ONE, BigDecimal.TEN)
+                val dataset = decimals.toDS()
+                dataset.collectAsList().let { (one, ten) ->
+                    one.compareTo(BigDecimal.ONE) shouldBe 0
+                    ten.compareTo(BigDecimal.TEN) shouldBe 0
+                }
             }
             should("be able to serialize BigDecimal") { // uses knownDataTypes
-                val dataset = dsOf(c(BigDecimal.TEN, 12))
-                dataset.show()
+                val decimalPair = c(BigDecimal.TEN, 12)
+                val dataset = dsOf(decimalPair)
+                val (a, b) = dataset.collectAsList().single()
+                a.compareTo(BigDecimal.TEN) shouldBe 0
+                b shouldBe 12
             }
             should("be able to serialize CalendarInterval") { // uses knownDataTypes
-                val dataset = dsOf(CalendarInterval(1, 0, 0L) to 2)
-                dataset.show()
+                val calendarIntervalPair = CalendarInterval(1, 0, 0L) to 2
+                val dataset = dsOf(calendarIntervalPair)
+                dataset.collectAsList() shouldBe listOf(calendarIntervalPair)
             }
-            should("be able to serialize null") { // uses knownDataTypes
-                val dataset: Dataset<Pair<Nothing?, Int>> = dsOf(null to 2)
-                dataset.show()
+            should("handle nullable datasets") {
+                val ints = listOf(1, 2, 3, null)
+                val dataset = ints.toDS()
+                dataset.collectAsList() shouldBe ints
             }
             should("Be able to serialize Scala Tuples including data classes") {
                 val dataset = dsOf(
@@ -415,20 +445,20 @@ class ApiTest : ShouldSpec({
                 val newDS1WithAs: Dataset<IntArray> = dataset.selectTyped(
                     col("a").`as`<IntArray>(),
                 )
-                newDS1WithAs.show()
+                newDS1WithAs.collectAsList()
 
                 val newDS2: Dataset<Pair<IntArray, Int>> = dataset.selectTyped(
                     col(SomeClass::a), // NOTE: this only works on 3.0, returning a data class with an array in it
                     col(SomeClass::b),
                 )
-                newDS2.show()
+                newDS2.collectAsList()
 
                 val newDS3: Dataset<Triple<IntArray, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
                 )
-                newDS3.show()
+                newDS3.collectAsList()
 
                 val newDS4: Dataset<Arity4<IntArray, Int, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
@@ -436,7 +466,7 @@ class ApiTest : ShouldSpec({
                     col(SomeClass::b),
                     col(SomeClass::b),
                 )
-                newDS4.show()
+                newDS4.collectAsList()
 
                 val newDS5: Dataset<Arity5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
@@ -445,7 +475,7 @@ class ApiTest : ShouldSpec({
                     col(SomeClass::b),
                     col(SomeClass::b),
                 )
-                newDS5.show()
+                newDS5.collectAsList()
             }
             should("Access columns using invoke on datasets") {
                 val dataset = dsOf(
@@ -498,19 +528,18 @@ class ApiTest : ShouldSpec({
                     dataset(SomeOtherClass::a),
                     col(SomeOtherClass::c),
                 )
-                b.show()
+                b.collectAsList()
             }
             should("Handle some where queries using column operator functions") {
                 val dataset = dsOf(
                     SomeOtherClass(intArrayOf(1, 2, 3), 4, true),
                     SomeOtherClass(intArrayOf(4, 3, 2), 1, true),
                 )
-                dataset.show()
+                dataset.collectAsList()
 
                 val column = col("b").`as`<IntArray>()
 
                 val b = dataset.where(column gt 3 and col(SomeOtherClass::c))
-                b.show()
 
                 b.count() shouldBe 1
             }
@@ -519,21 +548,51 @@ class ApiTest : ShouldSpec({
                     listOf(SomeClass(intArrayOf(1, 2, 3), 4)),
                     listOf(SomeClass(intArrayOf(3, 2, 1), 0)),
                 )
-                dataset.show()
+
+                val (first, second) = dataset.collectAsList()
+
+                first.single().let { (a, b) ->
+                    a.contentEquals(intArrayOf(1, 2, 3)) shouldBe true
+                    b shouldBe 4
+                }
+                second.single().let { (a, b) ->
+                    a.contentEquals(intArrayOf(3, 2, 1)) shouldBe true
+                    b shouldBe 0
+                }
             }
             should("Be able to serialize arrays of data classes") {
                 val dataset = dsOf(
                     arrayOf(SomeClass(intArrayOf(1, 2, 3), 4)),
                     arrayOf(SomeClass(intArrayOf(3, 2, 1), 0)),
                 )
-                dataset.show()
+
+                val (first, second) = dataset.collectAsList()
+
+                first.single().let { (a, b) ->
+                    a.contentEquals(intArrayOf(1, 2, 3)) shouldBe true
+                    b shouldBe 4
+                }
+                second.single().let { (a, b) ->
+                    a.contentEquals(intArrayOf(3, 2, 1)) shouldBe true
+                    b shouldBe 0
+                }
             }
             should("Be able to serialize lists of tuples") {
                 val dataset = dsOf(
                     listOf(Tuple2(intArrayOf(1, 2, 3), 4)),
                     listOf(Tuple2(intArrayOf(3, 2, 1), 0)),
                 )
-                dataset.show()
+
+                val (first, second) = dataset.collectAsList()
+
+                first.single().let {
+                    it._1().contentEquals(intArrayOf(1, 2, 3)) shouldBe true
+                    it._2() shouldBe 4
+                }
+                second.single().let {
+                    it._1().contentEquals(intArrayOf(3, 2, 1)) shouldBe true
+                    it._2() shouldBe 0
+                }
             }
             should("Allow simple forEachPartition in datasets") {
                 val dataset = dsOf(
