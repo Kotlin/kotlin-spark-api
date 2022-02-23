@@ -309,8 +309,7 @@ object KotlinReflection extends KotlinReflection {
             }
             case t if isSubtype(t, localTypeOf[scala.math.BigInt]) => {
                 createDeserializerForScalaBigInt(path)
-            } //      TODO case t if isSubtype(t, localTypeOf[Array[Byte]]) =>
-            //        createDeserializerForTypesSupportValueOf(path, classOf[Array[Byte]])
+            }
 
             case t if isSubtype(t, localTypeOf[Array[_]]) => {
                 var TypeRef(_, _, Seq(elementType)) = t
@@ -753,7 +752,7 @@ object KotlinReflection extends KotlinReflection {
 
         baseType(tpe) match {
 
-            //<editor-fold desc="scala-like"> // TODO binary should go though objectType
+            //<editor-fold desc="scala-like">
             case _ if !inputObject.dataType.isInstanceOf[ObjectType] && (!predefinedDt.exists {
                 _.isInstanceOf[ComplexWrapper]
             } || tpe == localTypeOf[Array[Byte]]) => {
@@ -933,12 +932,9 @@ object KotlinReflection extends KotlinReflection {
                             val propClass = structField.dataType.asInstanceOf[DataTypeWithClass].cls
                             val propDt = structField.dataType.asInstanceOf[DataTypeWithClass]
 
-                            val fieldType: Type = getType(propClass) // TODO this must also return the type Array[Byte]
-                            //
                             val fieldValue = Invoke(
                                 inputObject,
                                 maybeProp.get.getReadMethod.getName,
-                                //                                dataTypeFor(fieldType),
                                 inferExternalType(propClass),
                                 returnNullable = structField.nullable
                             )
@@ -951,8 +947,7 @@ object KotlinReflection extends KotlinReflection {
                                 tpe = tpe,
                                 walkedTypePath = newPath,
                                 seenTypeSet = seenTypeSet,
-                                predefinedDt = if (propDt
-                                    .isInstanceOf[ComplexWrapper] /*&& propClass != classOf[Array[Byte]]*/ ) Some(propDt) else None
+                                predefinedDt = if (propDt.isInstanceOf[ComplexWrapper]) Some(propDt) else None
                             )
 
                             (fieldName, serializer)
