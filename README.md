@@ -27,14 +27,14 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 - [Code of Conduct](#code-of-conduct)
 - [License](#license)
 
-## Supported versions of Apache Spark #TODO
+## Supported versions of Apache Spark
 
 | Apache Spark | Scala |  Kotlin for Apache Spark        |
 |:------------:|:-----:|:-------------------------------:|
 | 3.0.0+       | 2.12  | kotlin-spark-api-3.0:1.0.2    |
 | 2.4.1+       | 2.12  | kotlin-spark-api-2.4_2.12:1.0.2 |
 | 2.4.1+       | 2.11  | kotlin-spark-api-2.4_2.11:1.0.2 |
-| 3.2.0+       | 2.12  | kotlin-spark-api-2.4_2.12:1.0.3 |
+| 3.2.0+       | 2.12  | kotlin-spark-api-3.2:1.0.3 |
 
 ## Releases
 
