@@ -22,7 +22,7 @@ package org.apache.spark.sql
 
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.DeserializerBuildHelper._
-import org.apache.spark.sql.catalyst.ScalaReflection.{Schema, getClassFromType, isSubtype, javaBoxedType, localTypeOf}
+import org.apache.spark.sql.catalyst.ScalaReflection.{Schema, dataTypeFor, getClassFromType, isSubtype, javaBoxedType, localTypeOf}
 import org.apache.spark.sql.catalyst.SerializerBuildHelper._
 import org.apache.spark.sql.catalyst.analysis.GetColumnByOrdinal
 import org.apache.spark.sql.catalyst.expressions.objects._
@@ -34,6 +34,7 @@ import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
 import org.apache.spark.util.Utils
 
 import java.beans.{Introspector, PropertyDescriptor}
+import java.lang.Exception
 
 
 /**
@@ -215,6 +216,15 @@ object KotlinReflection extends KotlinReflection {
         baseType(tpe) match {
 
             //<editor-fold desc="Description">
+            case t if (
+                try {
+                    !dataTypeFor(t).isInstanceOf[ObjectType]
+                } catch {
+                    case _: Throwable => false
+                }) && !predefinedDt.exists(_.isInstanceOf[ComplexWrapper]) || tpe == localTypeOf[Array[Byte]] => {
+                path
+            }
+
             case t if isSubtype(t, localTypeOf[java.lang.Integer]) => {
                 createDeserializerForTypesSupportValueOf(path, classOf[java.lang.Integer])
             }
@@ -621,8 +631,14 @@ object KotlinReflection extends KotlinReflection {
     }
 
     def getType[T](clazz: Class[T]): universe.Type = {
-        val mir = runtimeMirror(clazz.getClassLoader)
-        mir.classSymbol(clazz).toType
+        clazz match {
+            case _ if clazz == classOf[Array[Byte]] => localTypeOf[Array[Byte]]
+            case _ => {
+                val mir = runtimeMirror(clazz.getClassLoader)
+                mir.classSymbol(clazz).toType
+            }
+        }
+
     }
 
     def deserializerFor(cls: java.lang.Class[_], dt: DataTypeWithClass): Expression = {
@@ -737,9 +753,10 @@ object KotlinReflection extends KotlinReflection {
 
         baseType(tpe) match {
 
-            //<editor-fold desc="scala-like">
-            case _ if !inputObject.dataType.isInstanceOf[ObjectType]
-                && !predefinedDt.exists(_.isInstanceOf[ComplexWrapper]) => {
+            //<editor-fold desc="scala-like"> // TODO binary should go though objectType
+            case _ if !inputObject.dataType.isInstanceOf[ObjectType] && (!predefinedDt.exists {
+                _.isInstanceOf[ComplexWrapper]
+            } || tpe == localTypeOf[Array[Byte]]) => {
                 inputObject
             }
             case t if isSubtype(t, localTypeOf[Option[_]]) => {
@@ -915,18 +932,19 @@ object KotlinReflection extends KotlinReflection {
                             val fieldName = structField.name
                             val propClass = structField.dataType.asInstanceOf[DataTypeWithClass].cls
                             val propDt = structField.dataType.asInstanceOf[DataTypeWithClass]
+
+                            val fieldType: Type = getType(propClass) // TODO this must also return the type Array[Byte]
+                            //
                             val fieldValue = Invoke(
                                 inputObject,
                                 maybeProp.get.getReadMethod.getName,
+                                //                                dataTypeFor(fieldType),
                                 inferExternalType(propClass),
                                 returnNullable = structField.nullable
                             )
                             val newPath = walkedTypePath.recordField(propClass.getName, fieldName)
 
-                            val tpe =
-                            //                                if (propClass == classOf[Array[Byte]]) localTypeOf[Array[Byte]]
-                            //                                else
-                                getType(propClass)
+                            val tpe = getType(propClass)
 
                             val serializer = serializerFor(
                                 inputObject = fieldValue,
