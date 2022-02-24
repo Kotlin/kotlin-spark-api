@@ -155,6 +155,7 @@ inline fun withSpark(
  * @param logLevel Control our logLevel. This overrides any user-defined log settings.
  * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
  */
+@Suppress("UsePropertyAccessSyntax")
 @JvmOverloads
 inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
     builder
@@ -229,7 +230,7 @@ inline fun withSparkStreaming(
  */
 open class KSparkSession(val spark: SparkSession) {
 
-    val sc: JavaSparkContext = JavaSparkContext(spark.sparkContext)
+    val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
 
     inline fun <reified T> List<T>.toDS() = toDS(spark)
     inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
