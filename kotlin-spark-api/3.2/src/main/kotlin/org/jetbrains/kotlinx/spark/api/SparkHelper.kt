@@ -78,6 +78,7 @@ inline fun withSpark(
  * @param logLevel Control our logLevel. This overrides any user-defined log settings.
  * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
  */
+@Suppress("UsePropertyAccessSyntax")
 @JvmOverloads
 inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
     builder
@@ -86,7 +87,6 @@ inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KS
             KSparkSession(this).apply {
                 sparkContext.setLogLevel(logLevel)
                 func()
-                sc.stop()
                 spark.stop()
             }
         }
@@ -163,5 +163,6 @@ open class KSparkSession(val spark: SparkSession, val sc: JavaSparkContext = Jav
 /**
  * This wrapper over [SparkSession] and [JavaStreamingContext] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-class KSparkStreamingSession(session: KSparkSession, val ssc: JavaStreamingContext) : KSparkSession(session.spark, session.sc)
+class KSparkStreamingSession(session: KSparkSession, val ssc: JavaStreamingContext) :
+    KSparkSession(session.spark, session.sc)
 
