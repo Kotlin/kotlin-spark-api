@@ -367,6 +367,7 @@ class ApiTest : ShouldSpec({
                     it[0] shouldBe Period.ZERO
 
                     // TODO this is also broken in Scala. It reports a Period of 0 instead of 2 days
+                    //  https://issues.apache.org/jira/browse/SPARK-38317
 //                    it[1] shouldBe Period.ofDays(2)
                     it[1] shouldBe Period.ofDays(0)
                 }
