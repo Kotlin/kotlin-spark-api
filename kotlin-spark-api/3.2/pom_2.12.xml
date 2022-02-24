@@ -36,6 +36,12 @@
       <version>${spark3.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- Test dependencies -->
     <dependency>

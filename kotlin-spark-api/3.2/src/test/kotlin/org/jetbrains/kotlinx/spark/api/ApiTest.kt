@@ -21,6 +21,11 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.apache.spark.api.java.JavaDoubleRDD
+import org.apache.spark.api.java.JavaPairRDD
+import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.streaming.GroupState
@@ -593,9 +598,72 @@ class ApiTest : ShouldSpec({
                     it.nullable() shouldBe true
                 }
             }
+            should("Convert Scala RDD to Dataset") {
+                val rdd0: RDD<Int> = sc.parallelize(
+                    listOf(1, 2, 3, 4, 5, 6)
+                ).rdd()
+                val dataset0: Dataset<Int> = rdd0.toDS()
+
+                dataset0.toList<Int>() shouldBe listOf(1, 2, 3, 4, 5, 6)
+            }
+
+            should("Convert a JavaRDD to a Dataset") {
+                val rdd1: JavaRDD<Int> = sc.parallelize(
+                    listOf(1, 2, 3, 4, 5, 6)
+                )
+                val dataset1: Dataset<Int> = rdd1.toDS()
+
+                dataset1.toList<Int>() shouldBe listOf(1, 2, 3, 4, 5, 6)
+            }
+            should("Convert JavaDoubleRDD to Dataset") {
+
+                // JavaDoubleRDD
+                val rdd2: JavaDoubleRDD = sc.parallelizeDoubles(
+                    listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+                )
+                val dataset2: Dataset<Double> = rdd2.toDS()
+
+                dataset2.toList<Double>() shouldBe listOf(1.0, 2.0, 3.0, 4.0, 5.0, 6.0)
+            }
+            should("Convert JavaPairRDD to Dataset") {
+                val rdd3: JavaPairRDD<Int, Double> = sc.parallelizePairs(
+                    listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
+                )
+                val dataset3: Dataset<Tuple2<Int, Double>> = rdd3.toDS()
+
+                dataset3.toList<Tuple2<Int, Double>>() shouldBe listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
+            }
+            should("Convert Kotlin Serializable data class RDD to Dataset") {
+                val rdd4 = sc.parallelize(
+                    listOf(SomeClass(intArrayOf(1, 2), 0))
+                )
+                val dataset4 = rdd4.toDS()
+
+                dataset4.toList<SomeClass>().first().let { (a, b) ->
+                    a contentEquals intArrayOf(1, 2) shouldBe true
+                    b shouldBe 0
+                }
+            }
+            should("Convert Arity RDD to Dataset") {
+                val rdd5 = sc.parallelize(
+                    listOf(c(1.0, 4))
+                )
+                val dataset5 = rdd5.toDS()
+
+                dataset5.toList<Arity2<Double, Int>>() shouldBe listOf(c(1.0, 4))
+            }
+            should("Convert List RDD to Dataset") {
+                val rdd6 = sc.parallelize(
+                    listOf(listOf(1, 2, 3), listOf(4, 5, 6))
+                )
+                val dataset6 = rdd6.toDS()
+
+                dataset6.toList<List<Int>>() shouldBe listOf(listOf(1, 2, 3), listOf(4, 5, 6))
+            }
         }
     }
 })
+
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
@@ -626,5 +694,5 @@ data class ComplexEnumDataClass(
 
 data class NullFieldAbleDataClass(
     val optionList: List<Int>?,
-    val optionMap: Map<String, Int>?
+    val optionMap: Map<String, Int>?,
 )

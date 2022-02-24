@@ -20,6 +20,11 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkConf
+import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.api.java.JavaRDDLike
+import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
@@ -78,18 +83,38 @@ inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KS
             KSparkSession(this).apply {
                 sparkContext.setLogLevel(logLevel)
                 func()
+                spark.stop()
             }
         }
-        .also { it.stop() }
+}
+
+/**
+ * Wrapper for spark creation which copies params from [sparkConf].
+ *
+ * @param sparkConf Sets a list of config options based on this.
+ * @param logLevel Control our logLevel. This overrides any user-defined log settings.
+ * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
+ */
+@JvmOverloads
+inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
+    withSpark(
+        builder = SparkSession.builder().config(sparkConf),
+        logLevel = logLevel,
+        func = func,
+    )
 }
 
 /**
  * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-@Suppress("EXPERIMENTAL_FEATURE_WARNING", "unused")
-inline class KSparkSession(val spark: SparkSession) {
+class KSparkSession(val spark: SparkSession) {
+
+    val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
+
     inline fun <reified T> List<T>.toDS() = toDS(spark)
     inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
     inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
+    inline fun <reified T> RDD<T>.toDS() = toDS(spark)
+    inline fun <reified T> JavaRDDLike<T, *>.toDS() = toDS(spark)
     val udf: UDFRegistration get() = spark.udf()
 }

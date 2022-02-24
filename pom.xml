@@ -32,6 +32,7 @@
         <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
         <nexus-staging-plugin.version>1.6.8</nexus-staging-plugin.version>
         <scala-maven-plugin.version>4.5.6</scala-maven-plugin.version>
+        <kotlin.code.style>official</kotlin.code.style>
     </properties>
 
     <modules>
