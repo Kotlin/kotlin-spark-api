@@ -25,5 +25,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: docs
           publish_dir: ./kotlin-spark-api/3.2/target/dokka
+          force_orphan: true
 
 
