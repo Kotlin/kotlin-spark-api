@@ -21,7 +21,6 @@
 
 package org.jetbrains.kotlinx.spark.api
 
-import org.apache.hadoop.shaded.org.apache.commons.math3.exception.util.ArgUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.api.java.*
 import org.apache.spark.api.java.function.*
@@ -34,17 +33,21 @@ import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.sql.types.*
+import org.apache.spark.unsafe.types.CalendarInterval
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.Product
 import scala.Tuple2
+import scala.concurrent.duration.`Duration$`
 import scala.reflect.ClassTag
-import scala.reflect.api.TypeTags.TypeTag
+import scala.reflect.api.StandardDefinitions
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Period
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.Any
@@ -96,10 +99,12 @@ val ENCODERS: Map<KClass<*>, Encoder<*>> = mapOf(
     String::class to STRING(),
     BigDecimal::class to DECIMAL(),
     Date::class to DATE(),
-    LocalDate::class to LOCALDATE(), // 3.0 only
+    LocalDate::class to LOCALDATE(), // 3.0+
     Timestamp::class to TIMESTAMP(),
-    Instant::class to INSTANT(), // 3.0 only
-    ByteArray::class to BINARY()
+    Instant::class to INSTANT(), // 3.0+
+    ByteArray::class to BINARY(),
+    Duration::class to DURATION(), // 3.2+
+    Period::class to PERIOD(), // 3.2+
 )
 
 
@@ -190,12 +195,16 @@ fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
     } as Encoder<T>
 }
 
-private fun isSupportedClass(cls: KClass<*>): Boolean =
-    cls.isData
-        || cls.isSubclassOf(Map::class)
-        || cls.isSubclassOf(Iterable::class)
-        || cls.isSubclassOf(Product::class)
-        || cls.java.isArray
+private fun isSupportedClass(cls: KClass<*>): Boolean = when {
+        cls == ByteArray::class -> false // uses binary encoder
+        cls.isData -> true
+        cls.isSubclassOf(Map::class) -> true
+        cls.isSubclassOf(Iterable::class) -> true
+        cls.isSubclassOf(Product::class) -> true
+        cls.java.isArray -> true
+        else -> false
+    }
+
 
 private fun <T> kotlinClassEncoder(schema: DataType, kClass: KClass<*>): Encoder<T> {
     return ExpressionEncoder(
@@ -1205,7 +1214,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     DoubleArray::class -> typeOf<Double>()
                     BooleanArray::class -> typeOf<Boolean>()
                     ShortArray::class -> typeOf<Short>()
-                    ByteArray::class -> typeOf<Byte>()
+//                    ByteArray::class -> typeOf<Byte>() handled by BinaryType
                     else -> types.getValue(klass.typeParameters[0].name)
                 }
             } else types.getValue(klass.typeParameters[0].name)
@@ -1303,10 +1312,14 @@ private val knownDataTypes: Map<KClass<out Any>, DataType> = mapOf(
     Float::class to DataTypes.FloatType,
     Double::class to DataTypes.DoubleType,
     String::class to DataTypes.StringType,
-    LocalDate::class to `DateType$`.`MODULE$`,
-    Date::class to `DateType$`.`MODULE$`,
-    Timestamp::class to `TimestampType$`.`MODULE$`,
-    Instant::class to `TimestampType$`.`MODULE$`,
+    LocalDate::class to DataTypes.DateType,
+    Date::class to DataTypes.DateType,
+    Timestamp::class to DataTypes.TimestampType,
+    Instant::class to DataTypes.TimestampType,
+    ByteArray::class to DataTypes.BinaryType,
+    Decimal::class to DecimalType.SYSTEM_DEFAULT(),
+    BigDecimal::class to DecimalType.SYSTEM_DEFAULT(),
+    CalendarInterval::class to DataTypes.CalendarIntervalType,
 )
 
 private fun transitiveMerge(a: Map<String, KType>, b: Map<String, KType>): Map<String, KType> {
