@@ -20,14 +20,53 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkConf
-import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.SparkContext
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
+import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
+
+/**
+ * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset]
+ */
+class KSparkSession(val spark: SparkSession) {
+
+    val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
+
+    inline fun <reified T> List<T>.toDS() = toDS(spark)
+    inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
+    inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
+    inline fun <reified T> RDD<T>.toDS() = toDS(spark)
+    inline fun <reified T> JavaRDDLike<T, *>.toDS() = toDS(spark)
+    val udf: UDFRegistration get() = spark.udf()
+}
+
+/**
+ * The entry point to programming Spark with the Dataset and DataFrame API.
+ *
+ * @see org.apache.spark.sql.SparkSession
+ */
+typealias SparkSession = org.apache.spark.sql.SparkSession
+
+/**
+ * Control our logLevel. This overrides any user-defined log settings.
+ * @param level The desired log level as [SparkLogLevel].
+ */
+fun SparkContext.setLogLevel(level: SparkLogLevel): Unit = setLogLevel(level.name)
+
+enum class SparkLogLevel {
+    ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
+}
+
+/**
+ * Returns the Spark context associated with this Spark session.
+ */
+val SparkSession.sparkContext: SparkContext
+    get() = KSparkExtensions.sparkContext(this)
 
 /**
  * Wrapper for spark creation which allows setting different spark params.
@@ -105,16 +144,36 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
 }
 
 /**
- * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset]
+ * Broadcast a read-only variable to the cluster, returning a
+ * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
+ * The variable will be sent to each cluster only once.
+ *
+ * @param value value to broadcast to the Spark nodes
+ * @return `Broadcast` object, a read-only variable cached on each machine
  */
-class KSparkSession(val spark: SparkSession) {
-
-    val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
-
-    inline fun <reified T> List<T>.toDS() = toDS(spark)
-    inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
-    inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
-    inline fun <reified T> RDD<T>.toDS() = toDS(spark)
-    inline fun <reified T> JavaRDDLike<T, *>.toDS() = toDS(spark)
-    val udf: UDFRegistration get() = spark.udf()
+inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
+    sparkContext.broadcast(value, encoder<T>().clsTag())
+} catch (e: ClassNotFoundException) {
+    JavaSparkContext(sparkContext).broadcast(value)
 }
+
+/**
+ * Broadcast a read-only variable to the cluster, returning a
+ * [org.apache.spark.broadcast.Broadcast] object for reading it in distributed functions.
+ * The variable will be sent to each cluster only once.
+ *
+ * @param value value to broadcast to the Spark nodes
+ * @return `Broadcast` object, a read-only variable cached on each machine
+ * @see broadcast
+ */
+@Deprecated(
+    "You can now use `spark.broadcast()` instead.",
+    ReplaceWith("spark.broadcast(value)"),
+    DeprecationLevel.WARNING
+)
+inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
+    broadcast(value, encoder<T>().clsTag())
+} catch (e: ClassNotFoundException) {
+    JavaSparkContext(this).broadcast(value)
+}
+
