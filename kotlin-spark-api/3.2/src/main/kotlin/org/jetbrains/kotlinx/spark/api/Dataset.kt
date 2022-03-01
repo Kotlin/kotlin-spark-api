@@ -50,7 +50,7 @@ inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
     createDataset(list, encoder<T>())
 
 /**
- * Utility method to create dataset from list
+ * Utility method to create dataset from *array or vararg arguments
  */
 inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
     createDataset(listOf(*t), encoder<T>())

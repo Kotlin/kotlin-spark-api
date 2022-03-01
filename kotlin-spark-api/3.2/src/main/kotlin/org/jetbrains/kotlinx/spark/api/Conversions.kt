@@ -19,7 +19,7 @@
  */
 
 /**
- * This files contains conversions of Iterators, Collections, etc. between the Scala-
+ * This files contains conversions of Iterators, Collections, Tuples, etc. between the Scala-
  * and Kotlin/Java variants.
  */
 

@@ -37,7 +37,6 @@
  * dataset.map { (a: Int, b: Double) ->
  *    (a + b).toString()
  * }
- *
  * ```
  */
 

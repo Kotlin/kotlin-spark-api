@@ -17,6 +17,11 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+
+/**
+ * This file contains the main entry points and wrappers for the Kotlin Spark API.
+ */
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkConf
@@ -25,23 +30,49 @@ import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.rdd.RDD
+import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 
 /**
- * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset]
+ * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset].
+ *
+ *  @param spark The current [SparkSession] to wrap
  */
 class KSparkSession(val spark: SparkSession) {
 
+    /** Lazy instance of [JavaSparkContext] wrapper around [sparkContext]. */
     val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
 
-    inline fun <reified T> List<T>.toDS() = toDS(spark)
-    inline fun <reified T> Array<T>.toDS() = spark.dsOf(*this)
-    inline fun <reified T> dsOf(vararg arg: T) = spark.dsOf(*arg)
-    inline fun <reified T> RDD<T>.toDS() = toDS(spark)
-    inline fun <reified T> JavaRDDLike<T, *>.toDS() = toDS(spark)
+    /** Utility method to create dataset from list. */
+    inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)
+
+    /** Utility method to create dataset from [Array]. */
+    inline fun <reified T> Array<T>.toDS(): Dataset<T> = spark.dsOf(*this)
+
+    /** Utility method to create dataset from vararg arguments. */
+    inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)
+
+    /** Utility method to create dataset from Scala [RDD]. */
+    inline fun <reified T> RDD<T>.toDS(): Dataset<T> = toDS(spark)
+
+    /** Utility method to create dataset from [JavaRDDLike]. */
+    inline fun <reified T> JavaRDDLike<T, *>.toDS(): Dataset<T> = toDS(spark)
+
+    /**
+     * A collection of methods for registering user-defined functions (UDF).
+     *
+     * The following example registers a UDF in Kotlin:
+     * ```Kotlin
+     *   sparkSession.udf.register("myUDF") { arg1: Int, arg2: String -> arg2 + arg1 }
+     * ```
+     *
+     * @note The user-defined functions must be deterministic. Due to optimization,
+     * duplicate invocations may be eliminated or the function may even be invoked more times than
+     * it is present in the query.
+     */
     val udf: UDFRegistration get() = spark.udf()
 }
 
@@ -58,6 +89,7 @@ typealias SparkSession = org.apache.spark.sql.SparkSession
  */
 fun SparkContext.setLogLevel(level: SparkLogLevel): Unit = setLogLevel(level.name)
 
+/** Log levels for spark. */
 enum class SparkLogLevel {
     ALL, DEBUG, ERROR, FATAL, INFO, OFF, TRACE, WARN
 }

@@ -17,6 +17,12 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+
+/**
+ * This file contains several extension functions to work with [KeyValueGroupedDataset]s more easily
+ * from Kotlin. This includes automatically providing the right encoders, as well as mapping to `Arities`.
+ */
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.api.java.function.CoGroupFunction
@@ -75,7 +81,7 @@ inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(
  */
 inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroupsK(noinline func: (VALUE, VALUE) -> VALUE): Dataset<Pair<KEY, VALUE>> =
     reduceGroups(ReduceFunction(func))
-        .map { t -> t._1 to t._2 }
+        .map { t -> t._1() to t._2() }
 
 /**
  * (Kotlin-specific)
@@ -98,7 +104,7 @@ inline fun <K, V, reified U> KeyValueGroupedDataset<K, V>.flatMapGroups(
     noinline func: (key: K, values: Iterator<V>) -> Iterator<U>,
 ): Dataset<U> = flatMapGroups(
     FlatMapGroupsFunction(func),
-    encoder<U>()
+    encoder<U>(),
 )
 
 
@@ -122,7 +128,7 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
 ): Dataset<U> = mapGroupsWithState(
     MapGroupsWithStateFunction(func),
     encoder<S>(),
-    encoder<U>()
+    encoder<U>(),
 )
 
 /**
@@ -148,7 +154,7 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
     MapGroupsWithStateFunction(func),
     encoder<S>(),
     encoder<U>(),
-    timeoutConf
+    timeoutConf,
 )
 
 /**
@@ -177,7 +183,7 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.flatMapGrou
     outputMode,
     encoder<S>(),
     encoder<U>(),
-    timeoutConf
+    timeoutConf,
 )
 
 /**
@@ -193,5 +199,5 @@ inline fun <K, V, U, reified R> KeyValueGroupedDataset<K, V>.cogroup(
 ): Dataset<R> = cogroup(
     other,
     CoGroupFunction(func),
-    encoder<R>()
+    encoder<R>(),
 )
