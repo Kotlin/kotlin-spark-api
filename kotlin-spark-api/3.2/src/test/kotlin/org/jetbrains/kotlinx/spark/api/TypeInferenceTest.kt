@@ -41,21 +41,21 @@ class TypeInferenceTest : ShouldSpec({
         val struct = Struct.fromJson(schema(typeOf<Pair<String, Test<Int>>>()).prettyJson())!!
         should("contain correct typings") {
             expect(struct.fields).notToBeNull().contains.inAnyOrder.only.entries(
-                    hasField("first", "string"),
-                    hasStruct("second",
-                            hasField("vala", "integer"),
-                            hasStruct("tripl1",
-                                    hasField("first", "integer"),
-                                    hasStruct("second",
-                                            hasField("vala2", "long"),
-                                            hasStruct("para2",
-                                                    hasField("first", "long"),
-                                                    hasField("second", "string")
-                                            )
-                                    ),
-                                    hasField("third", "integer")
+                hasField("first", "string"),
+                hasStruct("second",
+                    hasField("vala", "integer"),
+                    hasStruct("tripl1",
+                        hasField("first", "integer"),
+                        hasStruct("second",
+                            hasField("vala2", "long"),
+                            hasStruct("para2",
+                                hasField("first", "long"),
+                                hasField("second", "string")
                             )
+                        ),
+                        hasField("third", "integer")
                     )
+                )
             )
         }
     }
@@ -67,23 +67,23 @@ class TypeInferenceTest : ShouldSpec({
         val struct = Struct.fromJson(schema(typeOf<Pair<String, Test<Int>>>()).prettyJson())!!
         should("contain correct typings") {
             expect(struct.fields).notToBeNull().contains.inAnyOrder.only.entries(
-                    hasField("first", "string"),
-                    hasStruct("second",
-                            hasField("vala", "integer"),
-                            hasStruct("tripl1",
-                                    hasField("first", "integer"),
-                                    hasStruct("second",
-                                            hasField("vala2", "long"),
-                                            hasStruct("para2",
-                                                    hasField("first", "long"),
-                                                    hasStruct("second",
-                                                            hasField("vala3", "double")
-                                                    )
-                                            )
-                                    ),
-                                    hasField("third", "integer")
+                hasField("first", "string"),
+                hasStruct("second",
+                    hasField("vala", "integer"),
+                    hasStruct("tripl1",
+                        hasField("first", "integer"),
+                        hasStruct("second",
+                            hasField("vala2", "long"),
+                            hasStruct("para2",
+                                hasField("first", "long"),
+                                hasStruct("second",
+                                    hasField("vala3", "double")
+                                )
                             )
+                        ),
+                        hasField("third", "integer")
                     )
+                )
             )
         }
     }
@@ -93,9 +93,9 @@ class TypeInferenceTest : ShouldSpec({
         val struct = Struct.fromJson(schema(typeOf<Test>()).prettyJson())!!
         should("return correct types too") {
             expect(struct.fields).notToBeNull().contains.inAnyOrder.only.entries(
-                    hasField("a", "string"),
-                    hasField("b", "integer"),
-                    hasField("c", "double")
+                hasField("a", "string"),
+                hasField("b", "integer"),
+                hasField("c", "double")
             )
         }
     }
@@ -115,8 +115,8 @@ class TypeInferenceTest : ShouldSpec({
                 isOfType("array")
                 feature { f(it::elementType) }.notToBeNull().isA<ComplexElement> {
                     feature { f(it.value::fields) }.notToBeNull().contains.inAnyOrder.only.entries(
-                            hasField("first", "integer"),
-                            hasField("second", "long")
+                        hasField("first", "integer"),
+                        hasField("second", "long")
                     )
                 }
             }
@@ -131,7 +131,7 @@ class TypeInferenceTest : ShouldSpec({
                 isOfType("array")
                 feature { f(it::elementType) }.notToBeNull().isA<ComplexElement> {
                     feature { f(it.value::fields) }.notToBeNull().contains.inAnyOrder.only.entries(
-                            hasField("e", "string")
+                        hasField("e", "string")
                     )
                 }
             }
@@ -174,8 +174,8 @@ class TypeInferenceTest : ShouldSpec({
         val struct = Struct.fromJson(schema(typeOf<Test>()).prettyJson())!!
         should("Not change order of fields") {
             expect(struct.fields).notToBeNull().containsExactly(
-                    hasField("lon", "double"),
-                    hasField("lat", "double")
+                hasField("lon", "double"),
+                hasField("lat", "double")
             )
         }
     }
@@ -186,38 +186,39 @@ class TypeInferenceTest : ShouldSpec({
 
         should("show that list is nullable and element is not") {
             expect(struct)
-                    .feature("some", { fields }) {
-                        notToBeNull().contains.inOrder.only.entry {
-                            this
-                                    .feature("field name", { name }) { toBe("optionList") }
-                                    .feature("optionList is nullable", { nullable }) { toBe(true) }
-                                    .feature("optionList", { type }) {
-                                        this
-                                                .isA<StructType>()
-                                                .feature("element type of optionList", { value.elementType }) { toBe(SimpleElement("integer")) }
-                                                .feature("optionList contains null", { value.containsNull }) { toBe(false) }
-                                                .feature("optionList type", { value }) { isOfType("array") }
-                                    }
-                        }
+                .feature("some", { fields }) {
+                    notToBeNull().contains.inOrder.only.entry {
+                        this
+                            .feature("field name", { name }) { toBe("optionList") }
+                            .feature("optionList is nullable", { nullable }) { toBe(true) }
+                            .feature("optionList", { type }) {
+                                this
+                                    .isA<StructType>()
+                                    .feature("element type of optionList",
+                                        { value.elementType }) { toBe(SimpleElement("integer")) }
+                                    .feature("optionList contains null", { value.containsNull }) { toBe(false) }
+                                    .feature("optionList type", { value }) { isOfType("array") }
+                            }
                     }
+                }
         }
 
         should("generate valid serializer schema") {
             expect(encoder<Sample>().schema()) {
                 this
-                        .feature("data type", { this.fields()?.toList() }) {
-                            this.notToBeNull().contains.inOrder.only.entry {
-                                this
-                                        .feature("element name", { name() }) { toBe("optionList") }
-                                        .feature("field type", { dataType() }, {
-                                            this
-                                                    .isA<ArrayType>()
-                                                    .feature("element type", { elementType() }) { isA<IntegerType>() }
-                                                    .feature("element nullable", { containsNull() }) { toBe(expected = false) }
-                                        })
-                                        .feature("optionList nullable", { nullable() }) { toBe(true) }
-                            }
+                    .feature("data type", { this.fields()?.toList() }) {
+                        this.notToBeNull().contains.inOrder.only.entry {
+                            this
+                                .feature("element name", { name() }) { toBe("optionList") }
+                                .feature("field type", { dataType() }, {
+                                    this
+                                        .isA<ArrayType>()
+                                        .feature("element type", { elementType() }) { isA<IntegerType>() }
+                                        .feature("element nullable", { containsNull() }) { toBe(expected = false) }
+                                })
+                                .feature("optionList nullable", { nullable() }) { toBe(true) }
                         }
+                    }
             }
         }
     }
@@ -229,15 +230,15 @@ private fun Expect<Struct>.isOfType(type: String) {
 }
 
 private fun hasStruct(
-        name: String,
-        expectedField: Expect<StructField>.() -> Unit,
-        vararg expectedFields: Expect<StructField>.() -> Unit,
+    name: String,
+    expectedField: Expect<StructField>.() -> Unit,
+    vararg expectedFields: Expect<StructField>.() -> Unit,
 ): Expect<StructField>.() -> Unit {
     return {
         feature { f(it::name) }.toBe(name)
         feature { f(it::type) }.isA<StructType> {
             feature { f(it.value::fields) }.notToBeNull().contains.inAnyOrder.only.entries(expectedField,
-                    *expectedFields)
+                *expectedFields)
         }
     }
 }
