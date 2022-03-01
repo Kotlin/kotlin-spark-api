@@ -38,7 +38,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
 
-class EncodingTests : ShouldSpec({
+class EncodingTest : ShouldSpec({
 
     context("encoders") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {

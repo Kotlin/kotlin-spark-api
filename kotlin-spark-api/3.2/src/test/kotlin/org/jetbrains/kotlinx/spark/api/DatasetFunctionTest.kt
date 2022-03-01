@@ -16,7 +16,7 @@ import scala.Tuple2
 import scala.Tuple3
 import java.io.Serializable
 
-class DatasetFunctionTests : ShouldSpec({
+class DatasetFunctionTest : ShouldSpec({
 
     context("dataset extensions") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
