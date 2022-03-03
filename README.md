@@ -71,6 +71,36 @@ Once you have configured the dependency, you only need to add the following impo
 import org.jetbrains.kotlinx.spark.api.*
 ```   
 
+### Jupyter
+
+The Kotlin Spark API also supports Kotlin Jupyter notebooks.
+To it, simply add
+
+```jupyterpython
+%use kotlin-spark-api
+```
+to the top of your notebook. This will get the latest version of the API, together with the latest version of Spark.
+To define a certain version of Spark or the API itself, simply add it like this:
+```jupyterpython
+%use kotlin-spark-api(spark=3.2, version=1.0.4)
+```
+
+Inside the notebook a Spark session will be initiated automatically. This can be accessed via the `spark` value.
+`sc: JavaSparkContext` can also be accessed directly.
+
+One limitation of the notebooks is that the `SparkSession` context cannot be applied 
+implicitly to function calls. This means that instead of writing:
+```kotlin
+val ds = listOf(...).toDS()
+```
+you'll need to write:
+```kotlin
+val ds = listOf(...).toDS(spark)
+```
+
+Other than that, the API operates pretty similarly.
+
+
 ## Kotlin for Apache Spark features
 
 ### Creating a SparkSession in Kotlin
@@ -79,12 +109,13 @@ val spark = SparkSession
         .builder()
         .master("local[2]")
         .appName("Simple Application").orCreate
-
 ```
+
+This is not needed when running the Kotlin Spark API from a Jupyter notebook.
 
 ### Creating a Dataset in Kotlin
 ```kotlin
-spark.toDS("a" to 1, "b" to 2)
+spark.dsOf("a" to 1, "b" to 2)
 ```
 The example above produces `Dataset<Pair<String, Int>>`.
  
@@ -99,6 +130,8 @@ Note that we are forcing `RIGHT` to be nullable for you as a developer to be abl
 We provide you with useful function `withSpark`, which accepts everything that may be needed to run Spark — properties, name, master location and so on. It also accepts a block of code to execute inside Spark context.
 
 After work block ends, `spark.stop()` is called automatically.
+
+Do not use this when running the Kotlin Spark API from a Jupyter notebook.
 
 ```kotlin
 withSpark {
