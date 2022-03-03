@@ -19,15 +19,7 @@
  */
 package org.jetbrains.kotlinx.spark.api.jupyter
 
-import org.apache.spark.SparkConf
-import org.apache.spark.api.java.JavaSparkContext
-import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
-import org.jetbrains.kotlinx.jupyter.api.declare
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
-import org.jetbrains.kotlinx.spark.api.*
-import org.jetbrains.kotlinx.spark.api.setLogLevel
-import kotlin.reflect.*
-import org.jetbrains.kotlinx.spark.api.sparkContext
 
 @OptIn(ExperimentalStdlibApi::class)
 internal class Integration : JupyterIntegration() {
@@ -64,6 +56,7 @@ internal class Integration : JupyterIntegration() {
         import("org.apache.spark.sql.functions.*")
         import("org.apache.spark.*")
         import("org.apache.spark.sql.*")
+        import("org.apache.spark.api.java.*")
         import("org.apache.spark.sql.SparkSession.Builder")
         import("scala.collection.Seq")
 
@@ -71,30 +64,17 @@ internal class Integration : JupyterIntegration() {
         onLoaded {
             println("Running!!")
 
-            System.setProperty(
-                "spark.jars",
-                listOf(
-                    "~/.m2/repository/org/apache/spark/spark-core_2.12/3.2.1/spark-core_2.12-3.2.1.jar",
-                ).joinToString(",")
+            execute(
+                """|val spark = org.jetbrains.kotlinx.spark.api.SparkSession
+                   |    .builder()
+                   |    .master(SparkConf().get("spark.master", "local[*]"))
+                   |    .appName("Jupyter")
+                   |    .getOrCreate()""".trimMargin()
             )
 
-            val spark = org.apache.spark.sql.SparkSession
-                .builder()
-                .master(SparkConf().get("spark.master", "local[*]"))
-                .appName("Jupyter")
-                .getOrCreate()
-
-            //            execute("%dumpClassesForSpark")
-
-            spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)
-
-
-            val sc = JavaSparkContext(spark.sparkContext)
-
-            declare(
-                "spark" to spark,
-                "sc" to sc,
-            )
+            execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
+            execute("""val sc = org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)""")
+//            execute("""fun udf(): org.apache.spark.sql.UDFRegistration { return spark.udf() }""")
 
 
         }
