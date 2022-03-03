@@ -29,6 +29,12 @@
       <version>${spark3.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-core_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>

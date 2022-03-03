@@ -20,7 +20,9 @@
 package org.jetbrains.kotlinx.spark.api.jupyter
 
 import org.apache.spark.SparkConf
+import org.apache.spark.api.java.JavaSparkContext
 import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
+import org.jetbrains.kotlinx.jupyter.api.declare
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
 import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.setLogLevel
@@ -67,30 +69,34 @@ internal class Integration : JupyterIntegration() {
 
         // starting spark and unwrapping KSparkContext functions
         onLoaded {
-            execute("""println("Running!!")""")
-            execute(
-                """|val spark = org.apache.spark.sql.SparkSession
-                   |    .builder()
-                   |    .master(SparkConf().get("spark.master", "local[*]"))
-                   |    .appName("Jupyter")
-                   |    .getOrCreate()""".trimMargin()
-            )
-//            execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
-//            execute("""val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }""")
-//            val spark = org.apache.spark.sql.SparkSession
-//                .builder()
-//                .master(SparkConf().get("spark.master", "local[*]"))
-//                .appName("Jupyter")
-//                .getOrCreate()
-//            spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)
+            println("Running!!")
 
-//            declare(
-//                listOf(VariableDeclaration(
-//                    name = "spark",
-//                    value = spark,
-//                    type = typeOf<org.apache.spark.sql.SparkSession>(),
-//                ))
-//            )
+            System.setProperty(
+                "spark.jars",
+                listOf(
+                    "~/.m2/repository/org/apache/spark/spark-core_2.12/3.2.1/spark-core_2.12-3.2.1.jar",
+                ).joinToString(",")
+            )
+
+            val spark = org.apache.spark.sql.SparkSession
+                .builder()
+                .master(SparkConf().get("spark.master", "local[*]"))
+                .appName("Jupyter")
+                .getOrCreate()
+
+            //            execute("%dumpClassesForSpark")
+
+            spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)
+
+
+            val sc = JavaSparkContext(spark.sparkContext)
+
+            declare(
+                "spark" to spark,
+                "sc" to sc,
+            )
+
+
         }
     }
 }
