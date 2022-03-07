@@ -17,6 +17,7 @@
         <kotest-extension-allure.version>1.0.1</kotest-extension-allure.version>
         <spark3.version>3.2.1</spark3.version>
         <kotlin-jupyter-api.version>0.11.0-61</kotlin-jupyter-api.version>
+        <kotlinx.html.version>0.7.3</kotlinx.html.version>
 
         <!-- Plugin versions -->
         <allure-maven.version>2.10.0</allure-maven.version>
