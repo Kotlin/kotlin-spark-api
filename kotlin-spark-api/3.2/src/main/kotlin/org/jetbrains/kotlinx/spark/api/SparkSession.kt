@@ -81,7 +81,11 @@ open class KSparkSession(val spark: SparkSession) {
 /**
  * This wrapper over [SparkSession] and [JavaStreamingContext] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-class KSparkStreamingSession(spark: SparkSession, val ssc: JavaStreamingContext) : KSparkSession(spark)
+class KSparkStreamingSession(spark: SparkSession, val ssc: JavaStreamingContext) : KSparkSession(spark) {
+
+    /** Can be overwritten to be run after the streaming session has started and before it's terminated. */
+    var runAfterStart: KSparkStreamingSession.() -> Unit = {}
+}
 
 
 
@@ -198,7 +202,7 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
  * @param appName Sets a name for the application, which will be shown in the Spark web UI.
  *  If no application name is set, a randomly generated name will be used.
  * @param logLevel Control our logLevel. This overrides any user-defined log settings.
- * @param func function which will be executed in context of [KSparkStreamingSession] (it means that `this` inside block will point to [KSparkStreamingSession])
+ * @param beforeStart function which will be executed in context of [KSparkStreamingSession] (it means that `this` inside block will point to [KSparkStreamingSession])
  * todo: provide alternatives with path instead of batchDuration etc
  */
 @JvmOverloads
@@ -220,6 +224,7 @@ inline fun withSparkStreaming(
         KSparkStreamingSession(spark = spark, ssc = ssc).apply {
             func()
             ssc.start()
+            runAfterStart()
             ssc.awaitTermination()
         }
     }

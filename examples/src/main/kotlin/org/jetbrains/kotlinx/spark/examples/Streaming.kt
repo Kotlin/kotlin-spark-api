@@ -35,6 +35,9 @@ fun main() = withSparkStreaming(Durations.seconds(1)) {
     val lines = ssc.socketTextStream("localhost", 9999)
     val words = lines.flatMap { it.split(" ").iterator() }
 
+    lines.
+
+
     words.foreachRDD { rdd, time ->
         val dataframe: Dataset<TestRow> = rdd.map { TestRow(it) }.toDS()
 
