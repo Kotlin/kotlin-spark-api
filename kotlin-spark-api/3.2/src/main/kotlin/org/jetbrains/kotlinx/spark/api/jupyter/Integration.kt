@@ -19,14 +19,12 @@
  */
 package org.jetbrains.kotlinx.spark.api.jupyter
 
-import com.sun.xml.internal.fastinfoset.alphabet.BuiltInRestrictedAlphabets.table
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
 import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.Dataset
 import org.jetbrains.kotlinx.jupyter.api.HTML
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
-import org.jetbrains.kotlinx.spark.api.forEach
 
 @OptIn(ExperimentalStdlibApi::class)
 internal class Integration : JupyterIntegration() {
