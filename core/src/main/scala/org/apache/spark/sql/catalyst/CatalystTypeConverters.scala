@@ -1,23 +1,22 @@
 package org.apache.spark.sql.catalyst
 
 import kotlin.jvm.JvmClassMappingKt
-import kotlin.reflect.{KClass, KFunction, KProperty1}
 import kotlin.reflect.full.KClasses
-
-import java.lang.{Iterable => JavaIterable}
-import java.math.{BigDecimal => JavaBigDecimal}
-import java.math.{BigInteger => JavaBigInteger}
-import java.sql.{Date, Timestamp}
-import java.time.{Instant, LocalDate}
-import java.util.{Map => JavaMap}
-import javax.annotation.Nullable
-import scala.language.existentials
+import kotlin.reflect.{KClass, KProperty1}
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.expressions._
 import org.apache.spark.sql.catalyst.util._
 import org.apache.spark.sql.internal.SQLConf
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
+
+import java.lang.{Iterable => JavaIterable}
+import java.math.{BigDecimal => JavaBigDecimal, BigInteger => JavaBigInteger}
+import java.sql.{Date, Timestamp}
+import java.time.{Instant, LocalDate}
+import java.util.{Map => JavaMap}
+import javax.annotation.Nullable
+import scala.language.existentials
 
 /**
  * Functions to convert Scala types to Catalyst types and vice versa.

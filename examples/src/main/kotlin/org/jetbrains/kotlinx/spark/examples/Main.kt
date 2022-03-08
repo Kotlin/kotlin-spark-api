@@ -19,6 +19,7 @@
  */
 package org.jetbrains.kotlinx.spark.examples
 
+import org.apache.spark.api.java.function.ReduceFunction
 import org.jetbrains.kotlinx.spark.api.*
 
 data class Q<T>(val id: Int, val text: T)

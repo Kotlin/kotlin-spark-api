@@ -1,4 +1,5 @@
 plugins {
+    scala
     kotlin("jvm")
 }
 
@@ -16,6 +17,10 @@ dependencies {
     val scalaVersion: String by project
     val scalaCompatVersion: String by project
     val spark3Version: String by project
+    val kotestVersion: String by project
+    val kotestExtensionAllureVersion: String by project
+    val klaxonVersion: String by project
+    val atriumVersion: String by project
 
     implementation(kotlin("stdlib-jdk8"))
     implementation("org.scala-lang:scala-library:$scalaVersion")
@@ -23,6 +28,14 @@ dependencies {
     implementation(kotlin("reflect"))
 
     implementation(project(":core"))
-    implementation(project(":common"))
 
+
+    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
+    testImplementation("io.kotest.extensions:kotest-extensions-allure:$kotestExtensionAllureVersion")
+    testImplementation("com.beust:klaxon:$klaxonVersion")
+    testImplementation("ch.tutteli.atrium:atrium-fluent-en_GB:$atriumVersion")
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
 }
