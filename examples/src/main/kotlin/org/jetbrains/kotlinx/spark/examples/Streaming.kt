@@ -30,12 +30,10 @@ data class TestRow(
     val word: String,
 )
 
-fun main() = withSparkStreaming(Durations.seconds(1)) {
+fun main() = withSparkStreaming(Durations.seconds(1), timeout = 10_000) {
 
     val lines = ssc.socketTextStream("localhost", 9999)
     val words = lines.flatMap { it.split(" ").iterator() }
-
-    lines.
 
 
     words.foreachRDD { rdd, time ->

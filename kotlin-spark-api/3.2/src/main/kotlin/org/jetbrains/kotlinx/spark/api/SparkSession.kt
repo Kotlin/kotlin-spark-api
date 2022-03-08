@@ -202,7 +202,8 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
  * @param appName Sets a name for the application, which will be shown in the Spark web UI.
  *  If no application name is set, a randomly generated name will be used.
  * @param logLevel Control our logLevel. This overrides any user-defined log settings.
- * @param beforeStart function which will be executed in context of [KSparkStreamingSession] (it means that `this` inside block will point to [KSparkStreamingSession])
+ * @param timeout The time in milliseconds to wait for the stream to terminate without input. -1 by default, this means no timeout.
+ * @param func function which will be executed in context of [KSparkStreamingSession] (it means that `this` inside block will point to [KSparkStreamingSession])
  * todo: provide alternatives with path instead of batchDuration etc
  */
 @JvmOverloads
@@ -212,6 +213,7 @@ inline fun withSparkStreaming(
     master: String = SparkConf().get("spark.master", "local[*]"),
     appName: String = "Kotlin Spark Sample",
     logLevel: SparkLogLevel = SparkLogLevel.ERROR,
+    timeout: Long = -1L,
     func: KSparkStreamingSession.() -> Unit,
 ) {
     withSpark(
@@ -225,7 +227,8 @@ inline fun withSparkStreaming(
             func()
             ssc.start()
             runAfterStart()
-            ssc.awaitTermination()
+            ssc.awaitTerminationOrTimeout(timeout)
+            ssc.stop()
         }
     }
 }

@@ -1,41 +1,41 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
-import org.apache.spark.sql.execution.streaming.MemoryStream
-import org.apache.spark.sql.streaming.OutputMode
 import org.apache.spark.streaming.Duration
+import java.io.Serializable
+import org.jetbrains.kotlinx.spark.api.*
+import java.util.LinkedList
+
 
 class StreamingTest : ShouldSpec({
     context("streaming") {
         should("stream") {
 
-            withSpark/*Streaming(Duration(1))*/ {
-            // WIP this doesn't use ssc at all?
+            val input = listOf("aaa", "bbb", "aaa", "ccc")
 
-                val events = MemoryStream<Int>(100, spark.sqlContext(), null, encoder())
-                val sessions = events.toDS()
-                sessions.isStreaming shouldBe true
-
-                val transformedSessions = sessions.map { (it * 2).toString() }
-
-                val streamingQuery = transformedSessions
-                    .writeStream()
-                    .format("memory")
-                    .queryName("test")
-                    .outputMode(OutputMode.Append())
-                    .start()
-
-                val currentOffset = events.addData(listOf(1, 2, 3).asScalaIterable())
-                streamingQuery.processAllAvailable()
-                events.commit(currentOffset)
-
-                spark.table("test")
-                    .show(false)
-
-
+            val results = object : Serializable {
+                @Volatile
+                var counter = 0
             }
 
+            withSparkStreaming(Duration(10), timeout = 1000) {
+                val resultsBroadcast = spark.broadcast(results)
+
+                val rdd = sc.parallelize(input)
+                val queue = LinkedList(listOf(rdd))
+
+                val inputStream = ssc.queueStream(queue)
+
+                inputStream.foreachRDD { rdd, _ ->
+                    rdd.foreach {
+                        it shouldBeIn input
+                        resultsBroadcast.value.counter++
+                    }
+                }
+            }
+            results.counter shouldBe input.size
 
         }
     }
