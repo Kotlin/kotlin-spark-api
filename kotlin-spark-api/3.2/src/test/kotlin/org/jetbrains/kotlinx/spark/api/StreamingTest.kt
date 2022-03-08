@@ -29,7 +29,7 @@ class StreamingTest : ShouldSpec({
                 val inputStream = ssc.queueStream(queue)
 
                 inputStream.foreachRDD { rdd, _ ->
-                    rdd.foreach {
+                    rdd.toDS().forEach {
                         it shouldBeIn input
                         resultsBroadcast.value.counter++
                     }
