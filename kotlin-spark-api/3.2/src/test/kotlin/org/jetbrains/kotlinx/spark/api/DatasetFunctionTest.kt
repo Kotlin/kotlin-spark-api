@@ -282,6 +282,42 @@ class DatasetFunctionTest : ShouldSpec({
 
                 dataset6.toList<List<Int>>() shouldBe listOf(listOf(1, 2, 3), listOf(4, 5, 6))
             }
+
+            should("Sort Arity2 Dataset") {
+                val list = listOf(
+                    c(1, 6),
+                    c(2, 5),
+                    c(3, 4),
+                )
+                val dataset = list.toDS()
+
+                dataset.sortByKey().collectAsList() shouldBe list.sortedBy { it._1 }
+                dataset.sortByValue().collectAsList() shouldBe list.sortedBy { it._2 }
+            }
+
+            should("Sort Tuple2 Dataset") {
+                val list = listOf(
+                    Tuple2(1, 6),
+                    Tuple2(2, 5),
+                    Tuple2(3, 4),
+                )
+                val dataset = list.toDS()
+
+                dataset.sortByKey().collectAsList() shouldBe list.sortedBy { it._1 }
+                dataset.sortByValue().collectAsList() shouldBe list.sortedBy { it._2 }
+            }
+
+            should("Sort Pair Dataset") {
+                val list = listOf(
+                    Pair(1, 6),
+                    Pair(2, 5),
+                    Pair(3, 4),
+                )
+                val dataset = list.toDS()
+
+                dataset.sortByKey().collectAsList() shouldBe list.sortedBy { it.first }
+                dataset.sortByValue().collectAsList() shouldBe list.sortedBy { it.second }
+            }
         }
     }
 
@@ -400,6 +436,7 @@ class DatasetFunctionTest : ShouldSpec({
 
                 b.count() shouldBe 1
             }
+
 
         }
     }
