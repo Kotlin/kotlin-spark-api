@@ -309,6 +309,30 @@ inline fun <reified L : Any?, reified R : Any?> Dataset<L>.fullJoin(
  */
 inline fun <reified T> Dataset<T>.sort(columns: (Dataset<T>) -> Array<Column>): Dataset<T> = sort(*columns(this))
 
+/** Returns a dataset sorted by the first (`_1`) value of each [Tuple2] inside. */
+@JvmName("sortByTuple2Key")
+fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByKey(): Dataset<Tuple2<T1, T2>> = sort("_1")
+
+/** Returns a dataset sorted by the second (`_2`) value of each [Tuple2] inside. */
+@JvmName("sortByTuple2Value")
+fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByValue(): Dataset<Tuple2<T1, T2>> = sort("_2")
+
+/** Returns a dataset sorted by the first (`_1`) value of each [Arity2] inside. */
+@JvmName("sortByArity2Key")
+fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByKey(): Dataset<Arity2<T1, T2>> = sort("_1")
+
+/** Returns a dataset sorted by the second (`_2`) value of each [Arity2] inside. */
+@JvmName("sortByArity2Value")
+fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByValue(): Dataset<Arity2<T1, T2>> = sort("_2")
+
+/** Returns a dataset sorted by the first (`first`) value of each [Pair] inside. */
+@JvmName("sortByPairKey")
+fun <T1, T2> Dataset<Pair<T1, T2>>.sortByKey(): Dataset<Pair<T1, T2>> = sort("first")
+
+/** Returns a dataset sorted by the second (`second`) value of each [Pair] inside. */
+@JvmName("sortByPairValue")
+fun <T1, T2> Dataset<Pair<T1, T2>>.sortByValue(): Dataset<Pair<T1, T2>> = sort("second")
+
 /**
  * This function creates block, where one can call any further computations on already cached dataset
  * Data will be unpersisted automatically at the end of computation
