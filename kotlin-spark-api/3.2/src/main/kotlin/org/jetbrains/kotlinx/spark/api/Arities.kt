@@ -17,9 +17,29 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+
 /**
- * Helper classes and functions to work with unnamed tuples
+ * Helper classes and functions to work with unnamed tuples we call Arities.
+ * Arities are easier to work with in Kotlin than Scala Tuples since they are Kotlin data classes.
+ * This means they can be destructured, copied, etc.
+ * Finally, the Arities are Serializable, meaning they can be used inside RDDs and they can be broadcast.
+ *
+ * Example:
+ * ```kotlin
+ * // creation
+ * val tuple: Arity3<Int, String, Double> = c(1, "test", 1.0)
+ *
+ * // addition
+ * val newTuple: Arity5<Int, String, Double, Int, Int> = tuple + c(1, 2)
+ *
+ * // destructuring
+ * val dataset: Dataset<Arity2<Int, Double>> = ...
+ * dataset.map { (a: Int, b: Double) ->
+ *    (a + b).toString()
+ * }
+ * ```
  */
+
 package org.jetbrains.kotlinx.spark.api
 
 import java.io.Serializable
