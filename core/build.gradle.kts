@@ -18,9 +18,9 @@ dependencies {
     val scalaCompatVersion: String by project
     val spark3Version: String by project
 
-    implementation("org.scala-lang:scala-library:$scalaVersion")
-    implementation("org.apache.spark:spark-sql_$scalaCompatVersion:$spark3Version")
-    implementation(kotlin("reflect"))
+    api("org.scala-lang:scala-library:$scalaVersion")
+    api("org.apache.spark:spark-sql_$scalaCompatVersion:$spark3Version")
+    api(kotlin("reflect"))
 
 
 }

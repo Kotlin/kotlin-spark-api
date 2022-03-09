@@ -19,10 +19,10 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Dataset
-import org.junit.jupiter.api.assertThrows
 import scala.collection.JavaConverters
 import scala.collection.mutable.WrappedArray
 
@@ -60,7 +60,7 @@ class UDFRegisterTest : ShouldSpec({
             )
             invalidTypes.forEachIndexed { index, invalidType ->
                 should("$index: throw an ${TypeOfUDFParameterNotSupportedException::class.simpleName} when encountering ${invalidType.qualifiedName}") {
-                    assertThrows<TypeOfUDFParameterNotSupportedException> {
+                    shouldThrow<TypeOfUDFParameterNotSupportedException> {
                         invalidType.checkForValidType("test")
                     }
                 }
@@ -71,7 +71,7 @@ class UDFRegisterTest : ShouldSpec({
             withSpark {
 
                 should("fail when using a simple kotlin.Array") {
-                    assertThrows<TypeOfUDFParameterNotSupportedException> {
+                    shouldThrow<TypeOfUDFParameterNotSupportedException> {
                         udf.register("shouldFail") { array: Array<String> ->
                             array.joinToString(" ")
                         }
