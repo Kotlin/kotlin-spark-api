@@ -113,10 +113,10 @@ publishing {
             val releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             url = URI(if (projectVersion.endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
             credentials {
-
-
-                username = "TODO" // "$ossrhAsm0dey"
-                password = "TODO" // "$ossrhAsm0deyPass"
+                val mavenCentralUsername: String by project
+                val mavenCentralPassword: String by project
+                username = mavenCentralUsername
+                password = mavenCentralPassword
             }
         }
     }
