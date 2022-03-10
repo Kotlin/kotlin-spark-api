@@ -52,25 +52,6 @@ publishing {
                 classifier = "javadoc"
             }
 
-
-            /*
-            TODO not sure where to put this
-
-            <distributionManagement>
-                <repository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
-            </distributionManagement>
-
-             */
-
-
-
             pom {
                 groupId = groupID
                 artifactId = "kotlin-spark-api-parent"
@@ -80,7 +61,7 @@ publishing {
 
                 name.set("Kotlin Spark API: Parent")
                 description.set("Parent project for Kotlin for Apache Spark")
-//                packaging = "pom"
+                packaging = "pom"
 
                 url.set("https://maven.apache.org")
                 inceptionYear.set("2019")
@@ -132,6 +113,8 @@ publishing {
             val releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             url = URI(if (projectVersion.endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
             credentials {
+
+
                 username = "TODO" // "$ossrhAsm0dey"
                 password = "TODO" // "$ossrhAsm0deyPass"
             }
