@@ -23,8 +23,13 @@ import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
 import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.Dataset
+import org.apache.spark.unsafe.array.ByteArrayMethods
+import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.HTML
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
+import org.jetbrains.kotlinx.spark.api.KSparkSession
+import org.jetbrains.kotlinx.spark.api.asKotlinList
+import java.io.InputStreamReader
 
 @OptIn(ExperimentalStdlibApi::class)
 internal class Integration : JupyterIntegration() {
@@ -68,20 +73,26 @@ internal class Integration : JupyterIntegration() {
         onLoaded {
             println("Running!!")
 
-            execute(
-                """|val spark = org.jetbrains.kotlinx.spark.api.SparkSession
-                   |    .builder()
-                   |    .master(SparkConf().get("spark.master", "local[*]"))
-                   |    .appName("Jupyter")
-                   |    .getOrCreate()""".trimMargin()
+            @Language("kts")
+            val spark = execute(
+                """
+                val spark = org.jetbrains.kotlinx.spark.api.SparkSession
+                    .builder()
+                    .master(SparkConf().get("spark.master", "local[*]"))
+                    .appName("Jupyter")
+                    .getOrCreate()
+                """.trimIndent()
             )
 
-            execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
-            execute("""val sc = org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)""")
-//            execute("""fun udf(): org.apache.spark.sql.UDFRegistration { return spark.udf() }""")
+            @Language("kts")
+            val logLevel = execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
+
+            @Language("kts")
+            val sc = execute("""val sc = org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)""")
 
 
         }
+
 
         // Render Dataset
         render<Dataset<*>> {
@@ -91,10 +102,29 @@ internal class Integration : JupyterIntegration() {
 }
 
 
-private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 20): String = buildString {
-    appendHTML().table {
+private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String = buildString {
+    appendHTML().head {
+        style("text/css") {
+            unsafe {
+                val resource = "/table.css"
+                val res = Integration::class.java
+                    .getResourceAsStream(resource) ?: error("Resource '$resource' not found")
+                val readRes = InputStreamReader(res).readText()
+                raw("\n" + readRes)
+            }
+        }
+    }
+
+    appendHTML().table("dataset") {
+        val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
+        val tmpRows = getRows(numRows, truncate).asKotlinList().map { it.asKotlinList() }
+
+        val hasMoreData = tmpRows.size - 1 > numRows
+        val rows = tmpRows.take(numRows + 1)
+
+
         tr {
-            for (header in columns()) th {
+            for (header in rows.first()) th {
                 +header.let {
                     if (truncate > 0 && it.length > truncate) {
                         // do not show ellipses for strings shorter than 4 characters.
@@ -107,16 +137,15 @@ private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 20): String =
             }
         }
 
-        val data = select(col("*"))
-            .takeAsList(limit)
-            .toList()
-
-        for (row in data) tr {
-            for (i in 0 until row.size()) td {
-                +row.get(i).toString()
+        for (row in rows.drop(1)) tr {
+            for (item in row) td {
+                +item
             }
         }
-    }
 
+        if (hasMoreData) tr {
+            +"only showing top $numRows ${if (numRows == 1) "row" else "rows"}"
+        }
+    }
 
 }

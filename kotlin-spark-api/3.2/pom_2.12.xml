@@ -21,6 +21,11 @@
             <name>kotlinx-html</name>
             <url>https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven</url>
         </repository>
+        <repository>
+            <id>kotlin</id>
+            <name>kotlin</name>
+            <url>https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -47,6 +52,7 @@
         </dependency>
 
 
+
         <!-- Provided dependencies -->
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -59,49 +65,19 @@
             <artifactId>spark-streaming_${scala.compat.version}</artifactId>
             <version>${spark3.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-catalyst_${scala.compat.version}</artifactId>
-            <version>${spark3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-mllib_${scala.compat.version}</artifactId>
-            <version>${spark3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-repl_${scala.compat.version}</artifactId>
-            <version>${spark3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-graphx_${scala.compat.version}</artifactId>
-            <version>${spark3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-launcher_${scala.compat.version}</artifactId>
-            <version>${spark3.version}</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-reflect</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-compiler</artifactId>
-            <version>${scala.version}</version>
-        </dependency>
 
         <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlin-jupyter-test-kit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
@@ -124,6 +100,12 @@
             <groupId>ch.tutteli.atrium</groupId>
             <artifactId>atrium-fluent-en_GB</artifactId>
             <version>${atrium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>RELEASE</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

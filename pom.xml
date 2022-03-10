@@ -14,6 +14,7 @@
         <dokka.version>1.6.10</dokka.version>
         <atrium.version>0.16.0</atrium.version>
         <kotest.version>4.6.0</kotest.version>
+        <junit.version>5.8.2</junit.version>
         <kotest-extension-allure.version>1.0.1</kotest-extension-allure.version>
         <spark3.version>3.2.1</spark3.version>
         <kotlin-jupyter-api.version>0.11.0-61</kotlin-jupyter-api.version>
@@ -57,6 +58,18 @@
                 <groupId>org.jetbrains.kotlinx</groupId>
                 <artifactId>kotlin-jupyter-api</artifactId>
                 <version>${kotlin-jupyter-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jetbrains.kotlinx</groupId>
+                <artifactId>kotlin-jupyter-test-kit</artifactId>
+                <version>${kotlin-jupyter-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -171,9 +184,6 @@
                         <root>src/main/</root>
                         <root>src/test/</root>
                     </roots>
-                    <excludes>
-                        <exclude>**/*.json</exclude>
-                    </excludes>
                     <licenseName>apache_v2</licenseName>
                     <processStartTag>=LICENSE=</processStartTag>
                     <processEndTag>=LICENSE END=</processEndTag>
@@ -188,6 +198,7 @@
                         <configuration>
                             <excludes>
                                 <exclude>**/*.json</exclude>
+                                <exclude>**/*.css</exclude>
                             </excludes>
                         </configuration>
                         <phase>process-sources</phase>
