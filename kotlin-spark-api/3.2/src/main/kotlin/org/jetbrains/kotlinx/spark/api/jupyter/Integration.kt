@@ -21,14 +21,17 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
+import org.apache.spark.api.java.JavaRDDLike
+import org.apache.spark.api.java.function.MapGroupsFunction
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.KeyValueGroupedDataset
 import org.apache.spark.unsafe.array.ByteArrayMethods
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.HTML
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
-import org.jetbrains.kotlinx.spark.api.KSparkSession
-import org.jetbrains.kotlinx.spark.api.asKotlinList
+import org.jetbrains.kotlinx.spark.api.*
 import java.io.InputStreamReader
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -69,28 +72,30 @@ internal class Integration : JupyterIntegration() {
         import("org.apache.spark.sql.SparkSession.Builder")
         import("scala.collection.Seq")
 
+        var spark: SparkSession? = null
+
         // starting spark and unwrapping KSparkContext functions
         onLoaded {
             println("Running!!")
 
             @Language("kts")
-            val spark = execute(
+            val sparkField = execute(
                 """
                 val spark = org.jetbrains.kotlinx.spark.api.SparkSession
                     .builder()
                     .master(SparkConf().get("spark.master", "local[*]"))
                     .appName("Jupyter")
                     .getOrCreate()
+                spark
                 """.trimIndent()
             )
+            spark = sparkField.value as SparkSession
 
             @Language("kts")
             val logLevel = execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
 
             @Language("kts")
             val sc = execute("""val sc = org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)""")
-
-
         }
 
 
@@ -98,11 +103,22 @@ internal class Integration : JupyterIntegration() {
         render<Dataset<*>> {
             HTML(it.toHtml())
         }
+
+        render<RDD<*>> {
+            HTML(it.toJavaRDD().toHtml())
+        }
+
+        render<JavaRDDLike<*, *>> {
+            HTML(it.toHtml())
+        }
+
+//        render<KeyValueGroupedDataset<*, *>> {
+//            HTML(it.toHtml(spark!!))
+//        }
     }
 }
 
-
-private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String = buildString {
+private fun createHtmlTable(fillTable: TABLE.() -> Unit): String = buildString {
     appendHTML().head {
         style("text/css") {
             unsafe {
@@ -115,37 +131,85 @@ private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String =
         }
     }
 
-    appendHTML().table("dataset") {
-        val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
-        val tmpRows = getRows(numRows, truncate).asKotlinList().map { it.asKotlinList() }
-
-        val hasMoreData = tmpRows.size - 1 > numRows
-        val rows = tmpRows.take(numRows + 1)
+    appendHTML().table("dataset", fillTable)
+}
 
 
-        tr {
-            for (header in rows.first()) th {
-                +header.let {
-                    if (truncate > 0 && it.length > truncate) {
-                        // do not show ellipses for strings shorter than 4 characters.
-                        if (truncate < 4) it.substring(0, truncate)
-                        else it.substring(0, truncate - 3) + "..."
-                    } else {
-                        it
-                    }
+private fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): String = createHtmlTable {
+    val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
+    val tmpRows = take(numRows).toList()
+
+    val hasMoreData = tmpRows.size - 1 > numRows
+    val rows = tmpRows.take(numRows)
+
+    tr { th { +"Values" } }
+
+    for (row in rows) tr {
+        td {
+            val string = when (row) {
+                is ByteArray -> row.joinToString(prefix = "[", postfix = "]") { "%02X".format(it) }
+
+                is CharArray -> row.iterator().asSequence().toList().toString()
+                is ShortArray -> row.iterator().asSequence().toList().toString()
+                is IntArray -> row.iterator().asSequence().toList().toString()
+                is LongArray -> row.iterator().asSequence().toList().toString()
+                is FloatArray -> row.iterator().asSequence().toList().toString()
+                is DoubleArray -> row.iterator().asSequence().toList().toString()
+                is BooleanArray -> row.iterator().asSequence().toList().toString()
+                is Array<*> -> row.iterator().asSequence().toList().toString()
+                is Iterable<*> -> row.iterator().asSequence().toList().toString()
+                is Iterator<*> -> row.asSequence().toList().toString()
+
+                // TODO maybe others?
+
+                else -> row.toString()
+            }
+
+            +string.let {
+                if (truncate > 0 && it.length > truncate) {
+                    // do not show ellipses for strings shorter than 4 characters.
+                    if (truncate < 4) it.substring(0, truncate)
+                    else it.substring(0, truncate - 3) + "..."
+                } else {
+                    it
                 }
             }
         }
+    }
 
-        for (row in rows.drop(1)) tr {
-            for (item in row) td {
-                +item
+    if (hasMoreData) tr {
+        +"only showing top $numRows ${if (numRows == 1) "row" else "rows"}"
+    }
+}
+
+private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String = createHtmlTable {
+    val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
+    val tmpRows = getRows(numRows, truncate).asKotlinList().map { it.asKotlinList() }
+
+    val hasMoreData = tmpRows.size - 1 > numRows
+    val rows = tmpRows.take(numRows + 1)
+
+    tr {
+        for (header in rows.first()) th {
+            +header.let {
+                if (truncate > 0 && it.length > truncate) {
+                    // do not show ellipses for strings shorter than 4 characters.
+                    if (truncate < 4) it.substring(0, truncate)
+                    else it.substring(0, truncate - 3) + "..."
+                } else {
+                    it
+                }
             }
-        }
-
-        if (hasMoreData) tr {
-            +"only showing top $numRows ${if (numRows == 1) "row" else "rows"}"
         }
     }
 
+    for (row in rows.drop(1)) tr {
+        for (item in row) td {
+            +item
+        }
+    }
+
+    if (hasMoreData) tr {
+        +"only showing top $numRows ${if (numRows == 1) "row" else "rows"}"
+    }
 }
