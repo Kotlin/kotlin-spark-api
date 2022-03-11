@@ -19,33 +19,38 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
-import io.kotest.core.spec.style.shouldSpec
+import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.string.shouldContain
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.testkit.JupyterReplTestCase
-import org.junit.jupiter.api.Test
 
-class JupyterTests : JupyterReplTestCase() {
+class JupyterTests : ShouldSpec(object : (ShouldSpec) -> Unit, JupyterReplTestCase() {
 
-    @Test
-    fun `Do the tests`() {
+    override fun invoke(it: ShouldSpec) = it.run()
 
-        @Language("kts")
-        val html = execHtml(
-            """
-            val ds = listOf(1, 2, 3).toDS(spark)
-            ds
-            """.trimIndent()
-        )
+    fun ShouldSpec.run() {
+        context("Jupyter") {
+//            @Language("kts")
+//            val html = execHtml(
+//                """
+//            val ds = listOf(1, 2, 3).toDS(spark)
+//            ds
+//            """.trimIndent()
+//            )
+//
+//            println(html)
+//
+//            html shouldContain "value"
+//            html shouldContain "1"
+//            html shouldContain "2"
+//            html shouldContain "3"
 
-        println(html)
 
-        html shouldContain "value"
-        html shouldContain "1"
-        html shouldContain "2"
-        html shouldContain "3"
-
-
+        }
     }
 
-}
+
+//    val jupyter = object : JupyterReplTestCase() {}
+
+
+})

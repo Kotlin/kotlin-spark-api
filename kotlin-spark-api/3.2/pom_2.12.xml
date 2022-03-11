@@ -84,6 +84,14 @@
             <version>${kotest.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.jetbrains.kotlin/kotlin-main-kts -->
+<!--        <dependency>-->
+<!--            <groupId>org.jetbrains.kotlin</groupId>-->
+<!--            <artifactId>kotlin-main-kts</artifactId>-->
+<!--            <version>${kotlin.version}</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
+
         <dependency>
             <groupId>io.kotest.extensions</groupId>
             <artifactId>kotest-extensions-allure</artifactId>
