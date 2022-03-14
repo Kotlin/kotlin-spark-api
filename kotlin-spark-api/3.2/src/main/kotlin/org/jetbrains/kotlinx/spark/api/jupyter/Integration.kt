@@ -89,8 +89,8 @@ internal class Integration : JupyterIntegration() {
                     .getOrCreate()
                 spark
                 """.trimIndent()
-            )
-            spark = sparkField.value!! as SparkSession
+            ).value!! as SparkSession
+            spark = sparkField
 
             @Language("kts")
             val logLevel = execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
