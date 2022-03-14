@@ -1,6 +1,9 @@
 plugins {
     scala
     kotlin("jvm")
+
+    val dokkaVersion: String by System.getProperties()
+    id("org.jetbrains.dokka") version dokkaVersion
 }
 
 val groupID: String by project
