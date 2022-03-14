@@ -26,9 +26,9 @@ tasks.withType<Test>().configureEach {
 }
 
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn("dokkaJavadoc")
+    dependsOn("kotlin-spark-api:dokkaJavadoc")
     archiveClassifier.set("javadoc")
-    from("$buildDir/dokka/javadoc")
+    from("kotlin-spark-api/build/dokka/javadoc")
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
