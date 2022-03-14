@@ -118,6 +118,31 @@ class JupyterTests : ShouldSpec({
             }
         }
 
+        should("not render JavaRDDs with custom class") {
+            withRepl {
+                @Language("kts")
+                val html = execHtml(
+                    """
+                    data class Test(
+                        val longFirstName: String,
+                        val second: LongArray,
+                        val somethingSpecial: Map<Int, String>,
+                    ): Serializable
+
+                    val rdd = sc.parallelize(
+                        listOf(
+                            Test("aaaaaaaaa", longArrayOf(1L, 100000L, 24L), mapOf(1 to "one", 2 to "two")),
+                            Test("aaaaaaaaa", longArrayOf(1L, 100000L, 24L), mapOf(1 to "one", 2 to "two")),
+                        )
+                    )
+                    rdd
+                    """.trimIndent()
+                )
+                html shouldContain "Cannot render this RDD of this class."
+
+            }
+        }
+
         should("render JavaPairRDDs") {
             withRepl {
                 @Language("kts")

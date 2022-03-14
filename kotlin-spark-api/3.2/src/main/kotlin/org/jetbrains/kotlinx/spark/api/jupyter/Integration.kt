@@ -34,6 +34,18 @@ import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
 import org.jetbrains.kotlinx.spark.api.*
 import java.io.InputStreamReader
 
+
+import org.jetbrains.kotlinx.spark.api.*
+import org.apache.spark.sql.functions.*
+import org.apache.spark.*
+import org.apache.spark.sql.*
+import org.apache.spark.api.java.*
+import org.apache.spark.sql.SparkSession.Builder
+import scala.collection.*
+import org.apache.spark.rdd.*
+import org.jetbrains.kotlinx.spark.api.SparkSession
+import java.io.Serializable
+
 @OptIn(ExperimentalStdlibApi::class)
 internal class Integration : JupyterIntegration() {
 
@@ -70,14 +82,16 @@ internal class Integration : JupyterIntegration() {
         import("org.apache.spark.sql.*")
         import("org.apache.spark.api.java.*")
         import("org.apache.spark.sql.SparkSession.Builder")
-        import("scala.collection.*")
+        import("scala.collection.Seq")
         import("org.apache.spark.rdd.*")
+        import("java.io.Serializable")
 
         var spark: SparkSession? = null
 
+        val a: Map<Int, String> = mapOf()
+
         // starting spark and unwrapping KSparkContext functions
         onLoaded {
-            println("Running!!")
 
             @Language("kts")
             val sparkField = execute(
@@ -136,51 +150,57 @@ private fun createHtmlTable(fillTable: TABLE.() -> Unit): String = buildString {
 }
 
 
-private fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): String = createHtmlTable {
-    val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
-    val tmpRows = take(numRows).toList()
+private fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): String = try {
+    createHtmlTable {
+        val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
+        val tmpRows = take(numRows).toList()
 
-    val hasMoreData = tmpRows.size - 1 > numRows
-    val rows = tmpRows.take(numRows)
+        val hasMoreData = tmpRows.size - 1 > numRows
+        val rows = tmpRows.take(numRows)
 
-    tr { th { +"Values" } }
+        tr { th { +"Values" } }
 
-    for (row in rows) tr {
-        td {
-            val string = when (row) {
-                is ByteArray -> row.joinToString(prefix = "[", postfix = "]") { "%02X".format(it) }
+        for (row in rows) tr {
+            td {
+                val string = when (row) {
+                    is ByteArray -> row.joinToString(prefix = "[", postfix = "]") { "%02X".format(it) }
 
-                is CharArray -> row.iterator().asSequence().toList().toString()
-                is ShortArray -> row.iterator().asSequence().toList().toString()
-                is IntArray -> row.iterator().asSequence().toList().toString()
-                is LongArray -> row.iterator().asSequence().toList().toString()
-                is FloatArray -> row.iterator().asSequence().toList().toString()
-                is DoubleArray -> row.iterator().asSequence().toList().toString()
-                is BooleanArray -> row.iterator().asSequence().toList().toString()
-                is Array<*> -> row.iterator().asSequence().toList().toString()
-                is Iterable<*> -> row.iterator().asSequence().toList().toString()
-                is Iterator<*> -> row.asSequence().toList().toString()
+                    is CharArray -> row.iterator().asSequence().toList().toString()
+                    is ShortArray -> row.iterator().asSequence().toList().toString()
+                    is IntArray -> row.iterator().asSequence().toList().toString()
+                    is LongArray -> row.iterator().asSequence().toList().toString()
+                    is FloatArray -> row.iterator().asSequence().toList().toString()
+                    is DoubleArray -> row.iterator().asSequence().toList().toString()
+                    is BooleanArray -> row.iterator().asSequence().toList().toString()
+                    is Array<*> -> row.iterator().asSequence().toList().toString()
+                    is Iterable<*> -> row.iterator().asSequence().toList().toString()
+                    is Iterator<*> -> row.asSequence().toList().toString()
+                    is Serializable -> row.toString()
+                    // maybe others?
 
-                // TODO maybe others?
+                    else -> row.toString()
+                }
 
-                else -> row.toString()
-            }
-
-            +string.let {
-                if (truncate > 0 && it.length > truncate) {
-                    // do not show ellipses for strings shorter than 4 characters.
-                    if (truncate < 4) it.substring(0, truncate)
-                    else it.substring(0, truncate - 3) + "..."
-                } else {
-                    it
+                +string.let {
+                    if (truncate > 0 && it.length > truncate) {
+                        // do not show ellipses for strings shorter than 4 characters.
+                        if (truncate < 4) it.substring(0, truncate)
+                        else it.substring(0, truncate - 3) + "..."
+                    } else {
+                        it
+                    }
                 }
             }
         }
-    }
 
-    if (hasMoreData) tr {
-        +"only showing top $numRows ${if (numRows == 1) "row" else "rows"}"
+        if (hasMoreData) tr {
+            +"only showing top $numRows ${if (numRows == 1) "row" else "rows"}"
+        }
     }
+} catch (e: SparkException) {
+    // Whenever toString() on the contents doesn't work, since the class might be unknown...
+    """${toString()}
+        |Cannot render this RDD of this class.""".trimMargin()
 }
 
 private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String = createHtmlTable {
