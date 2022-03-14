@@ -70,7 +70,8 @@ internal class Integration : JupyterIntegration() {
         import("org.apache.spark.sql.*")
         import("org.apache.spark.api.java.*")
         import("org.apache.spark.sql.SparkSession.Builder")
-        import("scala.collection.Seq")
+        import("scala.collection.*")
+        import("org.apache.spark.rdd.*")
 
         var spark: SparkSession? = null
 
@@ -89,7 +90,7 @@ internal class Integration : JupyterIntegration() {
                 spark
                 """.trimIndent()
             )
-            spark = sparkField.value as SparkSession
+            spark = sparkField.value!! as SparkSession
 
             @Language("kts")
             val logLevel = execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")

@@ -21,9 +21,11 @@ package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import jupyter.kotlin.DependsOn
+import org.apache.spark.api.java.JavaSparkContext
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.EvalRequestData
 import org.jetbrains.kotlinx.jupyter.ReplForJupyter
@@ -38,11 +40,29 @@ class JupyterTests : ShouldSpec({
     val currentClassLoader = DependsOn::class.java.classLoader
     val scriptClasspath = classpathFromClassloader(currentClassLoader).orEmpty()
 
-    fun createRepl() = replProvider(scriptClasspath)
-    fun withRepl(action: ReplForJupyter.() -> Unit) = createRepl().action()
+    fun createRepl(): ReplForJupyter = replProvider(scriptClasspath)
+    fun withRepl(action: ReplForJupyter.() -> Unit): Unit = createRepl().action()
 
-    context("DF rendering") {
-        should("render DFs") {
+    context("Jupyter") {
+        should("Have spark instance") {
+            withRepl {
+                @Language("kts")
+                val spark = exec("""spark""")
+
+                spark as? SparkSession shouldNotBe null
+            }
+        }
+
+        should("Have JavaSparkContext instance") {
+            withRepl {
+                @Language("kts")
+                val sc = exec("""sc""")
+
+                sc as? JavaSparkContext shouldNotBe null
+            }
+        }
+
+        should("render Datasets") {
             withRepl {
                 @Language("kts")
                 val html = execHtml(
@@ -58,31 +78,120 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "2"
                 html shouldContain "3"
             }
+        }
 
+        should("render JavaRDDs") {
+            withRepl {
+                @Language("kts")
+                val html = execHtml(
+                    """
+                    val rdd: JavaRDD<List<Int>> = sc.parallelize(listOf(
+                        listOf(1, 2, 3), 
+                        listOf(4, 5, 6),
+                    ))
+                    rdd
+                    """.trimIndent()
+                )
+                println(html)
+
+                html shouldContain "[1, 2, 3]"
+                html shouldContain "[4, 5, 6]"
+            }
+        }
+
+        should("render JavaRDDs with Arrays") {
+            withRepl {
+                @Language("kts")
+                val html = execHtml(
+                    """
+                    val rdd: JavaRDD<IntArray> = sc.parallelize(listOf(
+                        intArrayOf(1, 2, 3), 
+                        intArrayOf(4, 5, 6),
+                    ))
+                    rdd
+                    """.trimIndent()
+                )
+                println(html)
+
+                html shouldContain "[1, 2, 3]"
+                html shouldContain "[4, 5, 6]"
+            }
+        }
+
+        should("render JavaPairRDDs") {
+            withRepl {
+                @Language("kts")
+                val html = execHtml(
+                    """
+                    val rdd: JavaPairRDD<Int, Int> = sc.parallelizePairs(listOf(
+                        c(1, 2).toTuple(),
+                        c(3, 4).toTuple(),
+                    ))
+                    rdd
+                    """.trimIndent()
+                )
+                println(html)
+
+                html shouldContain "(1,2)"
+                html shouldContain "(3,4)"
+
+            }
+        }
+
+        should("render JavaDoubleRDD") {
+            withRepl {
+                @Language("kts")
+                val html = execHtml(
+                    """
+                    val rdd: JavaDoubleRDD = sc.parallelizeDoubles(listOf(1.0, 2.0, 3.0, 4.0,))
+                    rdd
+                    """.trimIndent()
+                )
+                println(html)
+
+                html shouldContain "1.0"
+                html shouldContain "2.0"
+                html shouldContain "3.0"
+                html shouldContain "4.0"
+
+            }
+        }
+
+        should("render Scala RDD") {
+            withRepl {
+                @Language("kts")
+                val html = execHtml(
+                    """
+                    val rdd: RDD<List<Int>> = sc.parallelize(listOf(
+                        listOf(1, 2, 3), 
+                        listOf(4, 5, 6),
+                    )).rdd()
+                    rdd
+                    """.trimIndent()
+                )
+                println(html)
+
+                html shouldContain "[1, 2, 3]"
+                html shouldContain "[4, 5, 6]"
+            }
         }
     }
 })
 
-fun ReplForJupyter.execEx(code: Code): EvalResultEx {
-    return evalEx(EvalRequestData(code))
-}
+private fun ReplForJupyter.execEx(code: Code): EvalResultEx = evalEx(EvalRequestData(code))
 
-fun ReplForJupyter.exec(code: Code): Any? {
-    return execEx(code).renderedValue
-}
+private fun ReplForJupyter.exec(code: Code): Any? = execEx(code).renderedValue
 
-fun ReplForJupyter.execRaw(code: Code): Any? {
-    return execEx(code).rawValue
-}
+private fun ReplForJupyter.execRaw(code: Code): Any? = execEx(code).rawValue
 
 @JvmName("execTyped")
-inline fun <reified T : Any> ReplForJupyter.exec(code: Code): T {
+private inline fun <reified T : Any> ReplForJupyter.exec(code: Code): T {
     val res = exec(code)
     res.shouldBeInstanceOf<T>()
     return res
 }
 
-fun ReplForJupyter.execHtml(code: Code): String {
+private fun ReplForJupyter.execHtml(code: Code): String {
     val res = exec<MimeTypedResult>(code)
     val html = res["text/html"]
     html.shouldNotBeNull()

@@ -68,7 +68,7 @@ inline operator fun <reified T, reified U> Dataset<T>.invoke(column: KProperty1<
     replaceWith = ReplaceWith("this `===` c"),
     level = DeprecationLevel.ERROR,
 )
-infix fun Column.`==`(c: Column) = `$eq$eq$eq`(c)
+infix fun Column.`==`(c: Column): Column = `$eq$eq$eq`(c)
 
 /**
  * Unary minus, i.e. negate the expression.
