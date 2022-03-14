@@ -20,37 +20,71 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeInstanceOf
+import jupyter.kotlin.DependsOn
 import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlinx.jupyter.testkit.JupyterReplTestCase
+import org.jetbrains.kotlinx.jupyter.EvalRequestData
+import org.jetbrains.kotlinx.jupyter.ReplForJupyter
+import org.jetbrains.kotlinx.jupyter.api.Code
+import org.jetbrains.kotlinx.jupyter.api.MimeTypedResult
+import org.jetbrains.kotlinx.jupyter.repl.EvalResultEx
+import org.jetbrains.kotlinx.jupyter.testkit.ReplProvider
+import kotlin.script.experimental.jvm.util.classpathFromClassloader
 
-class JupyterTests : ShouldSpec(object : (ShouldSpec) -> Unit, JupyterReplTestCase() {
+class JupyterTests : ShouldSpec({
+    val replProvider: ReplProvider = ReplProvider.withoutLibraryResolution
+    val currentClassLoader = DependsOn::class.java.classLoader
+    val scriptClasspath = classpathFromClassloader(currentClassLoader).orEmpty()
 
-    override fun invoke(it: ShouldSpec) = it.run()
+    fun createRepl() = replProvider(scriptClasspath)
+    fun withRepl(action: ReplForJupyter.() -> Unit) = createRepl().action()
 
-    fun ShouldSpec.run() {
-        context("Jupyter") {
-//            @Language("kts")
-//            val html = execHtml(
-//                """
-//            val ds = listOf(1, 2, 3).toDS(spark)
-//            ds
-//            """.trimIndent()
-//            )
-//
-//            println(html)
-//
-//            html shouldContain "value"
-//            html shouldContain "1"
-//            html shouldContain "2"
-//            html shouldContain "3"
+    context("DF rendering") {
+        should("render DFs") {
+            withRepl {
+                @Language("kts")
+                val html = execHtml(
+                    """
+                    val ds = listOf(1, 2, 3).toDS(spark)
+                    ds
+                    """.trimIndent()
+                )
+                println(html)
 
+                html shouldContain "value"
+                html shouldContain "1"
+                html shouldContain "2"
+                html shouldContain "3"
+            }
 
         }
     }
-
-
-//    val jupyter = object : JupyterReplTestCase() {}
-
-
 })
+
+fun ReplForJupyter.execEx(code: Code): EvalResultEx {
+    return evalEx(EvalRequestData(code))
+}
+
+fun ReplForJupyter.exec(code: Code): Any? {
+    return execEx(code).renderedValue
+}
+
+fun ReplForJupyter.execRaw(code: Code): Any? {
+    return execEx(code).rawValue
+}
+
+@JvmName("execTyped")
+inline fun <reified T : Any> ReplForJupyter.exec(code: Code): T {
+    val res = exec(code)
+    res.shouldBeInstanceOf<T>()
+    return res
+}
+
+fun ReplForJupyter.execHtml(code: Code): String {
+    val res = exec<MimeTypedResult>(code)
+    val html = res["text/html"]
+    html.shouldNotBeNull()
+    return html
+}
