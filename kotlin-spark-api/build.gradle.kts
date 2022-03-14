@@ -27,9 +27,6 @@ dependencies {
 
     api(project(":core"))
 
-//    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion")
-//    testImplementation("io.kotest:kotest-assertions-core-jvm:$kotestVersion")
-//    testImplementation("io.kotest:kotest-framework-engine-jvm:$kotestVersion")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
     testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")

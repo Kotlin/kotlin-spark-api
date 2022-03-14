@@ -21,6 +21,10 @@ repositories {
     mavenCentral()
 }
 
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform()
+}
+
 val javadocJar by tasks.registering(Jar::class) {
     dependsOn("dokkaJavadoc")
     archiveClassifier.set("javadoc")
