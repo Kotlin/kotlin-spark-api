@@ -100,6 +100,8 @@ val ds = listOf(...).toDS(spark)
 
 Other than that, the API operates pretty similarly.
 
+There is also support for HTML rendering of Datasets and simple (Java)RDDs.
+
 
 ## Kotlin for Apache Spark features
 
