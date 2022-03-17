@@ -163,21 +163,12 @@ object JavaRecoverableNetworkWordCount {
         val words = lines.flatMap { it.split(SPACE).iterator() }
 
         val wordCounts = words
-            .mapToPair { c(it, 1).toTuple() }
+            .map { c(it, 1) }
             .reduceByKey { a: Int, b: Int -> a + b }
 
-//        val wordCounts = words
-//            .mapToPair { Tuple2(it, 1) }
-//            .reduceByKey { a: Int, b: Int -> a + b }
-
-//        val wordCounts = words
-//            .map { it to 1 }
-//            .reduceByKey { a: Int, b: Int -> a + b }
-//
-//        val wordCounts = words
-//            .map { c(it, 1) }
-//            .reduceByKey { a: Int, b: Int -> a + b }
-
+        val wordCounts2 = words
+            .map { it to 1 }
+            .reduceByKey { a: Int, b: Int -> a + b }
 
         wordCounts.foreachRDD { rdd, time: Time ->
 

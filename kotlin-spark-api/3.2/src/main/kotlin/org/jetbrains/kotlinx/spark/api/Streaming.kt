@@ -52,18 +52,12 @@ fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.toPairDStream(): JavaPairDStream<K,
 
 /**
  * Return a new DStream by applying `groupByKey` to each RDD. Hash partitioning is used to
- * generate the RDDs with Spark's default number of partitions.
- */
-fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKey(): JavaDStream<Arity2<K, Iterable<V>>> =
-    mapToPair { it.toTuple() }
-        .groupByKey()
-        .map { it.toArity() }
-
-/**
- * Return a new DStream by applying `groupByKey` to each RDD. Hash partitioning is used to
  * generate the RDDs with `numPartitions` partitions.
  */
-fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKey(numPartitions: Int): JavaDStream<Arity2<K, Iterable<V>>> =
+@JvmName("groupByKeyArity2")
+fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKey(
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Arity2<K, Iterable<V>>> =
     mapToPair { it.toTuple() }
         .groupByKey(numPartitions)
         .map { it.toArity() }
@@ -72,6 +66,7 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKey(numPartitions: Int): J
  * Return a new DStream by applying `groupByKey` on each RDD. The supplied
  * org.apache.spark.Partitioner is used to control the partitioning of each RDD.
  */
+@JvmName("groupByKeyArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKey(partitioner: Partitioner): JavaDStream<Arity2<K, Iterable<V>>> =
     mapToPair { it.toTuple() }
         .groupByKey(partitioner)
@@ -79,22 +74,13 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKey(partitioner: Partition
 
 /**
  * Return a new DStream by applying `reduceByKey` to each RDD. The values for each key are
- * merged using the associative and commutative reduce function. Hash partitioning is used to
- * generate the RDDs with Spark's default number of partitions.
- */
-fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKey(reduceFunc: (V, V) -> V): JavaDStream<Arity2<K, V>> =
-    mapToPair { it.toTuple() }
-        .reduceByKey(reduceFunc)
-        .map { it.toArity() }
-
-/**
- * Return a new DStream by applying `reduceByKey` to each RDD. The values for each key are
  * merged using the supplied reduce function. Hash partitioning is used to generate the RDDs
  * with `numPartitions` partitions.
  */
+@JvmName("reduceByKeyArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKey(
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
     reduceFunc: (V, V) -> V,
-    numPartitions: Int,
 ): JavaDStream<Arity2<K, V>> =
     mapToPair { it.toTuple() }
         .reduceByKey(reduceFunc, numPartitions)
@@ -105,9 +91,10 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKey(
  * merged using the supplied reduce function. org.apache.spark.Partitioner is used to control
  * the partitioning of each RDD.
  */
+@JvmName("reduceByKeyArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKey(
-    reduceFunc: (V, V) -> V,
     partitioner: Partitioner,
+    reduceFunc: (V, V) -> V,
 ): JavaDStream<Arity2<K, V>> =
     mapToPair { it.toTuple() }
         .reduceByKey(reduceFunc, partitioner)
@@ -118,6 +105,7 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKey(
  * combineByKey for RDDs. Please refer to combineByKey in
  * org.apache.spark.rdd.PairRDDFunctions in the Spark core documentation for more information.
  */
+@JvmName("combineByKeyArity2")
 fun <K, V, C> JavaDStreamLike<Arity2<K, V>, *, *>.combineByKey(
     createCombiner: (V) -> C,
     mergeValue: (C, V) -> C,
@@ -141,6 +129,7 @@ fun <K, V, C> JavaDStreamLike<Arity2<K, V>, *, *>.combineByKey(
  * @param numPartitions  number of partitions of each RDD in the new DStream; if not specified
  *                       then Spark's default number of partitions will be used
  */
+@JvmName("groupByKeyAndWindowArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKeyAndWindow(
     windowDuration: Duration,
     slideDuration: Duration = dstream().slideDuration(),
@@ -161,6 +150,7 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKeyAndWindow(
  * @param partitioner    partitioner for controlling the partitioning of each RDD in the new
  *                       DStream.
  */
+@JvmName("groupByKeyAndWindowArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKeyAndWindow(
     windowDuration: Duration,
     slideDuration: Duration = dstream().slideDuration(),
@@ -182,11 +172,12 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.groupByKeyAndWindow(
  *                       DStream's batching interval
  * @param numPartitions  number of partitions of each RDD in the new DStream.
  */
+@JvmName("reduceByKeyAndWindowArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
-    reduceFunc: (V, V) -> V,
     windowDuration: Duration,
     slideDuration: Duration = dstream().slideDuration(),
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    reduceFunc: (V, V) -> V,
 ): JavaDStream<Arity2<K, V>> =
     mapToPair { it.toTuple() }
         .reduceByKeyAndWindow(reduceFunc, windowDuration, slideDuration, numPartitions)
@@ -204,11 +195,12 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
  * @param partitioner    partitioner for controlling the partitioning of each RDD
  *                       in the new DStream.
  */
+@JvmName("reduceByKeyAndWindowArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
-    reduceFunc: (V, V) -> V,
     windowDuration: Duration,
     slideDuration: Duration = dstream().slideDuration(),
     partitioner: Partitioner,
+    reduceFunc: (V, V) -> V,
 ): JavaDStream<Arity2<K, V>> =
     mapToPair { it.toTuple() }
         .reduceByKeyAndWindow(reduceFunc, windowDuration, slideDuration, partitioner)
@@ -235,13 +227,14 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
  * @param filterFunc     Optional function to filter expired key-value pairs;
  *                       only pairs that satisfy the function are retained
  */
+@JvmName("reduceByKeyAndWindowArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
-    reduceFunc: (V, V) -> V,
     invReduceFunc: (V, V) -> V,
     windowDuration: Duration,
     slideDuration: Duration = dstream().slideDuration(),
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
     filterFunc: ((Arity2<K, V>) -> Boolean)? = null,
+    reduceFunc: (V, V) -> V,
 ): JavaDStream<Arity2<K, V>> =
     mapToPair { it.toTuple() }
         .reduceByKeyAndWindow(
@@ -277,13 +270,14 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
  * @param filterFunc     Optional function to filter expired key-value pairs;
  *                       only pairs that satisfy the function are retained
  */
+@JvmName("reduceByKeyAndWindowArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
-    reduceFunc: (V, V) -> V,
     invReduceFunc: (V, V) -> V,
     windowDuration: Duration,
     slideDuration: Duration = dstream().slideDuration(),
     partitioner: Partitioner,
     filterFunc: ((Arity2<K, V>) -> Boolean)? = null,
+    reduceFunc: (V, V) -> V,
 ): JavaDStream<Arity2<K, V>> =
     mapToPair { it.toTuple() }
         .reduceByKeyAndWindow(
@@ -324,6 +318,7 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.reduceByKeyAndWindow(
  * @tparam StateType    Class type of the state data
  * @tparam MappedType   Class type of the mapped data
  */
+@JvmName("mapWithStateArity2")
 fun <K, V, StateType, MappedType> JavaDStreamLike<Arity2<K, V>, *, *>.mapWithState(
     spec: StateSpec<K, V, StateType, MappedType>,
 ): JavaMapWithStateDStream<K, V, StateType, MappedType> =
@@ -339,9 +334,10 @@ fun <K, V, StateType, MappedType> JavaDStreamLike<Arity2<K, V>, *, *>.mapWithSta
  *                   corresponding state key-value pair will be eliminated.
  * @tparam S State type
  */
+@JvmName("updateStateByKeyArity2")
 fun <K, V, S> JavaDStreamLike<Arity2<K, V>, *, *>.updateStateByKey(
-    updateFunc: (List<V>, S?) -> S?,
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    updateFunc: (List<V>, S?) -> S?,
 ): JavaDStream<Arity2<K, S>> =
     mapToPair { it.toTuple() }
         .updateStateByKey(
@@ -365,9 +361,10 @@ fun <K, V, S> JavaDStreamLike<Arity2<K, V>, *, *>.updateStateByKey(
  *                    DStream
  * @tparam S State type
  */
+@JvmName("updateStateByKeyArity2")
 fun <K, V, S> JavaDStreamLike<Arity2<K, V>, *, *>.updateStateByKey(
-    updateFunc: (List<V>, S?) -> S?,
     partitioner: Partitioner,
+    updateFunc: (List<V>, S?) -> S?,
 ): JavaDStream<Arity2<K, S>> =
     mapToPair { it.toTuple() }
         .updateStateByKey(
@@ -389,10 +386,11 @@ fun <K, V, S> JavaDStreamLike<Arity2<K, V>, *, *>.updateStateByKey(
  * @param initialRDD initial state value of each key.
  * @tparam S State type
  */
+@JvmName("updateStateByKeyArity2")
 fun <K, V, S> JavaDStreamLike<Arity2<K, V>, *, *>.updateStateByKey(
-    updateFunc: (List<V>, S?) -> S?,
     partitioner: Partitioner,
     initialRDD: JavaRDD<Arity2<K, S>>,
+    updateFunc: (List<V>, S?) -> S?,
 ): JavaDStream<Arity2<K, S>> =
     mapToPair { it.toTuple() }
         .updateStateByKey(
@@ -408,6 +406,7 @@ fun <K, V, S> JavaDStreamLike<Arity2<K, V>, *, *>.updateStateByKey(
  * Return a new DStream by applying a map function to the value of each key-value pairs in
  * 'this' DStream without changing the key.
  */
+@JvmName("mapValuesArity2")
 fun <K, V, U> JavaDStreamLike<Arity2<K, V>, *, *>.mapValues(
     mapValuesFunc: (V) -> U,
 ): JavaDStream<Arity2<K, U>> =
@@ -419,6 +418,7 @@ fun <K, V, U> JavaDStreamLike<Arity2<K, V>, *, *>.mapValues(
  * Return a new DStream by applying a flatmap function to the value of each key-value pairs in
  * 'this' DStream without changing the key.
  */
+@JvmName("flatMapValuesArity2")
 fun <K, V, U> JavaDStreamLike<Arity2<K, V>, *, *>.flatMapValues(
     flatMapValuesFunc: (V) -> Iterator<U>,
 ): JavaDStream<Arity2<K, U>> =
@@ -430,6 +430,7 @@ fun <K, V, U> JavaDStreamLike<Arity2<K, V>, *, *>.flatMapValues(
  * Return a new DStream by applying 'cogroup' between RDDs of `this` DStream and `other` DStream.
  * Hash partitioning is used to generate the RDDs with `numPartitions` partitions.
  */
+@JvmName("cogroupArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.cogroup(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
@@ -447,6 +448,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.cogroup(
  * Return a new DStream by applying 'cogroup' between RDDs of `this` DStream and `other` DStream.
  * The supplied org.apache.spark.Partitioner is used to partition the generated RDDs.
  */
+@JvmName("cogroupArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.cogroup(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     partitioner: Partitioner,
@@ -464,6 +466,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.cogroup(
  * Return a new DStream by applying 'join' between RDDs of `this` DStream and `other` DStream.
  * Hash partitioning is used to generate the RDDs with `numPartitions` partitions.
  */
+@JvmName("joinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.join(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
@@ -481,6 +484,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.join(
  * Return a new DStream by applying 'join' between RDDs of `this` DStream and `other` DStream.
  * The supplied org.apache.spark.Partitioner is used to control the partitioning of each RDD.
  */
+@JvmName("joinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.join(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     partitioner: Partitioner,
@@ -499,6 +503,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.join(
  * `other` DStream. Hash partitioning is used to generate the RDDs with `numPartitions`
  * partitions.
  */
+@JvmName("leftOuterJoinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.leftOuterJoin(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
@@ -517,6 +522,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.leftOuterJoin(
  * `other` DStream. The supplied org.apache.spark.Partitioner is used to control
  * the partitioning of each RDD.
  */
+@JvmName("leftOuterJoinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.leftOuterJoin(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     partitioner: Partitioner,
@@ -535,6 +541,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.leftOuterJoin(
  * `other` DStream. Hash partitioning is used to generate the RDDs with `numPartitions`
  * partitions.
  */
+@JvmName("rightOuterJoinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.rightOuterJoin(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
@@ -553,6 +560,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.rightOuterJoin(
  * `other` DStream. The supplied org.apache.spark.Partitioner is used to control
  * the partitioning of each RDD.
  */
+@JvmName("rightOuterJoinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.rightOuterJoin(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     partitioner: Partitioner,
@@ -571,6 +579,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.rightOuterJoin(
  * `other` DStream. Hash partitioning is used to generate the RDDs with `numPartitions`
  * partitions.
  */
+@JvmName("fullOuterJoinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.fullOuterJoin(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
@@ -589,6 +598,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.fullOuterJoin(
  * `other` DStream. The supplied org.apache.spark.Partitioner is used to control
  * the partitioning of each RDD.
  */
+@JvmName("fullOuterJoinArity2")
 fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.fullOuterJoin(
     other: JavaDStreamLike<Arity2<K, W>, *, *>,
     partitioner: Partitioner,
@@ -606,6 +616,7 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.fullOuterJoin(
  * Save each RDD in `this` DStream as a Hadoop file. The file name at each batch interval is
  * generated based on `prefix` and `suffix`: "prefix-TIME_IN_MS.suffix".
  */
+@JvmName("saveAsHadoopFilesArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.saveAsHadoopFiles(
     prefix: String, suffix: String,
 ): Unit =
@@ -616,8 +627,594 @@ fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.saveAsHadoopFiles(
  * Save each RDD in `this` DStream as a Hadoop file. The file name at each batch interval is
  * generated based on `prefix` and `suffix`: "prefix-TIME_IN_MS.suffix".
  */
+@JvmName("saveAsNewAPIHadoopFilesArity2")
 fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.saveAsNewAPIHadoopFiles(
     prefix: String, suffix: String,
 ): Unit =
     mapToPair { it.toTuple() }
         .saveAsNewAPIHadoopFiles(prefix, suffix)
+
+/**
+ * Return a new DStream by applying `groupByKey` to each RDD. Hash partitioning is used to
+ * generate the RDDs with `numPartitions` partitions.
+ */
+@JvmName("groupByKeyPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.groupByKey(
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Pair<K, Iterable<V>>> =
+    mapToPair { it.toTuple() }
+        .groupByKey(numPartitions)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying `groupByKey` on each RDD. The supplied
+ * org.apache.spark.Partitioner is used to control the partitioning of each RDD.
+ */
+@JvmName("groupByKeyPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.groupByKey(partitioner: Partitioner): JavaDStream<Pair<K, Iterable<V>>> =
+    mapToPair { it.toTuple() }
+        .groupByKey(partitioner)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying `reduceByKey` to each RDD. The values for each key are
+ * merged using the supplied reduce function. Hash partitioning is used to generate the RDDs
+ * with `numPartitions` partitions.
+ */
+@JvmName("reduceByKeyPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.reduceByKey(
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    reduceFunc: (V, V) -> V,
+): JavaDStream<Pair<K, V>> =
+    mapToPair { it.toTuple() }
+        .reduceByKey(reduceFunc, numPartitions)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying `reduceByKey` to each RDD. The values for each key are
+ * merged using the supplied reduce function. org.apache.spark.Partitioner is used to control
+ * the partitioning of each RDD.
+ */
+@JvmName("reduceByKeyPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.reduceByKey(
+    partitioner: Partitioner,
+    reduceFunc: (V, V) -> V,
+): JavaDStream<Pair<K, V>> =
+    mapToPair { it.toTuple() }
+        .reduceByKey(reduceFunc, partitioner)
+        .map { it.toPair() }
+
+/**
+ * Combine elements of each key in DStream's RDDs using custom functions. This is similar to the
+ * combineByKey for RDDs. Please refer to combineByKey in
+ * org.apache.spark.rdd.PairRDDFunctions in the Spark core documentation for more information.
+ */
+@JvmName("combineByKeyPair")
+fun <K, V, C> JavaDStreamLike<Pair<K, V>, *, *>.combineByKey(
+    createCombiner: (V) -> C,
+    mergeValue: (C, V) -> C,
+    mergeCombiner: (C, C) -> C,
+    partitioner: Partitioner,
+    mapSideCombine: Boolean = true,
+): JavaDStream<Pair<K, C>> =
+    mapToPair { it.toTuple() }
+        .combineByKey(createCombiner, mergeValue, mergeCombiner, partitioner, mapSideCombine)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying `groupByKey` over a sliding window on `this` DStream.
+ * Similar to `DStream.groupByKey()`, but applies it over a sliding window.
+ * Hash partitioning is used to generate the RDDs with `numPartitions` partitions.
+ * @param windowDuration width of the window; must be a multiple of this DStream's
+ *                       batching interval
+ * @param slideDuration  sliding interval of the window (i.e., the interval after which
+ *                       the new DStream will generate RDDs); must be a multiple of this
+ *                       DStream's batching interval
+ * @param numPartitions  number of partitions of each RDD in the new DStream; if not specified
+ *                       then Spark's default number of partitions will be used
+ */
+@JvmName("groupByKeyAndWindowPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.groupByKeyAndWindow(
+    windowDuration: Duration,
+    slideDuration: Duration = dstream().slideDuration(),
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Pair<K, Iterable<V>>> =
+    mapToPair { it.toTuple() }
+        .groupByKeyAndWindow(windowDuration, slideDuration, numPartitions)
+        .map { it.toPair() }
+
+/**
+ * Create a new DStream by applying `groupByKey` over a sliding window on `this` DStream.
+ * Similar to `DStream.groupByKey()`, but applies it over a sliding window.
+ * @param windowDuration width of the window; must be a multiple of this DStream's
+ *                       batching interval
+ * @param slideDuration  sliding interval of the window (i.e., the interval after which
+ *                       the new DStream will generate RDDs); must be a multiple of this
+ *                       DStream's batching interval
+ * @param partitioner    partitioner for controlling the partitioning of each RDD in the new
+ *                       DStream.
+ */
+@JvmName("groupByKeyAndWindowPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.groupByKeyAndWindow(
+    windowDuration: Duration,
+    slideDuration: Duration = dstream().slideDuration(),
+    partitioner: Partitioner,
+): JavaDStream<Pair<K, Iterable<V>>> =
+    mapToPair { it.toTuple() }
+        .groupByKeyAndWindow(windowDuration, slideDuration, partitioner)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying `reduceByKey` over a sliding window. This is similar to
+ * `DStream.reduceByKey()` but applies it over a sliding window. Hash partitioning is used to
+ * generate the RDDs with `numPartitions` partitions.
+ * @param reduceFunc associative and commutative reduce function
+ * @param windowDuration width of the window; must be a multiple of this DStream's
+ *                       batching interval
+ * @param slideDuration  sliding interval of the window (i.e., the interval after which
+ *                       the new DStream will generate RDDs); must be a multiple of this
+ *                       DStream's batching interval
+ * @param numPartitions  number of partitions of each RDD in the new DStream.
+ */
+@JvmName("reduceByKeyAndWindowPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.reduceByKeyAndWindow(
+    windowDuration: Duration,
+    slideDuration: Duration = dstream().slideDuration(),
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    reduceFunc: (V, V) -> V,
+): JavaDStream<Pair<K, V>> =
+    mapToPair { it.toTuple() }
+        .reduceByKeyAndWindow(reduceFunc, windowDuration, slideDuration, numPartitions)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying `reduceByKey` over a sliding window. Similar to
+ * `DStream.reduceByKey()`, but applies it over a sliding window.
+ * @param reduceFunc associative and commutative reduce function
+ * @param windowDuration width of the window; must be a multiple of this DStream's
+ *                       batching interval
+ * @param slideDuration  sliding interval of the window (i.e., the interval after which
+ *                       the new DStream will generate RDDs); must be a multiple of this
+ *                       DStream's batching interval
+ * @param partitioner    partitioner for controlling the partitioning of each RDD
+ *                       in the new DStream.
+ */
+@JvmName("reduceByKeyAndWindowPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.reduceByKeyAndWindow(
+    windowDuration: Duration,
+    slideDuration: Duration = dstream().slideDuration(),
+    partitioner: Partitioner,
+    reduceFunc: (V, V) -> V,
+): JavaDStream<Pair<K, V>> =
+    mapToPair { it.toTuple() }
+        .reduceByKeyAndWindow(reduceFunc, windowDuration, slideDuration, partitioner)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying incremental `reduceByKey` over a sliding window.
+ * The reduced value of over a new window is calculated using the old window's reduced value :
+ *  1. reduce the new values that entered the window (e.g., adding new counts)
+ *
+ *  2. "inverse reduce" the old values that left the window (e.g., subtracting old counts)
+ *
+ * This is more efficient than reduceByKeyAndWindow without "inverse reduce" function.
+ * However, it is applicable to only "invertible reduce functions".
+ * Hash partitioning is used to generate the RDDs with Spark's default number of partitions.
+ * @param reduceFunc associative and commutative reduce function
+ * @param invReduceFunc inverse reduce function; such that for all y, invertible x:
+ *                      `invReduceFunc(reduceFunc(x, y), x) = y`
+ * @param windowDuration width of the window; must be a multiple of this DStream's
+ *                       batching interval
+ * @param slideDuration  sliding interval of the window (i.e., the interval after which
+ *                       the new DStream will generate RDDs); must be a multiple of this
+ *                       DStream's batching interval
+ * @param filterFunc     Optional function to filter expired key-value pairs;
+ *                       only pairs that satisfy the function are retained
+ */
+@JvmName("reduceByKeyAndWindowPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.reduceByKeyAndWindow(
+    invReduceFunc: (V, V) -> V,
+    windowDuration: Duration,
+    slideDuration: Duration = dstream().slideDuration(),
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    filterFunc: ((Pair<K, V>) -> Boolean)? = null,
+    reduceFunc: (V, V) -> V,
+): JavaDStream<Pair<K, V>> =
+    mapToPair { it.toTuple() }
+        .reduceByKeyAndWindow(
+            reduceFunc,
+            invReduceFunc,
+            windowDuration,
+            slideDuration,
+            numPartitions,
+            filterFunc?.let {
+                { tuple ->
+                    filterFunc(tuple.toPair())
+                }
+            }
+        )
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying incremental `reduceByKey` over a sliding window.
+ * The reduced value of over a new window is calculated using the old window's reduced value :
+ *  1. reduce the new values that entered the window (e.g., adding new counts)
+ *  2. "inverse reduce" the old values that left the window (e.g., subtracting old counts)
+ * This is more efficient than reduceByKeyAndWindow without "inverse reduce" function.
+ * However, it is applicable to only "invertible reduce functions".
+ * @param reduceFunc     associative and commutative reduce function
+ * @param invReduceFunc  inverse reduce function
+ * @param windowDuration width of the window; must be a multiple of this DStream's
+ *                       batching interval
+ * @param slideDuration  sliding interval of the window (i.e., the interval after which
+ *                       the new DStream will generate RDDs); must be a multiple of this
+ *                       DStream's batching interval
+ * @param partitioner    partitioner for controlling the partitioning of each RDD in the new
+ *                       DStream.
+ * @param filterFunc     Optional function to filter expired key-value pairs;
+ *                       only pairs that satisfy the function are retained
+ */
+@JvmName("reduceByKeyAndWindowPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.reduceByKeyAndWindow(
+    invReduceFunc: (V, V) -> V,
+    windowDuration: Duration,
+    slideDuration: Duration = dstream().slideDuration(),
+    partitioner: Partitioner,
+    filterFunc: ((Pair<K, V>) -> Boolean)? = null,
+    reduceFunc: (V, V) -> V,
+): JavaDStream<Pair<K, V>> =
+    mapToPair { it.toTuple() }
+        .reduceByKeyAndWindow(
+            reduceFunc,
+            invReduceFunc,
+            windowDuration,
+            slideDuration,
+            partitioner,
+            filterFunc?.let {
+                { tuple ->
+                    filterFunc(tuple.toPair())
+                }
+            }
+        )
+        .map { it.toPair() }
+
+/**
+ * Return a [MapWithStateDStream] by applying a function to every key-value element of
+ * `this` stream, while maintaining some state data for each unique key. The mapping function
+ * and other specification (e.g. partitioners, timeouts, initial state data, etc.) of this
+ * transformation can be specified using `StateSpec` class. The state data is accessible in
+ * as a parameter of type `State` in the mapping function.
+ *
+ * Example of using `mapWithState`:
+ * {{{
+ *    // A mapping function that maintains an integer state and return a String
+ *    def mappingFunction(key: String, value: Option[Int], state: State[Int]): Option[String] = {
+ *      // Use state.exists(), state.get(), state.update() and state.remove()
+ *      // to manage state, and return the necessary string
+ *    }
+ *
+ *    val spec = StateSpec.function(mappingFunction).numPartitions(10)
+ *
+ *    val mapWithStateDStream = keyValueDStream.mapWithState[StateType, MappedType](spec)
+ * }}}
+ *
+ * @param spec          Specification of this transformation
+ * @tparam StateType    Class type of the state data
+ * @tparam MappedType   Class type of the mapped data
+ */
+@JvmName("mapWithStatePair")
+fun <K, V, StateType, MappedType> JavaDStreamLike<Pair<K, V>, *, *>.mapWithState(
+    spec: StateSpec<K, V, StateType, MappedType>,
+): JavaMapWithStateDStream<K, V, StateType, MappedType> =
+    mapToPair { it.toTuple() }
+        .mapWithState(spec)
+
+/**
+ * Return a new "state" DStream where the state for each key is updated by applying
+ * the given function on the previous state of the key and the new values of each key.
+ * In every batch the updateFunc will be called for each state even if there are no new values.
+ * Hash partitioning is used to generate the RDDs with Spark's default number of partitions.
+ * @param updateFunc State update function. If `this` function returns None, then
+ *                   corresponding state key-value pair will be eliminated.
+ * @tparam S State type
+ */
+@JvmName("updateStateByKeyPair")
+fun <K, V, S> JavaDStreamLike<Pair<K, V>, *, *>.updateStateByKey(
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    updateFunc: (List<V>, S?) -> S?,
+): JavaDStream<Pair<K, S>> =
+    mapToPair { it.toTuple() }
+        .updateStateByKey(
+            { list: List<V>, s: Optional<S> ->
+                updateFunc(list, s.toNullable()).toOptional()
+            },
+            numPartitions,
+        )
+        .map { it.toPair() }
+
+/**
+ * Return a new "state" DStream where the state for each key is updated by applying
+ * the given function on the previous state of the key and the new values of each key.
+ * In every batch the updateFunc will be called for each state even if there are no new values.
+ * [[org.apache.spark.Partitioner]] is used to control the partitioning of each RDD.
+ * @param updateFunc State update function. Note, that this function may generate a different
+ *                   tuple with a different key than the input key. Therefore keys may be removed
+ *                   or added in this way. It is up to the developer to decide whether to
+ *                   remember the partitioner despite the key being changed.
+ * @param partitioner Partitioner for controlling the partitioning of each RDD in the new
+ *                    DStream
+ * @tparam S State type
+ */
+@JvmName("updateStateByKeyPair")
+fun <K, V, S> JavaDStreamLike<Pair<K, V>, *, *>.updateStateByKey(
+    partitioner: Partitioner,
+    updateFunc: (List<V>, S?) -> S?,
+): JavaDStream<Pair<K, S>> =
+    mapToPair { it.toTuple() }
+        .updateStateByKey(
+            { list: List<V>, s: Optional<S> ->
+                updateFunc(list, s.toNullable()).toOptional()
+            },
+            partitioner,
+        )
+        .map { it.toPair() }
+
+/**
+ * Return a new "state" DStream where the state for each key is updated by applying
+ * the given function on the previous state of the key and the new values of the key.
+ * org.apache.spark.Partitioner is used to control the partitioning of each RDD.
+ * @param updateFunc State update function. If `this` function returns None, then
+ *                   corresponding state key-value pair will be eliminated.
+ * @param partitioner Partitioner for controlling the partitioning of each RDD in the new
+ *                    DStream.
+ * @param initialRDD initial state value of each key.
+ * @tparam S State type
+ */
+@JvmName("updateStateByKeyPair")
+fun <K, V, S> JavaDStreamLike<Pair<K, V>, *, *>.updateStateByKey(
+    partitioner: Partitioner,
+    initialRDD: JavaRDD<Pair<K, S>>,
+    updateFunc: (List<V>, S?) -> S?,
+): JavaDStream<Pair<K, S>> =
+    mapToPair { it.toTuple() }
+        .updateStateByKey(
+            { list: List<V>, s: Optional<S> ->
+                updateFunc(list, s.toNullable()).toOptional()
+            },
+            partitioner,
+            initialRDD.mapToPair { it.toTuple() },
+        )
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying a map function to the value of each key-value pairs in
+ * 'this' DStream without changing the key.
+ */
+@JvmName("mapValuesPair")
+fun <K, V, U> JavaDStreamLike<Pair<K, V>, *, *>.mapValues(
+    mapValuesFunc: (V) -> U,
+): JavaDStream<Pair<K, U>> =
+    mapToPair { it.toTuple() }
+        .mapValues(mapValuesFunc)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying a flatmap function to the value of each key-value pairs in
+ * 'this' DStream without changing the key.
+ */
+@JvmName("flatMapValuesPair")
+fun <K, V, U> JavaDStreamLike<Pair<K, V>, *, *>.flatMapValues(
+    flatMapValuesFunc: (V) -> Iterator<U>,
+): JavaDStream<Pair<K, U>> =
+    mapToPair { it.toTuple() }
+        .flatMapValues(flatMapValuesFunc)
+        .map { it.toPair() }
+
+/**
+ * Return a new DStream by applying 'cogroup' between RDDs of `this` DStream and `other` DStream.
+ * Hash partitioning is used to generate the RDDs with `numPartitions` partitions.
+ */
+@JvmName("cogroupPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.cogroup(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Pair<K, Pair<Iterable<V>, Iterable<W>>>> =
+    mapToPair { it.toTuple() }
+        .cogroup(
+            other.mapToPair { it.toTuple() },
+            numPartitions,
+        )
+        .map {
+            Pair(it._1, it._2.toPair())
+        }
+
+/**
+ * Return a new DStream by applying 'cogroup' between RDDs of `this` DStream and `other` DStream.
+ * The supplied org.apache.spark.Partitioner is used to partition the generated RDDs.
+ */
+@JvmName("cogroupPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.cogroup(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    partitioner: Partitioner,
+): JavaDStream<Pair<K, Pair<Iterable<V>, Iterable<W>>>> =
+    mapToPair { it.toTuple() }
+        .cogroup(
+            other.mapToPair { it.toTuple() },
+            partitioner,
+        )
+        .map {
+            Pair(it._1, it._2.toPair())
+        }
+
+/**
+ * Return a new DStream by applying 'join' between RDDs of `this` DStream and `other` DStream.
+ * Hash partitioning is used to generate the RDDs with `numPartitions` partitions.
+ */
+@JvmName("joinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.join(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Pair<K, Pair<V, W>>> =
+    mapToPair { it.toTuple() }
+        .join(
+            other.mapToPair { it.toTuple() },
+            numPartitions,
+        )
+        .map {
+            Pair(it._1, it._2.toPair())
+        }
+
+/**
+ * Return a new DStream by applying 'join' between RDDs of `this` DStream and `other` DStream.
+ * The supplied org.apache.spark.Partitioner is used to control the partitioning of each RDD.
+ */
+@JvmName("joinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.join(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    partitioner: Partitioner,
+): JavaDStream<Pair<K, Pair<V, W>>> =
+    mapToPair { it.toTuple() }
+        .join(
+            other.mapToPair { it.toTuple() },
+            partitioner,
+        )
+        .map {
+            Pair(it._1, it._2.toPair())
+        }
+
+/**
+ * Return a new DStream by applying 'left outer join' between RDDs of `this` DStream and
+ * `other` DStream. Hash partitioning is used to generate the RDDs with `numPartitions`
+ * partitions.
+ */
+@JvmName("leftOuterJoinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.leftOuterJoin(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Pair<K, Pair<V, W?>>> =
+    mapToPair { it.toTuple() }
+        .leftOuterJoin(
+            other.mapToPair { it.toTuple() },
+            numPartitions,
+        )
+        .map {
+            Pair(it._1, Pair(it._2._1, it._2._2.toNullable()))
+        }
+
+/**
+ * Return a new DStream by applying 'left outer join' between RDDs of `this` DStream and
+ * `other` DStream. The supplied org.apache.spark.Partitioner is used to control
+ * the partitioning of each RDD.
+ */
+@JvmName("leftOuterJoinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.leftOuterJoin(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    partitioner: Partitioner,
+): JavaDStream<Pair<K, Pair<V, W?>>> =
+    mapToPair { it.toTuple() }
+        .leftOuterJoin(
+            other.mapToPair { it.toTuple() },
+            partitioner,
+        )
+        .map {
+            Pair(it._1, Pair(it._2._1, it._2._2.toNullable()))
+        }
+
+/**
+ * Return a new DStream by applying 'right outer join' between RDDs of `this` DStream and
+ * `other` DStream. Hash partitioning is used to generate the RDDs with `numPartitions`
+ * partitions.
+ */
+@JvmName("rightOuterJoinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.rightOuterJoin(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Pair<K, Pair<V?, W>>> =
+    mapToPair { it.toTuple() }
+        .rightOuterJoin(
+            other.mapToPair { it.toTuple() },
+            numPartitions,
+        )
+        .map {
+            Pair(it._1, Pair(it._2._1.toNullable(), it._2._2))
+        }
+
+/**
+ * Return a new DStream by applying 'right outer join' between RDDs of `this` DStream and
+ * `other` DStream. The supplied org.apache.spark.Partitioner is used to control
+ * the partitioning of each RDD.
+ */
+@JvmName("rightOuterJoinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.rightOuterJoin(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    partitioner: Partitioner,
+): JavaDStream<Pair<K, Pair<V?, W>>> =
+    mapToPair { it.toTuple() }
+        .rightOuterJoin(
+            other.mapToPair { it.toTuple() },
+            partitioner,
+        )
+        .map {
+            Pair(it._1, Pair(it._2._1.toNullable(), it._2._2))
+        }
+
+/**
+ * Return a new DStream by applying 'full outer join' between RDDs of `this` DStream and
+ * `other` DStream. Hash partitioning is used to generate the RDDs with `numPartitions`
+ * partitions.
+ */
+@JvmName("fullOuterJoinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.fullOuterJoin(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+): JavaDStream<Pair<K, Pair<V?, W?>>> =
+    mapToPair { it.toTuple() }
+        .fullOuterJoin(
+            other.mapToPair { it.toTuple() },
+            numPartitions,
+        )
+        .map {
+            Pair(it._1, Pair(it._2._1.toNullable(), it._2._2.toNullable()))
+        }
+
+/**
+ * Return a new DStream by applying 'full outer join' between RDDs of `this` DStream and
+ * `other` DStream. The supplied org.apache.spark.Partitioner is used to control
+ * the partitioning of each RDD.
+ */
+@JvmName("fullOuterJoinPair")
+fun <K, V, W> JavaDStreamLike<Pair<K, V>, *, *>.fullOuterJoin(
+    other: JavaDStreamLike<Pair<K, W>, *, *>,
+    partitioner: Partitioner,
+): JavaDStream<Pair<K, Pair<V?, W?>>> =
+    mapToPair { it.toTuple() }
+        .fullOuterJoin(
+            other.mapToPair { it.toTuple() },
+            partitioner,
+        )
+        .map {
+            Pair(it._1, Pair(it._2._1.toNullable(), it._2._2.toNullable()))
+        }
+
+/**
+ * Save each RDD in `this` DStream as a Hadoop file. The file name at each batch interval is
+ * generated based on `prefix` and `suffix`: "prefix-TIME_IN_MS.suffix".
+ */
+@JvmName("saveAsHadoopFilesPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.saveAsHadoopFiles(
+    prefix: String, suffix: String,
+): Unit =
+    mapToPair { it.toTuple() }
+        .saveAsHadoopFiles(prefix, suffix)
+
+/**
+ * Save each RDD in `this` DStream as a Hadoop file. The file name at each batch interval is
+ * generated based on `prefix` and `suffix`: "prefix-TIME_IN_MS.suffix".
+ */
+@JvmName("saveAsNewAPIHadoopFilesPair")
+fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.saveAsNewAPIHadoopFiles(
+    prefix: String, suffix: String,
+): Unit =
+    mapToPair { it.toTuple() }
+        .saveAsNewAPIHadoopFiles(prefix, suffix)
+
