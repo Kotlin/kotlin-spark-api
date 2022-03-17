@@ -170,6 +170,10 @@ object JavaRecoverableNetworkWordCount {
             .map { it to 1 }
             .reduceByKey { a: Int, b: Int -> a + b }
 
+        val wordCounts3 = words
+            .map { Tuple2(it, 1) }
+            .reduceByKey { a: Int, b: Int -> a + b }
+
         wordCounts.foreachRDD { rdd, time: Time ->
 
             // Get or register the excludeList Broadcast
