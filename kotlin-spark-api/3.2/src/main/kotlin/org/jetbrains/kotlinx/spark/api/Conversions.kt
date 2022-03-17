@@ -27,6 +27,7 @@
 
 package org.jetbrains.kotlinx.spark.api
 
+import org.apache.spark.api.java.Optional
 import scala.*
 import scala.collection.JavaConverters
 import java.util.*
@@ -42,6 +43,19 @@ import scala.collection.mutable.Buffer as ScalaMutableBuffer
 import scala.collection.mutable.Map as ScalaMutableMap
 import scala.collection.mutable.Seq as ScalaMutableSeq
 import scala.collection.mutable.Set as ScalaMutableSet
+
+
+/** Converts Scala [Option] to Kotlin nullable. */
+fun <T> Option<T>.toNullable(): T? = getOrElse { null }
+
+/** Converts nullable value to Scala [Option]. */
+fun <T> T?.toOption(): Option<T> = Option.apply(this)
+
+/** Converts [Optional] to Kotlin nullable. */
+fun <T> Optional<T>.toNullable(): T? = orElse(null)
+
+/** Converts nullable value to [Optional]. */
+fun <T> T?.toOptional(): Optional<T> = Optional.ofNullable(this)
 
 /**
  * @see JavaConverters.asScalaIterator for more information.

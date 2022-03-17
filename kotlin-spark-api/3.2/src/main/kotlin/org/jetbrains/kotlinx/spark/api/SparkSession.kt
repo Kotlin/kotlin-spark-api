@@ -34,6 +34,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
 import org.apache.spark.streaming.Duration
+import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
@@ -193,8 +194,15 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
 /**
  * Wrapper for spark streaming creation. `spark: SparkSession` and `ssc: JavaStreamingContext` are provided, started,
  * awaited, and stopped automatically.
+ * The use of a checkpoint directory is optional.
+ * If checkpoint data exists in the provided `checkpointPath`, then StreamingContext will be
+ * recreated from the checkpoint data. If the data does not exist, then the provided factory
+ * will be used to create a JavaStreamingContext.
  *
- * @param batchDuration The time interval at which streaming data will be divided into batches
+ * @param batchDuration The time interval at which streaming data will be divided into batches. Defaults to 1 second.
+ * @param checkpointPath If checkpoint data exists in the provided `checkpointPath`, then StreamingContext will be
+ * recreated from the checkpoint data. If the data does not exist (or `null` is provided), then the streaming context will be built using
+ * the other provided parameters.
  * @param props spark options, value types are runtime-checked for type-correctness
  * @param master Sets the Spark master URL to connect to, such as "local" to run locally, "local[4]" to
  *  run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster. By default, it
@@ -208,7 +216,8 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
  */
 @JvmOverloads
 inline fun withSparkStreaming(
-    batchDuration: Duration,
+    batchDuration: Duration = Durations.seconds(1L),
+    checkpointPath: String? = null,
     props: Map<String, Any> = emptyMap(),
     master: String = SparkConf().get("spark.master", "local[*]"),
     appName: String = "Kotlin Spark Sample",
@@ -216,19 +225,53 @@ inline fun withSparkStreaming(
     timeout: Long = -1L,
     func: KSparkStreamingSession.() -> Unit,
 ) {
-    withSpark(
-        props = props,
-        master = master,
-        appName = appName,
-        logLevel = logLevel,
-    ) {
-        val ssc = JavaStreamingContext(sc, batchDuration)
-        KSparkStreamingSession(spark = spark, ssc = ssc).apply {
-            func()
-            ssc.start()
-            runAfterStart()
+    if (checkpointPath != null) {
+        TODO()
+//        var kSparkStreamingSession: KSparkStreamingSession? = null
+//        val ssc = JavaStreamingContext.getOrCreate(checkpointPath) {
+//            val jssc = JavaStreamingContext(
+//                SparkConf()
+//                    .setAppName(appName)
+//                    .setMaster(master)
+//                    .setAll(props.map { (key, value) ->
+//                        c(key, value.toString()).toTuple()
+//                    }.asScalaIterable()),
+//                batchDuration,
+//            )
+//            jssc.sparkContext().sc().setLogLevel(logLevel)
+//            jssc.checkpoint(checkpointPath)
+//            kSparkStreamingSession = KSparkStreamingSession(
+//                spark = SparkSession
+//                    .builder()
+//                    .sparkContext(jssc.sparkContext().sc())
+//                    .getOrCreate(),
+//                ssc = jssc,
+//            ).apply { func() }
+//
+//            jssc
+//        }
+//        ssc.start()
+//        kSparkStreamingSession?.apply { runAfterStart() }
+//        ssc.awaitTerminationOrTimeout(timeout)
+//        ssc.stop()
+    } else {
+
+        withSpark(
+            props = props,
+            master = master,
+            appName = appName,
+            logLevel = logLevel,
+        ) {
+            val ssc = JavaStreamingContext(sc, batchDuration)
+            KSparkStreamingSession(spark = spark, ssc = ssc).apply {
+                func()
+                ssc.start()
+                runAfterStart()
+            }
+
             ssc.awaitTerminationOrTimeout(timeout)
             ssc.stop()
+
         }
     }
 }

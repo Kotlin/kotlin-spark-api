@@ -28,6 +28,22 @@
       <artifactId>core-3.2_${scala.compat.version}</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-sql-kafka-0-10_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming-kafka-0-10_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-streams-test-utils</artifactId>
+      <version>3.1.0</version>
+      <scope>test</scope>
+    </dependency>
 
     <!-- Provided dependencies -->
     <dependency>
