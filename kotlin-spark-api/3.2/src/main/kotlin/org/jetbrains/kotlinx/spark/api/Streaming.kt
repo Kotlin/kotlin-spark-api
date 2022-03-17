@@ -19,6 +19,7 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
+import com.sun.org.apache.xml.internal.serialize.OutputFormat
 import org.apache.spark.Partitioner
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.Optional
@@ -601,3 +602,22 @@ fun <K, V, W> JavaDStreamLike<Arity2<K, V>, *, *>.fullOuterJoin(
             c(it._1, c(it._2._1.toNullable(), it._2._2.toNullable()))
         }
 
+/**
+ * Save each RDD in `this` DStream as a Hadoop file. The file name at each batch interval is
+ * generated based on `prefix` and `suffix`: "prefix-TIME_IN_MS.suffix".
+ */
+fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.saveAsHadoopFiles(
+    prefix: String, suffix: String,
+): Unit =
+    mapToPair { it.toTuple() }
+        .saveAsHadoopFiles(prefix, suffix)
+
+/**
+ * Save each RDD in `this` DStream as a Hadoop file. The file name at each batch interval is
+ * generated based on `prefix` and `suffix`: "prefix-TIME_IN_MS.suffix".
+ */
+fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.saveAsNewAPIHadoopFiles(
+    prefix: String, suffix: String,
+): Unit =
+    mapToPair { it.toTuple() }
+        .saveAsNewAPIHadoopFiles(prefix, suffix)
