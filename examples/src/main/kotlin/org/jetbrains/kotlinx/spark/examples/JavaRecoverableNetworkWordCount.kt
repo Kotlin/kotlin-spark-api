@@ -17,21 +17,33 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+@file:OptIn(ExperimentalTime::class)
+
 package org.jetbrains.kotlinx.spark.examples
 
 import com.google.common.io.Files
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.Time
+import org.apache.spark.streaming.api.java.JavaDStream
+import org.apache.spark.streaming.api.java.JavaPairDStream
+import org.apache.spark.streaming.dstream.DStream
+import org.apache.spark.streaming.dstream.PairDStreamFunctions
 import org.apache.spark.util.LongAccumulator
 import org.jetbrains.kotlinx.spark.api.*
+import scala.Tuple1
 import scala.Tuple2
+import scala.reflect.ClassTag
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
+import kotlin.experimental.ExperimentalTypeInference
 import kotlin.system.exitProcess
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
 
 /**
@@ -144,6 +156,8 @@ object JavaRecoverableNetworkWordCount {
         }
     }
 
+
+    @OptIn(ExperimentalTypeInference::class)
     @Suppress("UnstableApiUsage")
     private fun KSparkStreamingSession.createContext(
         ip: String,
@@ -162,36 +176,75 @@ object JavaRecoverableNetworkWordCount {
 
         val words = lines.flatMap { it.split(SPACE).iterator() }
 
-        val wordCounts = words
-            .map { c(it, 1) }
-            .reduceByKey { a: Int, b: Int -> a + b }
+//        val wordCounts = words
+//            .map { c(it, 1) }
+//            .reduceByKey { a, b -> a + b }
+//            .reduceByKey { a, b -> a + b }
+//            .reduceByKey { a, b -> a + b }
+//            .reduceByKey { a, b -> a + b }
+//            .reduceByKey { a, b -> a + b }
+//            .reduceByKey { a, b -> a + b }
+//            .reduceByKey { a, b -> a + b }
+//            .reduceByKey { a, b -> a + b }
 
-        val wordCounts2 = words
-            .map { it to 1 }
-            .reduceByKey { a: Int, b: Int -> a + b }
+        val wordCounts4 = words
+            .mapToPair { Tuple2(it, 1) }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+
+
+//        val wordCounts2 = words
+//            .map { it to 1 }
+//            .reduceByKey { a, b -> a + b }
 
         val wordCounts3 = words
             .map { Tuple2(it, 1) }
-            .reduceByKey { a: Int, b: Int -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
+            .reduceByKey { a, b -> a + b }
 
-        wordCounts.foreachRDD { rdd, time: Time ->
+//        val wordCounts5 = words
+//            .dstream()
+//            .map({ Tuple2(it, 1) }, fakeClassTag())
+//            .let { DStream.toPairDStreamFunctions(it, fakeClassTag(), fakeClassTag(), null) }
+//            .reduceByKey { a, b -> a + b }
+//            .let { JavaDStream(it, fakeClassTag()) }
+
+        wordCounts3.foreachRDD { rdd, time: Time ->
+            val sc = JavaSparkContext(rdd.context())
 
             // Get or register the excludeList Broadcast
-            val excludeList = JavaWordExcludeList.getInstance(JavaSparkContext(rdd.context()))
+            val excludeList = JavaWordExcludeList.getInstance(sc)
 
             // Get or register the droppedWordsCounter Accumulator
-            val droppedWordsCounter = JavaDroppedWordsCounter.getInstance(JavaSparkContext(rdd.context()))
+            val droppedWordsCounter = JavaDroppedWordsCounter.getInstance(sc)
 
             // Use excludeList to drop words and use droppedWordsCounter to count them
-            val counts = rdd.filter { wordCount ->
-                if (excludeList.value().contains(wordCount._1)) {
-                    droppedWordsCounter.add(wordCount._2.toLong())
-                    false
-                } else {
-                    true
-                }
-            }.collect().toString()
-            val output = "Counts at time $time $counts"
+            val (counts, duration) = measureTimedValue {
+                rdd.filter { wordCount ->
+                    if (excludeList.value().contains(wordCount._1)) {
+                        droppedWordsCounter.add(wordCount._2.toLong())
+                        false
+                    } else {
+                        true
+                    }
+                }.collect()
+            }
+
+            println("Debug: ${rdd.toDebugString()}")
+
+            val output = "Counts at time $time $counts\n$duration"
             println(output)
             println("Dropped ${droppedWordsCounter.value()} word(s) totally")
             println("Appending to " + outputFile.absolutePath)
