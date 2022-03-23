@@ -38,6 +38,7 @@ import org.apache.spark.sql.KeyValueGroupedDataset
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.apache.spark.sql.streaming.OutputMode
+import scala.Tuple2
 
 
 /**
@@ -79,9 +80,8 @@ inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(
  * Note that you need to use [reduceGroupsK] always instead of the Java- or Scala-specific
  * [KeyValueGroupedDataset.reduceGroups] to make the compiler work.
  */
-inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroupsK(noinline func: (VALUE, VALUE) -> VALUE): Dataset<Pair<KEY, VALUE>> =
+inline fun <reified KEY, reified VALUE> KeyValueGroupedDataset<KEY, VALUE>.reduceGroupsK(noinline func: (VALUE, VALUE) -> VALUE): Dataset<Tuple2<KEY, VALUE>> =
     reduceGroups(ReduceFunction(func))
-        .map { t -> t._1() to t._2() }
 
 /**
  * (Kotlin-specific)
