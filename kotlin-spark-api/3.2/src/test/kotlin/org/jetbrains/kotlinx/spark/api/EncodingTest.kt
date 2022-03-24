@@ -26,6 +26,7 @@ import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Product
 import scala.Tuple1
 import scala.Tuple2
@@ -124,7 +125,7 @@ class EncodingTest : ShouldSpec({
             }
 
             should("be able to serialize binary") {
-                val byteArrayTriple = c("Hello there".encodeToByteArray(), 1, intArrayOf(1, 2, 3))
+                val byteArrayTriple = t("Hello there".encodeToByteArray(), 1, intArrayOf(1, 2, 3))
                 val dataset = dsOf(byteArrayTriple)
 
                 val (a, b, c) = dataset.collectAsList().single()
@@ -134,13 +135,13 @@ class EncodingTest : ShouldSpec({
             }
 
             should("be able to serialize Decimal") {
-                val decimalPair = c(Decimal().set(50), 12)
+                val decimalPair = t(Decimal().set(50), 12)
                 val dataset = dsOf(decimalPair)
                 dataset.collectAsList() shouldBe listOf(decimalPair)
             }
 
             should("be able to serialize BigDecimal") {
-                val decimalPair = c(BigDecimal.TEN, 12)
+                val decimalPair = t(BigDecimal.TEN, 12)
                 val dataset = dsOf(decimalPair)
                 val (a, b) = dataset.collectAsList().single()
                 a.compareTo(BigDecimal.TEN) shouldBe 0
@@ -155,23 +156,23 @@ class EncodingTest : ShouldSpec({
 
             should("Be able to serialize Scala Tuples including data classes") {
                 val dataset = dsOf(
-                    Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
-                    Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
+                    t("a", t("a", 1, LonLat(1.0, 1.0))),
+                    t("b", t("b", 2, LonLat(1.0, 2.0))),
                 )
                 dataset.show()
                 val asList = dataset.takeAsList(2)
-                asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
+                asList.first() shouldBe t("a", t("a", 1, LonLat(1.0, 1.0)))
             }
 
             should("Be able to serialize data classes with tuples") {
                 val dataset = dsOf(
-                    DataClassWithTuple(Tuple3(5L, "test", Tuple1(""))),
-                    DataClassWithTuple(Tuple3(6L, "tessst", Tuple1(""))),
+                    DataClassWithTuple(t(5L, "test", t(""))),
+                    DataClassWithTuple(t(6L, "tessst", t(""))),
                 )
 
                 dataset.show()
                 val asList = dataset.takeAsList(2)
-                asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
+                asList.first().tuple shouldBe t(5L, "test", t(""))
             }
         }
     }
@@ -187,15 +188,15 @@ class EncodingTest : ShouldSpec({
             }
 
             should("contain all generic primitives with complex schema") {
-                val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
-                val primitives2 = c(2, 2.0, 2.toFloat(), 2.toByte(), LocalDate.now().plusDays(1), false)
+                val primitives = t(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
+                val primitives2 = t(2, 2.0, 2.toFloat(), 2.toByte(), LocalDate.now().plusDays(1), false)
                 val tuples = dsOf(primitives, primitives2).collectAsList()
                 expect(tuples).contains.inAnyOrder.only.values(primitives, primitives2)
             }
 
             should("contain all generic primitives with complex nullable schema") {
-                val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
-                val nulls = c(null, null, null, null, null, null)
+                val primitives = t(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
+                val nulls = t(null, null, null, null, null, null)
                 val tuples = dsOf(primitives, nulls).collectAsList()
                 expect(tuples).contains.inAnyOrder.only.values(primitives, nulls)
             }

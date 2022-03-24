@@ -20,36 +20,47 @@
 package org.jetbrains.kotlinx.spark.examples
 
 import org.apache.spark.api.java.function.ReduceFunction
+import org.apache.spark.sql.Dataset
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
+import scala.*
 
 data class Q<T>(val id: Int, val text: T)
 object Main {
 
     @JvmStatic
     fun main(args: Array<String>) {
-
         val spark = SparkSession
             .builder()
             .master("local[2]")
-            .appName("Simple Application").orCreate
+            .appName("Simple Application")
+            .getOrCreate()
 
-        val triples = spark
-            .toDS(listOf(Q(1, 1 to null), Q(2, 2 to "22"), Q(3, 3 to "333")))
-            .map { (a, b) -> a + b.first to b.second?.length }
-            .map { it to 1 }
-            .map { (a, b) -> Triple(a.first, a.second, b) }
-
+        val triples: Dataset<Tuple3<Int, Int?, Int>> = spark
+            .toDS(
+                listOf(
+                    Q(1, t(1,  null)),
+                    Q(2, t(2,  "22")),
+                    Q(3, t(3,  "333")),
+                )
+            )
+            .map { (a, b) -> t(a + b._1, b._2?.length) }
+            .map { it: Tuple2<Int, Int?> -> it + 1 } // add counter
 
         val pairs = spark
-            .toDS(listOf(2 to "hell", 4 to "moon", 6 to "berry"))
+            .toDS(listOf(
+                t + 2 + "hell",
+                t + 4 + "moon",
+                t + 6 + "berry",
+            ))
 
         triples
-            .leftJoin(pairs, triples.col("first").multiply(2).eq(pairs.col("first")))
+            .leftJoin(pairs, triples.col("first").multiply(2) eq pairs.col("first"))
 //                .also { it.printSchema() }
-            .map { (triple, pair) -> Five(triple.first, triple.second, triple.third, pair?.first, pair?.second) }
+            .map { (triple, pair) -> Five(triple._1, triple._2, triple._3, pair?._1, pair?._2) }
             .groupByKey { it.a }
             .reduceGroupsK { v1, v2 -> v1.copy(a = v1.a + v2.a, b = v1.a + v2.a) }
-            .map { it.second }
+            .map { it._2 }
             .repartition(1)
             .withCached {
                 write()

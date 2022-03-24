@@ -51,6 +51,8 @@ import scala.Tuple22
  *
  */
 
+fun Tuple1<*>.dropFirst(): EmptyTuple = EmptyTuple
+fun Tuple1<*>.dropLast(): EmptyTuple = EmptyTuple
 fun <T1> Tuple2<*, T1>.dropFirst(): Tuple1<T1> = Tuple1<T1>(this._2())
 fun <T1> Tuple2<T1, *>.dropLast(): Tuple1<T1> = Tuple1<T1>(this._1())
 fun <T1, T2> Tuple3<*, T1, T2>.dropFirst(): Tuple2<T1, T2> = Tuple2<T1, T2>(this._2(), this._3())

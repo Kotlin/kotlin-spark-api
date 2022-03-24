@@ -20,6 +20,7 @@
 package org.jetbrains.kotlinx.spark.examples
 
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
 
 
 data class Left(val id: Int, val name: String)
@@ -32,10 +33,12 @@ fun main() {
         val first = dsOf(Left(1, "a"), Left(2, "b"))
         val second = dsOf(Right(1, 100), Right(3, 300))
         first
-            .leftJoin(second, first.col("id").eq(second.col("id")))
+            .leftJoin(second, first.col("id") eq second.col("id"))
             .debugCodegen()
             .also { it.show() }
-            .map { c(it.first.id, it.first.name, it.second?.value) }
+            .map { (left, right) ->
+                t + left.id + left.name + right?.value
+            }
             .show()
 
     }

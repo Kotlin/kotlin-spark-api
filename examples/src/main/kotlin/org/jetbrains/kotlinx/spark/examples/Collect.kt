@@ -21,6 +21,7 @@ package org.jetbrains.kotlinx.spark.examples
 
 import org.apache.spark.sql.Row
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
 
 fun main() {
     withSpark {
@@ -39,7 +40,7 @@ fun main() {
             }
 
         dsOf(1, 2, 3)
-            .map { c(it, it + 1, it + 2) }
+            .map { t(it, it + 1, it + 2) }
             .to<Row>()
             .select("_1")
             .collectAsList()

@@ -21,6 +21,7 @@ package org.jetbrains.kotlinx.spark.examples
 
 import org.apache.spark.sql.Dataset
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
 
 const val MEANINGFUL_WORD_LENGTH = 4
 
@@ -33,15 +34,15 @@ fun main() {
             .flatten()
             .cleanup()
             .groupByKey { it }
-            .mapGroups { k, iter -> k to iter.asSequence().count() }
-            .sort { arrayOf(it.col("second").desc()) }
+            .mapGroups { k, iter -> t + k + iter.asSequence().count() }
+            .sort { arrayOf(it.col("_2").desc()) }
             .limit(20)
-            .map { it.second to it.first }
+            .map { it.swap() }
             .show(false)
     }
 }
 
-fun Dataset<String>.cleanup() =
+fun Dataset<String>.cleanup(): Dataset<String> =
     filter { it.isNotBlank() }
         .map { it.trim(',', ' ', '\n', ':', '.', ';', '?', '!', '"', '\'', '\t', '　') }
         .filter { !it.endsWith("n’t") }
