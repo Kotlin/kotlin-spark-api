@@ -25,6 +25,8 @@ import kotlin.jvm.Throws
 
 /**
  * Extra extensions for Scala [Product]s such as Tuples.
+ * In most cases, the functions of `SameTypeProductExtensions.kt` will be used
+ * instead of these. But these help for the overview and generic case.
  *
  * For example:
  *
@@ -103,7 +105,7 @@ fun Product.getOrNull(n: Int): Any? = if (n in 0 until size) productElement(n) e
  */
 @Suppress("UNCHECKED_CAST")
 @Throws(IndexOutOfBoundsException::class, ClassCastException::class)
-fun <T> Product.getAs(n: Int): T = productElement(n) as T
+inline fun <reified T> Product.getAs(n: Int): T = productElement(n) as T
 
 /** The n'th element of this product, 0-based.  In other words, for a
  *  product `A(x,,1,,, ..., x,,k,,)`, returns `x,,(n+1),,` where `0 <= n < k`.
@@ -113,7 +115,7 @@ fun <T> Product.getAs(n: Int): T = productElement(n) as T
  *  @return       the element `n` elements after the first element, `null` if out of bounds or unable to be cast
  */
 @Suppress("UNCHECKED_CAST")
-fun <T> Product.getAsOrNull(n: Int): T? = getOrNull(n) as? T
+inline fun <reified T> Product.getAsOrNull(n: Int): T? = getOrNull(n) as? T
 
 /** The range of n'th elements of this product, 0-based.  In other words, for a
  *  product `A(x,,1,,, ..., x,,k,,)`, returns `x,,(n+1),,` where `0 <= n < k`.
@@ -143,7 +145,7 @@ fun Product.getOrNull(indexRange: IntRange): List<Any?> = indexRange.map(::getOr
  *  @return       the elements in [indexRange]
  */
 @Throws(IndexOutOfBoundsException::class, ClassCastException::class)
-fun <T> Product.getAs(indexRange: IntRange): List<T> = indexRange.map(::getAs)
+inline fun <reified T> Product.getAs(indexRange: IntRange): List<T> = indexRange.map(::getAs)
 
 /** The range of n'th elements of this product, 0-based.  In other words, for a
  *  product `A(x,,1,,, ..., x,,k,,)`, returns `x,,(n+1),,` where `0 <= n < k`.
@@ -152,4 +154,4 @@ fun <T> Product.getAs(indexRange: IntRange): List<T> = indexRange.map(::getAs)
  *  @param        indexRange   the indices of the elements to return
  *  @return       the elements in [indexRange], `null` is out of bounds or unable to be cast
  */
-fun <T> Product.getAsOrNull(indexRange: IntRange): List<T?> = indexRange.map(::getAsOrNull)
+inline fun <reified T> Product.getAsOrNull(indexRange: IntRange): List<T?> = indexRange.map(::getAsOrNull)

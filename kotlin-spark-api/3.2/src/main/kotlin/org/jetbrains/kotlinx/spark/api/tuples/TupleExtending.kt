@@ -62,6 +62,8 @@ import scala.Tuple22
  * If you mean to create ```tupleOf(a, b, tupleOf(c, d))``` or ```tupleOf(tupleOf(a, b), c, d)```,
  * use [appendedBy] and [prependedBy] explicitly.
  *
+ * Note that [String.plus] concatenates any object to the string, so prepending it like ```myString + myTuple``` won't work.
+ *
  * For concatenating two tuples, see [org.jetbrains.kotlinx.spark.api.tuples.concat].
  *
  */

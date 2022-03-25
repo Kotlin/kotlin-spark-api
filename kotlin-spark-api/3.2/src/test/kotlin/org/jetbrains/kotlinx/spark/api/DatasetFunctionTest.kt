@@ -45,25 +45,25 @@ class DatasetFunctionTest : ShouldSpec({
 
             should("handle cached operations") {
                 val result = dsOf(1, 2, 3, 4, 5)
-                    .map { t(it, it + 2) }
+                    .map { it X (it + 2) }
                     .withCached {
                         expect(collectAsList()).contains.inAnyOrder.only.values(
-                            t(1, 3),
-                            t(2, 4),
-                            t(3, 5),
-                            t(4, 6),
-                            t(5, 7),
+                            1 X 3,
+                            2 X 4,
+                            3 X 5,
+                            4 X 6,
+                            5 X 7,
                         )
 
                         val next = filter { it._1 % 2 == 0 }
-                        expect(next.collectAsList()).contains.inAnyOrder.only.values(t(2, 4), t(4, 6))
+                        expect(next.collectAsList()).contains.inAnyOrder.only.values(2 X 4, 4 X 6)
                         next
                     }
-                    .map {
+                    .map { it: Tuple2<Int, Int> ->
                         it + (it._1 + it._2) * 2
                     }
                     .collectAsList()
-                expect(result).contains.inOrder.only.values(t(2, 4, 12), t(4, 6, 20))
+                expect(result).contains.inOrder.only.values(2 X 4 X 12, 4 X 6 X 20)
             }
 
             should("handle join operations") {
@@ -75,7 +75,7 @@ class DatasetFunctionTest : ShouldSpec({
                 val second = dsOf(Right(1, 100), Right(3, 300))
                 val result = first
                     .leftJoin(second, first.col("id") eq second.col("id"))
-                    .map { t + it._1.id + it._1.name + it._2?.value }
+                    .map { it._1.id X it._1.name X it._2?.value }
                     .collectAsList()
                 expect(result).contains.inOrder.only.values(t(1, "a", 100), t(2, "b", null))
             }
@@ -171,7 +171,7 @@ class DatasetFunctionTest : ShouldSpec({
                         s = key
                         s shouldBe key
 
-                        t(s!!, collected.map { it._2 })
+                        s!! X collected.map { it._2 }
                     }
 
                 mappedWithStateTimeoutConf.count() shouldBe 2
@@ -189,7 +189,7 @@ class DatasetFunctionTest : ShouldSpec({
                     s = key
                     s shouldBe key
 
-                    t(s!!, collected.map { it._2 })
+                    s!! X collected.map { it._2 }
                 }
 
                 mappedWithState.count() shouldBe 2
@@ -225,9 +225,7 @@ class DatasetFunctionTest : ShouldSpec({
 
                 val cogrouped = groupedDataset1.cogroup(groupedDataset2) { key, left, right ->
                     listOf(
-                        key to (left.asSequence() + right.asSequence())
-                            .map { it._2 }
-                            .toList()
+                        key to (left.asSequence() + right.asSequence()).map { it._2 }.toList()
                     ).iterator()
                 }
 

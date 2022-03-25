@@ -34,8 +34,8 @@ fun main() {
             .flatten()
             .cleanup()
             .groupByKey { it }
-            .mapGroups { k, iter -> t + k + iter.asSequence().count() }
-            .sort { arrayOf(it.col("_2").desc()) }
+            .mapGroups { k, iter -> k X iter.asSequence().count() }
+            .sort { arrayOf(it(colName = "_2").desc()) }
             .limit(20)
             .map { it.swap() }
             .show(false)

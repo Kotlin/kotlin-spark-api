@@ -25,14 +25,14 @@ import org.jetbrains.kotlinx.spark.api.tuples.*
 fun main() {
     withSpark {
         dsOf(1, 2, 3, 4, 5)
-            .map { t(it, (it + 2)) }
+            .map { it X (it + 2) }
             .withCached {
                 showDS()
 
                 filter { it._1 % 2 == 0 }.showDS()
             }
             .map { (first, second) ->
-                t(first, second, (first + second) * 2)
+                first X second X (first + second) * 2
             }
             .show()
     }

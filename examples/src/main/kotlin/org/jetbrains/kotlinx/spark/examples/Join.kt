@@ -37,7 +37,7 @@ fun main() {
             .debugCodegen()
             .also { it.show() }
             .map { (left, right) ->
-                t + left.id + left.name + right?.value
+                left.id X left.name X right?.value
             }
             .show()
 

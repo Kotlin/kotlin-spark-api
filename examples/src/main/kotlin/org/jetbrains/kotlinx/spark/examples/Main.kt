@@ -39,23 +39,28 @@ object Main {
         val triples: Dataset<Tuple3<Int, Int?, Int>> = spark
             .toDS(
                 listOf(
-                    Q(1, t(1,  null)),
-                    Q(2, t(2,  "22")),
-                    Q(3, t(3,  "333")),
+                    Q(1, 1 X null),
+                    Q(2, 2 X "22"),
+                    Q(3, 3 X "333"),
                 )
             )
-            .map { (a, b) -> t(a + b._1, b._2?.length) }
+            .map { (a, b) -> t(_1 = a + b._1, _2 = b._2?.length) }
             .map { it: Tuple2<Int, Int?> -> it + 1 } // add counter
 
         val pairs = spark
-            .toDS(listOf(
-                t + 2 + "hell",
-                t + 4 + "moon",
-                t + 6 + "berry",
-            ))
+            .toDS(
+                listOf(
+                    2 X "hell",
+                    4 X "moon",
+                    6 X "berry",
+                )
+            )
 
         triples
-            .leftJoin(pairs, triples.col("first").multiply(2) eq pairs.col("first"))
+            .leftJoin(
+                right = pairs,
+                col = triples("_1").multiply(2) eq pairs("_1"),
+            )
 //                .also { it.printSchema() }
             .map { (triple, pair) -> Five(triple._1, triple._2, triple._3, pair?._1, pair?._2) }
             .groupByKey { it.a }

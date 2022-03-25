@@ -193,7 +193,7 @@ fun <T1, T2> Arity2<T1, T2>.toPair(): Pair<T1, T2> = Pair<T1, T2>(_1, _2)
 /**
  * Returns a new [Tuple3] based on the arguments in the current [Triple].
  */
-//fun <T1, T2, T3> Triple<T1, T2, T3>.toTuple(): Tuple3<T1, T2, T3> = Tuple3<T1, T2, T3>(first, second, third)
+fun <T1, T2, T3> Triple<T1, T2, T3>.toTuple(): Tuple3<T1, T2, T3> = Tuple3<T1, T2, T3>(first, second, third)
 
 /**
  * Returns a new [Arity3] based on the arguments in the current [Triple].
