@@ -117,7 +117,8 @@ class TuplesTest : ShouldSpec({
             tupleOf(1, 2, 3, 4, 5).size shouldBe 5
             tupleOf(1, 2, 3, 4)[0] shouldBe 1
             shouldThrow<IndexOutOfBoundsException> { tupleOf(1, 2L)[5] }
-            tupleOf(1).getOrNull(5) shouldBe null
+
+            tupleOf(1, 2, 3).getOrNull(5) shouldBe null
 
             shouldThrow<IndexOutOfBoundsException> { tupleOf(1).getAs<String>(5) }
             shouldThrow<ClassCastException> { tupleOf(1).getAs<String>(0) }
