@@ -8,7 +8,9 @@ import io.kotest.matchers.shouldNotBe
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.jetbrains.kotlinx.spark.api.*
 import scala.Tuple3
+import io.kotest.matchers.types.shouldBeInstanceOf
 
+@Suppress("ShouldBeInstanceOfInspection", "RedundantLambdaArrow", "USELESS_IS_CHECK")
 class TuplesTest : ShouldSpec({
     context("Test tuple extensions") {
 
@@ -111,14 +113,20 @@ class TuplesTest : ShouldSpec({
                 it shouldBe 1
             }
             tupleOf(1, 2, 3).toList().isNotEmpty() shouldBe true
-            tupleOf(1, 2, 3).asIterable().none {
-                it > 4
-            } shouldBe true
+            tupleOf(1, 2, 3).asIterable().none { it > 4 } shouldBe true
             tupleOf(1, 2, 3, 4, 5).size shouldBe 5
             tupleOf(1, 2, 3, 4)[0] shouldBe 1
             shouldThrow<IndexOutOfBoundsException> { tupleOf(1, 2L)[5] }
 
-            tupleOf(1, 2, 3).getOrNull(5) shouldBe null
+            tupleOf(1 to 3, arrayOf(1), A()).getOrNull(5).let {
+                (it is Any?) shouldBe true
+                it shouldBe null
+            }
+
+            tupleOf(1, 2, 3).getOrNull(5).let {
+                (it is Int?) shouldBe true
+                it shouldBe null
+            }
 
             shouldThrow<IndexOutOfBoundsException> { tupleOf(1).getAs<String>(5) }
             shouldThrow<ClassCastException> { tupleOf(1).getAs<String>(0) }
@@ -129,8 +137,10 @@ class TuplesTest : ShouldSpec({
 
             tupleOf(1, 2, 3).toTriple() shouldBe Triple(1, 2, 3)
 
-            tupleOf(1, 2, 3, 4, 5, 6, 7)[1..3]
-                .containsAll(listOf(2, 3, 4)) shouldBe true
+            tupleOf(1, 2, 3, 4, 5, 6, 7)[1..3].let {
+                it.shouldBeInstanceOf<List<Int>>()
+                it.containsAll(listOf(2, 3, 4)) shouldBe true
+            }
             tupleOf(1, 1, 2)[1..2] shouldBe tupleOf(1, 2, 2)[0..1]
 
             tupleOf(1, 2, 3, 4, 5)[2] shouldBe 3
@@ -138,13 +148,25 @@ class TuplesTest : ShouldSpec({
             shouldThrow<IndexOutOfBoundsException> { tupleOf(1, 1, 2)[1..5] }
             (null in tupleOf(1, 1, 2).getOrNull(1..5)) shouldBe true
 
-
-
             tupleOf(1, 2) shouldBe tupleOf(2, 1).swap()
             tupleOf(1 to "Test") shouldBe tupleOf(1 to "Test")
             val a: List<Super> = tupleOf(A(), B()).toList()
         }
 
+        should("Have copy methods for tuples, Kotlin data class style") {
+            t().copy() shouldBe t()
+
+            t(1, 2).copy(_1 = 0) shouldBe t(0, 2)
+            t(1, 2).copy(_2 = 0) shouldBe t(1, 0)
+
+            t(1, 2).copy() shouldBe t(1, 2)
+            t(1, 2, 3, 4, 5).copy() shouldBe t(1, 2, 3, 4, 5)
+
+            // when specifying all parameters, the Scala version will be used
+            t(1, 2).copy(3, 4) shouldBe t(3, 4)
+            // unless explicitly giving parameters
+            t(1, 2).copy(_1 = 3, _2 = 4) shouldBe t(3, 4)
+        }
 
     }
 })
