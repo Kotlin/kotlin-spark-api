@@ -183,7 +183,22 @@ class TuplesTest : ShouldSpec({
 
             val c: Tuple2<Tuple2<Tuple2<Int, String>, List<Int?>>, Tuple2<Tuple2<Map<Int, String>, Long>, Int>> =
                 t(1, mapOf(1 to "a")) zip t("13", 1L) zip t(listOf(null, 1), 1, 'c')
+        }
 
+        should("Map tuples") {
+            val a = t(1, A(), 3L, 4.0, 5).map {
+                when (it) {
+                    is A -> A()
+                    else -> it.toString()
+                }
+            }
+        }
+
+        should("Take n from tuples") {
+            t(1, 2, 3).take2() shouldBe t(1, 2)
+            t(1, 2, 3).takeLast2() shouldBe t(2, 3)
+
+            val a = t(1.0, 2, 3L, 4f).takeLast3()
         }
 
     }
