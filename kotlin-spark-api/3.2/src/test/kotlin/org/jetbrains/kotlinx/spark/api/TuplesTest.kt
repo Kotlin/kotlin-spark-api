@@ -9,6 +9,8 @@ import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.jetbrains.kotlinx.spark.api.*
 import scala.Tuple3
 import io.kotest.matchers.types.shouldBeInstanceOf
+import scala.Tuple1
+import scala.Tuple2
 
 @Suppress("ShouldBeInstanceOfInspection", "RedundantLambdaArrow", "USELESS_IS_CHECK")
 class TuplesTest : ShouldSpec({
@@ -166,6 +168,22 @@ class TuplesTest : ShouldSpec({
             t(1, 2).copy(3, 4) shouldBe t(3, 4)
             // unless explicitly giving parameters
             t(1, 2).copy(_1 = 3, _2 = 4) shouldBe t(3, 4)
+        }
+
+        should("Zip tuples") {
+
+            (t(1, 2) zip t(3, 4)) shouldBe t(t(1, 3), t(2, 4))
+            (t(1, 2, 3, 4, 5, 6) zip t("a", "b")) shouldBe t(t(1, "a"), t(2, "b"))
+
+            (t(1, 2, 3, 4) zip t()) shouldBe t()
+            (t() zip t(1, 2, 3, 4)) shouldBe t()
+
+            val a: Tuple2<Tuple2<String, Int>, Tuple2<Double, Long>> =  t("1", 2.0) zip t(3, 4L, "", "")
+            val b: Tuple3<Tuple2<String, Int>, Tuple2<Double, Long>, Tuple2<Float, String>> = t("1", 2.0, 5f) zip t(3, 4L, "", "")
+
+            val c: Tuple2<Tuple2<Tuple2<Int, String>, List<Int?>>, Tuple2<Tuple2<Map<Int, String>, Long>, Int>> =
+                t(1, mapOf(1 to "a")) zip t("13", 1L) zip t(listOf(null, 1), 1, 'c')
+
         }
 
     }
