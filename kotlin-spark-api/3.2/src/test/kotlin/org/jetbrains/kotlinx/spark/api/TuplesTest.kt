@@ -186,19 +186,31 @@ class TuplesTest : ShouldSpec({
         }
 
         should("Map tuples") {
-            val a = t(1, A(), 3L, 4.0, 5).map {
-                when (it) {
-                    is A -> A()
-                    else -> it.toString()
-                }
-            }
+            t(1, 2.toShort(), 3L, 4.0, 5).map {
+                it.toString()
+            } shouldBe t("1", "2", "3", "4.0", "5")
         }
 
         should("Take n from tuples") {
             t(1, 2, 3).take2() shouldBe t(1, 2)
             t(1, 2, 3).takeLast2() shouldBe t(2, 3)
 
-            val a = t(1.0, 2, 3L, 4f).takeLast3()
+            t(1, 2, 3).take0() shouldBe t()
+            t(1, 2, 3).takeLast0() shouldBe t()
+        }
+
+        should("Drop n from tuples") {
+            t(1, 2, 3).drop2() shouldBe t(3)
+            t(1, 2, 3).dropLast2() shouldBe t(1)
+
+            t(1, 2, 3).drop0() shouldBe t(1, 2, 3)
+            t(1, 2, 3).dropLast0() shouldBe t(1, 2, 3)
+        }
+
+        should("Split tuples") {
+            t(1, 2, 3, 4, 5).splitAt2() shouldBe t(t(1, 2), t(3, 4, 5))
+            t(1, 2, 3, 4, 5).splitAt0() shouldBe t(t(), t(1, 2, 3, 4, 5))
+            t(1, 2, 3, 4, 5).splitAt5() shouldBe t(t(1, 2, 3, 4, 5), t())
         }
 
     }

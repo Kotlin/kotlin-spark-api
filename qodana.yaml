@@ -1,3 +1,5 @@
+version: "1.0"
+linter: jetbrains/qodana-jvm-community:2021.3
 profile:
   name: qodana.recommended
 exclude:
