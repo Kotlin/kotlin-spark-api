@@ -1,3 +1,5 @@
+profile:
+  name: qodana.recommended
 exclude:
   - name: Tuples
     paths:
