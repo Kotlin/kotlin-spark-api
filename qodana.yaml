@@ -1,0 +1,4 @@
+exclude:
+  - name: Tuples
+    paths:
+      - kotlin-spark-api/3.2/src/main/kotlin/org/jetbrains/kotlinx/spark/api/tuples
