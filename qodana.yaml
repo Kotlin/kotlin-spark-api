@@ -1,8 +1,6 @@
-version: "1.0"
-linter: jetbrains/qodana-jvm-community:2021.3
-proile
+profile:
   name: qodana.recommended
-excde:
-  - name: Tuples
+exclude:
+  - name: All
     paths:
       - kotlin-spark-api/3.2/src/main/kotlin/org/jetbrains/kotlinx/spark/api/tuples
