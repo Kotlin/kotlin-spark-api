@@ -1,6 +1,6 @@
-profile:
+proile:
   name: qodana.recommended
-exclude:
+exclue:
   - name: All
-    paths:
+    pat:
       - kotlin-spark-api/3.2/src/main/kotlin/org/jetbrains/kotlinx/spark/api/tuples
