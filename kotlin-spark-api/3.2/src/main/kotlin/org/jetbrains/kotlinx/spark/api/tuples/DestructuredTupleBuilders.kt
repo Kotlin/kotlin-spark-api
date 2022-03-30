@@ -45,6 +45,9 @@ import scala.Tuple22
 
 /**
  * This file provides a descriptive way to create Tuples using [X].
+ * Only use [X] to create new Tuples.
+ * To create Tuples of Tuples, it's recommended to use [t] or [tupleOf] instead as using [X] can lead
+ * to unexpected results.
  *
  * For instance:
  * ```val yourTuple = 1 X "test" X a```

@@ -47,7 +47,9 @@ import scala.Tuple22
  * This can be done using [dropFirst] and [dropLast].
  *
  * For example:
- * ```val yourTuple: Tuple2<Int, String> = tupleOf(1, "test", a).dropLast()```
+ * ```kotlin
+ * val yourTuple: Tuple2<Int, String> = tupleOf(1, "test", a).dropLast()
+ * ```
  *
  */
 

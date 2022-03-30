@@ -245,7 +245,7 @@ The concept of `EmptyTuple` from Scala 3 is also already present:
 tupleOf(1).dropLast() == tupleOf() == emptyTuple()
 ```
 
-Finally, all these helper functions are also baked in:
+Finally, all these tuple helper functions are also baked in:
 
 - `componentX()` for destructuring: `val (a, b) = tuple`
 - `dropLast() / dropFirst()`
@@ -257,10 +257,15 @@ Finally, all these helper functions are also baked in:
 - `getOrNull(n) / getOrNull(i..j)`
 - `getAs<T>(n) / getAs<T>(i..j)`
 - `getAsOrNull<T>(n) / getAsOrNull<T>(i..j)`
-- `zip`
 - `copy(_1 = ..., _5 = ...)`
 - `first() / last()`
 - `_1`, `_6` etc. (instead of `_1()`, `_6()`)
+- `zip`
+- `dropN() / dropLastN()`
+- `takeN() / takeLastN()`
+- `splitAtN()`
+- `map`
+- `cast`
 
 ## Examples
 

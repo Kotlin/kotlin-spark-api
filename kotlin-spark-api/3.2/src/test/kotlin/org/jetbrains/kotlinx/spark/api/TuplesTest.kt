@@ -186,9 +186,15 @@ class TuplesTest : ShouldSpec({
         }
 
         should("Map tuples") {
-            t(1, 2.toShort(), 3L, 4.0, 5).map {
-                it.toString()
-            } shouldBe t("1", "2", "3", "4.0", "5")
+            t(1, 2.toShort(), 3L, 4.0, 5)
+                .map { it.toString() }
+                .shouldBe(
+                    t("1", "2", "3", "4.0", "5")
+                )
+
+            shouldThrow<ClassCastException> {
+                t(1, "2", 3L).cast<String, Int, Double>()
+            }
         }
 
         should("Take n from tuples") {

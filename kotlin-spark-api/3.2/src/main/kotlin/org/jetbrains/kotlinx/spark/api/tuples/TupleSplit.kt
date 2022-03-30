@@ -2,6 +2,18 @@ package org.jetbrains.kotlinx.spark.api.tuples
 
 import scala.*
 
+/**
+ * Given a tuple `t(a1, ..., am)`, returns a [Tuple2] of the tuple `t(a1, ..., an)`
+ *  consisting of the first n elements, and the tuple `t(an+1, ..., am)` consisting
+ *  of the remaining elements.
+ *  Splitting at 0 or at n results in `t(t(), myTuple)` or `t(myTuple, t())` respectively.
+ *
+ *  For example:
+ *  ```kotlin
+ *  t(1, 2, 3, 4, 5).splitAt2() == t(t(1, 2), t(3, 4, 5))
+ *  ```
+ */
+
 fun <T1> Tuple1<T1>.splitAt0(): Tuple2<EmptyTuple, Tuple1<T1>> = Tuple2<EmptyTuple, Tuple1<T1>>(EmptyTuple, Tuple1<T1>(this._1()))
 fun <T1> Tuple1<T1>.splitAt1(): Tuple2<Tuple1<T1>, EmptyTuple> = Tuple2<Tuple1<T1>, EmptyTuple>(Tuple1<T1>(this._1()), EmptyTuple)
 fun <T1, T2> Tuple2<T1, T2>.splitAt0(): Tuple2<EmptyTuple, Tuple2<T1, T2>> = Tuple2<EmptyTuple, Tuple2<T1, T2>>(EmptyTuple, Tuple2<T1, T2>(this._1(), this._2()))

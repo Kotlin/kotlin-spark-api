@@ -4,11 +4,10 @@ import scala.*
 
 /**
  * This file provides zip-functions to all Tuple variants.
- * Given two tuples, `t(a1, ..., an)` and `t(a1, ..., an)`, returns a tuple
+ * Given two tuples, `t(a1, ..., an) zip t(a1, ..., an)`, returns a tuple
  *  `t(t(a1, b1), ..., t(an, bn))`. If the two tuples have different sizes,
  *  the extra elements of the larger tuple will be disregarded.
  *  The result is typed as `TupleX<Tuple2<TA1, TB1>, ..., Tuple2<TAn, TBn>>`.
- *
  */
 
 infix fun Tuple1<*>.zip(other: EmptyTuple): EmptyTuple = EmptyTuple

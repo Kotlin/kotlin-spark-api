@@ -2,6 +2,17 @@ package org.jetbrains.kotlinx.spark.api.tuples
 
 import scala.*
 
+/**
+ * This file contains all functions to drop N items from the beginning or end of a Tuple.
+ * If all items are dropped, the result will be [EmptyTuple].
+ *
+ * For example:
+ * ```kotlin
+ * tupleOf(1, 2, 3, 4).drop2() == tupleOf(3, 4)
+ * tupleOf(1, 2, 3, 4).dropLast2() == tupleOf(1, 2)
+ * ```
+ */
+
 fun <T1> Tuple1<T1>.drop0(): Tuple1<T1> = Tuple1<T1>(this._1())
 fun Tuple1<*>.drop1(): EmptyTuple = EmptyTuple
 fun <T1, T2> Tuple2<T1, T2>.drop0(): Tuple2<T1, T2> = Tuple2<T1, T2>(this._1(), this._2())

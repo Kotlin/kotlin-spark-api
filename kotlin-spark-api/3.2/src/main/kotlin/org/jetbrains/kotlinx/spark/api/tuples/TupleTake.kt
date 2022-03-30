@@ -1,6 +1,18 @@
 package org.jetbrains.kotlinx.spark.api.tuples
 
 import scala.*
+
+/**
+ * This file contains all functions to take N items from the beginning or end of a Tuple.
+ * If 0 items are taken, the result will be [EmptyTuple].
+ *
+ * For example:
+ * ```kotlin
+ * tupleOf(1, 2, 3, 4).take2() == tupleOf(1, 2)
+ * tupleOf(1, 2, 3, 4).takeLast2() == tupleOf(3, 4)
+ * ```
+ */
+
 fun Tuple1<*>.take0(): EmptyTuple = EmptyTuple
 fun <T1> Tuple1<T1>.take1(): Tuple1<T1> = Tuple1<T1>(this._1())
 fun Tuple2<*, *>.take0(): EmptyTuple = EmptyTuple
