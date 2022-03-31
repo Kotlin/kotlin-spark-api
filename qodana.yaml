@@ -6,3 +6,4 @@ exclude:
   - name: All
     paths:
       - kotlin-spark-api/3.2/src/main/kotlin/org/jetbrains/kotlinx/spark/api/tuples
+      - kotlin-spark-api/3.2/src/main/kotlin/org/jetbrains/kotlinx/spark/api/Arities.kt
