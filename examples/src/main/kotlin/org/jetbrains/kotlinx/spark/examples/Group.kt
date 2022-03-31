@@ -21,7 +21,6 @@ package org.jetbrains.kotlinx.spark.examples
 
 import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.*
-import org.jetbrains.kotlinx.spark.api.tuples.t
 
 fun main() {
     withSpark {
@@ -31,7 +30,9 @@ fun main() {
             2 X "c",
         )
             .groupByKey { it._1 }
-            .reduceGroupsK { a, b -> tupleOf(_1 = a._1 + b._1, _2 = a._2 + b._2) }
+            .reduceGroupsK { a, b ->
+                tupleOf(a._1 + b._1, a._2 + b._2)
+            }
             .show()
     }
 }

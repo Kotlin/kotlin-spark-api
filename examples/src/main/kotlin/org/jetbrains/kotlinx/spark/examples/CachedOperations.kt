@@ -31,9 +31,7 @@ fun main() {
 
                 filter { it._1 % 2 == 0 }.showDS()
             }
-            .map { (first, second) ->
-                first X second X (first + second) * 2
-            }
+            .map { it.appendedBy(it._1 + it._2 * 2) }
             .show()
     }
 }

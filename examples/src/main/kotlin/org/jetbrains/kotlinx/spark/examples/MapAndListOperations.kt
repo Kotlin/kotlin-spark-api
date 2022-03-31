@@ -30,7 +30,7 @@ fun main() {
         )
             .flatMap {
                 it.toList()
-                    .map { (first, tuple) -> listOf(first, tuple._1, tuple._2, tuple._3) }
+                    .map { (first, tuple) -> (first + tuple).toList() }
                     .iterator()
             }
             .flatten()

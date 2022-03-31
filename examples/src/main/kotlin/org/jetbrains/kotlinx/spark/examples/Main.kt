@@ -44,7 +44,7 @@ object Main {
                     Q(3, 3 X "333"),
                 )
             )
-            .map { (a, b) -> t(_1 = a + b._1, _2 = b._2?.length) }
+            .map { (a, b) -> t(a + b._1, b._2?.length) }
             .map { it: Tuple2<Int, Int?> -> it + 1 } // add counter
 
         val pairs = spark

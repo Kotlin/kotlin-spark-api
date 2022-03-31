@@ -147,7 +147,7 @@ inline fun <reified T1, T2> Dataset<Pair<T1, T2>>.takeKeys(): Dataset<T1> = map 
  * Maps the Dataset to only retain the "keys" or [Arity2._1] values.
  */
 @JvmName("takeKeysArity2")
-@Deprecated("Use Scala tuples instead.")
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 inline fun <reified T1, T2> Dataset<Arity2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1 }
 
 /**
@@ -168,7 +168,7 @@ inline fun <T1, reified T2> Dataset<Pair<T1, T2>>.takeValues(): Dataset<T2> = ma
  * Maps the Dataset to only retain the "values" or [Arity2._2] values.
  */
 @JvmName("takeValuesArity2")
-@Deprecated("Use Scala tuples instead.")
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 inline fun <T1, reified T2> Dataset<Arity2<T1, T2>>.takeValues(): Dataset<T2> = map { it._2 }
 
 /** DEPRECATED: Use [as] or [to] for this. */
@@ -318,12 +318,12 @@ fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByKey(): Dataset<Tuple2<T1, T2>> = sort
 fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByValue(): Dataset<Tuple2<T1, T2>> = sort("_2")
 
 /** Returns a dataset sorted by the first (`_1`) value of each [Arity2] inside. */
-@Deprecated("Use Scala tuples instead.")
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 @JvmName("sortByArity2Key")
 fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByKey(): Dataset<Arity2<T1, T2>> = sort("_1")
 
 /** Returns a dataset sorted by the second (`_2`) value of each [Arity2] inside. */
-@Deprecated("Use Scala tuples instead.")
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 @JvmName("sortByArity2Value")
 fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByValue(): Dataset<Arity2<T1, T2>> = sort("_2")
 
