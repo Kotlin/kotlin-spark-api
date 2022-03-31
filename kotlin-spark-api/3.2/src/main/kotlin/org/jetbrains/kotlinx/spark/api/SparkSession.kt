@@ -22,6 +22,8 @@
  * This file contains the main entry points and wrappers for the Kotlin Spark API.
  */
 
+@file:Suppress("UsePropertyAccessSyntax")
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.SparkConf
@@ -38,13 +40,14 @@ import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
+import scala.Tuple2
 
 /**
  * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset].
  *
  *  @param spark The current [SparkSession] to wrap
  */
-open class KSparkSession(val spark: SparkSession) {
+class KSparkSession(val spark: SparkSession) {
 
     /** Lazy instance of [JavaSparkContext] wrapper around [sparkContext]. */
     val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
@@ -82,12 +85,43 @@ open class KSparkSession(val spark: SparkSession) {
 /**
  * This wrapper over [SparkSession] and [JavaStreamingContext] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-class KSparkStreamingSession(spark: SparkSession, val ssc: JavaStreamingContext) : KSparkSession(spark) {
+class KSparkStreamingSession(val ssc: JavaStreamingContext) {
 
     /** Can be overwritten to be run after the streaming session has started and before it's terminated. */
     var runAfterStart: KSparkStreamingSession.() -> Unit = {}
-}
 
+    fun invokeRunAfterStart(): Unit = runAfterStart()
+
+
+    fun withSpark(sc: SparkConf, func: KSparkSession.() -> Unit) {
+        val spark = SparkSession.builder().config(sc).getOrCreate()
+        KSparkSession(spark).apply(func)
+    }
+
+    /**
+     * Helper function to enter Spark scope from [ssc] like
+     * ```kotlin
+     * ssc.withSpark { // this: KSparkSession
+     *
+     * }
+     * ```
+     */
+    fun withSpark(ssc: JavaStreamingContext, func: KSparkSession.() -> Unit) = withSpark(ssc.sparkContext().conf, func)
+
+
+    /**
+     * Helper function to enter Spark scope from a provided like
+     * when using the `foreachRDD` function.
+     * ```kotlin
+     * withSpark(rdd) { // this: KSparkSession
+     *
+     * }
+     * ```
+     */
+    fun withSpark(rdd: JavaRDDLike<*, *>, func: KSparkSession.() -> Unit) = withSpark(rdd.context().conf, func)
+
+
+}
 
 
 /**
@@ -160,7 +194,7 @@ inline fun withSpark(
  * @param logLevel Control our logLevel. This overrides any user-defined log settings.
  * @param func function which will be executed in context of [KSparkSession] (it means that `this` inside block will point to [KSparkSession])
  */
-@Suppress("UsePropertyAccessSyntax")
+
 @JvmOverloads
 inline fun withSpark(builder: Builder, logLevel: SparkLogLevel = ERROR, func: KSparkSession.() -> Unit) {
     builder
@@ -212,7 +246,6 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
  * @param logLevel Control our logLevel. This overrides any user-defined log settings.
  * @param timeout The time in milliseconds to wait for the stream to terminate without input. -1 by default, this means no timeout.
  * @param func function which will be executed in context of [KSparkStreamingSession] (it means that `this` inside block will point to [KSparkStreamingSession])
- * todo: provide alternatives with path instead of batchDuration etc
  */
 @JvmOverloads
 inline fun withSparkStreaming(
@@ -221,60 +254,55 @@ inline fun withSparkStreaming(
     props: Map<String, Any> = emptyMap(),
     master: String = SparkConf().get("spark.master", "local[*]"),
     appName: String = "Kotlin Spark Sample",
-    logLevel: SparkLogLevel = SparkLogLevel.ERROR,
     timeout: Long = -1L,
-    func: KSparkStreamingSession.() -> Unit,
+    crossinline func: KSparkStreamingSession.() -> Unit,
 ) {
     if (checkpointPath != null) {
-        TODO()
-//        var kSparkStreamingSession: KSparkStreamingSession? = null
-//        val ssc = JavaStreamingContext.getOrCreate(checkpointPath) {
-//            val jssc = JavaStreamingContext(
-//                SparkConf()
-//                    .setAppName(appName)
-//                    .setMaster(master)
-//                    .setAll(props.map { (key, value) ->
-//                        c(key, value.toString()).toTuple()
-//                    }.asScalaIterable()),
-//                batchDuration,
-//            )
-//            jssc.sparkContext().sc().setLogLevel(logLevel)
-//            jssc.checkpoint(checkpointPath)
-//            kSparkStreamingSession = KSparkStreamingSession(
-//                spark = SparkSession
-//                    .builder()
-//                    .sparkContext(jssc.sparkContext().sc())
-//                    .getOrCreate(),
-//                ssc = jssc,
-//            ).apply { func() }
-//
-//            jssc
-//        }
-//        ssc.start()
-//        kSparkStreamingSession?.apply { runAfterStart() }
-//        ssc.awaitTerminationOrTimeout(timeout)
-//        ssc.stop()
-    } else {
+        var kSparkStreamingSession: KSparkStreamingSession? = null
+        val ssc = JavaStreamingContext.getOrCreate(checkpointPath) {
+            val sc = SparkConf()
+                .setAppName(appName)
+                .setMaster(master)
+                .setAll(
+                    props
+                        .map { (key, value) -> Tuple2(key, value.toString()) }
+                        .asScalaIterable()
+                )
 
-        withSpark(
-            props = props,
-            master = master,
-            appName = appName,
-            logLevel = logLevel,
-        ) {
             val ssc = JavaStreamingContext(sc, batchDuration)
-            KSparkStreamingSession(spark = spark, ssc = ssc).apply {
-                func()
-                ssc.start()
-                runAfterStart()
-            }
+            ssc.checkpoint(checkpointPath)
 
-            ssc.awaitTerminationOrTimeout(timeout)
-            ssc.stop()
+            kSparkStreamingSession = KSparkStreamingSession(ssc)
 
+            func(kSparkStreamingSession!!)
+
+            ssc
         }
+        ssc.start()
+        kSparkStreamingSession?.invokeRunAfterStart()
+        ssc.awaitTerminationOrTimeout(timeout)
+        ssc.stop()
+    } else {
+        val sc = SparkConf()
+            .setAppName(appName)
+            .setMaster(master)
+            .setAll(
+                props
+                    .map { (key, value) -> Tuple2(key, value.toString()) }
+                    .asScalaIterable()
+            )
+        val ssc = JavaStreamingContext(sc, batchDuration)
+        val kSparkStreamingSession = KSparkStreamingSession(ssc)
+
+        func(kSparkStreamingSession)
+        ssc.start()
+        kSparkStreamingSession.invokeRunAfterStart()
+
+        ssc.awaitTerminationOrTimeout(timeout)
+        ssc.stop()
     }
 }
+
 
 /**
  * Broadcast a read-only variable to the cluster, returning a

@@ -22,21 +22,13 @@
 package org.jetbrains.kotlinx.spark.examples
 
 import com.google.common.io.Files
-import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.Time
-import org.apache.spark.streaming.api.java.JavaDStream
-import org.apache.spark.streaming.api.java.JavaPairDStream
-import org.apache.spark.streaming.dstream.DStream
-import org.apache.spark.streaming.dstream.PairDStreamFunctions
 import org.apache.spark.util.LongAccumulator
 import org.jetbrains.kotlinx.spark.api.*
-import scala.Tuple1
 import scala.Tuple2
-import scala.reflect.ClassTag
 import java.io.File
 import java.nio.charset.Charset
 import java.util.regex.Pattern
@@ -49,13 +41,13 @@ import kotlin.time.measureTimedValue
 /**
  * Use this singleton to get or register a Broadcast variable.
  */
-internal object JavaWordExcludeList {
+internal object KotlinWordExcludeList {
 
     @Volatile
     private var instance: Broadcast<List<String>>? = null
 
     fun getInstance(sc: JavaSparkContext): Broadcast<List<String>> {
-        if (instance == null) synchronized(JavaWordExcludeList::class.java) {
+        if (instance == null) synchronized(KotlinWordExcludeList::class) {
             if (instance == null) {
                 val wordExcludeList = listOf("a", "b", "c")
                 instance = sc.broadcast(wordExcludeList)
@@ -68,13 +60,13 @@ internal object JavaWordExcludeList {
 /**
  * Use this singleton to get or register an Accumulator.
  */
-internal object JavaDroppedWordsCounter {
+internal object KotlinDroppedWordsCounter {
 
     @Volatile
     private var instance: LongAccumulator? = null
 
     fun getInstance(sc: JavaSparkContext): LongAccumulator {
-        if (instance == null) synchronized(JavaDroppedWordsCounter::class.java) {
+        if (instance == null) synchronized(KotlinDroppedWordsCounter::class) {
             if (instance == null)
                 instance = sc.sc().longAccumulator("DroppedWordsCounter")
         }
@@ -87,7 +79,7 @@ internal object JavaDroppedWordsCounter {
  * shows how to use lazily instantiated singleton instances for Accumulator and Broadcast so that
  * they can be registered on driver failures.
  *
- * Usage: JavaRecoverableNetworkWordCount <hostname> <port> <checkpoint-directory> <output-file>
+ * Usage: KotlinRecoverableNetworkWordCount <hostname> <port> <checkpoint-directory> <output-file>
  * <hostname> and <port> describe the TCP server that Spark Streaming would connect to receive
  * data. <checkpoint-directory> directory to HDFS-compatible file system which checkpoint data
  * <output-file> file to which the word counts will be appended
@@ -100,7 +92,7 @@ internal object JavaDroppedWordsCounter {
  *
  * and run the example as
  *
- * `$ ./bin/run-example org.apache.spark.examples.streaming.JavaRecoverableNetworkWordCount \
+ * `$ ./bin/run-example org.apache.spark.examples.streaming.KotlinRecoverableNetworkWordCount \
  * localhost 9999 ~/checkpoint/ ~/out`
  *
  * If the directory ~/checkpoint/ does not exist (e.g. running for the first time), it will create
@@ -110,7 +102,7 @@ internal object JavaDroppedWordsCounter {
  *
  * Refer to the online documentation for more details.
  */
-object JavaRecoverableNetworkWordCount {
+object KotlinRecoverableNetworkWordCount {
 
     private val SPACE = Pattern.compile(" ")
 
@@ -125,7 +117,7 @@ object JavaRecoverableNetworkWordCount {
         if (args.size != 4 && args.isNotEmpty()) {
             System.err.println("You arguments were " + listOf(*args))
             System.err.println(
-                """Usage: JavaRecoverableNetworkWordCount <hostname> <port> <checkpoint-directory>
+                """Usage: KotlinRecoverableNetworkWordCount <hostname> <port> <checkpoint-directory>
                      <output-file>. <hostname> and <port> describe the TCP server that Spark
                      Streaming would connect to receive data. <checkpoint-directory> directory to
                      HDFS-compatible file system which checkpoint data <output-file> file to which
@@ -141,12 +133,13 @@ object JavaRecoverableNetworkWordCount {
         val checkpointDirectory = args.getOrElse(2) { DEFAULT_CHECKPOINT_DIRECTORY }
         val outputPath = args.getOrElse(3) { DEFAULT_OUTPUT_PATH }
 
+
         // (used to detect the new context)
         // Create the context with a 1 second batch size or load from checkpointDirectory
         withSparkStreaming(
-//            checkpointPath = checkpointDirectory, TODO
+            checkpointPath = checkpointDirectory,
             batchDuration = Durations.seconds(1),
-            appName = "JavaRecoverableNetworkWordCount",
+            appName = "KotlinRecoverableNetworkWordCount",
         ) {
             createContext(
                 ip = ip,
@@ -167,8 +160,12 @@ object JavaRecoverableNetworkWordCount {
         // If you do not see this printed, that means the StreamingContext has been loaded
         // from the new checkpoint
         println("Creating new context")
-        val outputFile = File(outputPath)
-        if (outputFile.exists()) outputFile.delete()
+        val outputFile = File(outputPath).apply {
+            if (exists()) delete()
+            parentFile.mkdirs()
+            createNewFile()
+        }
+
 
         // Create a socket stream on target ip:port and count the
         // words in input stream of \n delimited text (e.g. generated by 'nc')
@@ -176,86 +173,55 @@ object JavaRecoverableNetworkWordCount {
 
         val words = lines.flatMap { it.split(SPACE).iterator() }
 
-//        val wordCounts = words
-//            .map { c(it, 1) }
-//            .reduceByKey { a, b -> a + b }
-//            .reduceByKey { a, b -> a + b }
-//            .reduceByKey { a, b -> a + b }
-//            .reduceByKey { a, b -> a + b }
-//            .reduceByKey { a, b -> a + b }
-//            .reduceByKey { a, b -> a + b }
-//            .reduceByKey { a, b -> a + b }
-//            .reduceByKey { a, b -> a + b }
-
-        val wordCounts4 = words
-            .mapToPair { Tuple2(it, 1) }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-
-
-//        val wordCounts2 = words
-//            .map { it to 1 }
-//            .reduceByKey { a, b -> a + b }
-
         val wordCounts3 = words
             .map { Tuple2(it, 1) }
             .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
-            .reduceByKey { a, b -> a + b }
 
-//        val wordCounts5 = words
-//            .dstream()
-//            .map({ Tuple2(it, 1) }, fakeClassTag())
-//            .let { DStream.toPairDStreamFunctions(it, fakeClassTag(), fakeClassTag(), null) }
-//            .reduceByKey { a, b -> a + b }
-//            .let { JavaDStream(it, fakeClassTag()) }
+        // in normal streaming context we can create a SparkSession from ssc: JavaStreamingContext
+        // normally `ssc.sparkContext().conf`
+        withSpark(ssc) {
+            listOf(1, 2, 3).toDS().show()
+        }
 
         wordCounts3.foreachRDD { rdd, time: Time ->
-            val sc = JavaSparkContext(rdd.context())
+            // but in foreachRDD we must obtain this conf from the RDD
+            // like `rdd.context().conf`
+            withSpark(rdd) {
 
-            // Get or register the excludeList Broadcast
-            val excludeList = JavaWordExcludeList.getInstance(sc)
+                rdd.toDS().show()
 
-            // Get or register the droppedWordsCounter Accumulator
-            val droppedWordsCounter = JavaDroppedWordsCounter.getInstance(sc)
+                // Get or register the excludeList Broadcast
+                val excludeList = KotlinWordExcludeList.getInstance(sc)
 
-            // Use excludeList to drop words and use droppedWordsCounter to count them
-            val (counts, duration) = measureTimedValue {
-                rdd.filter { wordCount ->
-                    if (excludeList.value().contains(wordCount._1)) {
-                        droppedWordsCounter.add(wordCount._2.toLong())
-                        false
-                    } else {
-                        true
-                    }
-                }.collect()
-            }
+                // Get or register the droppedWordsCounter Accumulator
+                val droppedWordsCounter = KotlinDroppedWordsCounter.getInstance(sc)
 
-            println("Debug: ${rdd.toDebugString()}")
+                // Use excludeList to drop words and use droppedWordsCounter to count them
+                val (counts, duration) = measureTimedValue {
+                    rdd.filter { wordCount ->
+                        if (excludeList.value().contains(wordCount._1)) {
+                            droppedWordsCounter.add(wordCount._2.toLong())
+                            false
+                        } else {
+                            true
+                        }
+                    }.collect()
+                }
 
-            val output = "Counts at time $time $counts\n$duration"
-            println(output)
-            println("Dropped ${droppedWordsCounter.value()} word(s) totally")
-            println("Appending to " + outputFile.absolutePath)
-            Files.append(
-                """
+
+                val output = "Counts at time $time $counts\n$duration"
+                println(output)
+                println("Dropped ${droppedWordsCounter.value()} word(s) totally")
+                println("Appending to " + outputFile.absolutePath)
+                Files.append(
+                    """
                     $output
                     
                     """.trimIndent(),
-                outputFile,
-                Charset.defaultCharset(),
-            )
+                    outputFile,
+                    Charset.defaultCharset(),
+                )
+            }
         }
     }
 

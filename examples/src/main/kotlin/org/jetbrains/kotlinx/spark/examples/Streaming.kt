@@ -37,12 +37,15 @@ fun main() = withSparkStreaming(Durations.seconds(1), timeout = 10_000) {
 
 
     words.foreachRDD { rdd, time ->
-        val dataframe: Dataset<TestRow> = rdd.map { TestRow(it) }.toDS()
+        withSpark(rdd) {
 
-        dataframe
-            .groupByKey { it.word }
-            .count()
-            .show()
+            val dataframe: Dataset<TestRow> = rdd.map { TestRow(it) }.toDS()
+
+            dataframe
+                .groupByKey { it.word }
+                .count()
+                .show()
+        }
 
     }
 
