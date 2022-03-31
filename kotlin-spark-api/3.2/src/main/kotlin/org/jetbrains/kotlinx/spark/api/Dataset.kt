@@ -25,6 +25,8 @@
  * possible/easier.
  */
 
+@file:Suppress("unused")
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.api.java.JavaRDDLike

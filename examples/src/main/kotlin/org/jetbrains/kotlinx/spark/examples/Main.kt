@@ -26,6 +26,7 @@ import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.*
 
 data class Q<T>(val id: Int, val text: T)
+@Suppress("RedundantLambdaArrow", "UsePropertyAccessSyntax")
 object Main {
 
     @JvmStatic
