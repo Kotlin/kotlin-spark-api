@@ -30,8 +30,11 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies
 import org.jetbrains.kotlinx.spark.api.c
+import org.jetbrains.kotlinx.spark.api.reduceByKey
 import org.jetbrains.kotlinx.spark.api.toTuple
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.jetbrains.kotlinx.spark.api.withSparkStreaming
+import scala.Tuple2
 import java.io.Serializable
 import java.util.regex.Pattern
 import kotlin.system.exitProcess
@@ -56,6 +59,7 @@ import kotlin.system.exitProcess
  * consumer-group topic1,topic2
  */
 object KotlinDirectKafkaWordCount {
+
     private val SPACE = Pattern.compile(" ")
 
     private const val DEFAULT_BROKER = "localhost:9092"
@@ -102,8 +106,8 @@ object KotlinDirectKafkaWordCount {
             val lines: JavaDStream<String> = messages.map { it.value() }
             val words: JavaDStream<String> = lines.flatMap { it.split(SPACE).iterator() }
 
-            val wordCounts: JavaPairDStream<String, Int> = words
-                .mapToPair { c(it, 1).toTuple() }
+            val wordCounts: JavaDStream<Tuple2<String, Int>> = words
+                .map { it X 1 }
                 .reduceByKey { a: Int, b: Int -> a + b }
 
             wordCounts.print()

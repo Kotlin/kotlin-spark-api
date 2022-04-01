@@ -92,22 +92,26 @@ class KSparkStreamingSession(val ssc: JavaStreamingContext) {
 
     fun invokeRunAfterStart(): Unit = runAfterStart()
 
+    fun getSpark(sc: SparkConf): SparkSession =
+        SparkSession
+            .builder()
+            .config(sc)
+            .getOrCreate()
 
-    fun <T> withSpark(sc: SparkConf, func: KSparkSession.() -> T): T {
-        val spark = SparkSession.builder().config(sc).getOrCreate()
+    fun <T> withSpark(sc: SparkConf, func: KSparkSession.() -> T): T =
+        KSparkSession(getSpark(sc)).func()
 
-        return with(KSparkSession(spark), func)
-    }
 
     /**
-     * Helper function to enter Spark scope from [ssc] like
+     * Helper function to enter Spark scope from [sscForConf] like
      * ```kotlin
-     * ssc.withSpark { // this: KSparkSession
+     * withSpark(ssc) { // this: KSparkSession
      *
      * }
      * ```
      */
-    fun <T> withSpark(ssc: JavaStreamingContext, func: KSparkSession.() -> T): T = withSpark(ssc.sparkContext().conf, func)
+    fun <T> withSpark(sscForConf: JavaStreamingContext, func: KSparkSession.() -> T): T =
+        withSpark(sscForConf.sparkContext().conf, func)
 
 
     /**
@@ -119,7 +123,8 @@ class KSparkStreamingSession(val ssc: JavaStreamingContext) {
      * }
      * ```
      */
-    fun <T> withSpark(rdd: JavaRDDLike<*, *>, func: KSparkSession.() -> T): T = withSpark(rdd.context().conf, func)
+    fun <T> withSpark(rddForConf: JavaRDDLike<*, *>, func: KSparkSession.() -> T): T =
+        withSpark(rddForConf.context().conf, func)
 
 
 }

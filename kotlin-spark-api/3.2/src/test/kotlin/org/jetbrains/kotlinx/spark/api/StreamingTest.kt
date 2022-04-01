@@ -42,16 +42,18 @@ class StreamingTest : ShouldSpec({
             }
 
             withSparkStreaming(Duration(10), timeout = 1000) {
-                val (resultsBroadcast, queue) = withSpark(ssc) {
-                    val resultsBroadcast = spark.broadcast(results)
-                    val rdd = sc.parallelize(input)
+                val (resultsBroadcast, queue) =
+                    withSpark(sscForConf = ssc) {
+                        val resultsBroadcast = spark.broadcast(results)
+                        val rdd = sc.parallelize(input)
 
-                    resultsBroadcast X LinkedList(listOf(rdd))
-                }
+                        resultsBroadcast X LinkedList(listOf(rdd))
+                    }
+
                 val inputStream = ssc.queueStream(queue)
 
                 inputStream.foreachRDD { rdd, _ ->
-                    withSpark(rdd) {
+                    withSpark(rddForConf = rdd) {
                         rdd.toDS().forEach {
                             it shouldBeIn input
                             resultsBroadcast.value.counter++
