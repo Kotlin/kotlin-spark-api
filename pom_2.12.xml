@@ -20,6 +20,7 @@
 
   <modules>
     <module>core/3.2/pom_2.12.xml</module>
+    <module>scala-tuples-in-kotlin/pom_2.12.xml</module>
     <module>kotlin-spark-api/3.2/pom_2.12.xml</module>
     <module>examples/pom-3.2_2.12.xml</module>
   </modules>
@@ -29,6 +30,11 @@
       <dependency>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
         <artifactId>core-3.2_${scala.compat.version}</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.jetbrains.kotlinx.spark</groupId>
+        <artifactId>scala-tuples-in-kotlin</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

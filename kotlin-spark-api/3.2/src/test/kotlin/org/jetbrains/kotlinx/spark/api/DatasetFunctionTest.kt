@@ -215,11 +215,11 @@ class DatasetFunctionTest : ShouldSpec({
             }
 
             should("be able to cogroup grouped datasets") {
-                val groupedDataset1 = listOf(1 to "a", 1 to "b", 2 to "c").map { it.toTuple() }
+                val groupedDataset1 = listOf(1 X "a", 1 X "b", 2 X "c")
                     .toDS()
                     .groupByKey { it._1 }
 
-                val groupedDataset2 = listOf(1 to "d", 5 to "e", 3 to "f").map { it.toTuple() }
+                val groupedDataset2 = listOf(1 X "d", 5 X "e", 3 X "f")
                     .toDS()
                     .groupByKey { it._1 }
 

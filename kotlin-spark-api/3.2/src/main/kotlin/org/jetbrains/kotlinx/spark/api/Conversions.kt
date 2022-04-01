@@ -168,20 +168,10 @@ fun <A, B> ScalaConcurrentMap<A, B>.asKotlinConcurrentMap(): ConcurrentMap<A, B>
 
 
 /**
- * Returns a new [Tuple2] based on the arguments in the current [Pair].
- */
-fun <T1, T2> Pair<T1, T2>.toTuple(): Tuple2<T1, T2> = Tuple2<T1, T2>(first, second)
-
-/**
  * Returns a new [Arity2] based on the arguments in the current [Pair].
  */
 @Deprecated("Use Scala tuples instead.", ReplaceWith("this.toTuple()", "scala.Tuple2"))
 fun <T1, T2> Pair<T1, T2>.toArity(): Arity2<T1, T2> = Arity2<T1, T2>(first, second)
-
-/**
- * Returns a new [Pair] based on the arguments in the current [Tuple2].
- */
-fun <T1, T2> Tuple2<T1, T2>.toPair(): Pair<T1, T2> = Pair<T1, T2>(_1(), _2())
 
 /**
  * Returns a new [Pair] based on the arguments in the current [Arity2].
@@ -189,22 +179,11 @@ fun <T1, T2> Tuple2<T1, T2>.toPair(): Pair<T1, T2> = Pair<T1, T2>(_1(), _2())
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 fun <T1, T2> Arity2<T1, T2>.toPair(): Pair<T1, T2> = Pair<T1, T2>(_1, _2)
 
-
-/**
- * Returns a new [Tuple3] based on the arguments in the current [Triple].
- */
-fun <T1, T2, T3> Triple<T1, T2, T3>.toTuple(): Tuple3<T1, T2, T3> = Tuple3<T1, T2, T3>(first, second, third)
-
 /**
  * Returns a new [Arity3] based on the arguments in the current [Triple].
  */
 @Deprecated("Use Scala tuples instead.", ReplaceWith("this.toTuple()", "scala.Tuple3"))
 fun <T1, T2, T3> Triple<T1, T2, T3>.toArity(): Arity3<T1, T2, T3> = Arity3<T1, T2, T3>(first, second, third)
-
-/**
- * Returns a new [Triple] based on the arguments in the current [Tuple3].
- */
-fun <T1, T2, T3> Tuple3<T1, T2, T3>.toTriple(): Triple<T1, T2, T3> = Triple<T1, T2, T3>(_1(), _2(), _3())
 
 /**
  * Returns a new [Triple] based on the arguments in the current [Arity3].
