@@ -33,19 +33,18 @@ import org.apache.spark.streaming.dstream.DStream
 import scala.Tuple2
 
 
-@JvmName("tuple2ToPairDStream")
 fun <K, V> JavaDStream<Tuple2<K, V>>.toPairDStream(): JavaPairDStream<K, V> =
     JavaPairDStream.fromJavaDStream(this)
 
-fun <K, V> JavaRDD<Tuple2<K, V>>.toPairRDD(): JavaPairRDD<K, V> = JavaPairRDD.fromJavaRDD(this)
+fun <K, V> JavaPairDStream<K, V>.toTupleDStream(): JavaDStream<Tuple2<K, V>> =
+    toJavaDStream()
 
-@JvmName("arity2ToPairDStream")
-fun <K, V> JavaDStreamLike<Arity2<K, V>, *, *>.toPairDStream(): JavaPairDStream<K, V> =
-    mapToPair(Arity2<K, V>::toTuple)
+fun <K, V> JavaRDD<Tuple2<K, V>>.toPairRDD(): JavaPairRDD<K, V> = 
+    JavaPairRDD.fromJavaRDD(this)
 
-@JvmName("pairToPairDStream")
-fun <K, V> JavaDStreamLike<Pair<K, V>, *, *>.toPairDStream(): JavaPairDStream<K, V> =
-    mapToPair(Pair<K, V>::toTuple)
+fun <K, V> JavaPairRDD<K, V>.toTupleRDD(): JavaRDD<Tuple2<K, V>> =
+    JavaPairRDD.toRDD(this).toJavaRDD()
+
 
 /**
  * Return a new DStream by applying `groupByKey` to each RDD. Hash partitioning is used to
@@ -57,7 +56,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.groupByKey(
 ): JavaDStream<Tuple2<K, Iterable<V>>> =
     toPairDStream()
         .groupByKey(numPartitions)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying `groupByKey` on each RDD. The supplied
@@ -67,7 +66,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.groupByKey(
 fun <K, V> JavaDStream<Tuple2<K, V>>.groupByKey(partitioner: Partitioner): JavaDStream<Tuple2<K, Iterable<V>>> =
     toPairDStream()
         .groupByKey(partitioner)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying `reduceByKey` to each RDD. The values for each key are
@@ -81,7 +80,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKey(
 ): JavaDStream<Tuple2<K, V>> =
     toPairDStream()
         .reduceByKey(reduceFunc, numPartitions)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying `reduceByKey` to each RDD. The values for each key are
@@ -95,7 +94,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKey(
 ): JavaDStream<Tuple2<K, V>> =
     toPairDStream()
         .reduceByKey(reduceFunc, partitioner)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Combine elements of each key in DStream's RDDs using custom functions. This is similar to the
@@ -112,7 +111,7 @@ fun <K, V, C> JavaDStream<Tuple2<K, V>>.combineByKey(
 ): JavaDStream<Tuple2<K, C>> =
     toPairDStream()
         .combineByKey(createCombiner, mergeValue, mergeCombiner, partitioner, mapSideCombine)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying `groupByKey` over a sliding window on `this` DStream.
@@ -134,7 +133,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.groupByKeyAndWindow(
 ): JavaDStream<Tuple2<K, Iterable<V>>> =
     toPairDStream()
         .groupByKeyAndWindow(windowDuration, slideDuration, numPartitions)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Create a new DStream by applying `groupByKey` over a sliding window on `this` DStream.
@@ -155,7 +154,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.groupByKeyAndWindow(
 ): JavaDStream<Tuple2<K, Iterable<V>>> =
     toPairDStream()
         .groupByKeyAndWindow(windowDuration, slideDuration, partitioner)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying `reduceByKey` over a sliding window. This is similar to
@@ -178,7 +177,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKeyAndWindow(
 ): JavaDStream<Tuple2<K, V>> =
     toPairDStream()
         .reduceByKeyAndWindow(reduceFunc, windowDuration, slideDuration, numPartitions)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying `reduceByKey` over a sliding window. Similar to
@@ -201,7 +200,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKeyAndWindow(
 ): JavaDStream<Tuple2<K, V>> =
     toPairDStream()
         .reduceByKeyAndWindow(reduceFunc, windowDuration, slideDuration, partitioner)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying incremental `reduceByKey` over a sliding window.
@@ -246,7 +245,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKeyAndWindow(
                 }
             }
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying incremental `reduceByKey` over a sliding window.
@@ -289,7 +288,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKeyAndWindow(
                 }
             }
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a [MapWithStateDStream] by applying a function to every key-value element of
@@ -342,7 +341,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
             },
             numPartitions,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new "state" DStream where the state for each key is updated by applying
@@ -369,7 +368,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
             },
             partitioner,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new "state" DStream where the state for each key is updated by applying
@@ -396,7 +395,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
             partitioner,
             initialRDD.toPairRDD(),
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 
 /**
@@ -409,7 +408,7 @@ fun <K, V, U> JavaDStream<Tuple2<K, V>>.mapValues(
 ): JavaDStream<Tuple2<K, U>> =
     toPairDStream()
         .mapValues(mapValuesFunc)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying a flatmap function to the value of each key-value pairs in
@@ -421,7 +420,7 @@ fun <K, V, U> JavaDStream<Tuple2<K, V>>.flatMapValues(
 ): JavaDStream<Tuple2<K, U>> =
     toPairDStream()
         .flatMapValues(flatMapValuesFunc)
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'cogroup' between RDDs of `this` DStream and `other` DStream.
@@ -437,7 +436,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.cogroup(
             other.toPairDStream(),
             numPartitions,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 
 /**
@@ -454,7 +453,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.cogroup(
             other.toPairDStream(),
             partitioner,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'join' between RDDs of `this` DStream and `other` DStream.
@@ -470,7 +469,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.join(
             other.toPairDStream(),
             numPartitions,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'join' between RDDs of `this` DStream and `other` DStream.
@@ -486,7 +485,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.join(
             other.toPairDStream(),
             partitioner,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'left outer join' between RDDs of `this` DStream and
@@ -503,7 +502,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.leftOuterJoin(
             other.toPairDStream(),
             numPartitions,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'left outer join' between RDDs of `this` DStream and
@@ -520,7 +519,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.leftOuterJoin(
             other.toPairDStream(),
             partitioner,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'right outer join' between RDDs of `this` DStream and
@@ -537,7 +536,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.rightOuterJoin(
             other.toPairDStream(),
             numPartitions,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'right outer join' between RDDs of `this` DStream and
@@ -554,7 +553,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.rightOuterJoin(
             other.toPairDStream(),
             partitioner,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'full outer join' between RDDs of `this` DStream and
@@ -571,7 +570,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.fullOuterJoin(
             other.toPairDStream(),
             numPartitions,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Return a new DStream by applying 'full outer join' between RDDs of `this` DStream and
@@ -588,7 +587,7 @@ fun <K, V, W> JavaDStream<Tuple2<K, V>>.fullOuterJoin(
             other.toPairDStream(),
             partitioner,
         )
-        .toJavaDStream()
+        .toTupleDStream()
 
 /**
  * Save each RDD in `this` DStream as a Hadoop file. The file name at each batch interval is

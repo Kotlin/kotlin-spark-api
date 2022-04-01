@@ -93,9 +93,10 @@ class KSparkStreamingSession(val ssc: JavaStreamingContext) {
     fun invokeRunAfterStart(): Unit = runAfterStart()
 
 
-    fun withSpark(sc: SparkConf, func: KSparkSession.() -> Unit) {
+    fun <T> withSpark(sc: SparkConf, func: KSparkSession.() -> T): T {
         val spark = SparkSession.builder().config(sc).getOrCreate()
-        KSparkSession(spark).apply(func)
+
+        return with(KSparkSession(spark), func)
     }
 
     /**
@@ -106,7 +107,7 @@ class KSparkStreamingSession(val ssc: JavaStreamingContext) {
      * }
      * ```
      */
-    fun withSpark(ssc: JavaStreamingContext, func: KSparkSession.() -> Unit) = withSpark(ssc.sparkContext().conf, func)
+    fun <T> withSpark(ssc: JavaStreamingContext, func: KSparkSession.() -> T): T = withSpark(ssc.sparkContext().conf, func)
 
 
     /**
@@ -118,7 +119,7 @@ class KSparkStreamingSession(val ssc: JavaStreamingContext) {
      * }
      * ```
      */
-    fun withSpark(rdd: JavaRDDLike<*, *>, func: KSparkSession.() -> Unit) = withSpark(rdd.context().conf, func)
+    fun <T> withSpark(rdd: JavaRDDLike<*, *>, func: KSparkSession.() -> T): T = withSpark(rdd.context().conf, func)
 
 
 }

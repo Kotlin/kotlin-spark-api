@@ -22,9 +22,11 @@ package org.jetbrains.kotlinx.spark.api
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
+import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.streaming.Duration
 import java.io.Serializable
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import java.util.LinkedList
 
 
@@ -40,19 +42,23 @@ class StreamingTest : ShouldSpec({
             }
 
             withSparkStreaming(Duration(10), timeout = 1000) {
-                val resultsBroadcast = spark.broadcast(results)
+                val (resultsBroadcast, queue) = withSpark(ssc) {
+                    val resultsBroadcast = spark.broadcast(results)
+                    val rdd = sc.parallelize(input)
 
-                val rdd = sc.parallelize(input)
-                val queue = LinkedList(listOf(rdd))
-
+                    resultsBroadcast X LinkedList(listOf(rdd))
+                }
                 val inputStream = ssc.queueStream(queue)
 
                 inputStream.foreachRDD { rdd, _ ->
-                    rdd.toDS().forEach {
-                        it shouldBeIn input
-                        resultsBroadcast.value.counter++
+                    withSpark(rdd) {
+                        rdd.toDS().forEach {
+                            it shouldBeIn input
+                            resultsBroadcast.value.counter++
+                        }
                     }
                 }
+
             }
             results.counter shouldBe input.size
 
