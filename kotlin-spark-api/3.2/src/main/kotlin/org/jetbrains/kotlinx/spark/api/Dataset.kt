@@ -25,6 +25,8 @@
  * possible/easier.
  */
 
+@file:Suppress("unused")
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.api.java.JavaRDDLike
@@ -40,6 +42,9 @@ import org.apache.spark.sql.KeyValueGroupedDataset
 import org.apache.spark.sql.TypedColumn
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.Tuple2
+import scala.Tuple3
+import scala.Tuple4
+import scala.Tuple5
 import kotlin.reflect.KProperty1
 
 
@@ -144,6 +149,7 @@ inline fun <reified T1, T2> Dataset<Pair<T1, T2>>.takeKeys(): Dataset<T1> = map 
  * Maps the Dataset to only retain the "keys" or [Arity2._1] values.
  */
 @JvmName("takeKeysArity2")
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 inline fun <reified T1, T2> Dataset<Arity2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1 }
 
 /**
@@ -164,6 +170,7 @@ inline fun <T1, reified T2> Dataset<Pair<T1, T2>>.takeValues(): Dataset<T2> = ma
  * Maps the Dataset to only retain the "values" or [Arity2._2] values.
  */
 @JvmName("takeValuesArity2")
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 inline fun <T1, reified T2> Dataset<Arity2<T1, T2>>.takeValues(): Dataset<T2> = map { it._2 }
 
 /** DEPRECATED: Use [as] or [to] for this. */
@@ -250,11 +257,10 @@ fun <T> Dataset<T>.debug(): Dataset<T> = also { KSparkExtensions.debug(it) }
  * @param right right dataset
  * @param col join condition
  *
- * @return dataset of pairs where right element is forced nullable
+ * @return dataset of [Tuple2] where right element is forced nullable
  */
-inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R?>> {
-    return joinWith(right, col, "left").map { it._1 to it._2 }
-}
+inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, col: Column): Dataset<Tuple2<L, R?>> =
+    joinWith(right, col, "left")
 
 /**
  * Alias for [Dataset.joinWith] which passes "right" argument
@@ -264,11 +270,10 @@ inline fun <reified L, reified R : Any?> Dataset<L>.leftJoin(right: Dataset<R>, 
  * @param right right dataset
  * @param col join condition
  *
- * @return dataset of [Pair] where left element is forced nullable
+ * @return dataset of [Tuple2] where left element is forced nullable
  */
-inline fun <reified L : Any?, reified R> Dataset<L>.rightJoin(right: Dataset<R>, col: Column): Dataset<Pair<L?, R>> {
-    return joinWith(right, col, "right").map { it._1 to it._2 }
-}
+inline fun <reified L : Any?, reified R> Dataset<L>.rightJoin(right: Dataset<R>, col: Column): Dataset<Tuple2<L?, R>> =
+    joinWith(right, col, "right")
 
 /**
  * Alias for [Dataset.joinWith] which passes "inner" argument
@@ -277,11 +282,10 @@ inline fun <reified L : Any?, reified R> Dataset<L>.rightJoin(right: Dataset<R>,
  * @param right right dataset
  * @param col join condition
  *
- * @return resulting dataset of [Pair]
+ * @return resulting dataset of [Tuple2]
  */
-inline fun <reified L, reified R> Dataset<L>.innerJoin(right: Dataset<R>, col: Column): Dataset<Pair<L, R>> {
-    return joinWith(right, col, "inner").map { it._1 to it._2 }
-}
+inline fun <reified L, reified R> Dataset<L>.innerJoin(right: Dataset<R>, col: Column): Dataset<Tuple2<L, R>> =
+    joinWith(right, col, "inner")
 
 /**
  * Alias for [Dataset.joinWith] which passes "full" argument
@@ -291,14 +295,12 @@ inline fun <reified L, reified R> Dataset<L>.innerJoin(right: Dataset<R>, col: C
  * @param right right dataset
  * @param col join condition
  *
- * @return dataset of [Pair] where both elements are forced nullable
+ * @return dataset of [Tuple2] where both elements are forced nullable
  */
 inline fun <reified L : Any?, reified R : Any?> Dataset<L>.fullJoin(
     right: Dataset<R>,
     col: Column,
-): Dataset<Pair<L?, R?>> {
-    return joinWith(right, col, "full").map { it._1 to it._2 }
-}
+): Dataset<Tuple2<L?, R?>> = joinWith(right, col, "full")
 
 /**
  * Alias for [Dataset.sort] which forces user to provide sorted columns from the source dataset
@@ -308,6 +310,32 @@ inline fun <reified L : Any?, reified R : Any?> Dataset<L>.fullJoin(
  * @return sorted [Dataset]
  */
 inline fun <reified T> Dataset<T>.sort(columns: (Dataset<T>) -> Array<Column>): Dataset<T> = sort(*columns(this))
+
+/** Returns a dataset sorted by the first (`_1`) value of each [Tuple2] inside. */
+@JvmName("sortByTuple2Key")
+fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByKey(): Dataset<Tuple2<T1, T2>> = sort("_1")
+
+/** Returns a dataset sorted by the second (`_2`) value of each [Tuple2] inside. */
+@JvmName("sortByTuple2Value")
+fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByValue(): Dataset<Tuple2<T1, T2>> = sort("_2")
+
+/** Returns a dataset sorted by the first (`_1`) value of each [Arity2] inside. */
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
+@JvmName("sortByArity2Key")
+fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByKey(): Dataset<Arity2<T1, T2>> = sort("_1")
+
+/** Returns a dataset sorted by the second (`_2`) value of each [Arity2] inside. */
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
+@JvmName("sortByArity2Value")
+fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByValue(): Dataset<Arity2<T1, T2>> = sort("_2")
+
+/** Returns a dataset sorted by the first (`first`) value of each [Pair] inside. */
+@JvmName("sortByPairKey")
+fun <T1, T2> Dataset<Pair<T1, T2>>.sortByKey(): Dataset<Pair<T1, T2>> = sort("first")
+
+/** Returns a dataset sorted by the second (`second`) value of each [Pair] inside. */
+@JvmName("sortByPairValue")
+fun <T1, T2> Dataset<Pair<T1, T2>>.sortByValue(): Dataset<Pair<T1, T2>> = sort("second")
 
 /**
  * This function creates block, where one can call any further computations on already cached dataset
@@ -376,11 +404,11 @@ inline fun <reified T, reified U1> Dataset<T>.selectTyped(
 inline fun <reified T, reified U1, reified U2> Dataset<T>.selectTyped(
     c1: TypedColumn<out Any, U1>,
     c2: TypedColumn<out Any, U2>,
-): Dataset<Pair<U1, U2>> =
+): Dataset<Tuple2<U1, U2>> =
     select(
         c1 as TypedColumn<T, U1>,
         c2 as TypedColumn<T, U2>,
-    ).map { Pair(it._1(), it._2()) }
+    )
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
@@ -390,12 +418,12 @@ inline fun <reified T, reified U1, reified U2, reified U3> Dataset<T>.selectType
     c1: TypedColumn<out Any, U1>,
     c2: TypedColumn<out Any, U2>,
     c3: TypedColumn<out Any, U3>,
-): Dataset<Triple<U1, U2, U3>> =
+): Dataset<Tuple3<U1, U2, U3>> =
     select(
         c1 as TypedColumn<T, U1>,
         c2 as TypedColumn<T, U2>,
         c3 as TypedColumn<T, U3>,
-    ).map { Triple(it._1(), it._2(), it._3()) }
+    )
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
@@ -406,13 +434,13 @@ inline fun <reified T, reified U1, reified U2, reified U3, reified U4> Dataset<T
     c2: TypedColumn<out Any, U2>,
     c3: TypedColumn<out Any, U3>,
     c4: TypedColumn<out Any, U4>,
-): Dataset<Arity4<U1, U2, U3, U4>> =
+): Dataset<Tuple4<U1, U2, U3, U4>> =
     select(
         c1 as TypedColumn<T, U1>,
         c2 as TypedColumn<T, U2>,
         c3 as TypedColumn<T, U3>,
         c4 as TypedColumn<T, U4>,
-    ).map { Arity4(it._1(), it._2(), it._3(), it._4()) }
+    )
 
 /**
  * Returns a new Dataset by computing the given [Column] expressions for each element.
@@ -424,12 +452,12 @@ inline fun <reified T, reified U1, reified U2, reified U3, reified U4, reified U
     c3: TypedColumn<out Any, U3>,
     c4: TypedColumn<out Any, U4>,
     c5: TypedColumn<out Any, U5>,
-): Dataset<Arity5<U1, U2, U3, U4, U5>> =
+): Dataset<Tuple5<U1, U2, U3, U4, U5>> =
     select(
         c1 as TypedColumn<T, U1>,
         c2 as TypedColumn<T, U2>,
         c3 as TypedColumn<T, U3>,
         c4 as TypedColumn<T, U4>,
         c5 as TypedColumn<T, U5>,
-    ).map { Arity5(it._1(), it._2(), it._3(), it._4(), it._5()) }
+    )
 

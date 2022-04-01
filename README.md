@@ -22,6 +22,7 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
     - [toList and toArray](#tolist-and-toarray-methods)
     - [Column infix/operator functions](#column-infixoperator-functions)
     - [Overload Resolution Ambiguity](#overload-resolution-ambiguity)
+    - [Tuples](#tuples)
 - [Examples](#examples)
 - [Reporting issues/Support](#reporting-issuessupport)
 - [Code of Conduct](#code-of-conduct)
@@ -204,6 +205,67 @@ We had to implement the functions `reduceGroups` and `reduce` for Kotlin separat
 
 We have a special example of work with this function in the [Groups example](https://github.com/JetBrains/kotlin-spark-api/blob/main/examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/Group.kt).
 
+### Tuples
+
+Inspired by [ScalaTuplesInKotlin](https://github.com/Jolanrensen/ScalaTuplesInKotlin), the API introduces a lot of helper- extension functions
+to make working with Scala Tuples a breeze in your Kotlin Spark projects. While working with data classes is encouraged,
+for pair-like Datasets / RDDs / DStreams Scala Tuples are recommended, both for the useful helper functions, as well as Spark performance.
+To enable these features
+simply add
+```kotlin
+import org.jetbrains.kotlinx.spark.api.tuples.*
+```
+to the start of your file.
+
+Tuple creation can be done in the following manners:
+```kotlin
+val a: Tuple2<Int, Long> = tupleOf(1, 2L)
+val b: Tuple3<String, Double, Int> = t("test", 1.0, 2)
+val c: Tuple3<Float, String, Int> = 5f X "aaa" X 1
+```
+Tuples can be expanded and merged like this:
+```kotlin
+// expand
+tupleOf(1, 2).appendedBy(3) == tupleOf(1, 2, 3)
+tupleOf(1, 2) + 3 == tupleOf(1, 2, 3)
+tupleOf(2, 3).prependedBy(1) == tupleOf(1, 2, 3)
+1 + tupleOf(2, 3) == tupleOf(1, 2, 3)
+
+// merge
+tupleOf(1, 2) concat tupleOf(3, 4) == tupleOf(1, 2, 3, 4)
+tupleOf(1, 2) + tupleOf(3, 4) == tupleOf(1, 2, 3, 4)
+
+// extend tuple instead of merging with it
+tupleOf(1, 2).appendedBy(tupleOf(3, 4)) == tupleOf(1, 2, tupleOf(3, 4))
+tupleOf(1, 2) + tupleOf(tupleOf(3, 4)) == tupleOf(1, 2, tupleOf(3, 4))
+```
+
+The concept of `EmptyTuple` from Scala 3 is also already present:
+```kotlin
+tupleOf(1).dropLast() == tupleOf() == emptyTuple()
+```
+
+Finally, all these tuple helper functions are also baked in:
+
+- `componentX()` for destructuring: `val (a, b) = tuple`
+- `dropLast() / dropFirst()`
+- `contains(x)` for `if (x in tuple) { ... }` 
+- `iterator()` for `for (x in tuple) { ... }`
+- `asIterable()`
+- `size`
+- `get(n) / get(i..j)` for `tuple[1] / tuple[i..j]`
+- `getOrNull(n) / getOrNull(i..j)`
+- `getAs<T>(n) / getAs<T>(i..j)`
+- `getAsOrNull<T>(n) / getAsOrNull<T>(i..j)`
+- `copy(_1 = ..., _5 = ...)`
+- `first() / last()`
+- `_1`, `_6` etc. (instead of `_1()`, `_6()`)
+- `zip`
+- `dropN() / dropLastN()`
+- `takeN() / takeLastN()`
+- `splitAtN()`
+- `map`
+- `cast`
 
 ## Examples
 

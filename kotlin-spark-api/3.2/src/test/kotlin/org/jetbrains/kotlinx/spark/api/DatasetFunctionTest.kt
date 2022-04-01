@@ -31,8 +31,11 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
 import scala.Tuple3
+import scala.Tuple4
+import scala.Tuple5
 import java.io.Serializable
 
 class DatasetFunctionTest : ShouldSpec({
@@ -42,23 +45,25 @@ class DatasetFunctionTest : ShouldSpec({
 
             should("handle cached operations") {
                 val result = dsOf(1, 2, 3, 4, 5)
-                    .map { it to (it + 2) }
+                    .map { it X (it + 2) }
                     .withCached {
                         expect(collectAsList()).contains.inAnyOrder.only.values(
-                            1 to 3,
-                            2 to 4,
-                            3 to 5,
-                            4 to 6,
-                            5 to 7
+                            1 X 3,
+                            2 X 4,
+                            3 X 5,
+                            4 X 6,
+                            5 X 7,
                         )
 
-                        val next = filter { it.first % 2 == 0 }
-                        expect(next.collectAsList()).contains.inAnyOrder.only.values(2 to 4, 4 to 6)
+                        val next = filter { it._1 % 2 == 0 }
+                        expect(next.collectAsList()).contains.inAnyOrder.only.values(2 X 4, 4 X 6)
                         next
                     }
-                    .map { c(it.first, it.second, (it.first + it.second) * 2) }
+                    .map { it: Tuple2<Int, Int> ->
+                        it + (it._1 + it._2) * 2
+                    }
                     .collectAsList()
-                expect(result).contains.inOrder.only.values(c(2, 4, 12), c(4, 6, 20))
+                expect(result).contains.inOrder.only.values(2 X 4 X 12, 4 X 6 X 20)
             }
 
             should("handle join operations") {
@@ -69,10 +74,10 @@ class DatasetFunctionTest : ShouldSpec({
                 val first = dsOf(Left(1, "a"), Left(2, "b"))
                 val second = dsOf(Right(1, 100), Right(3, 300))
                 val result = first
-                    .leftJoin(second, first.col("id").eq(second.col("id")))
-                    .map { c(it.first.id, it.first.name, it.second?.value) }
+                    .leftJoin(second, first.col("id") eq second.col("id"))
+                    .map { it._1.id X it._1.name X it._2?.value }
                     .collectAsList()
-                expect(result).contains.inOrder.only.values(c(1, "a", 100), c(2, "b", null))
+                expect(result).contains.inOrder.only.values(t(1, "a", 100), t(2, "b", null))
             }
 
             should("handle map operations") {
@@ -121,16 +126,16 @@ class DatasetFunctionTest : ShouldSpec({
             }
 
             should("Have Kotlin ready functions in place of overload ambiguity") {
-                val dataset: Pair<Int, SomeClass> = dsOf(
+                val dataset: Tuple2<Int, SomeClass> = dsOf(
                     SomeClass(intArrayOf(1, 2, 3), 1),
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
                     .groupByKey { it: SomeClass -> it.b }
                     .reduceGroupsK { v1: SomeClass, v2: SomeClass -> v1 }
-                    .filter { it: Pair<Int, SomeClass> -> true } // not sure why this does work, but reduce doesn't
-                    .reduceK { v1: Pair<Int, SomeClass>, v2: Pair<Int, SomeClass> -> v1 }
+                    .filter { it: Tuple2<Int, SomeClass> -> true } // not sure why this does work, but reduce doesn't
+                    .reduceK { v1: Tuple2<Int, SomeClass>, v2: Tuple2<Int, SomeClass> -> v1 }
 
-                dataset.second.a shouldBe intArrayOf(1, 2, 3)
+                dataset._2.a shouldBe intArrayOf(1, 2, 3)
             }
         }
     }
@@ -139,24 +144,24 @@ class DatasetFunctionTest : ShouldSpec({
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
             should("perform flat map on grouped datasets") {
-                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                val groupedDataset = listOf(t(1, "a"), t(1, "b"), t(2, "c"))
                     .toDS()
-                    .groupByKey { it.first }
+                    .groupByKey { it._1 }
 
                 val flatMapped = groupedDataset.flatMapGroups { key, values ->
                     val collected = values.asSequence().toList()
 
                     if (collected.size > 1) collected.iterator()
-                    else emptyList<Pair<Int, String>>().iterator()
+                    else emptyList<Tuple2<Int, String>>().iterator()
                 }
 
                 flatMapped.count() shouldBe 2
             }
 
             should("perform map group with state and timeout conf on grouped datasets") {
-                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                val groupedDataset = listOf(t(1, "a"), t(1, "b"), t(2, "c"))
                     .toDS()
-                    .groupByKey { it.first }
+                    .groupByKey { it._1 }
 
                 val mappedWithStateTimeoutConf =
                     groupedDataset.mapGroupsWithState(GroupStateTimeout.NoTimeout()) { key, values, state: GroupState<Int> ->
@@ -166,16 +171,16 @@ class DatasetFunctionTest : ShouldSpec({
                         s = key
                         s shouldBe key
 
-                        s!! to collected.map { it.second }
+                        s!! X collected.map { it._2 }
                     }
 
                 mappedWithStateTimeoutConf.count() shouldBe 2
             }
 
             should("perform map group with state on grouped datasets") {
-                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                val groupedDataset = listOf(t(1, "a"), t(1, "b"), t(2, "c"))
                     .toDS()
-                    .groupByKey { it.first }
+                    .groupByKey { it._1 }
 
                 val mappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
                     var s by state
@@ -184,16 +189,16 @@ class DatasetFunctionTest : ShouldSpec({
                     s = key
                     s shouldBe key
 
-                    s!! to collected.map { it.second }
+                    s!! X collected.map { it._2 }
                 }
 
                 mappedWithState.count() shouldBe 2
             }
 
             should("perform flat map group with state on grouped datasets") {
-                val groupedDataset = listOf(1 to "a", 1 to "b", 2 to "c")
+                val groupedDataset = listOf(t(1, "a"), t(1, "b"), t(2, "c"))
                     .toDS()
-                    .groupByKey { it.first }
+                    .groupByKey { it._1 }
 
                 val flatMappedWithState = groupedDataset.mapGroupsWithState { key, values, state: GroupState<Int> ->
                     var s by state
@@ -203,26 +208,24 @@ class DatasetFunctionTest : ShouldSpec({
                     s shouldBe key
 
                     if (collected.size > 1) collected.iterator()
-                    else emptyList<Pair<Int, String>>().iterator()
+                    else emptyList<Tuple2<Int, String>>().iterator()
                 }
 
                 flatMappedWithState.count() shouldBe 2
             }
 
             should("be able to cogroup grouped datasets") {
-                val groupedDataset1 = listOf(1 to "a", 1 to "b", 2 to "c")
+                val groupedDataset1 = listOf(1 X "a", 1 X "b", 2 X "c")
                     .toDS()
-                    .groupByKey { it.first }
+                    .groupByKey { it._1 }
 
-                val groupedDataset2 = listOf(1 to "d", 5 to "e", 3 to "f")
+                val groupedDataset2 = listOf(1 X "d", 5 X "e", 3 X "f")
                     .toDS()
-                    .groupByKey { it.first }
+                    .groupByKey { it._1 }
 
                 val cogrouped = groupedDataset1.cogroup(groupedDataset2) { key, left, right ->
                     listOf(
-                        key to (left.asSequence() + right.asSequence())
-                            .map { it.second }
-                            .toList()
+                        key to (left.asSequence() + right.asSequence()).map { it._2 }.toList()
                     ).iterator()
                 }
 
@@ -265,11 +268,11 @@ class DatasetFunctionTest : ShouldSpec({
 
             should("Convert JavaPairRDD to Dataset") {
                 val rdd3: JavaPairRDD<Int, Double> = sc.parallelizePairs(
-                    listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
+                    listOf(t(1, 1.0), t(2, 2.0), t(3, 3.0))
                 )
                 val dataset3: Dataset<Tuple2<Int, Double>> = rdd3.toDS()
 
-                dataset3.toList<Tuple2<Int, Double>>() shouldBe listOf(Tuple2(1, 1.0), Tuple2(2, 2.0), Tuple2(3, 3.0))
+                dataset3.toList<Tuple2<Int, Double>>() shouldBe listOf(t(1, 1.0), t(2, 2.0), t(3, 3.0))
             }
 
             should("Convert Kotlin Serializable data class RDD to Dataset") {
@@ -284,13 +287,13 @@ class DatasetFunctionTest : ShouldSpec({
                 }
             }
 
-            should("Convert Arity RDD to Dataset") {
+            should("Convert Tuple RDD to Dataset") {
                 val rdd5 = sc.parallelize(
-                    listOf(c(1.0, 4))
+                    listOf(t(1.0, 4))
                 )
                 val dataset5 = rdd5.toDS()
 
-                dataset5.toList<Arity2<Double, Int>>() shouldBe listOf(c(1.0, 4))
+                dataset5.toList<Tuple2<Double, Int>>() shouldBe listOf(t(1.0, 4))
             }
 
             should("Convert List RDD to Dataset") {
@@ -300,6 +303,30 @@ class DatasetFunctionTest : ShouldSpec({
                 val dataset6 = rdd6.toDS()
 
                 dataset6.toList<List<Int>>() shouldBe listOf(listOf(1, 2, 3), listOf(4, 5, 6))
+            }
+
+            should("Sort Tuple2 Dataset") {
+                val list = listOf(
+                    t(1, 6),
+                    t(2, 5),
+                    t(3, 4),
+                )
+                val dataset = list.toDS()
+
+                dataset.sortByKey().collectAsList() shouldBe list.sortedBy { it._1 }
+                dataset.sortByValue().collectAsList() shouldBe list.sortedBy { it._2 }
+            }
+
+            should("Sort Pair Dataset") {
+                val list = listOf(
+                    Pair(1, 6),
+                    Pair(2, 5),
+                    Pair(3, 4),
+                )
+                val dataset = list.toDS()
+
+                dataset.sortByKey().collectAsList() shouldBe list.sortedBy { it.first }
+                dataset.sortByValue().collectAsList() shouldBe list.sortedBy { it.second }
             }
         }
     }
@@ -319,20 +346,20 @@ class DatasetFunctionTest : ShouldSpec({
                 )
                 newDS1WithAs.collectAsList()
 
-                val newDS2: Dataset<Pair<IntArray, Int>> = dataset.selectTyped(
+                val newDS2: Dataset<Tuple2<IntArray, Int>> = dataset.selectTyped(
                     col(SomeClass::a), // NOTE: this only works on 3.0, returning a data class with an array in it
                     col(SomeClass::b),
                 )
                 newDS2.collectAsList()
 
-                val newDS3: Dataset<Triple<IntArray, Int, Int>> = dataset.selectTyped(
+                val newDS3: Dataset<Tuple3<IntArray, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
                 )
                 newDS3.collectAsList()
 
-                val newDS4: Dataset<Arity4<IntArray, Int, Int, Int>> = dataset.selectTyped(
+                val newDS4: Dataset<Tuple4<IntArray, Int, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
@@ -340,7 +367,7 @@ class DatasetFunctionTest : ShouldSpec({
                 )
                 newDS4.collectAsList()
 
-                val newDS5: Dataset<Arity5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
+                val newDS5: Dataset<Tuple5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
@@ -419,6 +446,7 @@ class DatasetFunctionTest : ShouldSpec({
 
                 b.count() shouldBe 1
             }
+
 
         }
     }

@@ -20,12 +20,19 @@
 package org.jetbrains.kotlinx.spark.examples
 
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
 
 fun main() {
     withSpark {
-        dsOf(c(1, "a"), c(1, "b"), c(2, "c"))
+        dsOf(
+            1 X "a",
+            1 X "b",
+            2 X "c",
+        )
             .groupByKey { it._1 }
-            .reduceGroupsK { a, b -> c(a._1 + b._1, a._2 + b._2) }
+            .reduceGroupsK { a, b ->
+                tupleOf(a._1 + b._1, a._2 + b._2)
+            }
             .show()
     }
 }
