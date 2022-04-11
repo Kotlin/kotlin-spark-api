@@ -87,7 +87,7 @@ val spark = SparkSession
 ```kotlin
 spark.toDS("a" to 1, "b" to 2)
 ```
-The example above produces `Dataset<Pair<String, Int>>`.
+The example above produces `Dataset<Pair<String, Int>>`. While Kotlin Pairs and Triples are supported, Scala Tuples are reccomended for better support.
  
 ### Null safety
 There are several aliases in API, like `leftJoin`, `rightJoin` etc. These are null-safe by design. 
@@ -104,7 +104,7 @@ After work block ends, `spark.stop()` is called automatically.
 ```kotlin
 withSpark {
     dsOf(1, 2)
-            .map { it to it }
+            .map { it X it } // creates Tuple2<Int, Int>
             .show()
 }
 ```
@@ -122,13 +122,13 @@ To solve these problems we've added `withCached` function
 ```kotlin
 withSpark {
     dsOf(1, 2, 3, 4, 5)
-            .map { it to (it + 2) }
+            .map { tupleOf(it, it + 2) }
             .withCached {
                 showDS()
 
-                filter { it.first % 2 == 0 }.showDS()
+                filter { it._1 % 2 == 0 }.showDS()
             }
-            .map { c(it.first, it.second, (it.first + it.second) * 2) }
+            .map { tupleOf(it._1, it._2, (it._1 + it._2) * 2) }
             .show()
 }
 ```
