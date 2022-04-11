@@ -20,17 +20,18 @@
 package org.jetbrains.kotlinx.spark.examples
 
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
 
 fun main() {
     withSpark {
         dsOf(1, 2, 3, 4, 5)
-            .map { it to (it + 2) }
+            .map { it X (it + 2) }
             .withCached {
                 showDS()
 
-                filter { it.first % 2 == 0 }.showDS()
+                filter { it._1 % 2 == 0 }.showDS()
             }
-            .map { c(it.first, it.second, (it.first + it.second) * 2) }
+            .map { it.appendedBy(it._1 + it._2 * 2) }
             .show()
     }
 }
