@@ -63,6 +63,25 @@
       <scope>provided</scope>
     </dependency>
 
+<!--    <dependency>-->
+<!--      <groupId>org.apache.hadoop</groupId>-->
+<!--      <artifactId>hadoop-common</artifactId>-->
+<!--      <version>${hadoop.version}</version>-->
+<!--      <scope>provided</scope>-->
+<!--    </dependency>-->
+<!--    <dependency>-->
+<!--      <groupId>org.apache.hadoop</groupId>-->
+<!--      <artifactId>hadoop-hdfs</artifactId>-->
+<!--      <version>${hadoop.version}</version>-->
+<!--      <scope>provided</scope>-->
+<!--    </dependency>-->
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoop.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
     <!-- Test dependencies -->
     <dependency>
       <groupId>io.kotest</groupId>
@@ -87,6 +106,14 @@
       <artifactId>atrium-fluent-en_GB</artifactId>
       <version>${atrium.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+<!--      <type>test-jar</type>-->
     </dependency>
   </dependencies>
 

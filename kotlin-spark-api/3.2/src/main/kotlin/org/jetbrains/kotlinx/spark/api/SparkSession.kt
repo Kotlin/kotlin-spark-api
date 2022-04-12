@@ -26,11 +26,14 @@
 
 package org.jetbrains.kotlinx.spark.api
 
+
+import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.SparkSession.Builder
@@ -39,8 +42,9 @@ import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
-import scala.Tuple2
+import java.io.Serializable
 
 /**
  * This wrapper over [SparkSession] which provides several additional methods to create [org.apache.spark.sql.Dataset].
@@ -85,18 +89,36 @@ class KSparkSession(val spark: SparkSession) {
 /**
  * This wrapper over [SparkSession] and [JavaStreamingContext] provides several additional methods to create [org.apache.spark.sql.Dataset]
  */
-class KSparkStreamingSession(val ssc: JavaStreamingContext) {
+class KSparkStreamingSession(@Transient val ssc: JavaStreamingContext) : Serializable {
+    // Serializable and Transient to that [withSpark] works inside [foreachRDD] and other Spark functions that serialize
 
-    /** Can be overwritten to be run after the streaming session has started and before it's terminated. */
-    var runAfterStart: KSparkStreamingSession.() -> Unit = {}
+    private var runAfterStart: KSparkStreamingSession.() -> Unit = {}
 
-    fun invokeRunAfterStart(): Unit = runAfterStart()
+    /** Will be run after the streaming session has started and before it's terminated. */
+    fun setRunAfterStart(block: KSparkStreamingSession.() -> Unit) {
+        runAfterStart = block
+    }
 
-    fun getSpark(sc: SparkConf): SparkSession =
-        SparkSession
-            .builder()
-            .config(sc)
-            .getOrCreate()
+    internal fun invokeRunAfterStart(): Unit = runAfterStart()
+
+
+    /**
+     * Helper function to enter Spark scope from a provided like
+     * when using the `foreachRDD` function.
+     * ```kotlin
+     * withSpark(rdd) { // this: KSparkSession
+     *
+     * }
+     * ```
+     */
+    fun <T> withSpark(rddForConf: JavaRDDLike<*, *>, func: KSparkSession.() -> T): T =
+        withSpark(rddForConf.context().conf, func)
+
+
+    fun getSpark(sc: SparkConf): SparkSession = SparkSession
+        .builder()
+        .config(sc)
+        .getOrCreate()
 
     fun <T> withSpark(sc: SparkConf, func: KSparkSession.() -> T): T =
         KSparkSession(getSpark(sc)).func()
@@ -114,20 +136,9 @@ class KSparkStreamingSession(val ssc: JavaStreamingContext) {
         withSpark(sscForConf.sparkContext().conf, func)
 
 
-    /**
-     * Helper function to enter Spark scope from a provided like
-     * when using the `foreachRDD` function.
-     * ```kotlin
-     * withSpark(rdd) { // this: KSparkSession
-     *
-     * }
-     * ```
-     */
-    fun <T> withSpark(rddForConf: JavaRDDLike<*, *>, func: KSparkSession.() -> T): T =
-        withSpark(rddForConf.context().conf, func)
-
-
 }
+
+
 
 
 /**
@@ -239,52 +250,67 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
  * recreated from the checkpoint data. If the data does not exist, then the provided factory
  * will be used to create a JavaStreamingContext.
  *
- * @param batchDuration The time interval at which streaming data will be divided into batches. Defaults to 1 second.
- * @param checkpointPath If checkpoint data exists in the provided `checkpointPath`, then StreamingContext will be
- * recreated from the checkpoint data. If the data does not exist (or `null` is provided), then the streaming context will be built using
- * the other provided parameters.
- * @param props spark options, value types are runtime-checked for type-correctness
- * @param master Sets the Spark master URL to connect to, such as "local" to run locally, "local[4]" to
- *  run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster. By default, it
- *  tries to get the system value "spark.master", otherwise it uses "local[*]"
- * @param appName Sets a name for the application, which will be shown in the Spark web UI.
- *  If no application name is set, a randomly generated name will be used.
- * @param logLevel Control our logLevel. This overrides any user-defined log settings.
- * @param timeout The time in milliseconds to wait for the stream to terminate without input. -1 by default, this means no timeout.
- * @param func function which will be executed in context of [KSparkStreamingSession] (it means that `this` inside block will point to [KSparkStreamingSession])
+ * @param batchDuration     The time interval at which streaming data will be divided into batches. Defaults to 1
+ *                          second.
+ * @param checkpointPath    If checkpoint data exists in the provided `checkpointPath`, then StreamingContext will be
+ *                          recreated from the checkpoint data. If the data does not exist (or `null` is provided),
+ *                          then the streaming context will be built using the other provided parameters.
+ * @param hadoopConf        Only used if [checkpointPath] is given. Hadoop configuration if necessary for reading from
+ *                          any HDFS compatible file system.
+ * @param createOnError     Only used if [checkpointPath] is given. Whether to create a new JavaStreamingContext if
+ *                          there is an error in reading checkpoint data.
+ * @param props             Spark options, value types are runtime-checked for type-correctness.
+ * @param master            Sets the Spark master URL to connect to, such as "local" to run locally, "local[4]" to
+ *                          run locally with 4 cores, or "spark://master:7077" to run on a Spark standalone cluster.
+ *                          By default, it tries to get the system value "spark.master", otherwise it uses "local[*]".
+ * @param appName           Sets a name for the application, which will be shown in the Spark web UI.
+ *                          If no application name is set, a randomly generated name will be used.
+ * @param timeout           The time in milliseconds to wait for the stream to terminate without input. -1 by default,
+ *                          this means no timeout.
+ * @param func              Function which will be executed in context of [KSparkStreamingSession] (it means that
+ *                          `this` inside block will point to [KSparkStreamingSession])
  */
 @JvmOverloads
-inline fun withSparkStreaming(
+fun withSparkStreaming(
     batchDuration: Duration = Durations.seconds(1L),
     checkpointPath: String? = null,
+    hadoopConf: Configuration = SparkHadoopUtil.get().conf(),
+    createOnError: Boolean = false,
     props: Map<String, Any> = emptyMap(),
     master: String = SparkConf().get("spark.master", "local[*]"),
     appName: String = "Kotlin Spark Sample",
     timeout: Long = -1L,
-    crossinline func: KSparkStreamingSession.() -> Unit,
+    startStreamingContext: Boolean = true,
+    func: KSparkStreamingSession.() -> Unit,
 ) {
     if (checkpointPath != null) {
+
         var kSparkStreamingSession: KSparkStreamingSession? = null
-        val ssc = JavaStreamingContext.getOrCreate(checkpointPath) {
-            val sc = SparkConf()
-                .setAppName(appName)
-                .setMaster(master)
-                .setAll(
-                    props
-                        .map { (key, value) -> Tuple2(key, value.toString()) }
-                        .asScalaIterable()
-                )
 
-            val ssc = JavaStreamingContext(sc, batchDuration)
-            ssc.checkpoint(checkpointPath)
+        val ssc = JavaStreamingContext.getOrCreate(
+            /* checkpointPath = */ checkpointPath,
+            /* creatingFunc = */ {
+                val sc = SparkConf()
+                    .setAppName(appName)
+                    .setMaster(master)
+                    .setAll(
+                        props
+                            .map { (key, value) -> key X value.toString() }
+                            .asScalaIterable()
+                    )
 
-            kSparkStreamingSession = KSparkStreamingSession(ssc)
+                val ssc = JavaStreamingContext(sc, batchDuration)
+                ssc.checkpoint(checkpointPath)
 
-            func(kSparkStreamingSession!!)
+                kSparkStreamingSession = KSparkStreamingSession(ssc)
+                func(kSparkStreamingSession!!)
 
-            ssc
-        }
-        ssc.start()
+                ssc
+            },
+            /* hadoopConf = */ hadoopConf,
+            /* createOnError = */ createOnError
+        )
+        if (startStreamingContext) ssc.start()
         kSparkStreamingSession?.invokeRunAfterStart()
         ssc.awaitTerminationOrTimeout(timeout)
         ssc.stop()
@@ -294,7 +320,7 @@ inline fun withSparkStreaming(
             .setMaster(master)
             .setAll(
                 props
-                    .map { (key, value) -> Tuple2(key, value.toString()) }
+                    .map { (key, value) -> key X value.toString() }
                     .asScalaIterable()
             )
         val ssc = JavaStreamingContext(sc, batchDuration)

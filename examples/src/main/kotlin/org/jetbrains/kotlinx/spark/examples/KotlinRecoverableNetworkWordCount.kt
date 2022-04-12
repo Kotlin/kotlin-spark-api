@@ -28,8 +28,10 @@ import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.Time
 import org.apache.spark.util.LongAccumulator
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
 import java.io.File
+import java.io.Serializable
 import java.nio.charset.Charset
 import java.util.regex.Pattern
 import kotlin.experimental.ExperimentalTypeInference
@@ -174,13 +176,17 @@ object KotlinRecoverableNetworkWordCount {
         val words = lines.flatMap { it.split(SPACE).iterator() }
 
         val wordCounts3 = words
-            .map { Tuple2(it, 1) }
+            .map { t(it, 1) }
             .reduceByKey { a, b -> a + b }
 
         // in normal streaming context we can create a SparkSession from ssc: JavaStreamingContext
         // normally `ssc.sparkContext().conf`
         withSpark(ssc) {
             listOf(1, 2, 3).toDS().show()
+        }
+
+        setRunAfterStart {
+            println("Context is created and started running!")
         }
 
         wordCounts3.foreachRDD { rdd, time: Time ->
@@ -197,19 +203,17 @@ object KotlinRecoverableNetworkWordCount {
                 val droppedWordsCounter = KotlinDroppedWordsCounter.getInstance(sc)
 
                 // Use excludeList to drop words and use droppedWordsCounter to count them
-                val (counts, duration) = measureTimedValue {
-                    rdd.filter { wordCount ->
-                        if (excludeList.value().contains(wordCount._1)) {
-                            droppedWordsCounter.add(wordCount._2.toLong())
-                            false
-                        } else {
-                            true
-                        }
-                    }.collect()
-                }
+                val counts = rdd.filter { (word, count) ->
+                    if (excludeList.value().contains(word)) {
+                        droppedWordsCounter.add(count.toLong())
+                        false
+                    } else {
+                        true
+                    }
+                }.collect()
 
 
-                val output = "Counts at time $time $counts\n$duration"
+                val output = "Counts at time $time $counts"
                 println(output)
                 println("Dropped ${droppedWordsCounter.value()} word(s) totally")
                 println("Appending to " + outputFile.absolutePath)

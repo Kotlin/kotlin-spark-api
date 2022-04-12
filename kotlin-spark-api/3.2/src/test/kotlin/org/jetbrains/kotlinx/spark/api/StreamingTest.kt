@@ -22,12 +22,22 @@ package org.jetbrains.kotlinx.spark.api
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
-import org.apache.spark.api.java.JavaRDD
-import org.apache.spark.streaming.Duration
+import org.apache.commons.io.FileUtils
+import org.apache.hadoop.fs.FileSystem
+import org.apache.spark.SparkConf
+import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.streaming.*
+import org.apache.spark.streaming.api.java.JavaStreamingContext
+import org.apache.spark.util.Utils
+import org.jetbrains.kotlinx.spark.api.tuples.X
+import org.jetbrains.kotlinx.spark.api.tuples.component1
+import org.jetbrains.kotlinx.spark.api.tuples.component2
+import java.io.File
 import java.io.Serializable
-import org.jetbrains.kotlinx.spark.api.*
-import org.jetbrains.kotlinx.spark.api.tuples.*
-import java.util.LinkedList
+import java.net.ConnectException
+import java.nio.charset.StandardCharsets
+import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 
 class StreamingTest : ShouldSpec({
@@ -35,35 +45,195 @@ class StreamingTest : ShouldSpec({
         should("stream") {
 
             val input = listOf("aaa", "bbb", "aaa", "ccc")
-
-            val results = object : Serializable {
-                @Volatile
-                var counter = 0
-            }
+            val counter = Counter(0)
 
             withSparkStreaming(Duration(10), timeout = 1000) {
-                val (resultsBroadcast, queue) =
-                    withSpark(sscForConf = ssc) {
-                        val resultsBroadcast = spark.broadcast(results)
-                        val rdd = sc.parallelize(input)
 
-                        resultsBroadcast X LinkedList(listOf(rdd))
-                    }
+                val (counterBroadcast, queue) = withSpark(ssc) {
+                    spark.broadcast(counter) X LinkedList(listOf(sc.parallelize(input)))
+                }
 
                 val inputStream = ssc.queueStream(queue)
 
                 inputStream.foreachRDD { rdd, _ ->
-                    withSpark(rddForConf = rdd) {
+                    withSpark(rdd) {
                         rdd.toDS().forEach {
                             it shouldBeIn input
-                            resultsBroadcast.value.counter++
+                            counterBroadcast.value.value++
                         }
                     }
                 }
-
             }
-            results.counter shouldBe input.size
 
+            counter.value shouldBe input.size
+
+        }
+
+//        should("checkpoint") {
+//
+//            val emptyDir: File = Files.createTempDir()
+//            emptyDir.deleteOnExit()
+//            val contextSuite = StreamingContextSuite()
+//            val corruptedCheckpointDir: String = contextSuite.createCorruptedCheckpoint()
+//            val checkpointDir: String = contextSuite.createValidCheckpoint()
+//
+//            // Function to create JavaStreamingContext without any output operations
+//            // (used to detect the new context)
+//
+//            // Function to create JavaStreamingContext without any output operations
+//            // (used to detect the new context)
+//            val newContextCreated = AtomicBoolean(false)
+//            val creatingFunc: Function0<JavaStreamingContext> = {
+//                newContextCreated.set(true)
+//                JavaStreamingContext(conf, Seconds.apply(1))
+//            }
+//
+//            newContextCreated.set(false)
+//            ssc = JavaStreamingContext.getOrCreate(emptyDir.absolutePath, creatingFunc)
+//            Assert.assertTrue("new context not created", newContextCreated.get())
+//            ssc.stop()
+//
+//            newContextCreated.set(false)
+//            ssc = JavaStreamingContext.getOrCreate(
+//                corruptedCheckpointDir, creatingFunc,
+//                Configuration(), true
+//            )
+//            Assert.assertTrue("new context not created", newContextCreated.get())
+//            ssc.stop()
+//
+//            newContextCreated.set(false)
+//            ssc = JavaStreamingContext.getOrCreate(
+//                checkpointDir, creatingFunc,
+//                Configuration()
+//            )
+//            Assert.assertTrue("old context not recovered", !newContextCreated.get())
+//            ssc.stop()
+//
+//            newContextCreated.set(false)
+//            val sc = JavaSparkContext(conf)
+//            ssc = JavaStreamingContext.getOrCreate(
+//                checkpointDir, creatingFunc,
+//                Configuration()
+//            )
+//            Assert.assertTrue("old context not recovered", !newContextCreated.get())
+//            ssc.stop()
+//        }
+
+        should("Work with checkpointpath") {
+
+
+            val conf = SparkConf()
+                .setMaster("local[*]")
+                .setAppName("Kotlin Spark Sample")
+                .set("newContext", "true")
+
+            val emptyDir = Utils.createTempDir(System.getProperty("java.io.tmpdir"), "spark")
+            emptyDir.deleteOnExit()
+
+            val batchDuration = Durations.seconds(1)
+            val timeout = Durations.seconds(1).milliseconds()
+
+            val corruptedCheckpointDir = createCorruptedCheckpoint()
+            val checkpointDir = createValidCheckpoint(conf, batchDuration)
+
+            val newContextCreated = AtomicBoolean(false)
+
+
+            val creatingFun: KSparkStreamingSession.() -> Unit = {
+//                if (conf == null) conf = ssc.sparkContext().conf
+
+                println("created new context")
+                newContextCreated.set(true)
+//                setRunAfterStart {
+//                    ssc.stop()
+//                }
+            }
+
+
+
+            newContextCreated.set(false)
+            withSparkStreaming(
+                batchDuration = batchDuration,
+                checkpointPath = emptyDir.absolutePath,
+                props = mapOf("newContext" to true),
+                timeout = timeout,
+                func = creatingFun,
+                startStreamingContext = false,
+            )
+            newContextCreated.get() shouldBe true
+
+
+
+            newContextCreated.set(false)
+            withSparkStreaming(
+                batchDuration = batchDuration,
+                checkpointPath = corruptedCheckpointDir,
+                props = mapOf("newContext" to true),
+                timeout = timeout,
+                func = creatingFun,
+                startStreamingContext = false,
+                createOnError = true,
+            )
+            newContextCreated.get() shouldBe true
+
+            newContextCreated.set(false)
+            withSparkStreaming(
+                batchDuration = batchDuration,
+                checkpointPath = checkpointDir,
+                props = mapOf("newContext" to true),
+                timeout = timeout,
+                func = creatingFun,
+                startStreamingContext = false,
+            )
+            newContextCreated.get() shouldBe false
+
+
+            newContextCreated.set(false)
+//            val sc = JavaSparkContext(
+//                SparkConf()
+//                    .setAppName("test")
+//                    .setMaster("local[*]")
+//            )
+            withSparkStreaming(
+                batchDuration = batchDuration,
+                checkpointPath = checkpointDir,
+                props = mapOf("newContext" to true),
+                timeout = timeout,
+                func = creatingFun,
+                startStreamingContext = false,
+            )
+            newContextCreated.get() shouldBe false
+            // todo do something with checkpoint again, check that it doesn't create new instance
+
+
+            // TODO clean up checkpoint
         }
     }
 })
+
+private fun createCorruptedCheckpoint(): String {
+    val checkpointDirectory = Utils.createTempDir(System.getProperty("java.io.tmpdir"), "spark").absolutePath
+    val fakeCheckpointFile = Checkpoint.checkpointFile(checkpointDirectory, Time(1000))
+    FileUtils.write(File(fakeCheckpointFile.toString()), "blablabla", StandardCharsets.UTF_8)
+    assert(Checkpoint.getCheckpointFiles(checkpointDirectory, (null as FileSystem?).asOption()).nonEmpty())
+    return checkpointDirectory
+}
+
+private fun createValidCheckpoint(conf: SparkConf, batchDuration: Duration): String {
+    val testDirectory = Utils.createTempDir(System.getProperty("java.io.tmpdir"), "spark").absolutePath
+    val checkpointDirectory = Utils.createTempDir(System.getProperty("java.io.tmpdir"), "spark").absolutePath
+    val ssc = JavaStreamingContext(
+        conf.clone().set("someKey", "someValue"),
+        batchDuration,
+    )
+
+    ssc.checkpoint(checkpointDirectory)
+    ssc.textFileStream(testDirectory).foreachRDD { rdd, _ -> rdd.count() }
+    ssc.start()
+    ssc.stop()
+
+    return checkpointDirectory
+}
+
+class Counter(@Volatile var value: Int) : Serializable
+
