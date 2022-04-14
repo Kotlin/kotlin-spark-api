@@ -20,14 +20,26 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.timing.eventually
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.extensions.embedded.kafka.EmbeddedKafkaListener
+import io.kotest.extensions.embedded.kafka.embeddedKafkaListener
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.fs.FileSystem
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.producer.ProducerRecord
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.SparkException
 import org.apache.spark.streaming.*
+import org.apache.spark.streaming.api.java.JavaDStream
+import org.apache.spark.streaming.api.java.JavaInputDStream
+import org.apache.spark.streaming.kafka010.ConsumerStrategies
+import org.apache.spark.streaming.kafka010.KafkaUtils
+import org.apache.spark.streaming.kafka010.LocationStrategies
 import org.apache.spark.util.Utils
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
@@ -36,10 +48,85 @@ import java.io.Serializable
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.time.Duration.Companion.seconds
+import java.time.Duration
 
 
 class StreamingTest : ShouldSpec({
+
     context("streaming") {
+
+        context("kafka") {
+            val port = 9092
+            val broker = "localhost:$port"
+            val topic1 = "test1"
+            val topic2 = "test2"
+            val kafkaListener = EmbeddedKafkaListener(port)
+
+            listener(kafkaListener)
+
+            val producer = kafkaListener.stringStringProducer()
+            producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
+            producer.send(ProducerRecord(topic2, "This is also also a test test something"))
+            producer.close()
+
+            withSparkStreaming(
+                batchDuration = Durations.seconds(2),
+                appName = "KotlinDirectKafkaWordCount",
+                timeout = 1000L,
+            ) {
+
+                val kafkaParams: Map<String, Serializable> = mapOf(
+                    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to broker,
+                    ConsumerConfig.GROUP_ID_CONFIG to "consumer-group",
+                    ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+                    ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
+                )
+
+                // Create direct kafka stream with brokers and topics
+                val messages: JavaInputDStream<ConsumerRecord<String, String>> = KafkaUtils.createDirectStream(
+                    ssc,
+                    LocationStrategies.PreferConsistent(),
+                    ConsumerStrategies.Subscribe(setOf(topic1, topic2), kafkaParams),
+                )
+
+                // Get the lines, split them into words, count the words and print
+                val lines = messages.map { it.topic() X it.value() }
+                val words = lines.flatMapValues { it.split(" ").iterator() }
+
+                val wordCounts = words
+                    .map { t(it, 1) }
+                    .reduceByKey { a: Int, b: Int -> a + b }
+                    .map { (tup, counter) -> tup + counter }
+
+                val resultLists = mapOf(
+                    topic1 to listOf(
+                        "Hello" X 1,
+                        "this" X 1,
+                        "is" X 1,
+                        "a" X 1,
+                        "test" X 3,
+                    ),
+                    topic2 to listOf(
+                        "This" X 1,
+                        "is" X 1,
+                        "also" X 2,
+                        "a" X 1,
+                        "test" X 2,
+                        "something" X 1,
+                    )
+                )
+
+                wordCounts.foreachRDD { rdd, _ ->
+                    rdd.foreach { (topic, word, count) ->
+                        t(word, count).shouldBeIn(collection = resultLists[topic]!!)
+                    }
+                }
+
+                wordCounts.print()
+            }
+        }
+
         should("stream") {
 
             val input = listOf("aaa", "bbb", "aaa", "ccc")

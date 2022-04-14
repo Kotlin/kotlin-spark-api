@@ -96,6 +96,12 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>io.kotest.extensions</groupId>
+      <artifactId>kotest-extensions-embedded-kafka</artifactId>
+      <version>${kotest-extensions-embedded-kafka.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>com.beust</groupId>
       <artifactId>klaxon</artifactId>
       <version>${klaxon.version}</version>
