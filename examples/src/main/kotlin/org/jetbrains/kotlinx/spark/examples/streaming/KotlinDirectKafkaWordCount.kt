@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-package org.jetbrains.kotlinx.spark.examples
+package org.jetbrains.kotlinx.spark.examples.streaming
 
 import org.apache.kafka.clients.consumer.ConsumerConfig.*
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -25,13 +25,10 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.api.java.JavaDStream
 import org.apache.spark.streaming.api.java.JavaInputDStream
-import org.apache.spark.streaming.api.java.JavaPairDStream
 import org.apache.spark.streaming.kafka010.ConsumerStrategies
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies
-import org.jetbrains.kotlinx.spark.api.c
 import org.jetbrains.kotlinx.spark.api.reduceByKey
-import org.jetbrains.kotlinx.spark.api.toTuple
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.jetbrains.kotlinx.spark.api.withSparkStreaming
 import scala.Tuple2
@@ -84,7 +81,7 @@ object KotlinDirectKafkaWordCount {
         val topics: String = args.getOrElse(2) { DEFAULT_TOPIC }
 
         // Create context with a 2 seconds batch interval
-        withSparkStreaming(batchDuration = Durations.seconds(2), appName = "JavaDirectKafkaWordCount") {
+        withSparkStreaming(batchDuration = Durations.seconds(2), appName = "KotlinDirectKafkaWordCount") {
 
             val topicsSet: Set<String> = topics.split(',').toSet()
 

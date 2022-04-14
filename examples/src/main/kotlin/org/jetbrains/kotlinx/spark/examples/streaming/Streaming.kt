@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-package org.jetbrains.kotlinx.spark.examples
+package org.jetbrains.kotlinx.spark.examples.streaming
 
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.Dataset
@@ -30,13 +30,17 @@ data class TestRow(
     val word: String,
 )
 
+/**
+ * To run this on your local machine, you need to first run a Netcat server
+ *
+ * `$ nc -lk 9999`
+ */
 fun main() = withSparkStreaming(Durations.seconds(1), timeout = 10_000) {
 
     val lines = ssc.socketTextStream("localhost", 9999)
     val words = lines.flatMap { it.split(" ").iterator() }
 
-
-    words.foreachRDD { rdd, time ->
+    words.foreachRDD { rdd, _ ->
         withSpark(rdd) {
 
             val dataframe: Dataset<TestRow> = rdd.map { TestRow(it) }.toDS()

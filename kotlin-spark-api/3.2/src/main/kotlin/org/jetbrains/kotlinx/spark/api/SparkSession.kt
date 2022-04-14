@@ -318,7 +318,7 @@ fun withSparkStreaming(
         ssc
     }
 
-    val ssc: JavaStreamingContext = when {
+    val ssc = when {
         checkpointPath != null ->
             JavaStreamingContext.getOrCreate(checkpointPath, creatingFunc, hadoopConf, createOnError)
 

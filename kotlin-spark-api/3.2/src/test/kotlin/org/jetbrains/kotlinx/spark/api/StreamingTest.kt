@@ -20,31 +20,22 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.timing.eventually
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.fs.FileSystem
-import org.apache.spark.SparkConf
 import org.apache.spark.SparkException
-import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.streaming.*
-import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.apache.spark.util.Utils
 import org.jetbrains.kotlinx.spark.api.tuples.X
 import org.jetbrains.kotlinx.spark.api.tuples.component1
 import org.jetbrains.kotlinx.spark.api.tuples.component2
-import scala.Option
 import java.io.File
 import java.io.Serializable
-import java.net.ConnectException
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 
 
 class StreamingTest : ShouldSpec({
@@ -78,18 +69,14 @@ class StreamingTest : ShouldSpec({
 
         should("Work with checkpointpath") {
             val emptyDir = createTempDir()
-            emptyDir.deleteOnExit()
+            val testDirectory = createTempDir()
+            val corruptedCheckpointDir = createCorruptedCheckpoint()
 
             val batchDuration = Durations.seconds(1)
             val timeout = Durations.seconds(1).milliseconds()
 
-            val testDirectory = createTempDir()
-            testDirectory.deleteOnExit()
-
-            val corruptedCheckpointDir = createCorruptedCheckpoint()
 
             val newContextCreated = AtomicBoolean(false)
-
 
             val creatingFun: KSparkStreamingSession.() -> Unit = {
                 println("created new context")
@@ -151,12 +138,13 @@ class StreamingTest : ShouldSpec({
 })
 
 private fun createTempDir() = Utils.createTempDir(System.getProperty("java.io.tmpdir"), "spark")
+    .apply { deleteOnExit() }
 
 private fun createCorruptedCheckpoint(): String {
     val checkpointDirectory = createTempDir().absolutePath
     val fakeCheckpointFile = Checkpoint.checkpointFile(checkpointDirectory, Time(1000))
     FileUtils.write(File(fakeCheckpointFile.toString()), "blablabla", StandardCharsets.UTF_8)
-    assert(Checkpoint.getCheckpointFiles(checkpointDirectory, (null as FileSystem?).asOption()).nonEmpty())
+    assert(Checkpoint.getCheckpointFiles(checkpointDirectory, (null as FileSystem?).toOption()).nonEmpty())
     return checkpointDirectory
 }
 
