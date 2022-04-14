@@ -19,11 +19,8 @@
  */
 package org.jetbrains.kotlinx.spark.examples.streaming
 
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.Dataset
-import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.Durations
-import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.*
 
 data class TestRow(

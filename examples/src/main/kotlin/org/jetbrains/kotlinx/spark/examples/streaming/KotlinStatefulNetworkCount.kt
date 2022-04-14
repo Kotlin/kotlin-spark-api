@@ -1,18 +1,15 @@
 package org.jetbrains.kotlinx.spark.examples.streaming
 
-import org.apache.spark.SparkConf
 import org.apache.spark.api.java.Optional
 import org.apache.spark.api.java.StorageLevels
-import org.apache.spark.api.java.function.Function3
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.State
 import org.apache.spark.streaming.StateSpec
-import org.apache.spark.streaming.api.java.*
-import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.getOrElse
+import org.jetbrains.kotlinx.spark.api.mapWithState
+import org.jetbrains.kotlinx.spark.api.toPairRDD
 import org.jetbrains.kotlinx.spark.api.tuples.X
-import org.jetbrains.kotlinx.spark.api.tuples.t
-import scala.Tuple2
-import java.util.*
+import org.jetbrains.kotlinx.spark.api.withSparkStreaming
 import java.util.regex.Pattern
 import kotlin.system.exitProcess
 
