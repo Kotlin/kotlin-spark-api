@@ -36,6 +36,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.SparkSession.Builder
 import org.apache.spark.sql.UDFRegistration
 import org.apache.spark.streaming.Duration
@@ -70,6 +71,18 @@ class KSparkSession(val spark: SparkSession) {
 
     /** Utility method to create dataset from [JavaRDDLike]. */
     inline fun <reified T> JavaRDDLike<T, *>.toDS(): Dataset<T> = toDS(spark)
+
+    /**
+     * Utility method to create Dataset<Row> (Dataframe) from RDD.
+     * NOTE: [T] must be [Serializable].
+     */
+    inline fun <reified T> RDD<T>.toDF(): Dataset<Row> = toDF(spark)
+
+    /**
+     * Utility method to create Dataset<Row> (Dataframe) from JavaRDD.
+     * NOTE: [T] must be [Serializable].
+     */
+    inline fun <reified T> JavaRDDLike<T, *>.toDF(): Dataset<Row> = toDF(spark)
 
     /**
      * A collection of methods for registering user-defined functions (UDF).
