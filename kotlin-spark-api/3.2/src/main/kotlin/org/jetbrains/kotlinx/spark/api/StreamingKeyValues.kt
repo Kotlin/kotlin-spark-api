@@ -19,6 +19,7 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
+import org.apache.spark.HashPartitioner
 import org.apache.spark.Partitioner
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.api.java.JavaRDD
@@ -88,6 +89,22 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKey(
 ): JavaDStream<Tuple2<K, V>> =
     toPairDStream()
         .reduceByKey(reduceFunc, partitioner)
+        .toTupleDStream()
+
+/**
+ * Combine elements of each key in DStream's RDDs using custom functions. This is similar to the
+ * combineByKey for RDDs. Please refer to combineByKey in
+ * org.apache.spark.rdd.PairRDDFunctions in the Spark core documentation for more information.
+ */
+fun <K, V, C> JavaDStream<Tuple2<K, V>>.combineByKey(
+    createCombiner: (V) -> C,
+    mergeValue: (C, V) -> C,
+    mergeCombiner: (C, C) -> C,
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    mapSideCombine: Boolean = true,
+): JavaDStream<Tuple2<K, C>> =
+    toPairDStream()
+        .combineByKey(createCombiner, mergeValue, mergeCombiner, HashPartitioner(numPartitions), mapSideCombine)
         .toTupleDStream()
 
 /**
@@ -311,6 +328,7 @@ fun <K, V, StateType, MappedType> JavaDStream<Tuple2<K, V>>.mapWithState(
  * the given function on the previous state of the key and the new values of each key.
  * In every batch the updateFunc will be called for each state even if there are no new values.
  * Hash partitioning is used to generate the RDDs with Spark's default number of partitions.
+ * Note: Needs checkpoint directory to be set.
  * @param updateFunc State update function. If `this` function returns `null`, then
  *                   corresponding state key-value pair will be eliminated.
  * @tparam S State type
@@ -333,6 +351,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
  * the given function on the previous state of the key and the new values of each key.
  * In every batch the updateFunc will be called for each state even if there are no new values.
  * [[org.apache.spark.Partitioner]] is used to control the partitioning of each RDD.
+ * Note: Needs checkpoint directory to be set.
  * @param updateFunc State update function. Note, that this function may generate a different
  *                   tuple with a different key than the input key. Therefore keys may be removed
  *                   or added in this way. It is up to the developer to decide whether to
@@ -358,6 +377,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
  * Return a new "state" DStream where the state for each key is updated by applying
  * the given function on the previous state of the key and the new values of the key.
  * org.apache.spark.Partitioner is used to control the partitioning of each RDD.
+ * Note: Needs checkpoint directory to be set.
  * @param updateFunc State update function. If `this` function returns `null`, then
  *                   corresponding state key-value pair will be eliminated.
  * @param partitioner Partitioner for controlling the partitioning of each RDD in the new
