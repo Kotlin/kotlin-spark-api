@@ -27,6 +27,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
 import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.jetbrains.kotlinx.spark.extensions.DemoCaseClass
 import scala.*
 import java.math.BigDecimal
 import java.sql.Date
@@ -177,13 +178,59 @@ class EncodingTest : ShouldSpec({
     context("schema") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
-            should("handle Scala case class datasets") {
-                val caseClasses = listOf(Some(1), Some(2), Some(3))
+            should("handle Scala Case class datasets") {
+                val caseClasses = listOf(
+                    DemoCaseClass(1, "1"),
+                    DemoCaseClass(2, "2"),
+                    DemoCaseClass(3, "3"),
+                )
                 val dataset = caseClasses.toDS()
+                dataset.show()
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            should("handle Scala case class case class datasets") {
+            should("handle Scala Case class with data class datasets") {
+                val caseClasses = listOf(
+                    DemoCaseClass(1, "1" to 1L),
+                    DemoCaseClass(2, "2" to 2L),
+                    DemoCaseClass(3, "3" to 3L),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle data class with Scala Case class datasets") {
+                val caseClasses = listOf(
+                    1 to DemoCaseClass(1, "1"),
+                    2 to DemoCaseClass(2, "2"),
+                    3 to DemoCaseClass(3, "3"),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle data class with Scala Case class & deeper datasets") {
+                val caseClasses = listOf(
+                    1 to DemoCaseClass(1, "1" to DemoCaseClass(1, 1.0)),
+                    2 to DemoCaseClass(2, "2" to DemoCaseClass(2, 2.0)),
+                    3 to DemoCaseClass(3, "3" to DemoCaseClass(3, 3.0)),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+
+            should("handle Scala Option datasets") {
+                val caseClasses = listOf(Some(1), Some(2), Some(3))
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle Scala Option Option datasets") {
                 val caseClasses = listOf(
                     Some(Some(1)),
                     Some(Some(2)),
@@ -193,7 +240,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            should("handle data class Scala case class datasets") {
+            should("handle data class Scala Option datasets") {
                 val caseClasses = listOf(
                     Some(1) to Some(2),
                     Some(3) to Some(4),
@@ -203,7 +250,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            should("handle Scala case class data class datasets") {
+            should("handle Scala Option data class datasets") {
                 val caseClasses = listOf(
                     Some(1 to 2),
                     Some(3 to 4),
