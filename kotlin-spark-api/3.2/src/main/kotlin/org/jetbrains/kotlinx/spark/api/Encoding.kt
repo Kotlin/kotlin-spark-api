@@ -271,8 +271,18 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KDataTypeWrapper(structType, klass.java, true)
         }
         klass.isSubclassOf(Product::class) -> {
-            val params = type.arguments.mapIndexed { i, it ->
-                "_${i + 1}" to it.type!!
+
+            // create map from T1, T2 to Int, String etc.
+            val typeMap = klass.constructors.first().typeParameters.map { it.name }
+                .zip(
+                    type.arguments.map { it.type }
+                )
+                .toMap()
+
+            // collect params by name and actual type
+            val params = klass.constructors.first().parameters.map {
+                val typeName = it.type.toString().replace("!", "")
+                it.name to (typeMap[typeName] ?: it.type)
             }
 
             val structType = DataTypes.createStructType(

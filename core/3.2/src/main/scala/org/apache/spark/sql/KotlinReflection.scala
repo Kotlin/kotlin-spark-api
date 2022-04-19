@@ -28,7 +28,7 @@ import org.apache.spark.sql.catalyst.analysis.GetColumnByOrdinal
 import org.apache.spark.sql.catalyst.expressions.objects._
 import org.apache.spark.sql.catalyst.expressions.{Expression, _}
 import org.apache.spark.sql.catalyst.util.ArrayBasedMapData
-import org.apache.spark.sql.catalyst.{InternalRow, ScalaReflection, WalkedTypePath}
+import org.apache.spark.sql.catalyst.{DefinedByConstructorParams, InternalRow, ScalaReflection, WalkedTypePath}
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.{CalendarInterval, UTF8String}
 import org.apache.spark.util.Utils
@@ -42,11 +42,12 @@ import java.lang.Exception
  * for classes whose fields are entirely defined by constructor params but should not be
  * case classes.
  */
-trait DefinedByConstructorParams
+//trait DefinedByConstructorParams
 
 /**
  * KotlinReflection is heavily inspired by ScalaReflection and even extends it just to add several methods
  */
+//noinspection RedundantBlock
 object KotlinReflection extends KotlinReflection {
     /**
      * Returns the Spark SQL DataType for a given java class.  Where this is not an exact mapping
@@ -916,9 +917,18 @@ object KotlinReflection extends KotlinReflection {
             }
             //</editor-fold>
 
-            case _ if predefinedDt.isDefined => {
+            // Kotlin specific cases
+            case t if predefinedDt.isDefined => {
+
+//                if (seenTypeSet.contains(t)) {
+//                    throw new UnsupportedOperationException(
+//                        s"cannot have circular references in class, but got the circular reference of class $t"
+//                    )
+//                }
+
                 predefinedDt.get match {
 
+                    // Kotlin data class
                     case dataType: KDataTypeWrapper => {
                         val cls = dataType.cls
                         val properties = getJavaBeanReadableProperties(cls)
