@@ -223,14 +223,14 @@ class EncodingTest : ShouldSpec({
             }
 
 
-            should("handle Scala Option datasets") {
+            xshould("handle Scala Option datasets") {
                 val caseClasses = listOf(Some(1), Some(2), Some(3))
                 val dataset = caseClasses.toDS()
                 dataset.show()
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            should("handle Scala Option Option datasets") {
+            xshould("handle Scala Option Option datasets") {
                 val caseClasses = listOf(
                     Some(Some(1)),
                     Some(Some(2)),
@@ -240,7 +240,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            should("handle data class Scala Option datasets") {
+            xshould("handle data class Scala Option datasets") {
                 val caseClasses = listOf(
                     Some(1) to Some(2),
                     Some(3) to Some(4),
@@ -250,7 +250,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            should("handle Scala Option data class datasets") {
+            xshould("handle Scala Option data class datasets") {
                 val caseClasses = listOf(
                     Some(1 to 2),
                     Some(3 to 4),
