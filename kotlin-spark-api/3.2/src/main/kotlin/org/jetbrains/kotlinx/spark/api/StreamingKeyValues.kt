@@ -333,6 +333,7 @@ fun <K, V, StateType, MappedType> JavaDStream<Tuple2<K, V>>.mapWithState(
  *                   corresponding state key-value pair will be eliminated.
  * @tparam S State type
  */
+@JvmName("updateStateByKeyNullable")
 fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
     numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
     updateFunc: (List<V>, S?) -> S?,
@@ -343,6 +344,56 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
                 updateFunc(list, s.getOrNull()).toOptional()
             },
             numPartitions,
+        )
+        .toTupleDStream()
+
+/**
+ * Return a new "state" DStream where the state for each key is updated by applying
+ * the given function on the previous state of the key and the new values of each key.
+ * In every batch the updateFunc will be called for each state even if there are no new values.
+ * Hash partitioning is used to generate the RDDs with Spark's default number of partitions.
+ * Note: Needs checkpoint directory to be set.
+ * @param updateFunc State update function. If `this` function returns `null`, then
+ *                   corresponding state key-value pair will be eliminated.
+ * @tparam S State type
+ */
+@JvmName("updateStateByKey")
+fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
+    numPartitions: Int = dstream().ssc().sc().defaultParallelism(),
+    updateFunc: (List<V>, Optional<S>) -> Optional<S>,
+): JavaDStream<Tuple2<K, S>> =
+    toPairDStream()
+        .updateStateByKey(
+            updateFunc,
+            numPartitions,
+        )
+        .toTupleDStream()
+
+/**
+ * Return a new "state" DStream where the state for each key is updated by applying
+ * the given function on the previous state of the key and the new values of each key.
+ * In every batch the updateFunc will be called for each state even if there are no new values.
+ * [[org.apache.spark.Partitioner]] is used to control the partitioning of each RDD.
+ * Note: Needs checkpoint directory to be set.
+ * @param updateFunc State update function. Note, that this function may generate a different
+ *                   tuple with a different key than the input key. Therefore keys may be removed
+ *                   or added in this way. It is up to the developer to decide whether to
+ *                   remember the partitioner despite the key being changed.
+ * @param partitioner Partitioner for controlling the partitioning of each RDD in the new
+ *                    DStream
+ * @tparam S State type
+ */
+@JvmName("updateStateByKeyNullable")
+fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
+    partitioner: Partitioner,
+    updateFunc: (List<V>, S?) -> S?,
+): JavaDStream<Tuple2<K, S>> =
+    toPairDStream()
+        .updateStateByKey(
+            { list: List<V>, s: Optional<S> ->
+                updateFunc(list, s.getOrNull()).toOptional()
+            },
+            partitioner,
         )
         .toTupleDStream()
 
@@ -362,6 +413,31 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
  */
 fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
     partitioner: Partitioner,
+    updateFunc: (List<V>, Optional<S>) -> Optional<S>,
+): JavaDStream<Tuple2<K, S>> =
+    toPairDStream()
+        .updateStateByKey(
+            updateFunc,
+            partitioner,
+        )
+        .toTupleDStream()
+
+/**
+ * Return a new "state" DStream where the state for each key is updated by applying
+ * the given function on the previous state of the key and the new values of the key.
+ * org.apache.spark.Partitioner is used to control the partitioning of each RDD.
+ * Note: Needs checkpoint directory to be set.
+ * @param updateFunc State update function. If `this` function returns `null`, then
+ *                   corresponding state key-value pair will be eliminated.
+ * @param partitioner Partitioner for controlling the partitioning of each RDD in the new
+ *                    DStream.
+ * @param initialRDD initial state value of each key.
+ * @tparam S State type
+ */
+@JvmName("updateStateByKeyNullable")
+fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
+    partitioner: Partitioner,
+    initialRDD: JavaRDD<Tuple2<K, S>>,
     updateFunc: (List<V>, S?) -> S?,
 ): JavaDStream<Tuple2<K, S>> =
     toPairDStream()
@@ -370,6 +446,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
                 updateFunc(list, s.getOrNull()).toOptional()
             },
             partitioner,
+            initialRDD.toPairRDD(),
         )
         .toTupleDStream()
 
@@ -388,13 +465,11 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
 fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
     partitioner: Partitioner,
     initialRDD: JavaRDD<Tuple2<K, S>>,
-    updateFunc: (List<V>, S?) -> S?,
+    updateFunc: (List<V>, Optional<S>) -> Optional<S>,
 ): JavaDStream<Tuple2<K, S>> =
     toPairDStream()
         .updateStateByKey(
-            { list: List<V>, s: Optional<S> ->
-                updateFunc(list, s.getOrNull()).toOptional()
-            },
+            updateFunc,
             partitioner,
             initialRDD.toPairRDD(),
         )

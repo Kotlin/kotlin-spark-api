@@ -55,7 +55,7 @@ class StreamingTest : ShouldSpec({
     context("streaming") {
 
         context("kafka") {
-            val port = 9092
+            val port = 6001
             val broker = "localhost:$port"
             val topic1 = "test1"
             val topic2 = "test2"
