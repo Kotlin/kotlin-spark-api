@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-scala-12:
+    container: node:14.16
     runs-on: ubuntu-latest
 
     steps:
