@@ -31,7 +31,6 @@
       <groupId>org.jetbrains.kotlinx.spark</groupId>
       <artifactId>scala-tuples-in-kotlin</artifactId>
     </dependency>
-
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-sql-kafka-0-10_${scala.compat.version}</artifactId>
@@ -42,12 +41,7 @@
       <artifactId>spark-streaming-kafka-0-10_${scala.compat.version}</artifactId>
       <version>${spark3.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.kafka</groupId>
-      <artifactId>kafka-streams-test-utils</artifactId>
-      <version>3.1.0</version>
-      <scope>test</scope>
-    </dependency>
+
 
     <!-- Provided dependencies -->
     <dependency>
@@ -62,19 +56,6 @@
       <version>${spark3.version}</version>
       <scope>provided</scope>
     </dependency>
-
-<!--    <dependency>-->
-<!--      <groupId>org.apache.hadoop</groupId>-->
-<!--      <artifactId>hadoop-common</artifactId>-->
-<!--      <version>${hadoop.version}</version>-->
-<!--      <scope>provided</scope>-->
-<!--    </dependency>-->
-<!--    <dependency>-->
-<!--      <groupId>org.apache.hadoop</groupId>-->
-<!--      <artifactId>hadoop-hdfs</artifactId>-->
-<!--      <version>${hadoop.version}</version>-->
-<!--      <scope>provided</scope>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-client</artifactId>
@@ -96,9 +77,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.kotest.extensions</groupId>
-      <artifactId>kotest-extensions-embedded-kafka</artifactId>
-      <version>${kotest-extensions-embedded-kafka.version}</version>
+      <groupId>io.github.embeddedkafka</groupId>
+      <artifactId>embedded-kafka_${scala.compat.version}</artifactId>
+      <version>${embedded-kafka.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -119,7 +100,12 @@
       <version>${spark3.version}</version>
       <classifier>tests</classifier>
       <scope>test</scope>
-<!--      <type>test-jar</type>-->
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-streams-test-utils</artifactId>
+      <version>3.1.0</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 

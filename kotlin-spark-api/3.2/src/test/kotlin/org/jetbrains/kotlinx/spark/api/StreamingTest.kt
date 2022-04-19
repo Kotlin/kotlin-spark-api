@@ -22,8 +22,6 @@ package org.jetbrains.kotlinx.spark.api
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.assertions.timing.eventually
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.extensions.embedded.kafka.EmbeddedKafkaListener
-import io.kotest.extensions.embedded.kafka.embeddedKafkaListener
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
