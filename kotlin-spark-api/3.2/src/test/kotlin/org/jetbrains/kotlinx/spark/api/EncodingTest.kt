@@ -27,10 +27,7 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
 import org.jetbrains.kotlinx.spark.api.tuples.*
-import scala.Product
-import scala.Tuple1
-import scala.Tuple2
-import scala.Tuple3
+import scala.*
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
@@ -179,6 +176,42 @@ class EncodingTest : ShouldSpec({
 
     context("schema") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
+
+            should("handle Scala case class datasets") {
+                val caseClasses = listOf(Some(1), Some(2), Some(3))
+                val dataset = caseClasses.toDS()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle Scala case class case class datasets") {
+                val caseClasses = listOf(
+                    Some(Some(1)),
+                    Some(Some(2)),
+                    Some(Some(3)),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle data class Scala case class datasets") {
+                val caseClasses = listOf(
+                    Some(1) to Some(2),
+                    Some(3) to Some(4),
+                    Some(5) to Some(6),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle Scala case class data class datasets") {
+                val caseClasses = listOf(
+                    Some(1 to 2),
+                    Some(3 to 4),
+                    Some(5 to 6),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.collectAsList() shouldBe caseClasses
+            }
 
             should("collect data classes with doubles correctly") {
                 val ll1 = LonLat(1.0, 2.0)
