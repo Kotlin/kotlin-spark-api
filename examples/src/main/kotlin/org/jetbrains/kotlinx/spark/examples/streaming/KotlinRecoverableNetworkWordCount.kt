@@ -209,6 +209,8 @@ object KotlinRecoverableNetworkWordCount {
                 println(output)
                 println("Dropped ${droppedWordsCounter.value()} word(s) totally")
                 println("Appending to " + outputFile.absolutePath)
+
+                @Suppress("UnstableApiUsage")
                 Files.append(
                     """
                     $output

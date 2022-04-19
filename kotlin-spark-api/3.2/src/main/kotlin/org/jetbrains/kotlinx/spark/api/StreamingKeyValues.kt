@@ -17,6 +17,8 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+@file:Suppress("unused")
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.HashPartitioner
@@ -295,7 +297,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKeyAndWindow(
         .toTupleDStream()
 
 /**
- * Return a [MapWithStateDStream] by applying a function to every key-value element of
+ * Return a [JavaMapWithStateDStream] by applying a function to every key-value element of
  * `this` stream, while maintaining some state data for each unique key. The mapping function
  * and other specification (e.g. partitioners, timeouts, initial state data, etc.) of this
  * transformation can be specified using `StateSpec` class. The state data is accessible in
