@@ -399,6 +399,16 @@ class EncodingTest : ShouldSpec({
                     .flatten()
                 expect(result).contains.inOrder.only.values(2, 3, 4, 5)
             }
+
+            should("!handle circular dependencies") {
+                val result = listOf(
+                    DataClass1(DataClass2(DataClass1())),
+                    DataClass1(DataClass2(DataClass1())),
+                    DataClass1(DataClass2(DataClass1())),
+                ).toDS()
+
+                result.show()
+            }
         }
     }
 })
@@ -428,3 +438,6 @@ data class NullFieldAbleDataClass(
     val optionList: List<Int>?,
     val optionMap: Map<String, Int>?,
 )
+
+data class DataClass1(val a: DataClass2? = null)
+data class DataClass2(val a: DataClass1? = null)
