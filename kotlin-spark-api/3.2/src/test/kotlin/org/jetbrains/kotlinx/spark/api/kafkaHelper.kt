@@ -71,7 +71,8 @@ class EmbeddedKafkaListener(
     val port: Int = config.kafkaPort()
 
 //    val host: String = "127.0.0.1"
-    val host: String = "0.0.0.0"
+//    val host: String = "0.0.0.0"
+    val host: String = "localhost"
 
     val bootstrapServer = "$host:$port"
 
