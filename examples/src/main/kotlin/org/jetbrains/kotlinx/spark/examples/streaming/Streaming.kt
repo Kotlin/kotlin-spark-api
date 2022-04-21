@@ -19,8 +19,12 @@
  */
 package org.jetbrains.kotlinx.spark.examples.streaming
 
+import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.streaming.Durations
+import org.apache.spark.streaming.Time
+import org.apache.spark.streaming.api.java.JavaDStream
+import org.apache.spark.streaming.api.java.JavaReceiverInputDStream
 import org.jetbrains.kotlinx.spark.api.*
 
 data class TestRow(
@@ -32,22 +36,18 @@ data class TestRow(
  *
  * `$ nc -lk 9999`
  */
-fun main() = withSparkStreaming(Durations.seconds(1), timeout = 10_000) {
+fun main() = withSparkStreaming(batchDuration = Durations.seconds(1), timeout = 10_000) { // this: KSparkStreamingSession
 
-    val lines = ssc.socketTextStream("localhost", 9999)
-    val words = lines.flatMap { it.split(" ").iterator() }
+    val lines: JavaReceiverInputDStream<String> = ssc.socketTextStream("localhost", 9999)
+    val words: JavaDStream<String> = lines.flatMap { it.split(" ").iterator() }
 
-    words.foreachRDD { rdd, _ ->
-        withSpark(rdd) {
-
+    words.foreachRDD { rdd: JavaRDD<String>, _: Time ->
+        withSpark(rdd) { // this: KSparkSession
             val dataframe: Dataset<TestRow> = rdd.map { TestRow(it) }.toDS()
-
             dataframe
                 .groupByKey { it.word }
                 .count()
                 .show()
         }
-
     }
-
 }
