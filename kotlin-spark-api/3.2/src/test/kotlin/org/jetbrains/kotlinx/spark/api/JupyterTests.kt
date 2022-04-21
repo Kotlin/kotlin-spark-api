@@ -94,8 +94,8 @@ class JupyterTests : ShouldSpec({
                 )
                 println(html)
 
-                html shouldContain "[1, 2, 3]"
-                html shouldContain "[4, 5, 6]"
+                html shouldContain "1, 2, 3"
+                html shouldContain "4, 5, 6"
             }
         }
 
@@ -113,8 +113,8 @@ class JupyterTests : ShouldSpec({
                 )
                 println(html)
 
-                html shouldContain "[1, 2, 3]"
-                html shouldContain "[4, 5, 6]"
+                html shouldContain "1, 2, 3"
+                html shouldContain "4, 5, 6"
             }
         }
 
@@ -157,8 +157,8 @@ class JupyterTests : ShouldSpec({
                 )
                 println(html)
 
-                html shouldContain "(1,2)"
-                html shouldContain "(3,4)"
+                html shouldContain "1, 2"
+                html shouldContain "3, 4"
 
             }
         }
@@ -196,8 +196,8 @@ class JupyterTests : ShouldSpec({
                 )
                 println(html)
 
-                html shouldContain "[1, 2, 3]"
-                html shouldContain "[4, 5, 6]"
+                html shouldContain "1, 2, 3"
+                html shouldContain "4, 5, 6"
             }
         }
     }

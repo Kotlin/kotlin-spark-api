@@ -10,14 +10,14 @@
     <packaging>pom</packaging>
 
     <properties>
-        <kotlin.version>1.5.30</kotlin.version>
+        <kotlin.version>1.6.20</kotlin.version>
         <dokka.version>1.6.10</dokka.version>
         <atrium.version>0.16.0</atrium.version>
         <kotest.version>4.6.0</kotest.version>
         <junit.version>5.8.2</junit.version>
         <kotest-extension-allure.version>1.0.1</kotest-extension-allure.version>
         <spark3.version>3.2.1</spark3.version>
-        <kotlin-jupyter-api.version>0.11.0-62</kotlin-jupyter-api.version>
+        <kotlin-jupyter-api.version>0.11.0-76</kotlin-jupyter-api.version>
         <kotlinx.html.version>0.7.3</kotlinx.html.version>
 
         <!-- Plugin versions -->

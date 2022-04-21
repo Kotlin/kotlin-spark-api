@@ -44,12 +44,15 @@ import org.apache.spark.sql.SparkSession.Builder
 import scala.collection.*
 import org.apache.spark.rdd.*
 import org.jetbrains.kotlinx.spark.api.SparkSession
+import scala.Product
 import java.io.Serializable
+import scala.collection.Iterable as ScalaIterable
+import scala.collection.Iterator as ScalaIterator
 
 @OptIn(ExperimentalStdlibApi::class)
 internal class Integration : JupyterIntegration() {
 
-    private val kotlinVersion = "1.5.30"
+    private val kotlinVersion = "1.6.20"
     private val scalaCompatVersion = "2.12"
     private val scalaVersion = "2.12.15"
     private val spark3Version = "3.2.1"
@@ -77,24 +80,22 @@ internal class Integration : JupyterIntegration() {
         )
 
         import("org.jetbrains.kotlinx.spark.api.*")
+        import("org.jetbrains.kotlinx.spark.api.tuples.*")
+        import(*(1..22).map { "scala.Tuple$it" }.toTypedArray())
         import("org.apache.spark.sql.functions.*")
         import("org.apache.spark.*")
         import("org.apache.spark.sql.*")
         import("org.apache.spark.api.java.*")
-        import("org.apache.spark.sql.SparkSession.Builder")
         import("scala.collection.Seq")
         import("org.apache.spark.rdd.*")
         import("java.io.Serializable")
 
-        var spark: SparkSession? = null
-
-        val a: Map<Int, String> = mapOf()
 
         // starting spark and unwrapping KSparkContext functions
         onLoaded {
 
             @Language("kts")
-            val sparkField = execute(
+            val spark = execute(
                 """
                 val spark = org.jetbrains.kotlinx.spark.api.SparkSession
                     .builder()
@@ -104,7 +105,6 @@ internal class Integration : JupyterIntegration() {
                 spark
                 """.trimIndent()
             ).value!! as SparkSession
-            spark = sparkField
 
             @Language("kts")
             val logLevel = execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
@@ -174,10 +174,14 @@ private fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): S
                     is BooleanArray -> row.iterator().asSequence().toList().toString()
                     is Array<*> -> row.iterator().asSequence().toList().toString()
                     is Iterable<*> -> row.iterator().asSequence().toList().toString()
+                    is ScalaIterable<*> -> row.asKotlinIterable().iterator().asSequence().toList().toString()
                     is Iterator<*> -> row.asSequence().toList().toString()
+                    is ScalaIterator<*> -> row.asKotlinIterator().asSequence().toList().toString()
+                    is Product -> row.productIterator().asKotlinIterator().asSequence().toList().toString()
                     is Serializable -> row.toString()
                     // maybe others?
 
+                    is Any? -> row.toString()
                     else -> row.toString()
                 }
 
