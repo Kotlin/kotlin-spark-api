@@ -21,6 +21,7 @@
         <kotlin-jupyter-api.version>0.11.0-76</kotlin-jupyter-api.version>
         <kotlinx.html.version>0.7.3</kotlinx.html.version>
         <hadoop.version>3.3.1</hadoop.version>
+        <junit.version>5.8.2</junit.version>
 
         <!-- Plugin versions -->
         <allure-maven.version>2.10.0</allure-maven.version>
