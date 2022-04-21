@@ -25,5 +25,5 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build with Maven
-        run: ./mvnw -B package --file pom.xml -Pscala-2.12 -Dkotlin-spark-api-3.2.test.excludes="org.jetbrains.kotlinx.spark.api.KafkaStreamingTest"
+        run: ./mvnw -B package --file pom.xml -Pscala-2.12 -Dkotest.tags="!Kafka"
 # vim: ts=2:sts=2:sw=2:expandtab

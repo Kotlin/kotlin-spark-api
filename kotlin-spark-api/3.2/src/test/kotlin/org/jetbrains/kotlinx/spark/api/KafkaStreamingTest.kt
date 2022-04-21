@@ -19,6 +19,7 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
+import io.kotest.core.Tag
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.collections.shouldBeIn
 import org.apache.kafka.clients.consumer.ConsumerConfig
@@ -33,39 +34,14 @@ import org.apache.spark.streaming.kafka010.LocationStrategies
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import java.io.Serializable
 
+object Kafka : Tag()
+
 class KafkaStreamingTest : ShouldSpec({
+
+    // making sure it can be skipped on github actions since it times out
+    tags(Kafka)
+
     context("kafka") {
-
-//            val kafka = install(
-//                TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1")))
-//            ) {
-//                withEmbeddedZookeeper()
-//            }
-//
-//            should("support kafka streams") {
-//                val topic1 = "test1"
-//                val topic2 = "test2"
-//
-//                val producer = kafka.createStringStringProducer()
-//                producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
-//                producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
-//                producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
-//                producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
-//                producer.send(ProducerRecord(topic2, "This is also also a test test something"))
-//                producer.send(ProducerRecord(topic2, "This is also also a test test something"))
-//                producer.send(ProducerRecord(topic2, "This is also also a test test something"))
-//                producer.send(ProducerRecord(topic2, "This is also also a test test something"))
-//                producer.close()
-//
-//                val consumer = kafka.createStringStringConsumer {
-//                    this[ConsumerConfig.MAX_POLL_RECORDS_CONFIG] = 1
-//                }
-//
-//                consumer.subscribe(listOf(topic1))
-//                val records = consumer.poll(Duration.ofSeconds(100))
-//                records.shouldHaveSize(4)
-//                records.print()
-
         val port = 9092
         val broker = "localhost:$port"
         val topic1 = "test1"
