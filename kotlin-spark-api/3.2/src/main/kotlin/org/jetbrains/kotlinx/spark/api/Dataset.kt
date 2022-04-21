@@ -36,10 +36,7 @@ import org.apache.spark.api.java.function.ForeachPartitionFunction
 import org.apache.spark.api.java.function.MapFunction
 import org.apache.spark.api.java.function.ReduceFunction
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Column
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.KeyValueGroupedDataset
-import org.apache.spark.sql.TypedColumn
+import org.apache.spark.sql.*
 import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.Tuple2
 import scala.Tuple3
@@ -77,6 +74,21 @@ inline fun <reified T> RDD<T>.toDS(spark: SparkSession): Dataset<T> =
  */
 inline fun <reified T> JavaRDDLike<T, *>.toDS(spark: SparkSession): Dataset<T> =
     spark.createDataset(this.rdd(), encoder<T>())
+
+/**
+ * Utility method to create Dataset<Row> (Dataframe) from JavaRDD.
+ * NOTE: [T] must be [Serializable].
+ */
+inline fun <reified T> JavaRDDLike<T, *>.toDF(spark: SparkSession): Dataset<Row> =
+    toDS(spark).toDF()
+
+/**
+ * Utility method to create Dataset<Row> (Dataframe) from RDD.
+ * NOTE: [T] must be [Serializable].
+ */
+inline fun <reified T> RDD<T>.toDF(spark: SparkSession): Dataset<Row> =
+    toDS(spark).toDF()
+
 
 /**
  * (Kotlin-specific)

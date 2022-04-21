@@ -34,7 +34,7 @@
         <dependency>
             <groupId>io.kotest.extensions</groupId>
             <artifactId>kotest-extensions-allure</artifactId>
-            <version>${kotest-extension-allure.version}</version>
+            <version>${kotest-extensions-allure.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

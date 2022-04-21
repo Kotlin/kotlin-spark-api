@@ -20,32 +20,9 @@ package org.jetbrains.kotlinx.spark.api/*-
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
-import org.apache.spark.api.java.JavaDoubleRDD
-import org.apache.spark.api.java.JavaPairRDD
-import org.apache.spark.api.java.JavaRDD
-import org.apache.spark.api.java.JavaSparkContext
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.functions.*
-import org.apache.spark.sql.streaming.GroupState
-import org.apache.spark.sql.streaming.GroupStateTimeout
-import org.apache.spark.sql.types.Decimal
-import org.apache.spark.unsafe.types.CalendarInterval
-import scala.Product
-import scala.Tuple1
-import scala.Tuple2
-import scala.Tuple3
 import scala.collection.Seq
 import java.io.Serializable
-import java.math.BigDecimal
-import java.sql.Date
-import java.sql.Timestamp
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
-import java.time.Period
 import kotlin.collections.Iterator
 import scala.collection.Iterator as ScalaIterator
 import scala.collection.Map as ScalaMap

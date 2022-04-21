@@ -19,13 +19,14 @@
  */
 package org.jetbrains.kotlinx.spark.examples
 
-import org.apache.spark.api.java.function.ReduceFunction
 import org.apache.spark.sql.Dataset
 import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.*
-import scala.*
+import scala.Tuple2
+import scala.Tuple3
 
 data class Q<T>(val id: Int, val text: T)
+
 @Suppress("RedundantLambdaArrow", "UsePropertyAccessSyntax")
 object Main {
 

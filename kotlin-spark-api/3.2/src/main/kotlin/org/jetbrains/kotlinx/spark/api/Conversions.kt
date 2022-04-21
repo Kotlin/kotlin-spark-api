@@ -27,6 +27,7 @@
 
 package org.jetbrains.kotlinx.spark.api
 
+import org.apache.spark.api.java.Optional
 import scala.*
 import scala.collection.JavaConverters
 import java.util.*
@@ -42,6 +43,39 @@ import scala.collection.mutable.Buffer as ScalaMutableBuffer
 import scala.collection.mutable.Map as ScalaMutableMap
 import scala.collection.mutable.Seq as ScalaMutableSeq
 import scala.collection.mutable.Set as ScalaMutableSet
+import org.apache.spark.streaming.State
+
+/** Returns state value if it exists, else `null`. */
+fun <T> State<T>.getOrNull(): T? = if (exists()) get() else null
+
+/** Returns state value if it exists, else [other]. */
+fun <T> State<T>.getOrElse(other: T): T = if (exists()) get() else other
+
+
+/** Converts Scala [Option] to Kotlin nullable. */
+fun <T> Option<T>.getOrNull(): T? = getOrElse(null)
+
+/** Get if available else [other]. */
+fun <T> Option<T>.getOrElse(other: T): T = getOrElse { other }
+
+/** Converts nullable value to Scala [Option]. */
+fun <T> T?.toOption(): Option<T> = Option.apply(this)
+
+/** Converts Scala [Option] to Java [Optional]. */
+fun <T> Option<T>.toOptional(): Optional<T> = Optional.ofNullable(getOrNull())
+
+
+/** Converts [Optional] to Kotlin nullable. */
+fun <T> Optional<T>.getOrNull(): T? = orNull()
+
+/** Get if available else [other]. */
+fun <T> Optional<T>.getOrElse(other: T): T = orElse(other)
+
+/** Converts nullable value to [Optional]. */
+fun <T> T?.toOptional(): Optional<T> = Optional.ofNullable(this)
+
+/** Converts Java [Optional] to Scala [Option]. */
+fun <T> Optional<T>.toOption(): Option<T> = Option.apply(getOrNull())
 
 /**
  * @see JavaConverters.asScalaIterator for more information.
