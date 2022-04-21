@@ -19,45 +19,29 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
-import io.kotest.assertions.print.print
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.timing.eventually
-import io.kotest.core.extensions.install
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.extensions.testcontainers.TestContainerExtension
-import io.kotest.extensions.testcontainers.kafka.createStringStringConsumer
-import io.kotest.extensions.testcontainers.kafka.createStringStringProducer
-import io.kotest.extensions.testcontainers.perTest
 import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.collections.shouldContainAll
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.fs.FileSystem
-import org.apache.kafka.clients.consumer.ConsumerConfig
-import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.kafka.clients.producer.ProducerConfig
-import org.apache.kafka.clients.producer.ProducerRecord
-import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.spark.SparkException
-import org.apache.spark.streaming.*
-import org.apache.spark.streaming.api.java.JavaDStream
-import org.apache.spark.streaming.api.java.JavaInputDStream
-import org.apache.spark.streaming.kafka010.ConsumerStrategies
-import org.apache.spark.streaming.kafka010.KafkaUtils
-import org.apache.spark.streaming.kafka010.LocationStrategies
+import org.apache.spark.streaming.Checkpoint
+import org.apache.spark.streaming.Duration
+import org.apache.spark.streaming.Durations
+import org.apache.spark.streaming.Time
 import org.apache.spark.util.Utils
-import org.jetbrains.kotlinx.spark.api.tuples.*
-import org.testcontainers.containers.KafkaContainer
-import org.testcontainers.utility.DockerImageName
+import org.jetbrains.kotlinx.spark.api.tuples.X
+import org.jetbrains.kotlinx.spark.api.tuples.component1
+import org.jetbrains.kotlinx.spark.api.tuples.component2
+import org.jetbrains.kotlinx.spark.api.tuples.t
 import scala.Tuple2
 import java.io.File
 import java.io.Serializable
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.time.Duration.Companion.seconds
-import java.time.Duration
 
 
 class StreamingTest : ShouldSpec({

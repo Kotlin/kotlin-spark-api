@@ -23,7 +23,6 @@ package org.jetbrains.kotlinx.spark.api
 
 /**
  * Source: https://github.com/kotest/kotest-extensions-embedded-kafka
- *
  */
 
 import io.github.embeddedkafka.EmbeddedKafka
@@ -40,7 +39,7 @@ import org.apache.kafka.common.serialization.StringDeserializer
 import org.apache.kafka.common.serialization.StringSerializer
 import org.apache.kafka.common.utils.Bytes
 import scala.Predef
-import java.util.Properties
+import java.util.*
 
 val embeddedKafkaListener: EmbeddedKafkaListener = EmbeddedKafkaListener(EmbeddedKafkaConfig.defaultConfig())
 

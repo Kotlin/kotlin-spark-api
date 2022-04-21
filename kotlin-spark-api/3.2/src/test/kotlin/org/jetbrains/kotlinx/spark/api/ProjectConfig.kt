@@ -25,4 +25,6 @@ import io.kotest.extensions.allure.AllureTestReporter
 @Suppress("unused")
 object ProjectConfig : AbstractProjectConfig() {
     override fun listeners() = super.listeners() + AllureTestReporter(true)
+
+    override fun extensions() = super.extensions() + AllureTestReporter(true)
 }

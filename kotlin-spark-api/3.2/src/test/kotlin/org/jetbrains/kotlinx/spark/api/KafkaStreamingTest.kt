@@ -38,7 +38,7 @@ object Kafka : Tag()
 
 class KafkaStreamingTest : ShouldSpec({
 
-    // making sure it can be skipped on github actions since it times out
+    // making sure it can be skipped on Github actions since it times out
     tags(Kafka)
 
     context("kafka") {

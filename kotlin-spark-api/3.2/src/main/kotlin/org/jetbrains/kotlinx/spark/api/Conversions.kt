@@ -30,7 +30,6 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.spark.api.java.Optional
 import scala.*
 import scala.collection.JavaConverters
-import scala.reflect.ClassTag
 import java.util.*
 import java.util.Enumeration
 import java.util.concurrent.ConcurrentMap
