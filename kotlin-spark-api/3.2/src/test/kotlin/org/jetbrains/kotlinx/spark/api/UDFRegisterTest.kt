@@ -124,8 +124,8 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("succeed in dataset") {
                     val dataset: Dataset<NormalClass> = listOf(
-                        NormalClass(name="a", age =10),
-                        NormalClass(name="b", age =20)
+                        NormalClass(name = "a", age = 10),
+                        NormalClass(name = "b", age = 20)
                     ).toDS()
 
                     val udfWrapper = udf.register<String, Int, String>("nameConcatAge") { name, age ->
@@ -150,7 +150,7 @@ class UDFRegisterTest : ShouldSpec({
                 should("return NormalClass") {
                     listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
                     udf.register<String, Int, NormalClass>("toNormalClass") { a, b ->
-                       NormalClass(b, a)
+                        NormalClass(b, a)
                     }
                     spark.sql("select toNormalClass(first, second) from test2").show()
                 }
@@ -159,6 +159,7 @@ class UDFRegisterTest : ShouldSpec({
 
     }
 })
+
 
 data class NormalClass(
     val age: Int,

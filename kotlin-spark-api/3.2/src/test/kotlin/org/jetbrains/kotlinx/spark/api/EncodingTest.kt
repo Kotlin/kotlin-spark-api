@@ -26,10 +26,9 @@ import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
-import scala.Product
-import scala.Tuple1
-import scala.Tuple2
-import scala.Tuple3
+import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.jetbrains.kotlinx.spark.extensions.DemoCaseClass
+import scala.*
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
@@ -132,7 +131,7 @@ class EncodingTest : ShouldSpec({
             }
 
             should("be able to serialize binary") {
-                val byteArrayTriple = c("Hello there".encodeToByteArray(), 1, intArrayOf(1, 2, 3))
+                val byteArrayTriple = t("Hello there".encodeToByteArray(), 1, intArrayOf(1, 2, 3))
                 val dataset = dsOf(byteArrayTriple)
 
                 val (a, b, c) = dataset.collectAsList().single()
@@ -142,13 +141,13 @@ class EncodingTest : ShouldSpec({
             }
 
             should("be able to serialize Decimal") {
-                val decimalPair = c(Decimal().set(50), 12)
+                val decimalPair = t(Decimal().set(50), 12)
                 val dataset = dsOf(decimalPair)
                 dataset.collectAsList() shouldBe listOf(decimalPair)
             }
 
             should("be able to serialize BigDecimal") {
-                val decimalPair = c(BigDecimal.TEN, 12)
+                val decimalPair = t(BigDecimal.TEN, 12)
                 val dataset = dsOf(decimalPair)
                 val (a, b) = dataset.collectAsList().single()
                 a.compareTo(BigDecimal.TEN) shouldBe 0
@@ -163,29 +162,111 @@ class EncodingTest : ShouldSpec({
 
             should("Be able to serialize Scala Tuples including data classes") {
                 val dataset = dsOf(
-                    Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0))),
-                    Tuple2("b", Tuple3("b", 2, LonLat(1.0, 2.0))),
+                    t("a", t("a", 1, LonLat(1.0, 1.0))),
+                    t("b", t("b", 2, LonLat(1.0, 2.0))),
                 )
                 dataset.show()
                 val asList = dataset.takeAsList(2)
-                asList.first() shouldBe Tuple2("a", Tuple3("a", 1, LonLat(1.0, 1.0)))
+                asList.first() shouldBe t("a", t("a", 1, LonLat(1.0, 1.0)))
             }
 
             should("Be able to serialize data classes with tuples") {
                 val dataset = dsOf(
-                    DataClassWithTuple(Tuple3(5L, "test", Tuple1(""))),
-                    DataClassWithTuple(Tuple3(6L, "tessst", Tuple1(""))),
+                    DataClassWithTuple(t(5L, "test", t(""))),
+                    DataClassWithTuple(t(6L, "tessst", t(""))),
                 )
 
                 dataset.show()
                 val asList = dataset.takeAsList(2)
-                asList.first().tuple shouldBe Tuple3(5L, "test", Tuple1(""))
+                asList.first().tuple shouldBe t(5L, "test", t(""))
             }
         }
     }
 
     context("schema") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
+
+            should("handle Scala Case class datasets") {
+                val caseClasses = listOf(
+                    DemoCaseClass(1, "1"),
+                    DemoCaseClass(2, "2"),
+                    DemoCaseClass(3, "3"),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle Scala Case class with data class datasets") {
+                val caseClasses = listOf(
+                    DemoCaseClass(1, "1" to 1L),
+                    DemoCaseClass(2, "2" to 2L),
+                    DemoCaseClass(3, "3" to 3L),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle data class with Scala Case class datasets") {
+                val caseClasses = listOf(
+                    1 to DemoCaseClass(1, "1"),
+                    2 to DemoCaseClass(2, "2"),
+                    3 to DemoCaseClass(3, "3"),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            should("handle data class with Scala Case class & deeper datasets") {
+                val caseClasses = listOf(
+                    1 to DemoCaseClass(1, "1" to DemoCaseClass(1, 1.0)),
+                    2 to DemoCaseClass(2, "2" to DemoCaseClass(2, 2.0)),
+                    3 to DemoCaseClass(3, "3" to DemoCaseClass(3, 3.0)),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+
+            xshould("handle Scala Option datasets") {
+                val caseClasses = listOf(Some(1), Some(2), Some(3))
+                val dataset = caseClasses.toDS()
+                dataset.show()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            xshould("handle Scala Option Option datasets") {
+                val caseClasses = listOf(
+                    Some(Some(1)),
+                    Some(Some(2)),
+                    Some(Some(3)),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            xshould("handle data class Scala Option datasets") {
+                val caseClasses = listOf(
+                    Some(1) to Some(2),
+                    Some(3) to Some(4),
+                    Some(5) to Some(6),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.collectAsList() shouldBe caseClasses
+            }
+
+            xshould("handle Scala Option data class datasets") {
+                val caseClasses = listOf(
+                    Some(1 to 2),
+                    Some(3 to 4),
+                    Some(5 to 6),
+                )
+                val dataset = caseClasses.toDS()
+                dataset.collectAsList() shouldBe caseClasses
+            }
 
             should("collect data classes with doubles correctly") {
                 val ll1 = LonLat(1.0, 2.0)
@@ -195,15 +276,15 @@ class EncodingTest : ShouldSpec({
             }
 
             should("contain all generic primitives with complex schema") {
-                val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
-                val primitives2 = c(2, 2.0, 2.toFloat(), 2.toByte(), LocalDate.now().plusDays(1), false)
+                val primitives = t(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
+                val primitives2 = t(2, 2.0, 2.toFloat(), 2.toByte(), LocalDate.now().plusDays(1), false)
                 val tuples = dsOf(primitives, primitives2).collectAsList()
                 expect(tuples).contains.inAnyOrder.only.values(primitives, primitives2)
             }
 
             should("contain all generic primitives with complex nullable schema") {
-                val primitives = c(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
-                val nulls = c(null, null, null, null, null, null)
+                val primitives = t(1, 1.0, 1.toFloat(), 1.toByte(), LocalDate.now(), true)
+                val nulls = t(null, null, null, null, null, null)
                 val tuples = dsOf(primitives, nulls).collectAsList()
                 expect(tuples).contains.inAnyOrder.only.values(primitives, nulls)
             }
