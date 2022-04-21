@@ -79,20 +79,6 @@ fun <T> T?.toOptional(): Optional<T> = Optional.ofNullable(this)
 fun <T> Optional<T>.toOption(): Option<T> = Option.apply(getOrNull())
 
 /**
- * TODO test
- * Produces a ClassTag[T], which is actually just a casted ClassTag[AnyRef].
- *
- * This method is used to keep ClassTags out of the external Java API, as the Java compiler
- * cannot produce them automatically. While this ClassTag-faking does please the compiler,
- * it can cause problems at runtime if the Scala API relies on ClassTags for correctness.
- *
- * Often, though, a ClassTag[AnyRef] will not lead to incorrect behavior, just worse performance
- * or security issues. For instance, an Array[AnyRef] can hold any type T, but may lose primitive
- * specialization.
- */
-fun <T> fakeClassTag(): ClassTag<T> = ClassTag.AnyRef() as ClassTag<T>
-
-/**
  * @see JavaConverters.asScalaIterator for more information.
  */
 fun <A> Iterator<A>.asScalaIterator(): ScalaIterator<A> = JavaConverters.asScalaIterator<A>(this)
