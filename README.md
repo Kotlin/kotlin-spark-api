@@ -23,6 +23,7 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
     - [Column infix/operator functions](#column-infixoperator-functions)
     - [Overload Resolution Ambiguity](#overload-resolution-ambiguity)
     - [Tuples](#tuples)
+    - [Streaming](#streaming)
 - [Examples](#examples)
 - [Reporting issues/Support](#reporting-issuessupport)
 - [Code of Conduct](#code-of-conduct)
@@ -266,6 +267,48 @@ Finally, all these tuple helper functions are also baked in:
 - `splitAtN()`
 - `map`
 - `cast`
+
+### Streaming
+
+A popular Spark extension is [Spark Streaming](https://spark.apache.org/docs/latest/streaming-programming-guide.html). 
+Of course the Kotlin Spark API also introduces a more Kotlin-esque approach to write your streaming programs.
+There are examples for use with a checkpoint, Kafka and SQL in the [examples module](examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/streaming).
+
+We shall also provide a quick example below:
+```kotlin
+// Automatically provides ssc: JavaStreamingContext which starts and awaits termination or timeout
+withSparkStreaming(batchDuration = Durations.seconds(1), timeout = 10_000) { // this: KSparkStreamingSession
+
+    // create input stream for, for instance, Netcat: `$ nc -lk 9999`
+    val lines: JavaReceiverInputDStream<String> = ssc.socketTextStream("localhost", 9999)
+  
+    // split input stream on space
+    val words: JavaDStream<String> = lines.flatMap { it.split(" ").iterator() }
+
+    // perform action on each formed RDD in the stream
+    words.foreachRDD { rdd: JavaRDD<String>, _: Time ->
+      
+          // to convert the JavaRDD to a Dataset, we need a spark session using the RDD context
+          withSpark(rdd) { // this: KSparkSession
+            val dataframe: Dataset<TestRow> = rdd.map { TestRow(word = it) }.toDS()
+            dataframe
+                .groupByKey { it.word }
+                .count()
+                .show()
+            // +-----+--------+
+            // |  key|count(1)|
+            // +-----+--------+
+            // |hello|       1|
+            // |   is|       1|
+            // |    a|       1|
+            // | this|       1|
+            // | test|       3|
+            // +-----+--------+
+        }
+    }
+}
+```
+
 
 ## Examples
 

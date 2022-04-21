@@ -31,6 +31,11 @@
       <groupId>org.jetbrains.kotlinx.spark</groupId>
       <artifactId>scala-tuples-in-kotlin</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming-kafka-0-10_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+    </dependency>
 
 
     <!-- Provided dependencies -->
@@ -46,6 +51,12 @@
       <version>${spark3.version}</version>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoop.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- Test dependencies -->
     <dependency>
@@ -57,7 +68,19 @@
     <dependency>
       <groupId>io.kotest.extensions</groupId>
       <artifactId>kotest-extensions-allure</artifactId>
-      <version>${kotest-extension-allure.version}</version>
+      <version>${kotest-extensions-allure.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.embeddedkafka</groupId>
+      <artifactId>embedded-kafka_${scala.compat.version}</artifactId>
+      <version>${embedded-kafka.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.kotest.extensions</groupId>
+      <artifactId>kotest-extensions-testcontainers</artifactId>
+      <version>${kotest-extensions-testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -70,6 +93,19 @@
       <groupId>ch.tutteli.atrium</groupId>
       <artifactId>atrium-fluent-en_GB</artifactId>
       <version>${atrium.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-streaming_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+      <classifier>tests</classifier>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-streams-test-utils</artifactId>
+      <version>3.1.0</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -140,6 +176,14 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>8</source>
+          <target>8</target>
+        </configuration>
       </plugin>
 
     </plugins>
