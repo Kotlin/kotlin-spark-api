@@ -100,10 +100,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.kotest.extensions</groupId>
-      <artifactId>kotest-extensions-testcontainers</artifactId>
-      <version>${kotest-extensions-testcontainers.version}</version>
-      <scope>test</scope>
+      <groupId>io.kotest</groupId>
+      <artifactId>kotest-assertions-shared-jvm</artifactId>
+      <version>${kotest.version}</version>
     </dependency>
     <dependency>
       <groupId>com.beust</groupId>
@@ -117,12 +116,12 @@
       <version>${atrium.version}</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>RELEASE</version>
-      <scope>test</scope>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.testng</groupId>-->
+<!--      <artifactId>testng</artifactId>-->
+<!--      <version>RELEASE</version>-->
+<!--      <scope>test</scope>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-streaming_${scala.compat.version}</artifactId>
@@ -208,6 +207,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
         <configuration>
           <source>8</source>
           <target>8</target>
