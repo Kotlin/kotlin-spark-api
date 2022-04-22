@@ -312,7 +312,7 @@ withSparkStreaming(batchDuration = Durations.seconds(1), timeout = 10_000) { // 
 
 ## Examples
 
-For more, check out [examples](https://github.com/JetBrains/kotlin-spark-api/tree/spark-3.2/examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/streaming) module.
+For more, check out [examples](https://github.com/JetBrains/kotlin-spark-api/tree/master/examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples) module.
 To get up and running quickly, check out this [tutorial](https://github.com/JetBrains/kotlin-spark-api/wiki/Quick-Start-Guide). 
 
 ## Reporting issues/Support
