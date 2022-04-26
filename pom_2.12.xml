@@ -19,17 +19,17 @@
   </properties>
 
   <modules>
-    <module>core/3.2/pom_2.12.xml</module>
+    <module>core/3.1/pom_2.12.xml</module>
     <module>scala-tuples-in-kotlin/pom_2.12.xml</module>
-    <module>kotlin-spark-api/3.2/pom_2.12.xml</module>
-    <module>examples/pom-3.2_2.12.xml</module>
+    <module>kotlin-spark-api/3.1/pom_2.12.xml</module>
+    <module>examples/pom-3.1_2.12.xml</module>
   </modules>
 
   <dependencyManagement>
     <dependencies>
       <dependency>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>core-3.2_${scala.compat.version}</artifactId>
+        <artifactId>core-3.1_${scala.compat.version}</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>

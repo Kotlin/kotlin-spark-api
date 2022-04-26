@@ -21,14 +21,20 @@ package org.jetbrains.kotlinx.spark.api
 
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
-import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.jetbrains.kotlinx.spark.api.tuples.component1
+import org.jetbrains.kotlinx.spark.api.tuples.component2
+import org.jetbrains.kotlinx.spark.api.tuples.component3
+import org.jetbrains.kotlinx.spark.api.tuples.t
 import org.jetbrains.kotlinx.spark.extensions.DemoCaseClass
-import scala.*
+import scala.Product
+import scala.Some
+import scala.Tuple2
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
@@ -61,21 +67,25 @@ class EncodingTest : ShouldSpec({
             }
 
             should("handle Duration Datasets") {
-                val dataset = dsOf(Duration.ZERO)
-                dataset.collectAsList() shouldBe listOf(Duration.ZERO)
+                shouldThrow<IllegalArgumentException> {
+                    val dataset = dsOf(Duration.ZERO)
+                    dataset.collectAsList() shouldBe listOf(Duration.ZERO)
+                }
             }
 
             should("handle Period Datasets") {
-                val periods = listOf(Period.ZERO, Period.ofDays(2))
-                val dataset = periods.toDS()
+                shouldThrow<IllegalArgumentException> {
+                    val periods = listOf(Period.ZERO, Period.ofDays(2))
+                    val dataset = periods.toDS()
 
-                dataset.show(false)
+                    dataset.show(false)
 
-                dataset.collectAsList().let {
-                    it[0] shouldBe Period.ZERO
+                    dataset.collectAsList().let {
+                        it[0] shouldBe Period.ZERO
 
-                    // NOTE Spark truncates java.time.Period to months.
-                    it[1] shouldBe Period.ofDays(0)
+                        // NOTE Spark truncates java.time.Period to months.
+                        it[1] shouldBe Period.ofDays(0)
+                    }
                 }
             }
 

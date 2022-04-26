@@ -77,7 +77,7 @@ class KDataTypeWrapper(
 
     override private[ sql ] def getFieldIndex(name: String) = dt.getFieldIndex(name)
 
-    private[ sql ] def findNestedField(fieldNames: Seq[ String ], includeCollections: Boolean, resolver: Resolver) =
+    override private[ sql ] def findNestedField(fieldNames: Seq[ String ], includeCollections: Boolean, resolver: Resolver) =
         dt.findNestedField(fieldNames, includeCollections, resolver)
 
     override private[ sql ] def buildFormattedString(prefix: String, stringConcat: StringUtils.StringConcat, maxDepth: Int): Unit =

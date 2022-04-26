@@ -47,32 +47,27 @@ import java.time.LocalDate
 import java.time.Period
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.Any
-import kotlin.Array
 import kotlin.Boolean
 import kotlin.BooleanArray
 import kotlin.Byte
 import kotlin.ByteArray
 import kotlin.Double
 import kotlin.DoubleArray
-import kotlin.ExperimentalStdlibApi
 import kotlin.Float
 import kotlin.FloatArray
-import kotlin.IllegalArgumentException
 import kotlin.Int
 import kotlin.IntArray
 import kotlin.Long
 import kotlin.LongArray
-import kotlin.OptIn
 import kotlin.Short
 import kotlin.ShortArray
 import kotlin.String
-import kotlin.Suppress
-import kotlin.reflect.*
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
-import kotlin.to
+import kotlin.reflect.typeOf
 
 @JvmField
 val ENCODERS: Map<KClass<*>, Encoder<*>> = mapOf(
@@ -90,9 +85,16 @@ val ENCODERS: Map<KClass<*>, Encoder<*>> = mapOf(
     Timestamp::class to TIMESTAMP(),
     Instant::class to INSTANT(), // 3.0+
     ByteArray::class to BINARY(),
-    Duration::class to DURATION(), // 3.2+
-    Period::class to PERIOD(), // 3.2+
+//    Duration::class to DURATION(), // 3.2+
+//    Period::class to PERIOD(), // 3.2+
 )
+
+private fun checkIfEncoderRequiresNewerVersion(klass: KClass<*>) {
+    when (klass) {
+        Duration::class, Period::class -> throw IllegalArgumentException("$klass is supported in Spark 3.2")
+    }
+}
+
 
 private val knownDataTypes: Map<KClass<out Any>, DataType> = mapOf(
     Byte::class to DataTypes.ByteType,
@@ -129,11 +131,13 @@ inline fun <reified T> encoder(): Encoder<T> = generateEncoder(typeOf<T>(), T::c
  * @see encoder
  */
 @Suppress("UNCHECKED_CAST")
-fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> =
-    when {
+fun <T> generateEncoder(type: KType, cls: KClass<*>): Encoder<T> {
+    checkIfEncoderRequiresNewerVersion(cls)
+    return when {
         isSupportedByKotlinClassEncoder(cls) -> kotlinClassEncoder(schema = memoizedSchema(type), kClass = cls)
         else -> ENCODERS[cls] as? Encoder<T>? ?: bean(cls.java)
     } as Encoder<T>
+}
 
 private fun isSupportedByKotlinClassEncoder(cls: KClass<*>): Boolean =
     when {
