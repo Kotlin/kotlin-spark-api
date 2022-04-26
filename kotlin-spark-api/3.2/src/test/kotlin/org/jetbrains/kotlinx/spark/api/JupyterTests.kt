@@ -48,6 +48,8 @@ class JupyterTests : ShouldSpec({
     context("Jupyter") {
         withRepl {
 
+            exec("""@file:DependsOn("org.apache.spark:spark-repl_2.12:3.2.1")""")
+
             println(currentClasspath.filter { "repl" in it })
 
             // init
