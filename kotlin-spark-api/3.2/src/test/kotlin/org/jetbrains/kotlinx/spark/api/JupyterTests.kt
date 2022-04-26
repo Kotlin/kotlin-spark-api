@@ -148,7 +148,7 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "4, 5, 6"
             }
 
-            should("not render JavaRDDs with custom class") {
+            xshould("not render JavaRDDs with custom class") {
                 @Language("kts")
                 val html = execHtml(
                     """
