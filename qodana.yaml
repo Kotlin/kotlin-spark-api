@@ -6,4 +6,4 @@ exclude:
   - name: All
     paths:
       - scala-tuples-in-kotlin/src/main/kotlin/org/jetbrains/kotlinx/spark/api/tuples
-      - kotlin-spark-api/3.2/src/main/kotlin/org/jetbrains/kotlinx/spark/api/Arities.kt
+      - kotlin-spark-api/3.1/src/main/kotlin/org/jetbrains/kotlinx/spark/api/Arities.kt
