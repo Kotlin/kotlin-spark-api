@@ -16,7 +16,7 @@
             <dependencies>
                 <dependency>
                     <groupId>org.jetbrains.kotlinx.spark</groupId>
-                    <artifactId>examples-3.1_2.12</artifactId>
+                    <artifactId>examples-3.0_2.12</artifactId>
                     <version>${project.parent.version}</version>
                 </dependency>
             </dependencies>

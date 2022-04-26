@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <name>Kotlin Spark API: Scala core for Spark 3.1+ (Scala 2.12)</name>
-  <description>Scala-Spark 3.1+ compatibility layer for Kotlin for Apache Spark</description>
-  <artifactId>core-3.1_2.12</artifactId>
+  <name>Kotlin Spark API: Scala core for Spark 3.0+ (Scala 2.12)</name>
+  <description>Scala-Spark 3.0+ compatibility layer for Kotlin for Apache Spark</description>
+  <artifactId>core-3.0_2.12</artifactId>
   <parent>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
     <artifactId>kotlin-spark-api-parent_2.12</artifactId>
