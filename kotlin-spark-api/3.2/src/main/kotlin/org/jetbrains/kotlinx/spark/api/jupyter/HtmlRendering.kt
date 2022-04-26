@@ -21,124 +21,23 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 
 import kotlinx.html.*
 import kotlinx.html.stream.appendHTML
+import org.apache.spark.SparkException
 import org.apache.spark.api.java.JavaRDDLike
-import org.apache.spark.api.java.function.MapGroupsFunction
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.functions.*
 import org.apache.spark.sql.Dataset
-import org.apache.spark.sql.KeyValueGroupedDataset
 import org.apache.spark.unsafe.array.ByteArrayMethods
-import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlinx.jupyter.api.HTML
-import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
-import org.jetbrains.kotlinx.spark.api.*
-import java.io.InputStreamReader
-
-
-import org.jetbrains.kotlinx.spark.api.*
-import org.apache.spark.sql.functions.*
-import org.apache.spark.*
-import org.apache.spark.sql.*
-import org.apache.spark.api.java.*
-import org.apache.spark.sql.SparkSession.Builder
-import scala.collection.*
-import org.apache.spark.rdd.*
-import org.jetbrains.kotlinx.spark.api.SparkSession
+import org.jetbrains.kotlinx.spark.api.asKotlinIterable
+import org.jetbrains.kotlinx.spark.api.asKotlinIterator
+import org.jetbrains.kotlinx.spark.api.asKotlinList
 import scala.Product
+import java.io.InputStreamReader
 import java.io.Serializable
-import scala.collection.Iterable as ScalaIterable
-import scala.collection.Iterator as ScalaIterator
-
-@OptIn(ExperimentalStdlibApi::class)
-internal class Integration : JupyterIntegration() {
-
-    private val kotlinVersion = "1.6.20"
-    private val scalaCompatVersion = "2.12"
-    private val scalaVersion = "2.12.15"
-    private val spark3Version = "3.2.1"
-
-    override fun Builder.onLoaded() {
-
-        dependencies(
-            "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
-            "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
-            "org.apache.spark:spark-sql_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-streaming_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-mllib_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-sql_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-repl_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-graphx_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-launcher_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-catalyst_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-streaming_$scalaCompatVersion:$spark3Version",
-            "org.apache.spark:spark-core_$scalaCompatVersion:$spark3Version",
-            "org.scala-lang:scala-library:$scalaVersion",
-            "org.scala-lang.modules:scala-xml_$scalaCompatVersion:2.0.1",
-            "org.scala-lang:scala-reflect:$scalaVersion",
-            "org.scala-lang:scala-compiler:$scalaVersion",
-            "commons-io:commons-io:2.11.0",
-        )
-
-        import("org.jetbrains.kotlinx.spark.api.*")
-        import("org.jetbrains.kotlinx.spark.api.tuples.*")
-        import(*(1..22).map { "scala.Tuple$it" }.toTypedArray())
-        import("org.apache.spark.sql.functions.*")
-        import("org.apache.spark.*")
-        import("org.apache.spark.sql.*")
-        import("org.apache.spark.api.java.*")
-        import("scala.collection.Seq")
-        import("org.apache.spark.rdd.*")
-        import("java.io.Serializable")
-
-
-        // starting spark and unwrapping KSparkContext functions
-        onLoaded {
-
-            @Language("kts")
-            val spark = execute(
-                """
-                val spark = org.jetbrains.kotlinx.spark.api.SparkSession
-                    .builder()
-                    .master(SparkConf().get("spark.master", "local[*]"))
-                    .appName("Jupyter")
-                    .getOrCreate()
-                spark
-                """.trimIndent()
-            ).value!! as SparkSession
-
-            @Language("kts")
-            val logLevel = execute("""spark.sparkContext.setLogLevel(SparkLogLevel.ERROR)""")
-
-            @Language("kts")
-            val sc = execute("""val sc = org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)""")
-        }
-
-
-        // Render Dataset
-        render<Dataset<*>> {
-            HTML(it.toHtml())
-        }
-
-        render<RDD<*>> {
-            HTML(it.toJavaRDD().toHtml())
-        }
-
-        render<JavaRDDLike<*, *>> {
-            HTML(it.toHtml())
-        }
-
-//        render<KeyValueGroupedDataset<*, *>> {
-//            HTML(it.toHtml(spark!!))
-//        }
-    }
-}
 
 private fun createHtmlTable(fillTable: TABLE.() -> Unit): String = buildString {
     appendHTML().head {
         style("text/css") {
             unsafe {
                 val resource = "/table.css"
-                val res = Integration::class.java
+                val res = SparkIntegration::class.java
                     .getResourceAsStream(resource) ?: error("Resource '$resource' not found")
                 val readRes = InputStreamReader(res).readText()
                 raw("\n" + readRes)
@@ -150,7 +49,7 @@ private fun createHtmlTable(fillTable: TABLE.() -> Unit): String = buildString {
 }
 
 
-private fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): String = try {
+internal fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): String = try {
     createHtmlTable {
         val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
         val tmpRows = take(numRows).toList()
@@ -174,9 +73,9 @@ private fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): S
                     is BooleanArray -> row.iterator().asSequence().toList().toString()
                     is Array<*> -> row.iterator().asSequence().toList().toString()
                     is Iterable<*> -> row.iterator().asSequence().toList().toString()
-                    is ScalaIterable<*> -> row.asKotlinIterable().iterator().asSequence().toList().toString()
+                    is scala.collection.Iterable<*> -> row.asKotlinIterable().iterator().asSequence().toList().toString()
                     is Iterator<*> -> row.asSequence().toList().toString()
-                    is ScalaIterator<*> -> row.asKotlinIterator().asSequence().toList().toString()
+                    is scala.collection.Iterator<*> -> row.asKotlinIterator().asSequence().toList().toString()
                     is Product -> row.productIterator().asKotlinIterator().asSequence().toList().toString()
                     is Serializable -> row.toString()
                     // maybe others?
@@ -207,7 +106,7 @@ private fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): S
         |Cannot render this RDD of this class.""".trimMargin()
 }
 
-private fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String = createHtmlTable {
+internal fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String = createHtmlTable {
     val numRows = limit.coerceIn(0 until ByteArrayMethods.MAX_ROUNDED_ARRAY_LENGTH)
     val tmpRows = getRows(numRows, truncate).asKotlinList().map { it.asKotlinList() }
 

@@ -31,6 +31,7 @@ import org.jetbrains.kotlinx.jupyter.EvalRequestData
 import org.jetbrains.kotlinx.jupyter.ReplForJupyter
 import org.jetbrains.kotlinx.jupyter.api.Code
 import org.jetbrains.kotlinx.jupyter.api.MimeTypedResult
+import org.jetbrains.kotlinx.jupyter.libraries.buildDependenciesInitCode
 import org.jetbrains.kotlinx.jupyter.repl.EvalResultEx
 import org.jetbrains.kotlinx.jupyter.testkit.ReplProvider
 import kotlin.script.experimental.jvm.util.classpathFromClassloader
@@ -41,29 +42,61 @@ class JupyterTests : ShouldSpec({
     val scriptClasspath = classpathFromClassloader(currentClassLoader).orEmpty()
 
     fun createRepl(): ReplForJupyter = replProvider(scriptClasspath)
-    fun withRepl(action: ReplForJupyter.() -> Unit): Unit = createRepl().action()
+    suspend fun withRepl(action: suspend ReplForJupyter.() -> Unit): Unit = createRepl().action()
+
 
     context("Jupyter") {
-        should("Have spark instance") {
-            withRepl {
+        withRepl {
+
+            println(currentClasspath.filter { "repl" in it })
+
+            // init
+            val _a = exec(
+                """%dumpClassesForSpark"""
+            )
+
+            @Language("kts")
+            val _b = exec(
+                """val spark = org.jetbrains.kotlinx.spark.api.SparkSession.builder().master(SparkConf().get("spark.master", "local[*]")).appName("Jupyter").getOrCreate()"""
+            )
+
+            @Language("kts")
+            val _c = exec(
+                """spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)"""
+            )
+
+            @Language("kts")
+            val _d = exec(
+                """val sc = org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)"""
+            )
+
+            should("Allow functions on local data classes") {
+                @Language("kts")
+                val klass = exec("""data class Test(val a: Int, val b: String)""")
+
+                @Language("kts")
+                val ds = exec("""val ds = spark.dsOf(Test(1, "hi"), Test(2, "something"))""")
+
+                @Language("kts")
+                val filtered = exec("""val filtered = ds.filter { it.a > 1 }""")
+
+                @Language("kts")
+                val filteredShow = exec("""filtered.show()""")
+            }
+
+            should("Have spark instance") {
                 @Language("kts")
                 val spark = exec("""spark""")
-
                 spark as? SparkSession shouldNotBe null
             }
-        }
 
-        should("Have JavaSparkContext instance") {
-            withRepl {
+            should("Have JavaSparkContext instance") {
                 @Language("kts")
                 val sc = exec("""sc""")
-
                 sc as? JavaSparkContext shouldNotBe null
             }
-        }
 
-        should("render Datasets") {
-            withRepl {
+            should("render Datasets") {
                 @Language("kts")
                 val html = execHtml(
                     """
@@ -78,10 +111,8 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "2"
                 html shouldContain "3"
             }
-        }
 
-        should("render JavaRDDs") {
-            withRepl {
+            should("render JavaRDDs") {
                 @Language("kts")
                 val html = execHtml(
                     """
@@ -97,10 +128,8 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "1, 2, 3"
                 html shouldContain "4, 5, 6"
             }
-        }
 
-        should("render JavaRDDs with Arrays") {
-            withRepl {
+            should("render JavaRDDs with Arrays") {
                 @Language("kts")
                 val html = execHtml(
                     """
@@ -116,10 +145,8 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "1, 2, 3"
                 html shouldContain "4, 5, 6"
             }
-        }
 
-        should("not render JavaRDDs with custom class") {
-            withRepl {
+            should("not render JavaRDDs with custom class") {
                 @Language("kts")
                 val html = execHtml(
                     """
@@ -139,12 +166,10 @@ class JupyterTests : ShouldSpec({
                     """.trimIndent()
                 )
                 html shouldContain "Cannot render this RDD of this class."
-
             }
-        }
 
-        should("render JavaPairRDDs") {
-            withRepl {
+
+            should("render JavaPairRDDs") {
                 @Language("kts")
                 val html = execHtml(
                     """
@@ -159,12 +184,9 @@ class JupyterTests : ShouldSpec({
 
                 html shouldContain "1, 2"
                 html shouldContain "3, 4"
-
             }
-        }
 
-        should("render JavaDoubleRDD") {
-            withRepl {
+            should("render JavaDoubleRDD") {
                 @Language("kts")
                 val html = execHtml(
                     """
@@ -178,12 +200,9 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "2.0"
                 html shouldContain "3.0"
                 html shouldContain "4.0"
-
             }
-        }
 
-        should("render Scala RDD") {
-            withRepl {
+            should("render Scala RDD") {
                 @Language("kts")
                 val html = execHtml(
                     """

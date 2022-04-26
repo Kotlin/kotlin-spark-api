@@ -77,11 +77,6 @@
 
     <!-- Test dependencies -->
     <dependency>
-      <groupId>org.jetbrains.kotlinx</groupId>
-      <artifactId>kotlin-jupyter-test-kit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>io.kotest</groupId>
       <artifactId>kotest-runner-junit5-jvm</artifactId>
       <version>${kotest.version}</version>
@@ -100,11 +95,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>io.kotest</groupId>
-      <artifactId>kotest-assertions-shared-jvm</artifactId>
-      <version>${kotest.version}</version>
-    </dependency>
-    <dependency>
       <groupId>com.beust</groupId>
       <artifactId>klaxon</artifactId>
       <version>${klaxon.version}</version>
@@ -116,12 +106,6 @@
       <version>${atrium.version}</version>
       <scope>test</scope>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>org.testng</groupId>-->
-<!--      <artifactId>testng</artifactId>-->
-<!--      <version>RELEASE</version>-->
-<!--      <scope>test</scope>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>org.apache.spark</groupId>
       <artifactId>spark-streaming_${scala.compat.version}</artifactId>
@@ -133,6 +117,11 @@
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-streams-test-utils</artifactId>
       <version>3.1.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlin-jupyter-test-kit</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

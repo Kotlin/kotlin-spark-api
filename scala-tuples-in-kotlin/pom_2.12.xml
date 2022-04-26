@@ -32,11 +32,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.kotest</groupId>
-            <artifactId>kotest-assertions-shared-jvm</artifactId>
-            <version>${kotest.version}</version>
-        </dependency>
-        <dependency>
             <groupId>io.kotest.extensions</groupId>
             <artifactId>kotest-extensions-allure</artifactId>
             <version>${kotest-extensions-allure.version}</version>

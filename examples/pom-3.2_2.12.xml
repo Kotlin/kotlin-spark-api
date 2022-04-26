@@ -15,6 +15,10 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-reflect</artifactId>
+    </dependency><!-- TODO this shouldn't be needed -->
+    <dependency>
       <groupId>org.jetbrains.kotlinx.spark</groupId>
       <artifactId>kotlin-spark-api-3.2</artifactId>
       <version>${project.version}</version>

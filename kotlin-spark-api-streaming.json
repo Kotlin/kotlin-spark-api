@@ -1,0 +1,14 @@
+{
+  "description": "Kotlin for Apache® Spark™",
+  "properties": {
+    "spark": "3.2",
+    "v": "2.0.0"
+  },
+  "link": "https://github.com/JetBrains/kotlin-spark-api",
+  "dependencies": [
+    "org.jetbrains.kotlinx.spark:kotlin-spark-api-$spark:$v"
+  ],
+  "init": [
+    "%dumpClassesForSpark"
+  ]
+}
