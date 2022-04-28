@@ -45,7 +45,6 @@ class JupyterTests : ShouldSpec({
     fun createRepl(): ReplForJupyter = replProvider(scriptClasspath)
     suspend fun withRepl(action: suspend ReplForJupyter.() -> Unit): Unit = createRepl().action()
 
-
     context("Jupyter") {
         withRepl {
 
@@ -126,15 +125,18 @@ class JupyterTests : ShouldSpec({
             }
 
             xshould("not render JavaRDDs with custom class") {
+
                 @Language("kts")
-                val html = execHtml(
-                    """
+                val klass = exec("""
                     data class Test(
                         val longFirstName: String,
                         val second: LongArray,
                         val somethingSpecial: Map<Int, String>,
                     ): Serializable
+                """.trimIndent())
 
+                @Language("kts")
+                val html = execHtml("""
                     val rdd = sc.parallelize(
                         listOf(
                             Test("aaaaaaaaa", longArrayOf(1L, 100000L, 24L), mapOf(1 to "one", 2 to "two")),

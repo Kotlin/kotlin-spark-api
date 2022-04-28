@@ -311,8 +311,11 @@
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>github</id>
+            <name>JetBrains</name>
+            <url>https://github.com/JetBrains/kotlin-spark-api</url>
+<!--            <id>ossrh</id>-->
+<!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
         </snapshotRepository>
     </distributionManagement>
 
