@@ -63,6 +63,11 @@
         <artifactId>spark-sql_${scala.compat.version}</artifactId>
         <version>${spark3.version}</version>
     </dependency>
+    <dependency> <!-- Needed for Jupyter -->
+      <groupId>org.apache.spark</groupId>
+      <artifactId>spark-repl_${scala.compat.version}</artifactId>
+      <version>${spark3.version}</version>
+    </dependency>
     <dependency>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-streaming_${scala.compat.version}</artifactId>

@@ -87,6 +87,24 @@ internal class SparkIntegration : JupyterIntegration() {
         import("org.apache.spark.streaming.*")
 
         // onLoaded is only done for the non-streaming variant of kotlin-spark-api in the json file
+        onLoaded {
+            execute("%dumpClassesForSpark")
+
+            execute("val spark = org.jetbrains.kotlinx.spark.api.SparkSession.builder().master(SparkConf().get(\"spark.master\", \"local[*]\")).appName(\"Jupyter\").config(\"spark.sql.codegen.wholeStage\", false).getOrCreate()")
+            execute("spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)")
+            execute("val sc by lazy { org.apache.spark.api.java.JavaSparkContext(spark.sparkContext) }")
+            execute("println(\"Spark session has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use kotlin-spark-api-streaming` instead.\")")
+
+            execute("inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)")
+            execute("inline fun <reified T> Array<T>.toDS(): Dataset<T> = spark.dsOf(*this)")
+            execute("inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)")
+            execute("inline fun <reified T> RDD<T>.toDS(): Dataset<T> = toDS(spark)")
+            execute("inline fun <reified T> JavaRDDLike<T, *>.toDS(): Dataset<T> = toDS(spark)")
+            execute("inline fun <reified T> RDD<T>.toDF(): Dataset<Row> = toDF(spark)")
+            execute("inline fun <reified T> JavaRDDLike<T, *>.toDF(): Dataset<Row> = toDF(spark)")
+            execute("val udf: UDFRegistration get() = spark.udf()")
+        }
+
 
         // Render Dataset
         render<Dataset<*>> {

@@ -25,6 +25,7 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import jupyter.kotlin.DependsOn
+import org.apache.spark.SparkConf
 import org.apache.spark.api.java.JavaSparkContext
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.EvalRequestData
@@ -48,36 +49,12 @@ class JupyterTests : ShouldSpec({
     context("Jupyter") {
         withRepl {
 
-            exec("""@file:DependsOn("org.apache.spark:spark-repl_2.12:3.2.1")""")
-
-            println(currentClasspath.filter { "repl" in it })
-
-            // init
-            val _a = exec(
-                """%dumpClassesForSpark"""
-            )
-
-            @Language("kts")
-            val _b = exec(
-                """val spark = org.jetbrains.kotlinx.spark.api.SparkSession.builder().master(SparkConf().get("spark.master", "local[*]")).appName("Jupyter").getOrCreate()"""
-            )
-
-            @Language("kts")
-            val _c = exec(
-                """spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)"""
-            )
-
-            @Language("kts")
-            val _d = exec(
-                """val sc = org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)"""
-            )
-
             should("Allow functions on local data classes") {
                 @Language("kts")
                 val klass = exec("""data class Test(val a: Int, val b: String)""")
 
                 @Language("kts")
-                val ds = exec("""val ds = spark.dsOf(Test(1, "hi"), Test(2, "something"))""")
+                val ds = exec("""val ds = dsOf(Test(1, "hi"), Test(2, "something"))""")
 
                 @Language("kts")
                 val filtered = exec("""val filtered = ds.filter { it.a > 1 }""")
@@ -102,7 +79,7 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val html = execHtml(
                     """
-                    val ds = listOf(1, 2, 3).toDS(spark)
+                    val ds = listOf(1, 2, 3).toDS()
                     ds
                     """.trimIndent()
                 )
@@ -170,7 +147,6 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "Cannot render this RDD of this class."
             }
 
-
             should("render JavaPairRDDs") {
                 @Language("kts")
                 val html = execHtml(
@@ -220,6 +196,9 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "1, 2, 3"
                 html shouldContain "4, 5, 6"
             }
+
+            @Language("kts")
+            val _stop = exec("""spark.stop()""")
         }
     }
 })
