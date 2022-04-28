@@ -40,6 +40,7 @@ import java.io.Serializable
 import scala.collection.Iterable as ScalaIterable
 import scala.collection.Iterator as ScalaIterator
 
+@Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
 internal class SparkIntegration : JupyterIntegration() {
 
@@ -72,37 +73,67 @@ internal class SparkIntegration : JupyterIntegration() {
 
         println("SparkIntegration loaded")
 
-        import("org.jetbrains.kotlinx.spark.api.*")
-        import("org.jetbrains.kotlinx.spark.api.tuples.*")
-        import(*(1..22).map { "scala.Tuple$it" }.toTypedArray())
-        import("org.apache.spark.sql.functions.*")
-        import("org.apache.spark.*")
-        import("org.apache.spark.sql.*")
-        import("org.apache.spark.api.java.*")
-        import("scala.collection.Seq")
-        import("org.apache.spark.rdd.*")
-        import("java.io.Serializable")
-        import("org.apache.spark.streaming.api.java.*")
-        import("org.apache.spark.streaming.api.*")
-        import("org.apache.spark.streaming.*")
+        import(
+            "org.jetbrains.kotlinx.spark.api.*",
+            "org.jetbrains.kotlinx.spark.api.tuples.*",
+            *(1..22).map { "scala.Tuple$it" }.toTypedArray(),
+            "org.apache.spark.sql.functions.*",
+            "org.apache.spark.*",
+            "org.apache.spark.sql.*",
+            "org.apache.spark.api.java.*",
+            "scala.collection.Seq",
+            "org.apache.spark.rdd.*",
+            "java.io.Serializable",
+            "org.apache.spark.streaming.api.java.*",
+            "org.apache.spark.streaming.api.*",
+            "org.apache.spark.streaming.*",
+        )
 
         // onLoaded is only done for the non-streaming variant of kotlin-spark-api in the json file
         onLoaded {
-            execute("%dumpClassesForSpark")
+            val _0 = execute("""%dumpClassesForSpark""")
 
-            execute("val spark = org.jetbrains.kotlinx.spark.api.SparkSession.builder().master(SparkConf().get(\"spark.master\", \"local[*]\")).appName(\"Jupyter\").config(\"spark.sql.codegen.wholeStage\", false).getOrCreate()")
-            execute("spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)")
-            execute("val sc by lazy { org.apache.spark.api.java.JavaSparkContext(spark.sparkContext) }")
-            execute("println(\"Spark session has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use kotlin-spark-api-streaming` instead.\")")
+            @Language("kts")
+            val _1 = listOf(
+                """
+                val spark = org.jetbrains.kotlinx.spark.api.SparkSession
+                    .builder()
+                    .master(SparkConf().get("spark.master", "local[*]"))
+                    .appName("Jupyter")
+                    .config("spark.sql.codegen.wholeStage", false)
+                    .getOrCreate()""".trimIndent(),
+                """
+                spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)""".trimIndent(),
+                """
+                val sc by lazy { 
+                    org.apache.spark.api.java.JavaSparkContext(spark.sparkContext) 
+                }""".trimIndent(),
+                """
+                println("Spark session has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use kotlin-spark-api-streaming` instead.")""".trimIndent(),
+                """
+                inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
+                """
+                inline fun <reified T> Array<T>.toDS(): Dataset<T> = spark.dsOf(*this)""".trimIndent(),
+                """
+                inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)""".trimIndent(),
+                """
+                inline fun <reified T> RDD<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
+                """
+                inline fun <reified T> JavaRDDLike<T, *>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
+                """
+                inline fun <reified T> RDD<T>.toDF(): Dataset<Row> = toDF(spark)""".trimIndent(),
+                """
+                inline fun <reified T> JavaRDDLike<T, *>.toDF(): Dataset<Row> = toDF(spark)""".trimIndent(),
+                """
+                val udf: UDFRegistration get() = spark.udf()""".trimIndent(),
+            ).map(::execute)
+        }
 
-            execute("inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)")
-            execute("inline fun <reified T> Array<T>.toDS(): Dataset<T> = spark.dsOf(*this)")
-            execute("inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)")
-            execute("inline fun <reified T> RDD<T>.toDS(): Dataset<T> = toDS(spark)")
-            execute("inline fun <reified T> JavaRDDLike<T, *>.toDS(): Dataset<T> = toDS(spark)")
-            execute("inline fun <reified T> RDD<T>.toDF(): Dataset<Row> = toDF(spark)")
-            execute("inline fun <reified T> JavaRDDLike<T, *>.toDF(): Dataset<Row> = toDF(spark)")
-            execute("val udf: UDFRegistration get() = spark.udf()")
+        onShutdown {
+            @Language("kts")
+            val _0 = execute("""
+                spark.stop()""".trimIndent()
+            )
         }
 
 
