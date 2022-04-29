@@ -101,6 +101,7 @@ internal class SparkIntegration : JupyterIntegration() {
                     .master(SparkConf().get("spark.master", "local[*]"))
                     .appName("Jupyter")
                     .config("spark.sql.codegen.wholeStage", false)
+                    .config("spark.io.compression.codec", "snappy")
                     .getOrCreate()""".trimIndent(),
                 """
                 spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)""".trimIndent(),
