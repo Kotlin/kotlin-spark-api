@@ -26,7 +26,7 @@ jobs:
       - name: Build with Maven
         run: ./mvnw -B package --file pom.xml -Pscala-2.12 -Dkotest.tags="!Kafka"
       - name: Deploy to GH Packages
-        run: mvn --batch-mode deploy
+        run: ./mvnw --batch-mode deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

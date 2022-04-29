@@ -88,22 +88,16 @@ To define a certain version of Spark or the API itself, simply add it like this:
 ```
 
 Inside the notebook a Spark session will be initiated automatically. This can be accessed via the `spark` value.
-`sc: JavaSparkContext` can also be accessed directly.
-
-One limitation of the notebooks is that the `SparkSession` context cannot be applied 
-implicitly to function calls. This means that instead of writing:
-```kotlin
-val ds = listOf(...).toDS()
-```
-you'll need to write:
-```kotlin
-val ds = listOf(...).toDS(spark)
-```
-
-Other than that, the API operates pretty similarly.
+`sc: JavaSparkContext` can also be accessed directly. The API operates pretty similarly.
 
 There is also support for HTML rendering of Datasets and simple (Java)RDDs.
 
+To use Spark Streaming abilities, instead use
+```jupyterpython
+%use kotlin-spark-api-streaming
+```
+This does not start a Spark session right away, meaning you can call `withSparkStreaming(batchDuration) {}` 
+in whichever cell you want.
 
 ## Kotlin for Apache Spark features
 
