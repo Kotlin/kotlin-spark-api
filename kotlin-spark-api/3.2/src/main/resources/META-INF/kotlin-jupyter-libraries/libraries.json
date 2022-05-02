@@ -3,6 +3,9 @@
   "producers": [
     {
       "fqn": "org.jetbrains.kotlinx.spark.api.jupyter.SparkIntegration"
+    },
+    {
+      "fqn": "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration"
     }
   ]
 }
