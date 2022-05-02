@@ -25,20 +25,50 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import jupyter.kotlin.DependsOn
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.apache.spark.SparkConf
 import org.apache.spark.api.java.JavaSparkContext
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.EvalRequestData
 import org.jetbrains.kotlinx.jupyter.ReplForJupyter
+import org.jetbrains.kotlinx.jupyter.ReplForJupyterImpl
 import org.jetbrains.kotlinx.jupyter.api.Code
+import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 import org.jetbrains.kotlinx.jupyter.api.MimeTypedResult
+import org.jetbrains.kotlinx.jupyter.api.libraries.*
+import org.jetbrains.kotlinx.jupyter.dependencies.ResolverConfig
+import org.jetbrains.kotlinx.jupyter.libraries.EmptyResolutionInfoProvider
+import org.jetbrains.kotlinx.jupyter.libraries.LibrariesScanner
+import org.jetbrains.kotlinx.jupyter.libraries.LibraryResolver
 import org.jetbrains.kotlinx.jupyter.libraries.buildDependenciesInitCode
 import org.jetbrains.kotlinx.jupyter.repl.EvalResultEx
 import org.jetbrains.kotlinx.jupyter.testkit.ReplProvider
+import org.jetbrains.kotlinx.jupyter.util.NameAcceptanceRule
+import org.jetbrains.kotlinx.jupyter.util.PatternNameAcceptanceRule
 import kotlin.script.experimental.jvm.util.classpathFromClassloader
 
 class JupyterTests : ShouldSpec({
-    val replProvider: ReplProvider = ReplProvider.withoutLibraryResolution
+    val replProvider = ReplProvider { classpath ->
+        ReplForJupyterImpl(
+            resolutionInfoProvider = EmptyResolutionInfoProvider,
+            scriptClasspath = classpath,
+            isEmbedded = true,
+        ).apply {
+            eval {
+                librariesScanner.addLibrariesFromClassLoader(
+                    classLoader = currentClassLoader,
+                    host = this,
+                    integrationTypeNameRules = listOf(
+                        PatternNameAcceptanceRule(false, "org.jetbrains.kotlinx.spark.api.jupyter.**"),
+                        PatternNameAcceptanceRule(true, "org.jetbrains.kotlinx.spark.api.jupyter.SparkIntegration"),
+                    ),
+                )
+            }
+        }
+    }
+
     val currentClassLoader = DependsOn::class.java.classLoader
     val scriptClasspath = classpathFromClassloader(currentClassLoader).orEmpty()
 
