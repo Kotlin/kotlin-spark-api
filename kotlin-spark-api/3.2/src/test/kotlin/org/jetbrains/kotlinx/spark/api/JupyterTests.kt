@@ -19,34 +19,31 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
+import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import jupyter.kotlin.DependsOn
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import org.apache.spark.SparkConf
 import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.streaming.Duration
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.EvalRequestData
 import org.jetbrains.kotlinx.jupyter.ReplForJupyter
 import org.jetbrains.kotlinx.jupyter.ReplForJupyterImpl
 import org.jetbrains.kotlinx.jupyter.api.Code
-import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 import org.jetbrains.kotlinx.jupyter.api.MimeTypedResult
-import org.jetbrains.kotlinx.jupyter.api.libraries.*
-import org.jetbrains.kotlinx.jupyter.dependencies.ResolverConfig
 import org.jetbrains.kotlinx.jupyter.libraries.EmptyResolutionInfoProvider
-import org.jetbrains.kotlinx.jupyter.libraries.LibrariesScanner
-import org.jetbrains.kotlinx.jupyter.libraries.LibraryResolver
-import org.jetbrains.kotlinx.jupyter.libraries.buildDependenciesInitCode
 import org.jetbrains.kotlinx.jupyter.repl.EvalResultEx
 import org.jetbrains.kotlinx.jupyter.testkit.ReplProvider
-import org.jetbrains.kotlinx.jupyter.util.NameAcceptanceRule
 import org.jetbrains.kotlinx.jupyter.util.PatternNameAcceptanceRule
+import org.jetbrains.kotlinx.spark.api.tuples.X
+import org.jetbrains.kotlinx.spark.api.tuples.component1
+import org.jetbrains.kotlinx.spark.api.tuples.component2
+import java.util.*
 import kotlin.script.experimental.jvm.util.classpathFromClassloader
 
 class JupyterTests : ShouldSpec({
@@ -234,6 +231,82 @@ class JupyterTests : ShouldSpec({
         }
     }
 })
+
+class JupyterStreamingTests : ShouldSpec({
+    val replProvider = ReplProvider { classpath ->
+        ReplForJupyterImpl(
+            resolutionInfoProvider = EmptyResolutionInfoProvider,
+            scriptClasspath = classpath,
+            isEmbedded = true,
+        ).apply {
+            eval {
+                librariesScanner.addLibrariesFromClassLoader(
+                    classLoader = currentClassLoader,
+                    host = this,
+                    integrationTypeNameRules = listOf(
+                        PatternNameAcceptanceRule(false, "org.jetbrains.kotlinx.spark.api.jupyter.**"),
+                        PatternNameAcceptanceRule(true,
+                            "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration"),
+                    ),
+                )
+            }
+        }
+    }
+
+    val currentClassLoader = DependsOn::class.java.classLoader
+    val scriptClasspath = classpathFromClassloader(currentClassLoader).orEmpty()
+
+    fun createRepl(): ReplForJupyter = replProvider(scriptClasspath)
+    suspend fun withRepl(action: suspend ReplForJupyter.() -> Unit): Unit = createRepl().action()
+
+    context("Jupyter") {
+        withRepl {
+
+            should("Not have spark instance") {
+                shouldThrowAny {
+                    @Language("kts")
+                    val spark = exec("""spark""")
+                    Unit
+                }
+            }
+
+            should("Not have sc instance") {
+                shouldThrowAny {
+                    @Language("kts")
+                    val sc = exec("""sc""")
+                    Unit
+                }
+            }
+
+            should("stream") {
+                val input = listOf("aaa", "bbb", "aaa", "ccc")
+                val counter = Counter(0)
+
+                withSparkStreaming(Duration(10), timeout = 1000) {
+
+                    val (counterBroadcast, queue) = withSpark(ssc) {
+                        spark.broadcast(counter) X LinkedList(listOf(sc.parallelize(input)))
+                    }
+
+                    val inputStream = ssc.queueStream(queue)
+
+                    inputStream.foreachRDD { rdd, _ ->
+                        withSpark(rdd) {
+                            rdd.toDS().forEach {
+                                it shouldBeIn input
+                                counterBroadcast.value.value++
+                            }
+                        }
+                    }
+                }
+
+                counter.value shouldBe input.size
+            }
+
+        }
+    }
+})
+
 
 private fun ReplForJupyter.execEx(code: Code): EvalResultEx = evalEx(EvalRequestData(code))
 

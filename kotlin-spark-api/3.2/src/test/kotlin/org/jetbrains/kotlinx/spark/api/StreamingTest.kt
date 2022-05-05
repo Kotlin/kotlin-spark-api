@@ -49,7 +49,6 @@ class StreamingTest : ShouldSpec({
     context("streaming") {
 
         should("stream") {
-
             val input = listOf("aaa", "bbb", "aaa", "ccc")
             val counter = Counter(0)
 
@@ -72,7 +71,6 @@ class StreamingTest : ShouldSpec({
             }
 
             counter.value shouldBe input.size
-
         }
 
         should("Work with checkpointpath") {

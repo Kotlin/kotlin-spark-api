@@ -58,8 +58,6 @@ abstract class Integration : JupyterIntegration() {
             "commons-io:commons-io:2.11.0",
         )
 
-        println("SparkIntegration loaded")
-
         import(
             "org.jetbrains.kotlinx.spark.api.*",
             "org.jetbrains.kotlinx.spark.api.tuples.*",
