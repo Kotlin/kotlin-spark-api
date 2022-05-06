@@ -24,7 +24,7 @@
     <module>scala-tuples-in-kotlin/pom_2.12.xml</module>
     <module>kotlin-spark-api/3.2/pom_2.12.xml</module>
     <module>examples/pom-3.2_2.12.xml</module>
-    <module>jupyter/pom.xml</module>
+    <module>jupyter</module>
   </modules>
 
   <dependencyManagement>
