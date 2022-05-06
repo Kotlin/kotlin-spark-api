@@ -20,7 +20,6 @@
         <kotlin-jupyter-api.version>0.11.0-83</kotlin-jupyter-api.version>
         <kotlinx.html.version>0.7.3</kotlinx.html.version>
         <hadoop.version>3.3.1</hadoop.version>
-<!--        <junit.version>5.8.2</junit.version>-->
 
         <!-- Plugin versions -->
         <allure-maven.version>2.10.0</allure-maven.version>
@@ -67,13 +66,6 @@
                 <artifactId>kotlin-jupyter-test-kit</artifactId>
                 <version>${kotlin-jupyter-api.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>org.junit</groupId>-->
-<!--                <artifactId>junit-bom</artifactId>-->
-<!--                <version>${junit.version}</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
 

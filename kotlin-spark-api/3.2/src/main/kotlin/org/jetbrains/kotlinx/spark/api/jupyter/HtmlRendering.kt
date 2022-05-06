@@ -84,14 +84,12 @@ internal fun <T> JavaRDDLike<T, *>.toHtml(limit: Int = 20, truncate: Int = 30): 
                     else -> row.toString()
                 }
 
-                +string.let {
-                    if (truncate > 0 && it.length > truncate) {
-                        // do not show ellipses for strings shorter than 4 characters.
-                        if (truncate < 4) it.substring(0, truncate)
-                        else it.substring(0, truncate - 3) + "..."
-                    } else {
-                        it
-                    }
+                +if (truncate > 0 && string.length > truncate) {
+                    // do not show ellipses for strings shorter than 4 characters.
+                    if (truncate < 4) string.substring(0, truncate)
+                    else string.substring(0, truncate - 3) + "..."
+                } else {
+                    string
                 }
             }
         }
@@ -115,15 +113,14 @@ internal fun <T> Dataset<T>.toHtml(limit: Int = 20, truncate: Int = 30): String 
 
     tr {
         for (header in rows.first()) th {
-            +header.let {
-                if (truncate > 0 && it.length > truncate) {
-                    // do not show ellipses for strings shorter than 4 characters.
-                    if (truncate < 4) it.substring(0, truncate)
-                    else it.substring(0, truncate - 3) + "..."
-                } else {
-                    it
-                }
+            +if (truncate > 0 && header.length > truncate) {
+                // do not show ellipses for strings shorter than 4 characters.
+                if (truncate < 4) header.substring(0, truncate)
+                else header.substring(0, truncate - 3) + "..."
+            } else {
+                header
             }
+
         }
     }
 

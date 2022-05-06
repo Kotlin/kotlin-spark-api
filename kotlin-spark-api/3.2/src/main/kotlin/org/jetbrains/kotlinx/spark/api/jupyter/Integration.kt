@@ -22,7 +22,6 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
-import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.HTML
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration

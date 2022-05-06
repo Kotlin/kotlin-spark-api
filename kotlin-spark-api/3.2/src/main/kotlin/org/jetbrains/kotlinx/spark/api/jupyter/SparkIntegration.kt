@@ -19,28 +19,9 @@
  */
 package org.jetbrains.kotlinx.spark.api.jupyter
 
-import kotlinx.html.*
-import kotlinx.html.stream.appendHTML
-import org.apache.spark.api.java.JavaRDDLike
-import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.Dataset
-import org.apache.spark.unsafe.array.ByteArrayMethods
+
 import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlinx.jupyter.api.HTML
-import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
-import org.jetbrains.kotlinx.spark.api.*
-import java.io.InputStreamReader
-
-
-import org.apache.spark.*
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
-import scala.collection.*
-import org.jetbrains.kotlinx.spark.api.SparkSession
-import scala.Product
-import java.io.Serializable
-import java.util.Random
-import scala.collection.Iterable as ScalaIterable
-import scala.collection.Iterator as ScalaIterator
 
 /**
  * %use kotlin-spark-api
