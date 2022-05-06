@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-package org.jetbrains.kotlinx.spark.api
+package org.jetbrains.kotlinx.spark.api.jupyter
 
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.ShouldSpec
@@ -40,9 +40,10 @@ import org.jetbrains.kotlinx.jupyter.libraries.EmptyResolutionInfoProvider
 import org.jetbrains.kotlinx.jupyter.repl.EvalResultEx
 import org.jetbrains.kotlinx.jupyter.testkit.ReplProvider
 import org.jetbrains.kotlinx.jupyter.util.PatternNameAcceptanceRule
-import org.jetbrains.kotlinx.spark.api.tuples.X
-import org.jetbrains.kotlinx.spark.api.tuples.component1
-import org.jetbrains.kotlinx.spark.api.tuples.component2
+import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.jetbrains.kotlinx.spark.api.*
+import scala.Tuple2
+import java.io.Serializable
 import java.util.*
 import kotlin.script.experimental.jvm.util.classpathFromClassloader
 
@@ -151,7 +152,7 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "4, 5, 6"
             }
 
-            xshould("not render JavaRDDs with custom class") {
+            should("render JavaRDDs with custom class") {
 
                 @Language("kts")
                 val klass = exec("""
@@ -173,7 +174,7 @@ class JupyterTests : ShouldSpec({
                     rdd
                     """.trimIndent()
                 )
-                html shouldContain "Cannot render this RDD of this class."
+                html shouldContain "Test(longFirstName=aaaaaaaa..."
             }
 
             should("render JavaPairRDDs") {
@@ -327,3 +328,5 @@ private fun ReplForJupyter.execHtml(code: Code): String {
     html.shouldNotBeNull()
     return html
 }
+
+class Counter(@Volatile var value: Int) : Serializable

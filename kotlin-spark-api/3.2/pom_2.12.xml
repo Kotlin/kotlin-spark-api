@@ -14,18 +14,6 @@
   </parent>
   <packaging>jar</packaging>
 
-  <repositories>
-    <repository>
-      <id>kotlinx-html</id>
-      <name>kotlinx-html</name>
-      <url>https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven</url>
-    </repository>
-    <repository>
-      <id>kotlin</id>
-      <name>kotlin</name>
-      <url>https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev</url>
-    </repository>
-  </repositories>
 
   <dependencies>
     <dependency>
@@ -50,23 +38,9 @@
       <version>${spark3.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.jetbrains.kotlinx</groupId>
-      <artifactId>kotlinx-html-jvm</artifactId>
-      <version>${kotlinx.html.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlinx</groupId>
-      <artifactId>kotlin-jupyter-api</artifactId>
-    </dependency>
-    <dependency>
         <groupId>org.apache.spark</groupId>
         <artifactId>spark-sql_${scala.compat.version}</artifactId>
         <version>${spark3.version}</version>
-    </dependency>
-    <dependency> <!-- Needed for Jupyter -->
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-repl_${scala.compat.version}</artifactId>
-      <version>${spark3.version}</version>
     </dependency>
     <dependency>
         <groupId>org.apache.spark</groupId>
@@ -122,11 +96,6 @@
       <groupId>org.apache.kafka</groupId>
       <artifactId>kafka-streams-test-utils</artifactId>
       <version>3.1.0</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlinx</groupId>
-      <artifactId>kotlin-jupyter-test-kit</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
