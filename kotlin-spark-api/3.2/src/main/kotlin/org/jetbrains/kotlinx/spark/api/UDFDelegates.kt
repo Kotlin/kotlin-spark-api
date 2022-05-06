@@ -10,6 +10,8 @@ import kotlin.reflect.KProperty
  *     myFunction()
  * }
  * ```
+ * NOTE: `myUdfFunctionName` MUST be accessed in order for the UDF to get registered.
+ * If you don't want or need that, use `udf.register("myUdfFunctionName") { ...` instead.
  */
 class UDFWrapperBuilderDelegate<UDF>(val getValue: (name: String) -> UDF) {
     operator fun getValue(
