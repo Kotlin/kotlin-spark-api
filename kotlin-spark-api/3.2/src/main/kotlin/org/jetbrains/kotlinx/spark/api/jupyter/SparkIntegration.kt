@@ -38,6 +38,7 @@ import scala.collection.*
 import org.jetbrains.kotlinx.spark.api.SparkSession
 import scala.Product
 import java.io.Serializable
+import java.util.Random
 import scala.collection.Iterable as ScalaIterable
 import scala.collection.Iterator as ScalaIterator
 
