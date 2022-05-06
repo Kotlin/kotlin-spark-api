@@ -19,8 +19,10 @@
  */
 package org.jetbrains.kotlinx.spark.api
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.Dataset
 import org.junit.jupiter.api.assertThrows
 import scala.collection.JavaConverters
@@ -115,7 +117,22 @@ class UDFRegisterTest : ShouldSpec({
                     val testData = dsOf(listOf("a", "b"))
                     val newData = testData.withColumn("text", stringArrayMerger(testData.col("value")))
 
-                    newData.select("text").collectAsList().zip(newData.select("value").collectAsList())
+                    (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
+                        .forEach { (text, textArray) ->
+                            assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
+                        }
+                }
+
+                should("succeed call UDF-Wrapper by delegate in withColumn") {
+
+                    val stringArrayMerger by udf.register { it: WrappedArray<String> ->
+                        it.asIterable().joinToString(" ")
+                    }
+
+                    val testData = dsOf(listOf("a", "b"))
+                    val newData = testData.withColumn("text", stringArrayMerger(testData("value")))
+
+                    (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
                             assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
                         }
@@ -128,13 +145,13 @@ class UDFRegisterTest : ShouldSpec({
                         NormalClass(name = "b", age = 20)
                     ).toDS()
 
-                    val udfWrapper = udf.register<String, Int, String>("nameConcatAge") { name, age ->
+                    val nameConcatAge by udf.register { name: String, age: Int ->
                         "$name-$age"
                     }
 
                     val collectAsList = dataset.withColumn(
                         "nameAndAge",
-                        udfWrapper(dataset.col("name"), dataset.col("age"))
+                        nameConcatAge(dataset.col("name"), dataset.col("age"))
                     )
                         .select("nameAndAge")
                         .collectAsList()
@@ -153,6 +170,25 @@ class UDFRegisterTest : ShouldSpec({
                         NormalClass(b, a)
                     }
                     spark.sql("select toNormalClass(first, second) from test2").show()
+                }
+
+                should("not return NormalClass using unaccessed by delegate") {
+                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
+                    val toNormalClass2 by udf.register { a: String, b: Int ->
+                        NormalClass(b, a)
+                    }
+                    shouldThrow<AnalysisException> { // toNormalClass2 is never accessed, so the delegate getValue function is not executed
+                        spark.sql("select toNormalClass2(first, second) from test2").show()
+                    }
+                }
+
+                should("return NormalClass using accessed by delegate") {
+                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
+                    val toNormalClass3 by udf.register { a: String, b: Int ->
+                        NormalClass(b, a)
+                    }
+                    val a = toNormalClass3
+                    spark.sql("select toNormalClass3(first, second) from test2").show()
                 }
             }
         }
