@@ -3,7 +3,7 @@ name: Generate and publish docs
 on:
   push:
     branches:
-      - "jupyter-test" # TODO change to spark-3.2
+      - "spark-3.2"
 
 jobs:
   build-and-deploy:
