@@ -31,7 +31,7 @@ abstract class Integration : JupyterIntegration() {
     private val kotlinVersion = "1.6.21"
     private val scalaCompatVersion = "2.12"
     private val scalaVersion = "2.12.15"
-    private val spark3Version = "3.1.3"
+    private val spark3Version = "3.0.3"
 
     abstract fun KotlinKernelHost.onLoaded()
 
