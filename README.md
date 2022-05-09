@@ -1,4 +1,4 @@
-# Kotlin for Apache® Spark™ [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.jetbrains.kotlinx.spark%20AND%20v:1.0.2) [![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/kotlin-spark-api](https://badges.gitter.im/JetBrains/kotlin-spark-api.svg)](https://gitter.im/JetBrains/kotlin-spark-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+# Kotlin for Apache® Spark™ [![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:org.jetbrains.kotlinx.spark%20AND%20v:1.1.0) [![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/kotlin-spark-api](https://badges.gitter.im/JetBrains/kotlin-spark-api.svg)](https://gitter.im/JetBrains/kotlin-spark-api?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 
 Your next API to work with  [Apache Spark](https://spark.apache.org/). 
@@ -31,12 +31,13 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 ## Supported versions of Apache Spark
 
-| Apache Spark | Scala |  Kotlin for Apache Spark        |
+| Apache Spark | Scala |     Kotlin for Apache Spark     |
 |:------------:|:-----:|:-------------------------------:|
-| 3.0.0+       | 2.12  | kotlin-spark-api-3.0:1.0.2    |
-| 2.4.1+       | 2.12  | kotlin-spark-api-2.4_2.12:1.0.2 |
-| 2.4.1+       | 2.11  | kotlin-spark-api-2.4_2.11:1.0.2 |
-| 3.2.0+       | 2.12  | kotlin-spark-api-3.2:1.0.3 |
+|    3.2.1+    | 2.12  |   kotlin-spark-api-3.2:1.1.0    |
+|    3.1.3+    | 2.12  |   kotlin-spark-api-3.1:1.1.0    |
+|    3.0.3+    | 2.12  |   kotlin-spark-api-3.0:1.1.0    |
+|    2.4.1+    | 2.12  | kotlin-spark-api-2.4_2.12:1.0.2 |
+|    2.4.1+    | 2.11  | kotlin-spark-api-2.4_2.11:1.0.2 |
 
 ## Releases
 
@@ -44,7 +45,7 @@ The list of Kotlin for Apache Spark releases is available [here](https://github.
 The Kotlin for Spark artifacts adhere to the following convention:
 `[Apache Spark version]_[Scala core version]:[Kotlin for Apache Spark API version]` 
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:"org.jetbrains.kotlinx.spark"%20AND%20a:"kotlin-spark-api-3.0")
+[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:"org.jetbrains.kotlinx.spark"%20AND%20a:"kotlin-spark-api-3.2")
 
 ## How to configure Kotlin for Apache Spark in your project
 
@@ -55,7 +56,7 @@ Here's an example `pom.xml`:
 ```xml
 <dependency>
   <groupId>org.jetbrains.kotlinx.spark</groupId>
-  <artifactId>kotlin-spark-api-3.0</artifactId>
+  <artifactId>kotlin-spark-api-3.2</artifactId>
   <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
@@ -84,7 +85,7 @@ To it, simply add
 to the top of your notebook. This will get the latest version of the API, together with the latest version of Spark.
 To define a certain version of Spark or the API itself, simply add it like this:
 ```jupyterpython
-%use kotlin-spark-api(spark=3.2, version=1.0.4)
+%use kotlin-spark-api(spark=3.2, v=1.1.0)
 ```
 
 Inside the notebook a Spark session will be initiated automatically. This can be accessed via the `spark` value.
@@ -134,8 +135,8 @@ Do not use this when running the Kotlin Spark API from a Jupyter notebook.
 ```kotlin
 withSpark {
     dsOf(1, 2)
-            .map { it X it } // creates Tuple2<Int, Int>
-            .show()
+        .map { it X it } // creates Tuple2<Int, Int>
+        .show()
 }
 ```
 
@@ -152,14 +153,14 @@ To solve these problems we've added `withCached` function
 ```kotlin
 withSpark {
     dsOf(1, 2, 3, 4, 5)
-            .map { tupleOf(it, it + 2) }
-            .withCached {
-                showDS()
-
-                filter { it._1 % 2 == 0 }.showDS()
-            }
-            .map { tupleOf(it._1, it._2, (it._1 + it._2) * 2) }
-            .show()
+        .map { tupleOf(it, it + 2) }
+        .withCached {
+            showDS()
+  
+            filter { it._1 % 2 == 0 }.showDS()
+        }
+        .map { tupleOf(it._1, it._2, (it._1 + it._2) * 2) }
+        .show()
 }
 ```
 
