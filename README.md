@@ -92,6 +92,8 @@ Inside the notebook a Spark session will be initiated automatically. This can be
 `sc: JavaSparkContext` can also be accessed directly. The API operates pretty similarly.
 
 There is also support for HTML rendering of Datasets and simple (Java)RDDs.
+Check out the [example](examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/JupyterExample.ipynb) as well.
+
 
 To use Spark Streaming abilities, instead use
 ```jupyterpython
@@ -99,6 +101,7 @@ To use Spark Streaming abilities, instead use
 ```
 This does not start a Spark session right away, meaning you can call `withSparkStreaming(batchDuration) {}` 
 in whichever cell you want.
+Check out the [example](examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/streaming/JupyterStreamingExample.ipynb).
 
 ## Kotlin for Apache Spark features
 
