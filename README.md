@@ -80,12 +80,12 @@ The Kotlin Spark API also supports Kotlin Jupyter notebooks.
 To it, simply add
 
 ```jupyterpython
-%use kotlin-spark-api
+%use spark
 ```
 to the top of your notebook. This will get the latest version of the API, together with the latest version of Spark.
 To define a certain version of Spark or the API itself, simply add it like this:
 ```jupyterpython
-%use kotlin-spark-api(spark=3.2, v=1.1.0)
+%use spark(spark=3.2, v=1.1.0)
 ```
 
 Inside the notebook a Spark session will be initiated automatically. This can be accessed via the `spark` value.
@@ -95,7 +95,7 @@ There is also support for HTML rendering of Datasets and simple (Java)RDDs.
 
 To use Spark Streaming abilities, instead use
 ```jupyterpython
-%use kotlin-spark-api-streaming
+%use spark-streaming
 ```
 This does not start a Spark session right away, meaning you can call `withSparkStreaming(batchDuration) {}` 
 in whichever cell you want.

@@ -42,7 +42,7 @@ import scala.collection.Iterable as ScalaIterable
 import scala.collection.Iterator as ScalaIterator
 
 /**
- * %use kotlin-spark-api-streaming
+ * %use spark-streaming
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
@@ -54,7 +54,7 @@ internal class SparkStreamingIntegration : Integration() {
         @Language("kts")
         val _1 = listOf(
             """
-                println("To start a spark streaming session, simply use `withSparkStreaming { }` inside a cell. To use Spark normally, use `withSpark { }` in a cell, or use `%use kotlin-spark-api` to start a Spark session for the whole notebook.")""".trimIndent(),
+                println("To start a spark streaming session, simply use `withSparkStreaming { }` inside a cell. To use Spark normally, use `withSpark { }` in a cell, or use `%use spark` to start a Spark session for the whole notebook.")""".trimIndent(),
         ).map(::execute)
     }
 }
