@@ -1,30 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Kotlin Spark API: Scala Tuples in Kotlin</name>
-    <description>Scala Tuple helper functions for kotlin</description>
-    <artifactId>scala-tuples-in-kotlin</artifactId>
+    <name>Kotlin Spark API: Jupyter integration for Spark 3.1+ (Scala 2.12)</name>
+    <artifactId>kotlin-spark-api-jupyter-3.1</artifactId>
+    <description>Jupyter integration</description>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
         <artifactId>kotlin-spark-api-parent_2.12</artifactId>
         <version>1.0.4-SNAPSHOT</version>
         <relativePath>../pom_2.12.xml</relativePath>
     </parent>
+    <packaging>jar</packaging>
+
+
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>kotlinx-html</id>
+            <name>kotlinx-html</name>
+            <url>https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven</url>
+        </repository>
+        <repository>
+            <id>kotlin</id>
+            <name>kotlin</name>
+            <url>https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
-            <groupId>org.scala-lang</groupId>
-            <artifactId>scala-library</artifactId>
-            <version>${scala.version}</version>
+            <groupId>org.jetbrains.kotlinx.spark</groupId>
+            <artifactId>kotlin-spark-api-3.1</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-html-jvm</artifactId>
+            <version>${kotlinx.html.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.compat.version}</artifactId>
+            <version>${spark3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-repl_${scala.compat.version}</artifactId>
+            <version>${spark3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming_${scala.compat.version}</artifactId>
+            <version>${spark3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlin-jupyter-api</artifactId>
+            <version>${kotlin-jupyter-api.version}</version>
         </dependency>
 
-        <!-- Test dependencies -->
+        <!-- Testing -->
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
@@ -38,22 +86,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.beust</groupId>
-            <artifactId>klaxon</artifactId>
-            <version>${klaxon.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>ch.tutteli.atrium</groupId>
-            <artifactId>atrium-fluent-en_GB</artifactId>
-            <version>${atrium.version}</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-test</artifactId>
-            <version>${kotlin.version}</version>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlin-jupyter-test-kit</artifactId>
+            <version>${kotlin-jupyter-api.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -63,57 +98,24 @@
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
         <directory>target/${scala.compat.version}</directory>
         <plugins>
-
-            <plugin>
-                <groupId>org.jetbrains.dokka</groupId>
-                <artifactId>dokka-maven-plugin</artifactId>
-                <version>${dokka.version}</version>
-                <configuration>
-                    <jdkVersion>8</jdkVersion>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>dokka</id>
-                        <goals>
-                            <goal>dokka</goal>
-                        </goals>
-                        <phase>pre-site</phase>
-                    </execution>
-                    <execution>
-                        <id>javadocjar</id>
-                        <goals>
-                            <goal>javadocJar</goal>
-                        </goals>
-                        <phase>pre-integration-test</phase>
-                    </execution>
-                </executions>
-            </plugin>
-
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
-                <version>${kotlin.version}</version>
                 <executions>
                     <execution>
                         <id>compile</id>
-                        <phase>compile</phase>
                         <goals>
                             <goal>compile</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>test-compile</id>
-                        <phase>test-compile</phase>
                         <goals>
                             <goal>test-compile</goal>
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <jvmTarget>1.8</jvmTarget>
-                </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -129,7 +131,6 @@
                     </archive>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
@@ -137,7 +138,6 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -145,7 +145,6 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
-
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -153,7 +152,15 @@
                     <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
-
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>9</source>
+                    <target>9</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>

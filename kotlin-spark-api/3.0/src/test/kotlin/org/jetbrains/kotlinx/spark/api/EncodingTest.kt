@@ -57,7 +57,11 @@ class EncodingTest : ShouldSpec({
             should("handle Instant Datasets") {
                 val instants = listOf(Instant.now(), Instant.now())
                 val dataset: Dataset<Instant> = instants.toDS()
-                dataset.collectAsList() shouldBe instants
+                dataset.collectAsList().let { (first, second) ->
+                    val (a, b) = instants
+                    a.compareTo(first) shouldBe 0
+                    b.compareTo(second) shouldBe 0
+                }
             }
 
             should("handle Timestamp Datasets") {
@@ -117,7 +121,11 @@ class EncodingTest : ShouldSpec({
             should("be able to serialize Instant") {
                 val instantPair = Instant.now() to Instant.now()
                 val dataset = dsOf(instantPair)
-                dataset.collectAsList() shouldBe listOf(instantPair)
+                dataset.collectAsList().single().let { (first, second) ->
+                    val (a, b) = instantPair
+                    a.compareTo(first) shouldBe 0
+                    b.compareTo(second) shouldBe 0
+                }
             }
 
             should("be able to serialize Date") {

@@ -21,15 +21,14 @@ package org.jetbrains.kotlinx.spark.api.tuples
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.matchers.collections.shouldNotBeIn
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.jetbrains.kotlinx.spark.api.*
 import scala.Tuple3
-import io.kotest.matchers.types.shouldBeInstanceOf
 import scala.Tuple1
 import scala.Tuple2
+import kotlin.reflect.typeOf
 
 @Suppress("ShouldBeInstanceOfInspection", "RedundantLambdaArrow", "USELESS_IS_CHECK")
 class TuplesTest : ShouldSpec({
@@ -159,7 +158,7 @@ class TuplesTest : ShouldSpec({
             tupleOf(1, 2, 3).toTriple() shouldBe Triple(1, 2, 3)
 
             tupleOf(1, 2, 3, 4, 5, 6, 7)[1..3].let {
-                it.shouldBeInstanceOf<List<Int>>()
+                (it is List<Int>) shouldBe true
                 it.containsAll(listOf(2, 3, 4)) shouldBe true
             }
             tupleOf(1, 1, 2)[1..2] shouldBe tupleOf(1, 2, 2)[0..1]
