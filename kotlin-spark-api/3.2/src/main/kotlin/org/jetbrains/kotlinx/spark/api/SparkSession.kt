@@ -66,6 +66,9 @@ class KSparkSession(val spark: SparkSession) {
     /** Utility method to create dataset from vararg arguments. */
     inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)
 
+    /** Creates new empty dataset of type [T]. */
+    inline fun <reified T> emptyDataset(): Dataset<T> = spark.emptyDataset(encoder<T>())
+
     /** Utility method to create dataset from Scala [RDD]. */
     inline fun <reified T> RDD<T>.toDS(): Dataset<T> = toDS(spark)
 

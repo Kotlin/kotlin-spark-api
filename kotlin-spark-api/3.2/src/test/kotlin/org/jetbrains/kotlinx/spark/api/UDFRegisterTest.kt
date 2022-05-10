@@ -20,13 +20,19 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNot
+import io.kotest.matchers.shouldNotBe
 import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions.col
+import org.apache.spark.sql.functions.udf
 import org.junit.jupiter.api.assertThrows
 import scala.collection.JavaConverters
 import scala.collection.mutable.WrappedArray
+import kotlin.random.Random
 
 @Suppress("unused")
 private fun <T> scala.collection.Iterable<T>.asIterable(): Iterable<T> = JavaConverters.asJavaIterable(this)
@@ -161,6 +167,79 @@ class UDFRegisterTest : ShouldSpec({
             }
         }
 
+        context("non deterministic") {
+            withSpark(logLevel = SparkLogLevel.DEBUG) {
+                should("allow udfs to be non deterministic") {
+                    udf.register("random", asNondeterministic = true) { ->
+                        Random.nextInt()
+                    }
+
+                    val a = spark.sql("SELECT random()")
+                        .selectTyped(col("random()").`as`<Int>())
+                        .takeAsList(1)
+                        .single()
+                    val b = spark.sql("SELECT random()")
+                        .selectTyped(col("random()").`as`<Int>())
+                        .takeAsList(1)
+                        .single()
+
+                    a shouldNotBe b
+                }
+
+                should("allow udfs to be non deterministic using delegate") {
+                    val random by udf.register(asNondeterministic = true) { ->
+                        Random.nextInt()
+                    }
+
+                    val a = dsOf(1)
+                        .selectTyped(random().`as`<Int>())
+                        .takeAsList(1)
+                        .single()
+                    val b = dsOf(1)
+                        .selectTyped(random().`as`<Int>())
+                        .takeAsList(1)
+                        .single()
+
+                    a shouldNotBe b
+                }
+            }
+        }
+
+        context("non nullable") {
+            withSpark(logLevel = SparkLogLevel.DEBUG) {
+
+                should("allow udfs to be non nullable") {
+                    udf.register<Int?>("test", asNonNullable = true) { ->
+                        null
+                    }
+                    shouldThrowAny {
+                        spark.sql("SELECT test()")
+                            .selectTyped(col("test()").`as`<Int>())
+                            .showDS()
+                            .takeAsList(1)
+                            .single()
+                    }
+                }
+
+                should("allow udfs to be non nullable using delegate") {
+                    val test by udf.register<Int?>(asNonNullable = true) { ->
+                        null
+                    }
+
+                    // access it once
+                    test()
+
+                    shouldThrowAny {
+                        spark.sql("SELECT test()")
+                            .selectTyped(col("test()").`as`<Int>())
+                            .showDS()
+                            .takeAsList(1)
+                            .single()
+                    }
+                }
+            }
+        }
+
         context("udf return data class") {
             withSpark(logLevel = SparkLogLevel.DEBUG) {
                 should("return NormalClass") {
@@ -192,6 +271,7 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("return NormalClass using accessed by multiple delegates") {
                     listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
+
                     val toNormalClass = udf.register { a: String, b: Int ->
                         NormalClass(b, a)
                     }
