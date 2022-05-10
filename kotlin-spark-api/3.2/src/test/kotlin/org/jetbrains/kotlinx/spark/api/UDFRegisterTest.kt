@@ -138,7 +138,6 @@ class UDFRegisterTest : ShouldSpec({
                         }
                 }
 
-
                 should("succeed in dataset") {
                     val dataset: Dataset<NormalClass> = listOf(
                         NormalClass(name = "a", age = 10),
@@ -189,6 +188,24 @@ class UDFRegisterTest : ShouldSpec({
                     }
                     val a = toNormalClass3
                     spark.sql("select toNormalClass3(first, second) from test2").show()
+                }
+
+                should("return NormalClass using accessed by multiple delegates") {
+                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
+                    val toNormalClass = udf.register { a: String, b: Int ->
+                        NormalClass(b, a)
+                    }
+
+                    val a by toNormalClass
+                    val a1 = a
+                    val b by toNormalClass
+                    val b1 = b
+                    val c by toNormalClass
+                    val c1 = c
+
+                    spark.sql("select a(first, second) from test2").show()
+                    spark.sql("select b(first, second) from test2").show()
+                    spark.sql("select c(first, second) from test2").show()
                 }
             }
         }
