@@ -189,49 +189,7 @@ dataset.where( col("colA") `===` 6 )
 dataset.where( col("colA") eq 6)
 ```
 
-In short, all supported operators are:
-
-- `==`,
-- `!=`, 
-- `eq` / `` `===` ``,
-- `neq` / `` `=!=` ``,
-- `-col(...)`,
-- `!col(...)`,  
-- `gt`,
-- `lt`,
-- `geq`,  
-- `leq`,
-- `or`,
-- `and` / `` `&&` ``,
-- `+`,
-- `-`,
-- `*`,
-- `/`,
-- `%`
-
-Secondly, there are some quality of life additions as well:
-
-In Kotlin, Ranges are often
-used to solve inclusive/exclusive situations for a range. So, you can now do:
-```kotlin
-dataset.where( col("colA") inRangeOf 0..2 )
-```
-
-Also, for columns containing map- or array like types:
-
-```kotlin
-dataset.where( col("colB")[0] geq 5 )
-```
-
-Finally, thanks to Kotlin reflection, we can provide a type- and refactor safe way
-to create `TypedColumn`s and with those a new Dataset from pieces of another using the `selectTyped()` function, added to the API:
-```kotlin
-val dataset: Dataset<YourClass> = ...
-val newDataset: Dataset<Pair<TypeA, TypeB>> = dataset.selectTyped(col(YourClass::colA), col(YourClass::colB))
-
-// Alternatively, for instance when working with a Dataset<Row>
-val typedDataset: Dataset<Pair<String, Int>> = otherDataset.selectTyped(col("a").`as`<String>(), col("b").`as`<Int>())
-```
+To read more, check the [wiki](https://github.com/JetBrains/kotlin-spark-api/wiki/Column-functions).
 
 ### Overload resolution ambiguity
 
