@@ -126,8 +126,12 @@ recommended for better support.
 There are several aliases in API, like `leftJoin`, `rightJoin` etc. These are null-safe by design. 
 For example, `leftJoin` is aware of nullability and returns `Dataset<Pair<LEFT, RIGHT?>>`.
 Note that we are forcing `RIGHT` to be nullable for you as a developer to be able to handle this situation. 
-`NullPointerException`s are hard to debug in Spark, and we doing our best to make them as rare as possible.
+`NullPointerException`s are hard to debug in Spark, and we're doing our best to make them as rare as possible.
 
+In Spark, you might also come across Scala-native `Option<*>` or Java-compatible `Optional<*>` classes.
+We provide `getOrNull()` and `getOrElse()` functions for these to use Kotlin's null safety for good.
+
+Similarly, you can also create `Option<*>`s and `Optional<*>`s like `T?.toOptional()` if a Spark function requires it.
 ### withSpark function
 
 We provide you with useful function `withSpark`, which accepts everything that may be needed to run Spark — properties, name, master location and so on. It also accepts a block of code to execute inside Spark context.
