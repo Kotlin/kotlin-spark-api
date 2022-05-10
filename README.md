@@ -119,7 +119,8 @@ This is not needed when running the Kotlin Spark API from a Jupyter notebook.
 ```kotlin
 spark.dsOf("a" to 1, "b" to 2)
 ```
-The example above produces `Dataset<Pair<String, Int>>`. While Kotlin Pairs and Triples are supported, Scala Tuples are reccomended for better support.
+The example above produces `Dataset<Pair<String, Int>>`. While Kotlin Pairs and Triples are supported, Scala Tuples are 
+recommended for better support.
  
 ### Null safety
 There are several aliases in API, like `leftJoin`, `rightJoin` etc. These are null-safe by design. 
