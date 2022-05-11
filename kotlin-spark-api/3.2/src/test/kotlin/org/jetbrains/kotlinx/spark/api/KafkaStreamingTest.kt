@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,7 +20,11 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.Tag
+import io.kotest.core.extensions.install
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.extensions.testcontainers.TestContainerExtension
+import io.kotest.extensions.testcontainers.kafka.createProducer
+import io.kotest.extensions.testcontainers.kafka.createStringStringProducer
 import io.kotest.matchers.collections.shouldBeIn
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -32,27 +36,33 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies
 import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.testcontainers.containers.KafkaContainer
+import org.testcontainers.utility.DockerImageName
 import java.io.Serializable
+import java.util.concurrent.TimeUnit
 
 object Kafka : Tag()
 
 class KafkaStreamingTest : ShouldSpec({
 
-    // making sure it can be skipped on Github actions since it times out
     tags(Kafka)
+    val kafka = install(TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.4")))) {
+        withEmbeddedZookeeper()
+        withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+    }
+
 
     context("kafka") {
-        val port = 9092
-        val broker = "localhost:$port"
         val topic1 = "test1"
         val topic2 = "test2"
-        val kafkaListener = EmbeddedKafkaListener(port)
-        listener(kafkaListener)
 
         should("support kafka streams") {
-            val producer = kafkaListener.stringStringProducer()
-            producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
-            producer.send(ProducerRecord(topic2, "This is also also a test test something"))
+            val producer = kafka.createStringStringProducer()
+            listOf(
+                producer.send(ProducerRecord(topic1, "Hello this is a test test test")),
+                producer.send(ProducerRecord(topic2, "This is also also a test test something")),
+            )
+                .map { it.get(10, TimeUnit.SECONDS) }
             producer.close()
 
             withSparkStreaming(
@@ -62,7 +72,7 @@ class KafkaStreamingTest : ShouldSpec({
             ) {
 
                 val kafkaParams: Map<String, Serializable> = mapOf(
-                    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to broker,
+                    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafka.bootstrapServers,
                     ConsumerConfig.GROUP_ID_CONFIG to "consumer-group",
                     ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                     ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
