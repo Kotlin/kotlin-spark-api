@@ -56,7 +56,7 @@ Here's an example `pom.xml`:
 ```xml
 <dependency>
   <groupId>org.jetbrains.kotlinx.spark</groupId>
-  <artifactId>kotlin-spark-api-3.2</artifactId>
+  <artifactId>kotlin-spark-api-3.1</artifactId>
   <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
