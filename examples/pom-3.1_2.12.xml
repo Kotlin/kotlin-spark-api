@@ -9,7 +9,7 @@
     <artifactId>examples-3.1_2.12</artifactId>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-spark-api-parent_2.12</artifactId>
+        <artifactId>kotlin-spark-api-parent-3.2_2.12</artifactId>
         <version>1.0.4-SNAPSHOT</version>
         <relativePath>../pom_2.12.xml</relativePath>
     </parent>
