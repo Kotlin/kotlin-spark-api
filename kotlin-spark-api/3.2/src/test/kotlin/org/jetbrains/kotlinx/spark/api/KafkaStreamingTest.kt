@@ -21,11 +21,11 @@ package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.Tag
 import io.kotest.core.extensions.install
-import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.core.spec.style.FunSpec
 import io.kotest.extensions.testcontainers.TestContainerExtension
-import io.kotest.extensions.testcontainers.kafka.createProducer
+import io.kotest.extensions.testcontainers.kafka.createStringStringConsumer
 import io.kotest.extensions.testcontainers.kafka.createStringStringProducer
-import io.kotest.matchers.collections.shouldBeIn
+import io.kotest.matchers.collections.shouldContain
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -38,37 +38,36 @@ import org.apache.spark.streaming.kafka010.LocationStrategies
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
+import scala.Tuple3
 import java.io.Serializable
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 object Kafka : Tag()
 
-class KafkaStreamingTest : ShouldSpec({
+class KafkaStreamingTest : FunSpec() {
+    init {
 
-    tags(Kafka)
-    val kafka = install(TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.4")))) {
-        withEmbeddedZookeeper()
-        withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
-    }
+        tags(Kafka)
 
+        val kafka =
+            install(TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1")))) {
+                withEmbeddedZookeeper()
+//                withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+            }
+        println(kafka.bootstrapServers)
+        test("Streaming should support kafka") {
+            val topic1 = "test1"
+            val topic2 = "test2"
 
-    context("kafka") {
-        val topic1 = "test1"
-        val topic2 = "test2"
-
-        should("support kafka streams") {
-            val producer = kafka.createStringStringProducer()
-            listOf(
-                producer.send(ProducerRecord(topic1, "Hello this is a test test test")),
-                producer.send(ProducerRecord(topic2, "This is also also a test test something")),
-            )
-                .map { it.get(10, TimeUnit.SECONDS) }
-            producer.close()
+            val producer = autoClose(kafka.createStringStringProducer())
+            producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
+            producer.send(ProducerRecord(topic2, "This is also also a test test something"))
 
             withSparkStreaming(
-                batchDuration = Durations.seconds(2),
+                batchDuration = Durations.milliseconds(1000),
                 appName = "KotlinDirectKafkaWordCount",
-                timeout = 1000L,
+                timeout = 10000L,
+                master = "local"
             ) {
 
                 val kafkaParams: Map<String, Serializable> = mapOf(
@@ -77,19 +76,18 @@ class KafkaStreamingTest : ShouldSpec({
                     ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                     ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                 )
-
                 // Create direct kafka stream with brokers and topics
                 val messages: JavaInputDStream<ConsumerRecord<String, String>> = KafkaUtils.createDirectStream(
                     ssc,
-                    LocationStrategies.PreferConsistent(),
+                    LocationStrategies.PreferBrokers(),
                     ConsumerStrategies.Subscribe(setOf(topic1, topic2), kafkaParams),
                 )
 
                 // Get the lines, split them into words, count the words and print
-                val lines = messages.map { it.topic() X it.value() }
-                val words = lines.flatMapValues { it.split(" ").iterator() }
 
-                val wordCounts = words
+                val wordCounts = messages
+                    .map { it.topic() X it.value() }
+                    .flatMapValues { it.split(" ").iterator() }
                     .map { t(it, 1) }
                     .reduceByKey { a: Int, b: Int -> a + b }
                     .map { (tup, counter) -> tup + counter }
@@ -111,16 +109,18 @@ class KafkaStreamingTest : ShouldSpec({
                         "something" X 1,
                     )
                 )
-
+                val data = arrayListOf<List<Tuple3<String, String, Int>>>()
                 wordCounts.foreachRDD { rdd, _ ->
-                    rdd.foreach { (topic, word, count) ->
-                        t(word, count).shouldBeIn(collection = resultLists[topic]!!)
+                    data.add(rdd.collect())
+                }
+                ssc.awaitTerminationOrTimeout(10000)
+                resultLists.forEach { (topic, tuples) ->
+                    tuples.forEach { (word, count) ->
+                        data shouldContain t(topic, word, count)
                     }
                 }
-
-                wordCounts.print()
             }
-        }
 
+        }
     }
-})
+}
