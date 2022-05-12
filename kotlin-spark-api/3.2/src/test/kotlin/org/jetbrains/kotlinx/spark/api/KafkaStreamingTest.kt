@@ -26,6 +26,7 @@ import io.kotest.extensions.testcontainers.TestContainerExtension
 import io.kotest.extensions.testcontainers.kafka.createStringStringConsumer
 import io.kotest.extensions.testcontainers.kafka.createStringStringProducer
 import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -49,29 +50,51 @@ class KafkaStreamingTest : FunSpec() {
 
         tags(Kafka)
 
-        val kafka =
-            install(TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1")))) {
-                withEmbeddedZookeeper()
-//                withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
-            }
+        val kafka = install(
+            TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1")))
+        ) {
+            withEmbeddedZookeeper()
+            withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+        }
         println(kafka.bootstrapServers)
         test("Streaming should support kafka") {
             val topic1 = "test1"
             val topic2 = "test2"
 
-            val producer = autoClose(kafka.createStringStringProducer())
-            producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
-            producer.send(ProducerRecord(topic2, "This is also also a test test something"))
+            val resultLists = mapOf(
+                topic1 to listOf(
+                    "Hello" X 1,
+                    "this" X 1,
+                    "is" X 1,
+                    "a" X 1,
+                    "test" X 3,
+                ),
+                topic2 to listOf(
+                    "This" X 1,
+                    "is" X 1,
+                    "also" X 2,
+                    "a" X 1,
+                    "test" X 2,
+                    "something" X 1,
+                )
+            )
+            val data = arrayListOf<List<Tuple3<String, String, Int>>>()
 
             withSparkStreaming(
                 batchDuration = Durations.milliseconds(1000),
                 appName = "KotlinDirectKafkaWordCount",
-                timeout = 10000L,
+                timeout = 10_000L,
                 master = "local"
             ) {
 
+                setRunAfterStart {
+                    val producer = autoClose(kafka.createStringStringProducer())
+                    producer.send(ProducerRecord(topic1, "Hello this is a test test test"))
+                    producer.send(ProducerRecord(topic2, "This is also also a test test something"))
+                }
+
                 val kafkaParams: Map<String, Serializable> = mapOf(
-                    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to kafka.bootstrapServers,
+                    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to "${kafka.host}:${kafka.getMappedPort(KafkaContainer.KAFKA_PORT)}",
                     ConsumerConfig.GROUP_ID_CONFIG to "consumer-group",
                     ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
                     ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java,
@@ -92,35 +115,16 @@ class KafkaStreamingTest : FunSpec() {
                     .reduceByKey { a: Int, b: Int -> a + b }
                     .map { (tup, counter) -> tup + counter }
 
-                val resultLists = mapOf(
-                    topic1 to listOf(
-                        "Hello" X 1,
-                        "this" X 1,
-                        "is" X 1,
-                        "a" X 1,
-                        "test" X 3,
-                    ),
-                    topic2 to listOf(
-                        "This" X 1,
-                        "is" X 1,
-                        "also" X 2,
-                        "a" X 1,
-                        "test" X 2,
-                        "something" X 1,
-                    )
-                )
-                val data = arrayListOf<List<Tuple3<String, String, Int>>>()
+
                 wordCounts.foreachRDD { rdd, _ ->
                     data.add(rdd.collect())
                 }
-                ssc.awaitTerminationOrTimeout(10000)
-                resultLists.forEach { (topic, tuples) ->
-                    tuples.forEach { (word, count) ->
-                        data shouldContain t(topic, word, count)
-                    }
-                }
             }
 
+            val resultList = resultLists.flatMap { (topic, tuples) ->
+                tuples.map { it.prependedBy(topic) }
+            }
+            data.flatten() shouldContainAll resultList
         }
     }
 }
