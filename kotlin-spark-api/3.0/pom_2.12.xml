@@ -74,6 +74,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>io.kotest.extensions</groupId>
+            <artifactId>kotest-extensions-testcontainers</artifactId>
+            <version>${kotest-extensions-testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.github.embeddedkafka</groupId>
             <artifactId>embedded-kafka_${scala.compat.version}</artifactId>
             <version>${embedded-kafka.version}</version>
