@@ -99,6 +99,30 @@
         <directory>target/${scala.compat.version}</directory>
         <plugins>
             <plugin>
+                <groupId>org.jetbrains.dokka</groupId>
+                <artifactId>dokka-maven-plugin</artifactId>
+                <version>${dokka.version}</version>
+                <configuration>
+                    <jdkVersion>8</jdkVersion>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>dokka</id>
+                        <goals>
+                            <goal>dokka</goal>
+                        </goals>
+                        <phase>pre-site</phase>
+                    </execution>
+                    <execution>
+                        <id>javadocjar</id>
+                        <goals>
+                            <goal>javadocJar</goal>
+                        </goals>
+                        <phase>pre-integration-test</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
                 <executions>

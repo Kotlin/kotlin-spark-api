@@ -103,6 +103,10 @@ This does not start a Spark session right away, meaning you can call `withSparkS
 in whichever cell you want.
 Check out the [example](examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/streaming/JupyterStreamingExample.ipynb).
 
+NOTE: You need `kotlin-jupyter-kernel` to be at least version 0.11.0.83 for the Kotlin Spark API to work. Also, if the 
+`%use spark` magic does not output "Spark session has been started...", and `%use spark-streaming` doesn't work at all, 
+add `%useLatestDescriptors` above it.
+
 ## Kotlin for Apache Spark features
 
 ### Creating a SparkSession in Kotlin
