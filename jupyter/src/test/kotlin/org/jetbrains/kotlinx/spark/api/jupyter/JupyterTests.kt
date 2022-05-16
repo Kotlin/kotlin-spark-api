@@ -30,6 +30,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import jupyter.kotlin.DependsOn
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.streaming.Duration
+import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.EvalRequestData
 import org.jetbrains.kotlinx.jupyter.ReplForJupyter
@@ -155,16 +156,19 @@ class JupyterTests : ShouldSpec({
             should("render JavaRDDs with custom class") {
 
                 @Language("kts")
-                val klass = exec("""
+                val klass = exec(
+                    """
                     data class Test(
                         val longFirstName: String,
                         val second: LongArray,
                         val somethingSpecial: Map<Int, String>,
                     ): Serializable
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 @Language("kts")
-                val html = execHtml("""
+                val html = execHtml(
+                    """
                     val rdd = sc.parallelize(
                         listOf(
                             Test("aaaaaaaaa", longArrayOf(1L, 100000L, 24L), mapOf(1 to "one", 2 to "two")),
@@ -246,8 +250,10 @@ class JupyterStreamingTests : ShouldSpec({
                     host = this,
                     integrationTypeNameRules = listOf(
                         PatternNameAcceptanceRule(false, "org.jetbrains.kotlinx.spark.api.jupyter.**"),
-                        PatternNameAcceptanceRule(true,
-                            "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration"),
+                        PatternNameAcceptanceRule(
+                            true,
+                            "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration"
+                        ),
                     ),
                 )
             }
@@ -262,6 +268,13 @@ class JupyterStreamingTests : ShouldSpec({
 
     context("Jupyter") {
         withRepl {
+
+            should("Have sscCollection instance") {
+
+                @Language("kts")
+                val sscCollection = exec("""sscCollection""")
+                sscCollection as? MutableSet<JavaStreamingContext> shouldNotBe null
+            }
 
             should("Not have spark instance") {
                 shouldThrowAny {

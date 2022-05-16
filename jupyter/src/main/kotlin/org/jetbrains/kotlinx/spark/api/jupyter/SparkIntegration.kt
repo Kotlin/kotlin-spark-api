@@ -21,6 +21,7 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 
 
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlinx.jupyter.api.FieldValue
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 
 /**
@@ -68,4 +69,6 @@ internal class SparkIntegration : Integration() {
                 val udf: UDFRegistration get() = spark.udf()""".trimIndent(),
         ).map(::execute)
     }
+
+    override fun KotlinKernelHost.afterCellExecution(snippetInstance: Any, result: FieldValue) = Unit
 }
