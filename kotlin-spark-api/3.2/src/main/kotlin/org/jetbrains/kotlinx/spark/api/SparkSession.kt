@@ -113,7 +113,7 @@ class KSparkStreamingSession(@Transient val ssc: JavaStreamingContext) : Seriali
         runAfterStart = block
     }
 
-    internal fun invokeRunAfterStart(): Unit = runAfterStart()
+    fun invokeRunAfterStart(): Unit = runAfterStart()
 
 
     /** Creates new spark session from given [sc]. */
@@ -308,50 +308,42 @@ fun withSparkStreaming(
     startStreamingContext: Boolean = true,
     func: KSparkStreamingSession.() -> Unit,
 ) {
-    var ssc: JavaStreamingContext? = null
-    try {
 
-        // will only be set when a new context is created
-        var kSparkStreamingSession: KSparkStreamingSession? = null
+    // will only be set when a new context is created
+    var kSparkStreamingSession: KSparkStreamingSession? = null
 
-        val creatingFunc = {
-            val sc = SparkConf()
-                .setAppName(appName)
-                .setMaster(master)
-                .setAll(
-                    props
-                        .map { (key, value) -> key X value.toString() }
-                        .asScalaIterable()
-                )
+    val creatingFunc = {
+        val sc = SparkConf()
+            .setAppName(appName)
+            .setMaster(master)
+            .setAll(
+                props
+                    .map { (key, value) -> key X value.toString() }
+                    .asScalaIterable()
+            )
 
-            val ssc = JavaStreamingContext(sc, batchDuration)
-            ssc.checkpoint(checkpointPath)
+        val ssc = JavaStreamingContext(sc, batchDuration)
+        ssc.checkpoint(checkpointPath)
 
-            kSparkStreamingSession = KSparkStreamingSession(ssc)
-            func(kSparkStreamingSession!!)
+        kSparkStreamingSession = KSparkStreamingSession(ssc)
+        func(kSparkStreamingSession!!)
 
-            ssc
-        }
-
-        ssc = when {
-            checkpointPath != null ->
-                JavaStreamingContext.getOrCreate(checkpointPath, creatingFunc, hadoopConf, createOnError)
-
-            else -> creatingFunc()
-        }
-
-        if (startStreamingContext) {
-            ssc!!.start()
-            kSparkStreamingSession?.invokeRunAfterStart()
-        }
-        ssc!!.awaitTerminationOrTimeout(timeout)
-    } finally {
-        // TODO remove printlns
-        ssc?.stop()
-        println("stopping ssc")
-        ssc?.awaitTermination()
-        println("ssc stopped")
+        ssc
     }
+
+    val ssc = when {
+        checkpointPath != null ->
+            JavaStreamingContext.getOrCreate(checkpointPath, creatingFunc, hadoopConf, createOnError)
+
+        else -> creatingFunc()
+    }
+
+    if (startStreamingContext) {
+        ssc.start()
+        kSparkStreamingSession?.invokeRunAfterStart()
+    }
+    ssc.awaitTerminationOrTimeout(timeout)
+    ssc.stop()
 }
 
 

@@ -39,6 +39,8 @@ abstract class Integration : JupyterIntegration() {
      */
     abstract fun KotlinKernelHost.onLoaded()
 
+    abstract fun KotlinKernelHost.onShutdown()
+
     abstract fun KotlinKernelHost.afterCellExecution(snippetInstance: Any, result: FieldValue)
 
     open val dependencies: Array<String> = arrayOf(
@@ -91,6 +93,10 @@ abstract class Integration : JupyterIntegration() {
 
         afterCellExecution { snippetInstance, result ->
             afterCellExecution(snippetInstance, result)
+        }
+
+        onShutdown {
+            onShutdown()
         }
 
         // Render Dataset

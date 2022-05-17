@@ -70,5 +70,9 @@ internal class SparkIntegration : Integration() {
         ).map(::execute)
     }
 
+    override fun KotlinKernelHost.onShutdown() {
+        execute("""spark.stop()""")
+    }
+
     override fun KotlinKernelHost.afterCellExecution(snippetInstance: Any, result: FieldValue) = Unit
 }
