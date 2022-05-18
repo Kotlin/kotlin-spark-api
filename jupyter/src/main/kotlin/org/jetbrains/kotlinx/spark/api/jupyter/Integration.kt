@@ -22,10 +22,9 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
-import org.jetbrains.kotlinx.jupyter.api.FieldValue
-import org.jetbrains.kotlinx.jupyter.api.HTML
-import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
+import org.jetbrains.kotlinx.jupyter.api.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
+import kotlin.reflect.typeOf
 
 abstract class Integration : JupyterIntegration() {
 
@@ -33,6 +32,11 @@ abstract class Integration : JupyterIntegration() {
     private val scalaCompatVersion = "2.12"
     private val scalaVersion = "2.12.15"
     private val spark3Version = "3.2.1"
+
+    private val displayLimit = "DISPLAY_LIMIT"
+    private val displayLimitDefault = 20
+    private val displayTruncate = "DISPLAY_TRUNCATE"
+    private val displayTruncateDefault = 30
 
     /**
      * Will be run after importing all dependencies
@@ -84,6 +88,21 @@ abstract class Integration : JupyterIntegration() {
         import(*imports)
 
         onLoaded {
+            declare(
+                VariableDeclaration(
+                    name = displayLimit,
+                    value = displayLimitDefault,
+                    type = typeOf<Int>(),
+                    isMutable = true,
+                ),
+                VariableDeclaration(
+                    name = displayTruncate,
+                    value = displayTruncateDefault,
+                    type = typeOf<Int>(),
+                    isMutable = true,
+                ),
+            )
+
             onLoaded()
         }
 
@@ -101,15 +120,50 @@ abstract class Integration : JupyterIntegration() {
 
         // Render Dataset
         render<Dataset<*>> {
-            HTML(it.toHtml())
+            val limit = notebook
+                .variablesState[displayLimit]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayLimitDefault
+
+            val truncate = notebook
+                .variablesState[displayTruncate]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayTruncateDefault
+
+            HTML(it.toHtml(limit = limit, truncate = truncate))
         }
 
         render<RDD<*>> {
-            HTML(it.toJavaRDD().toHtml())
-        }
+            val limit = notebook
+                .variablesState[displayLimit]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayLimitDefault
 
+            val truncate = notebook
+                .variablesState[displayTruncate]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayTruncateDefault
+
+            HTML(it.toJavaRDD().toHtml(limit = limit, truncate = truncate))
+        }
         render<JavaRDDLike<*, *>> {
-            HTML(it.toHtml())
+            val limit = notebook
+                .variablesState[displayLimit]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayLimitDefault
+
+            val truncate = notebook
+                .variablesState[displayTruncate]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayTruncateDefault
+
+            HTML(it.toHtml(limit = limit, truncate = truncate))
         }
     }
 }
