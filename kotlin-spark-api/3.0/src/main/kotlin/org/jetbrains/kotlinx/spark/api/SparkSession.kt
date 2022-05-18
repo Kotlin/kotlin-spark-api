@@ -113,7 +113,7 @@ class KSparkStreamingSession(@Transient val ssc: JavaStreamingContext) : Seriali
         runAfterStart = block
     }
 
-    internal fun invokeRunAfterStart(): Unit = runAfterStart()
+    fun invokeRunAfterStart(): Unit = runAfterStart()
 
 
     /** Creates new spark session from given [sc]. */

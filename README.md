@@ -271,7 +271,7 @@ For more information, check the [wiki](https://github.com/JetBrains/kotlin-spark
 
 ## Examples
 
-For more, check out [examples](https://github.com/JetBrains/kotlin-spark-api/tree/master/examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples) module.
+For more, check out [examples](examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples) module.
 To get up and running quickly, check out this [tutorial](https://github.com/JetBrains/kotlin-spark-api/wiki/Quick-Start-Guide). 
 
 ## Reporting issues/Support
