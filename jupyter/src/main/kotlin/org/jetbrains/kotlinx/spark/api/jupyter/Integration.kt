@@ -41,11 +41,17 @@ abstract class Integration : JupyterIntegration() {
     /**
      * Will be run after importing all dependencies
      */
-    abstract fun KotlinKernelHost.onLoaded()
+    open fun KotlinKernelHost.onLoaded() = Unit
 
-    abstract fun KotlinKernelHost.onShutdown()
+    open fun KotlinKernelHost.onShutdown() = Unit
 
-    abstract fun KotlinKernelHost.afterCellExecution(snippetInstance: Any, result: FieldValue)
+    open fun KotlinKernelHost.onInterrupt() = Unit
+
+    open fun KotlinKernelHost.beforeCellExecution() = Unit
+
+    open fun KotlinKernelHost.afterCellExecution(snippetInstance: Any, result: FieldValue) = Unit
+
+    open fun Builder.onLoadedAlsoDo() = Unit
 
     open val dependencies: Array<String> = arrayOf(
         "org.apache.spark:spark-repl_$scalaCompatVersion:$spark3Version",
@@ -108,62 +114,55 @@ abstract class Integration : JupyterIntegration() {
 
         beforeCellExecution {
             execute("""scala.Console.setOut(System.out)""")
+
+            beforeCellExecution()
         }
 
         afterCellExecution { snippetInstance, result ->
             afterCellExecution(snippetInstance, result)
         }
 
+        onInterrupt {
+            onInterrupt()
+        }
+
         onShutdown {
             onShutdown()
         }
 
-        // Render Dataset
-        render<Dataset<*>> {
-            val limit = notebook
+        fun getLimitAndTruncate() = Pair(
+            notebook
                 .variablesState[displayLimit]
                 ?.value
                 ?.getOrNull() as? Int
-                ?: displayLimitDefault
-
-            val truncate = notebook
+                ?: displayLimitDefault,
+            notebook
                 .variablesState[displayTruncate]
                 ?.value
                 ?.getOrNull() as? Int
                 ?: displayTruncateDefault
+        )
+
+
+        // Render Dataset
+        render<Dataset<*>> {
+            val (limit, truncate) = getLimitAndTruncate()
 
             HTML(it.toHtml(limit = limit, truncate = truncate))
         }
 
         render<RDD<*>> {
-            val limit = notebook
-                .variablesState[displayLimit]
-                ?.value
-                ?.getOrNull() as? Int
-                ?: displayLimitDefault
-
-            val truncate = notebook
-                .variablesState[displayTruncate]
-                ?.value
-                ?.getOrNull() as? Int
-                ?: displayTruncateDefault
+            val (limit, truncate) = getLimitAndTruncate()
 
             HTML(it.toJavaRDD().toHtml(limit = limit, truncate = truncate))
         }
-        render<JavaRDDLike<*, *>> {
-            val limit = notebook
-                .variablesState[displayLimit]
-                ?.value
-                ?.getOrNull() as? Int
-                ?: displayLimitDefault
 
-            val truncate = notebook
-                .variablesState[displayTruncate]
-                ?.value
-                ?.getOrNull() as? Int
-                ?: displayTruncateDefault
+        render<JavaRDDLike<*, *>> {
+            val (limit, truncate) = getLimitAndTruncate()
 
             HTML(it.toHtml(limit = limit, truncate = truncate))
         }
+
+        onLoadedAlsoDo()
     }
 }

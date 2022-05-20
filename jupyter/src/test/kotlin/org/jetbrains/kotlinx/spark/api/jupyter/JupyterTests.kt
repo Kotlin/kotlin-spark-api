@@ -28,6 +28,7 @@ import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import jupyter.kotlin.DependsOn
 import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.EvalRequestData
 import org.jetbrains.kotlinx.jupyter.ReplForJupyter
@@ -262,6 +263,14 @@ class JupyterStreamingTests : ShouldSpec({
 
     context("Jupyter") {
         withRepl {
+
+            // For when onInterrupt is implemented in the Jupyter kernel
+            should("Have sscCollection instance") {
+
+                @Language("kts")
+                val sscCollection = exec("""sscCollection""")
+                sscCollection as? MutableSet<JavaStreamingContext> shouldNotBe null
+            }
 
             should("Not have spark instance") {
                 shouldThrowAny {
