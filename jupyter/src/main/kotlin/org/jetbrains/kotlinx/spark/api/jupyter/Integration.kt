@@ -22,10 +22,9 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
-import org.jetbrains.kotlinx.jupyter.api.FieldValue
-import org.jetbrains.kotlinx.jupyter.api.HTML
-import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
+import org.jetbrains.kotlinx.jupyter.api.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
+import kotlin.reflect.typeOf
 
 abstract class Integration : JupyterIntegration() {
 
@@ -34,14 +33,25 @@ abstract class Integration : JupyterIntegration() {
     private val scalaVersion = "2.12.15"
     private val spark3Version = "3.1.3"
 
+    private val displayLimit = "DISPLAY_LIMIT"
+    private val displayLimitDefault = 20
+    private val displayTruncate = "DISPLAY_TRUNCATE"
+    private val displayTruncateDefault = 30
+
     /**
      * Will be run after importing all dependencies
      */
-    abstract fun KotlinKernelHost.onLoaded()
+    open fun KotlinKernelHost.onLoaded() = Unit
 
-    abstract fun KotlinKernelHost.onShutdown()
+    open fun KotlinKernelHost.onShutdown() = Unit
 
-    abstract fun KotlinKernelHost.afterCellExecution(snippetInstance: Any, result: FieldValue)
+    open fun KotlinKernelHost.onInterrupt() = Unit
+
+    open fun KotlinKernelHost.beforeCellExecution() = Unit
+
+    open fun KotlinKernelHost.afterCellExecution(snippetInstance: Any, result: FieldValue) = Unit
+
+    open fun Builder.onLoadedAlsoDo() = Unit
 
     open val dependencies: Array<String> = arrayOf(
         "org.apache.spark:spark-repl_$scalaCompatVersion:$spark3Version",
@@ -84,32 +94,75 @@ abstract class Integration : JupyterIntegration() {
         import(*imports)
 
         onLoaded {
+            declare(
+                VariableDeclaration(
+                    name = displayLimit,
+                    value = displayLimitDefault,
+                    type = typeOf<Int>(),
+                    isMutable = true,
+                ),
+                VariableDeclaration(
+                    name = displayTruncate,
+                    value = displayTruncateDefault,
+                    type = typeOf<Int>(),
+                    isMutable = true,
+                ),
+            )
+
             onLoaded()
         }
 
         beforeCellExecution {
             execute("""scala.Console.setOut(System.out)""")
+
+            beforeCellExecution()
         }
 
         afterCellExecution { snippetInstance, result ->
             afterCellExecution(snippetInstance, result)
         }
 
+        onInterrupt {
+            onInterrupt()
+        }
+
         onShutdown {
             onShutdown()
         }
 
+        fun getLimitAndTruncate() = Pair(
+            notebook
+                .variablesState[displayLimit]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayLimitDefault,
+            notebook
+                .variablesState[displayTruncate]
+                ?.value
+                ?.getOrNull() as? Int
+                ?: displayTruncateDefault
+        )
+
+
         // Render Dataset
         render<Dataset<*>> {
-            HTML(it.toHtml())
+            val (limit, truncate) = getLimitAndTruncate()
+
+            HTML(it.toHtml(limit = limit, truncate = truncate))
         }
 
         render<RDD<*>> {
-            HTML(it.toJavaRDD().toHtml())
+            val (limit, truncate) = getLimitAndTruncate()
+
+            HTML(it.toJavaRDD().toHtml(limit = limit, truncate = truncate))
         }
 
         render<JavaRDDLike<*, *>> {
-            HTML(it.toHtml())
+            val (limit, truncate) = getLimitAndTruncate()
+
+            HTML(it.toHtml(limit = limit, truncate = truncate))
         }
+
+        onLoadedAlsoDo()
     }
 }
