@@ -107,6 +107,8 @@ NOTE: You need `kotlin-jupyter-kernel` to be at least version 0.11.0.83 for the 
 `%use spark` magic does not output "Spark session has been started...", and `%use spark-streaming` doesn't work at all, 
 add `%useLatestDescriptors` above it.
 
+For more information, check the [wiki](https://github.com/JetBrains/kotlin-spark-api/wiki/Jupyter).
+
 ## Kotlin for Apache Spark features
 
 ### Creating a SparkSession in Kotlin
