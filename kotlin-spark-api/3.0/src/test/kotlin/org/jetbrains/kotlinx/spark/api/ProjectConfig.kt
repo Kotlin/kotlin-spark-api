@@ -20,10 +20,8 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.config.AbstractProjectConfig
-import io.kotest.extensions.allure.AllureTestReporter
 
 @Suppress("unused")
 object ProjectConfig : AbstractProjectConfig() {
-    override fun extensions() = super.extensions() + AllureTestReporter(true)
 
 }
