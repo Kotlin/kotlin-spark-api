@@ -32,12 +32,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.kotest.extensions</groupId>
-            <artifactId>kotest-extensions-allure</artifactId>
-            <version>${kotest-extensions-allure.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.beust</groupId>
             <artifactId>klaxon</artifactId>
             <version>${klaxon.version}</version>
