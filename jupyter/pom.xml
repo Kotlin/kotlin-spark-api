@@ -80,12 +80,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.kotest.extensions</groupId>
-            <artifactId>kotest-extensions-allure</artifactId>
-            <version>${kotest-extensions-allure.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlin-jupyter-test-kit</artifactId>
             <version>${kotlin-jupyter-api.version}</version>

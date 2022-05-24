@@ -69,12 +69,6 @@
         </dependency>
         <dependency>
             <groupId>io.kotest.extensions</groupId>
-            <artifactId>kotest-extensions-allure</artifactId>
-            <version>${kotest-extensions-allure.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.kotest.extensions</groupId>
             <artifactId>kotest-extensions-testcontainers</artifactId>
             <version>${kotest-extensions-testcontainers.version}</version>
             <scope>test</scope>
@@ -165,14 +159,6 @@
                         <phase>pre-integration-test</phase>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>io.qameta.allure</groupId>
-                <artifactId>allure-maven</artifactId>
-                <configuration>
-                    <resultsDirectory>${project.basedir}/allure-results/${scala.compat.version}</resultsDirectory>
-                </configuration>
             </plugin>
 
             <plugin>
