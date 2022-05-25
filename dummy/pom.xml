@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <name>Kotlin API for Apache Spark: not-needed</name>
     <description>Module to workaround https://issues.sonatype.org/browse/NEXUS-9138</description>
-    <artifactId>dummy-3.1</artifactId>
+    <artifactId>dummy-3.0</artifactId>
     <profiles>
         <profile>
             <id>scala-2.12</id>

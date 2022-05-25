@@ -36,7 +36,7 @@
       </dependency>
       <dependency>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>scala-tuples-in-kotlin-3.1</artifactId>
+        <artifactId>scala-tuples-in-kotlin-3.0</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>
