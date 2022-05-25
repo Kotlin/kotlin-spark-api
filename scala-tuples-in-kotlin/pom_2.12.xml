@@ -4,7 +4,7 @@
 
     <name>Kotlin Spark API: Scala Tuples in Kotlin</name>
     <description>Scala Tuple helper functions for kotlin</description>
-    <artifactId>scala-tuples-in-kotlin</artifactId>
+    <artifactId>scala-tuples-in-kotlin-3.2</artifactId>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
         <artifactId>kotlin-spark-api-parent-3.1_2.12</artifactId>
