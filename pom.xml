@@ -277,7 +277,7 @@
         <snapshotRepository>
             <id>github</id>
             <name>GitHub JetBrains Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/JetBrains/kotlin-spark-api</url>
+            <url>https://maven.pkg.github.com/Kotlin/kotlin-spark-api</url>
 <!--            <id>ossrh</id>-->
 <!--            <url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
         </snapshotRepository>
