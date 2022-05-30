@@ -1,9 +1,9 @@
-name: Generate and publish docs
+name: Deploy dev version to GH packages
 
 on:
   push:
     branches:
-      - "spark-3.2"
+      - "main"
 
 jobs:
   build-and-deploy:
