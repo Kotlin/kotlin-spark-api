@@ -20,15 +20,12 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.shouldNot
 import io.kotest.matchers.shouldNotBe
 import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.functions.udf
 import org.junit.jupiter.api.assertThrows
 import scala.collection.JavaConverters
 import scala.collection.mutable.WrappedArray
@@ -97,7 +94,7 @@ class UDFRegisterTest : ShouldSpec({
                         a.asIterable().map { it.code }
                     }
 
-                    val result = spark.sql("select StringToIntList('ab')").`as`<List<Int>>().collectAsList()
+                    val result = spark.sql("select StringToIntList('ab')").to<List<Int>>().collectAsList()
                     result shouldBe listOf(listOf(97, 98))
                 }
 
@@ -106,7 +103,7 @@ class UDFRegisterTest : ShouldSpec({
                     udf.register<String, Int, Int>("stringIntDiff") { a, b ->
                         a[0].code - b
                     }
-                    val result = spark.sql("select stringIntDiff(first, second) from test1").`as`<Int>().collectAsList()
+                    val result = spark.sql("select stringIntDiff(first, second) from test1").to<Int>().collectAsList()
                     result shouldBe listOf(96, 96)
                 }
             }
@@ -121,7 +118,7 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     val testData = dsOf(listOf("a", "b"))
-                    val newData = testData.withColumn("text", stringArrayMerger(testData.col("value")))
+                    val newData = testData.withColumn("text", stringArrayMerger(testData.col("value").typed()))
 
                     (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
@@ -136,7 +133,7 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     val testData = dsOf(listOf("a", "b"))
-                    val newData = testData.withColumn("text", stringArrayMerger(testData("value")))
+                    val newData = testData.withColumn("text", stringArrayMerger(testData("value").typed()))
 
                     (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
@@ -156,7 +153,7 @@ class UDFRegisterTest : ShouldSpec({
 
                     val collectAsList = dataset.withColumn(
                         "nameAndAge",
-                        nameConcatAge(dataset.col("name"), dataset.col("age"))
+                        nameConcatAge(col(NormalClass::name), col(NormalClass::age))
                     )
                         .select("nameAndAge")
                         .collectAsList()
@@ -175,11 +172,11 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     val a = spark.sql("SELECT random()")
-                        .selectTyped(col("random()").`as`<Int>())
+                        .selectTyped(col("random()").typed<Int>())
                         .takeAsList(1)
                         .single()
                     val b = spark.sql("SELECT random()")
-                        .selectTyped(col("random()").`as`<Int>())
+                        .selectTyped(col("random()").typed<Int>())
                         .takeAsList(1)
                         .single()
 
@@ -187,16 +184,28 @@ class UDFRegisterTest : ShouldSpec({
                 }
 
                 should("allow udfs to be non deterministic using delegate") {
+
+
+
                     val random by udf.register(asNondeterministic = true) { ->
                         Random.nextInt()
                     }
 
+                    val executed = random()
+
+                    val map = udf.register("map") { it: Int ->
+                        "$it yay"
+                    }
+
                     val a = dsOf(1)
-                        .selectTyped(random().`as`<Int>())
+                        .selectTyped(random())
                         .takeAsList(1)
                         .single()
+
                     val b = dsOf(1)
-                        .selectTyped(random().`as`<Int>())
+                        .selectTyped(random())
+                        .selectTyped(map.invoke(col("*").typed()))
+                        .showDS()
                         .takeAsList(1)
                         .single()
 
@@ -209,33 +218,32 @@ class UDFRegisterTest : ShouldSpec({
             withSpark(logLevel = SparkLogLevel.DEBUG) {
 
                 should("allow udfs to be non nullable") {
-                    udf.register<Int?>("test", asNonNullable = true) { ->
+                    udf.register<Int?>("test") { ->
                         null
                     }
-                    shouldThrowAny {
-                        spark.sql("SELECT test()")
-                            .selectTyped(col("test()").`as`<Int>())
-                            .showDS()
-                            .takeAsList(1)
-                            .single()
-                    }
+
+                    spark.sql("SELECT test()")
+                        .selectTyped(col("test()").typed<Int?>())
+                        .showDS()
+                        .takeAsList(1)
+                        .single()
+
                 }
 
                 should("allow udfs to be non nullable using delegate") {
-                    val test by udf.register<Int?>(asNonNullable = true) { ->
+                    val test by udf.register<Int?>() { ->
                         null
                     }
 
                     // access it once
                     test()
 
-                    shouldThrowAny {
-                        spark.sql("SELECT test()")
-                            .selectTyped(col("test()").`as`<Int>())
-                            .showDS()
-                            .takeAsList(1)
-                            .single()
-                    }
+                    spark.sql("SELECT test()")
+                        .selectTyped(col("test()").typed<Int?>())
+                        .showDS()
+                        .takeAsList(1)
+                        .single()
+
                 }
             }
         }

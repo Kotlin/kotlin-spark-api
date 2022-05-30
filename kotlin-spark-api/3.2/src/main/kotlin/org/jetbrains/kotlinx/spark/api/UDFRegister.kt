@@ -26,12 +26,8 @@
 
 package org.jetbrains.kotlinx.spark.api
 
-import org.apache.spark.sql.Column
-import org.apache.spark.sql.DataTypeWithClass
-import org.apache.spark.sql.UDFRegistration
+import org.apache.spark.sql.*
 import org.apache.spark.sql.api.java.*
-import org.apache.spark.sql.catalyst.expressions.Nondeterministic
-import org.apache.spark.sql.functions
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.sql.types.DataType
 import scala.collection.mutable.WrappedArray
@@ -80,9 +76,9 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
  * A wrapper for a UDF with 0 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper0(private val udfName: String) {
+class UDFWrapper0<R>(private val udfName: String, private val encoder: Encoder<R>) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(): Column = functions.callUDF(udfName)
+    operator fun invoke(): TypedColumn<*, R> = functions.callUDF(udfName).`as`(encoder)
 }
 
 /** Registers the [func] with its [name] in [this].
@@ -98,24 +94,24 @@ class UDFWrapper0(private val udfName: String) {
 inline fun <reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
-    noinline func: () -> R,
-): UDFWrapper0 {
+    func: UDF0<R>,
+): UDFWrapper0<R> {
     register(
         name,
-        udf(UDF0(func), schema(typeOf<R>()).unWrap())
+        udf(func, schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper0(name)
+    return UDFWrapper0(name, encoder())
 }
 
 /**
  * A wrapper for a UDF with 1 argument.
  * @property udfName the name of the UDF
  */
-class UDFWrapper1(private val udfName: String) {
+class UDFWrapper1<T1, R>(private val udfName: String, private val encoder: Encoder<R>) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
+    operator fun invoke(param1: TypedColumn<*, T1>): TypedColumn<*, R> = functions.callUDF(udfName, param1).`as`(encoder)
     operator fun invoke(param1: Column): Column = functions.callUDF(udfName, param1)
 }
 
@@ -123,25 +119,25 @@ class UDFWrapper1(private val udfName: String) {
 inline fun <reified T1, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
-    noinline func: (T1) -> R,
-): UDFWrapper1 {
+    func: UDF1<T1, R>,
+): UDFWrapper1<T1, R> {
     T1::class.checkForValidType("T1")
     register(
         name,
-        udf(UDF1(func), schema(typeOf<R>()).unWrap())
+        udf(func, schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper1(name)
+    return UDFWrapper1(name, encoder())
 }
 
 /**
  * A wrapper for a UDF with 2 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper2(private val udfName: String) {
+class UDFWrapper2<T1, T2, R>(private val udfName: String, private val encoder: Encoder<R>) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
+    operator fun invoke(param1: TypedColumn<*, T1>, param2: TypedColumn<*, T2>): TypedColumn<*, R> = functions.callUDF(udfName, param1, param2).`as`(encoder)
     operator fun invoke(param1: Column, param2: Column): Column = functions.callUDF(udfName, param1, param2)
 }
 
@@ -149,18 +145,17 @@ class UDFWrapper2(private val udfName: String) {
 inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
-    noinline func: (T1, T2) -> R,
-): UDFWrapper2 {
+    func: UDF2<T1, T2, R>,
+): UDFWrapper2<T1, T2, R> {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     register(
         name,
-        udf(UDF2(func), schema(typeOf<R>()).unWrap())
+        udf(func, schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper2(name)
+    return UDFWrapper2(name, encoder())
 }
 
 /**
@@ -176,7 +171,6 @@ class UDFWrapper3(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3) -> R,
 ): UDFWrapper3 {
     T1::class.checkForValidType("T1")
@@ -186,7 +180,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
         name,
         udf(UDF3(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper3(name)
 }
@@ -204,7 +198,6 @@ class UDFWrapper4(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4) -> R,
 ): UDFWrapper4 {
     T1::class.checkForValidType("T1")
@@ -215,7 +208,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
         name,
         udf(UDF4(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper4(name)
 }
@@ -233,7 +226,6 @@ class UDFWrapper5(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5) -> R,
 ): UDFWrapper5 {
     T1::class.checkForValidType("T1")
@@ -245,7 +237,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF5(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper5(name)
 }
@@ -263,7 +255,6 @@ class UDFWrapper6(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6) -> R,
 ): UDFWrapper6 {
     T1::class.checkForValidType("T1")
@@ -276,7 +267,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF6(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper6(name)
 }
@@ -294,7 +285,6 @@ class UDFWrapper7(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7) -> R,
 ): UDFWrapper7 {
     T1::class.checkForValidType("T1")
@@ -308,7 +298,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF7(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper7(name)
 }
@@ -326,7 +316,6 @@ class UDFWrapper8(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
 ): UDFWrapper8 {
     T1::class.checkForValidType("T1")
@@ -341,7 +330,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF8(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper8(name)
 }
@@ -359,7 +348,6 @@ class UDFWrapper9(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R,
 ): UDFWrapper9 {
     T1::class.checkForValidType("T1")
@@ -375,7 +363,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF9(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper9(name)
 }
@@ -393,7 +381,6 @@ class UDFWrapper10(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R,
 ): UDFWrapper10 {
     T1::class.checkForValidType("T1")
@@ -410,7 +397,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF10(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper10(name)
 }
@@ -428,7 +415,6 @@ class UDFWrapper11(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) -> R,
 ): UDFWrapper11 {
     T1::class.checkForValidType("T1")
@@ -446,7 +432,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF11(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper11(name)
 }
@@ -464,7 +450,6 @@ class UDFWrapper12(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) -> R,
 ): UDFWrapper12 {
     T1::class.checkForValidType("T1")
@@ -483,7 +468,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF12(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper12(name)
 }
@@ -501,7 +486,6 @@ class UDFWrapper13(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) -> R,
 ): UDFWrapper13 {
     T1::class.checkForValidType("T1")
@@ -521,7 +505,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF13(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper13(name)
 }
@@ -539,7 +523,6 @@ class UDFWrapper14(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) -> R,
 ): UDFWrapper14 {
     T1::class.checkForValidType("T1")
@@ -560,7 +543,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF14(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper14(name)
 }
@@ -578,7 +561,6 @@ class UDFWrapper15(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) -> R,
 ): UDFWrapper15 {
     T1::class.checkForValidType("T1")
@@ -600,7 +582,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF15(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper15(name)
 }
@@ -618,7 +600,6 @@ class UDFWrapper16(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) -> R,
 ): UDFWrapper16 {
     T1::class.checkForValidType("T1")
@@ -641,7 +622,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF16(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper16(name)
 }
@@ -659,7 +640,6 @@ class UDFWrapper17(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) -> R,
 ): UDFWrapper17 {
     T1::class.checkForValidType("T1")
@@ -683,7 +663,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF17(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper17(name)
 }
@@ -701,7 +681,6 @@ class UDFWrapper18(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) -> R,
 ): UDFWrapper18 {
     T1::class.checkForValidType("T1")
@@ -726,7 +705,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF18(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper18(name)
 }
@@ -744,7 +723,6 @@ class UDFWrapper19(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) -> R,
 ): UDFWrapper19 {
     T1::class.checkForValidType("T1")
@@ -770,7 +748,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF19(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper19(name)
 }
@@ -788,7 +766,6 @@ class UDFWrapper20(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) -> R,
 ): UDFWrapper20 {
     T1::class.checkForValidType("T1")
@@ -815,7 +792,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF20(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper20(name)
 }
@@ -833,7 +810,6 @@ class UDFWrapper21(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified T21, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) -> R,
 ): UDFWrapper21 {
     T1::class.checkForValidType("T1")
@@ -861,7 +837,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF21(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper21(name)
 }
@@ -879,7 +855,6 @@ class UDFWrapper22(private val udfName: String) {
 inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified T21, reified T22, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
-    asNonNullable: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22) -> R,
 ): UDFWrapper22 {
     T1::class.checkForValidType("T1")
@@ -908,7 +883,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
         name,
         udf(UDF22(func), schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
-            .let { if (asNonNullable) it.asNonNullable() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
     return UDFWrapper22(name)
 }

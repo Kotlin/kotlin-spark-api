@@ -404,9 +404,26 @@ operator fun Column.get(key: Any): Column = getItem(key)
  * val df: Dataset<Row> = ...
  * val typedColumn: Dataset<Int> = df.selectTyped( col("a").`as`<Int>() )
  * ```
+ *
+ * @see typed
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
+
+/**
+ * Provides a type hint about the expected return value of this column. This information can
+ * be used by operations such as `select` on a [Dataset] to automatically convert the
+ * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.selectTyped( col("a").typed<Int>() )
+ * ```
+ *
+ * @see as
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T> Column.typed(): TypedColumn<Any, T> = `as`<T>()
 
 /**
  * Creates a [Column] of literal value.
