@@ -1,19 +1,16 @@
 plugins {
     scala
-    kotlin("jvm")
-
-    val dokkaVersion: String by System.getProperties()
-    id("org.jetbrains.dokka") version dokkaVersion
+    kotlin
+    dokka
 }
 
-val groupID: String by project
-val projectVersion: String by project
-
-group = groupID
-version = projectVersion
+group = Versions.groupID
+version = Versions.project
 
 repositories {
     mavenCentral()
+    maven(url = "https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven")
+    maven(url = "https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev")
 }
 
 tasks.withType<Test>().configureEach {
@@ -21,21 +18,27 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-    val kotestVersion: String by project
-    val kotestExtensionAllureVersion: String by project
-    val klaxonVersion: String by project
-    val atriumVersion: String by project
 
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(// todo or api(
+        project(":kotlin-spark-api"),
+    )
 
-    api(project(":kotlin-spark-api"))
+    with(Dependencies) {
+        implementation(
+            kotlinStdLib,
+            kotlinxHtml,
+            sparkSql,
+            sparkRepl,
+            sparkStreaming,
+            hadoopClient,
+            jupyter,
+        )
+    }
 
-    // TODO should implementation(spark)
-    
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.1")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
-    testImplementation("io.kotest:kotest-runner-junit5:$kotestVersion")
-    testImplementation("io.kotest.extensions:kotest-extensions-allure:$kotestExtensionAllureVersion")
-    testImplementation("com.beust:klaxon:$klaxonVersion")
-    testImplementation("ch.tutteli.atrium:atrium-fluent-en_GB:$atriumVersion")
+    with(TestDependencies) {
+        testImplementation(
+            kotest,
+            jupyter,
+        )
+    }
 }

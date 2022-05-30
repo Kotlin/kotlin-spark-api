@@ -1,8 +1,8 @@
 import java.net.URI
 
 plugins {
-    kotlin("jvm") version Versions.kotlin
-    id("com.github.hierynomus.license") version Versions.licenseGradlePluginVersion
+    kotlin
+    license
     `maven-publish`
     signing
 }

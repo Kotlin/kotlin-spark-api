@@ -1,7 +1,7 @@
 plugins {
     scala
-    kotlin("jvm")
-    id("org.jetbrains.dokka") version Versions.dokka
+    kotlin
+    dokka
 }
 
 group = Versions.groupID
@@ -29,8 +29,8 @@ dependencies {
         )
     }
 
-    with(RuntimeOnlyDependencies) {
-        runtimeOnly(
+    with(ProvidedDependencies) {
+        implementation(
             sparkSql,
             sparkStreaming,
             hadoopClient,

@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm")
+    kotlin
 }
 
 group = Versions.groupID
@@ -10,6 +10,15 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib-jdk8"))
-    implementation(project(":kotlin-spark-api"))
+    implementation(
+        project(":kotlin-spark-api"),
+    )
+
+    with(Dependencies) {
+        implementation(
+            sparkSql,
+            sparkStreaming,
+            sparkStreamingKafka,
+        )
+    }
 }

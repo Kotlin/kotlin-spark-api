@@ -1,6 +1,6 @@
 plugins {
     scala
-    kotlin("jvm")
+    kotlin
 }
 
 group = Versions.groupID
@@ -19,7 +19,9 @@ dependencies {
         )
     }
 
-    with(RuntimeOnlyDependencies) {
-        runtimeOnly(sparkSql)
+    with(ProvidedDependencies) {
+        implementation(
+            sparkSql,
+        )
     }
 }
