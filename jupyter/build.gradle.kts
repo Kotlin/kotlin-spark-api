@@ -18,14 +18,9 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-
-    implementation(// todo or api(
-        project(":kotlin-spark-api"),
-    )
-
     with(Dependencies) {
-        implementation(
-            kotlinStdLib,
+        api(
+            project(":kotlin-spark-api"),
             kotlinxHtml,
             sparkSql,
             sparkRepl,
@@ -33,12 +28,14 @@ dependencies {
             hadoopClient,
             jupyter,
         )
-    }
 
-    with(TestDependencies) {
+        implementation(
+            kotlinStdLib,
+        )
+
         testImplementation(
             kotest,
-            jupyter,
+            jupyterTest,
         )
     }
 }

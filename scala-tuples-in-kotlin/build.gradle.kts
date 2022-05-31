@@ -21,12 +21,8 @@ dependencies {
             kotlinStdLib,
             scalaLibrary,
         )
-    }
-
-    with(TestDependencies) {
         testImplementation(
             kotest,
-            klaxon,
             atrium,
             kotlinTest,
         )

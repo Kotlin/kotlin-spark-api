@@ -36,10 +36,11 @@ artifacts {
     archives(sourcesJar)
 }
 
-
-
 publishing {
     publications {
+        register<MavenPublication>("gpr") {
+            from(components["java"])
+        }
         create<MavenPublication>("mavenJava") {
             artifact(sourcesJar) {
                 classifier = "sources"
@@ -106,6 +107,16 @@ publishing {
     }
     repositories {
         maven {
+            name = "GitHubPackages"
+            url = uri("https://github.com/Kotlin/kotlin-spark-api")
+            credentials {
+                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+                password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+            }
+        }
+
+        maven {
+            name = "MavenCentral"
             val snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
             val releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             url = URI(if (Versions.project.endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)

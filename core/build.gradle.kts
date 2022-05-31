@@ -17,11 +17,8 @@ dependencies {
             scalaLibrary,
             reflect,
         )
+
+        implementation(sparkSql)
     }
 
-    with(ProvidedDependencies) {
-        implementation(
-            sparkSql,
-        )
-    }
 }

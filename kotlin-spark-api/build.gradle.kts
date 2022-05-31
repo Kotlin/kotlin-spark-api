@@ -26,18 +26,11 @@ dependencies {
         implementation(
             kotlinStdLib,
             reflect,
-        )
-    }
-
-    with(ProvidedDependencies) {
-        implementation(
             sparkSql,
             sparkStreaming,
             hadoopClient,
         )
-    }
 
-    with(TestDependencies) {
         testImplementation(
             sparkStreamingKafka,
             kotest,
@@ -48,6 +41,7 @@ dependencies {
             kafkaStreamsTestUtils,
         )
     }
+
 }
 
 
