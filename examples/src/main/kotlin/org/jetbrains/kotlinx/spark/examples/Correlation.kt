@@ -42,7 +42,6 @@ fun main() = withSpark {
     ).map(::tupleOf)
 
     val df = data.toDS()
-    df.showDS()
 
     val r1: Matrix = Correlation.corr(df, "_1").head().getAs(0)
     println(
