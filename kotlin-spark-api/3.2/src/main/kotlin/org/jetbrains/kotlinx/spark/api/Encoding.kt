@@ -72,6 +72,7 @@ import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.jvm.jvmName
 import kotlin.to
 
 @JvmField
@@ -305,6 +306,21 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                 /* dt = */ structType,
                 /* cls = */ klass.java,
                 /* nullable = */ true
+            )
+        }
+
+        UDTRegistration.exists(klass.jvmName) -> {
+            @Suppress("UNCHECKED_CAST")
+            val dataType = UDTRegistration.getUDTFor(klass.jvmName)
+                .getOrNull()!!
+                .let { it as Class<UserDefinedType<*>> }
+                .getConstructor()
+                .newInstance()
+
+            KSimpleTypeWrapper(
+                /* dt = */ dataType,
+                /* cls = */ klass.java,
+                /* nullable = */ false
             )
         }
 
