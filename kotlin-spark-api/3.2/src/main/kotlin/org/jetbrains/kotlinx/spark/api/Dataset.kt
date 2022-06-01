@@ -52,16 +52,53 @@ inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
     createDataset(list, encoder<T>())
 
 /**
+ * Utility method to create dataframe from list
+ */
+inline fun <reified T> SparkSession.toDF(list: List<T>, vararg colNames: String): Dataset<Row> =
+    toDS(list).run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
+
+/**
  * Utility method to create dataset from *array or vararg arguments
  */
 inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
-    createDataset(listOf(*t), encoder<T>())
+    createDataset(t.toList(), encoder<T>())
+
+/**
+ * Utility method to create dataframe from *array or vararg arguments
+ */
+inline fun <reified T> SparkSession.dfOf(vararg t: T): Dataset<Row> =
+    createDataset(t.toList(), encoder<T>()).toDF()
+
+/**
+ * Utility method to create dataframe from *array or vararg arguments with given column names
+ */
+inline fun <reified T> SparkSession.dfOf(colNames: Array<String>, vararg t: T): Dataset<Row> =
+    createDataset(t.toList(), encoder<T>())
+        .run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
 
 /**
  * Utility method to create dataset from list
  */
 inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
     spark.createDataset(this, encoder<T>())
+
+/**
+ * Utility method to create dataframe from list
+ */
+inline fun <reified T> List<T>.toDF(spark: SparkSession, vararg colNames: String): Dataset<Row> =
+    toDS(spark).run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
+
+/**
+ * Utility method to create dataset from list
+ */
+inline fun <reified T> Array<T>.toDS(spark: SparkSession): Dataset<T> =
+    toList().toDS(spark)
+
+/**
+ * Utility method to create dataframe from list
+ */
+inline fun <reified T> Array<T>.toDF(spark: SparkSession, vararg colNames: String): Dataset<Row> =
+    toDS(spark).run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
 
 /**
  * Utility method to create dataset from RDD
@@ -79,15 +116,15 @@ inline fun <reified T> JavaRDDLike<T, *>.toDS(spark: SparkSession): Dataset<T> =
  * Utility method to create Dataset<Row> (Dataframe) from JavaRDD.
  * NOTE: [T] must be [Serializable].
  */
-inline fun <reified T> JavaRDDLike<T, *>.toDF(spark: SparkSession): Dataset<Row> =
-    toDS(spark).toDF()
+inline fun <reified T> JavaRDDLike<T, *>.toDF(spark: SparkSession, vararg colNames: String): Dataset<Row> =
+    toDS(spark).run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
 
 /**
  * Utility method to create Dataset<Row> (Dataframe) from RDD.
  * NOTE: [T] must be [Serializable].
  */
-inline fun <reified T> RDD<T>.toDF(spark: SparkSession): Dataset<Row> =
-    toDS(spark).toDF()
+inline fun <reified T> RDD<T>.toDF(spark: SparkSession, vararg colNames: String): Dataset<Row> =
+    toDS(spark).run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
 
 
 /**

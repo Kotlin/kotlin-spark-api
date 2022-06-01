@@ -31,6 +31,7 @@ import org.apache.spark.sql.types.StructType
 import org.jetbrains.kotlinx.spark.api.showDS
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import org.jetbrains.kotlinx.spark.api.withSpark
+import scala.Tuple1
 
 
 fun main() = withSpark {
@@ -41,9 +42,9 @@ fun main() = withSpark {
         Vectors.sparse(4, intArrayOf(0, 3), doubleArrayOf(9.0, 1.0))
     ).map(::tupleOf)
 
-    val df = data.toDS()
+    val df = data.toDF("features")
 
-    val r1: Matrix = Correlation.corr(df, "_1").head().getAs(0)
+    val r1 = Correlation.corr(df, "features").head().getAs<Matrix>(0)
     println(
         """
         |Pearson correlation matrix:
@@ -52,7 +53,7 @@ fun main() = withSpark {
         """.trimMargin()
     )
 
-    val r2: Matrix = Correlation.corr(df, "_1", "spearman").head().getAs(0)
+    val r2 = Correlation.corr(df, "features", "spearman").head().getAs<Matrix>(0)
     println(
         """
         |Spearman correlation matrix:
