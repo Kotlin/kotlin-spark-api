@@ -70,6 +70,7 @@ import kotlin.String
 import kotlin.Suppress
 import kotlin.reflect.*
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.jvm.jvmName
@@ -320,7 +321,21 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             KSimpleTypeWrapper(
                 /* dt = */ dataType,
                 /* cls = */ klass.java,
-                /* nullable = */ false
+                /* nullable = */ type.isMarkedNullable
+            )
+        }
+
+        klass.hasAnnotation<SQLUserDefinedType>() -> {
+            val dataType = klass.findAnnotation<SQLUserDefinedType>()!!
+                .udt
+                .java
+                .getConstructor()
+                .newInstance()
+
+            KSimpleTypeWrapper(
+                /* dt = */ dataType,
+                /* cls = */ klass.java,
+                /* nullable = */ type.isMarkedNullable
             )
         }
 

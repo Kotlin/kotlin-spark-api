@@ -45,10 +45,7 @@ class CityUserDefinedType : UserDefinedType<City>() {
 }
 
 @SQLUserDefinedType(udt = CityUserDefinedType::class)
-class City(
-    val name: String,
-    val departmentNumber: Int,
-) : Serializable {
+class City(val name: String, val departmentNumber: Int) : Serializable {
 
     override fun toString(): String =
         MoreObjects
@@ -60,7 +57,7 @@ class City(
 
 fun main() = withSpark {
 
-    UDTRegistration.register(City::class.jvmName, CityUserDefinedType::class.jvmName)
+//    UDTRegistration.register(City::class.jvmName, CityUserDefinedType::class.jvmName)
 
     val items = listOf(
         City("Amsterdam", 1),
