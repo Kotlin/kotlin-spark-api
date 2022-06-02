@@ -185,8 +185,6 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("allow udfs to be non deterministic using delegate") {
 
-
-
                     val random by udf.register(asNondeterministic = true) { ->
                         Random.nextInt()
                     }

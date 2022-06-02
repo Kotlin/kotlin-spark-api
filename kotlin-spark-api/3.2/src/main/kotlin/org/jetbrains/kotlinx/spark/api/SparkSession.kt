@@ -100,6 +100,10 @@ class KSparkSession(val spark: SparkSession) {
      * it is present in the query.
      */
     val udf: UDFRegistration get() = spark.udf()
+
+    fun <T : TypedUserDefinedFunction<*>> T.register(name: String = this.name ?: error("No name defined yet")): T = apply {
+        spark.udf().register(name, udf)
+    }
 }
 
 /**

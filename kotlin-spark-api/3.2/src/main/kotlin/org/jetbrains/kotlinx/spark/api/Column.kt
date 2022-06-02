@@ -408,7 +408,7 @@ operator fun Column.get(key: Any): Column = getItem(key)
  * @see typed
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
+inline fun <reified T> Column.`as`(): TypedColumn<*, T> = `as`(encoder<T>())
 
 /**
  * Provides a type hint about the expected return value of this column. This information can
@@ -423,7 +423,7 @@ inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
  * @see as
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> Column.typed(): TypedColumn<Any, T> = `as`<T>()
+inline fun <reified T> Column.typed(): TypedColumn<*, T> = `as`<T>()
 
 /**
  * Creates a [Column] of literal value.
@@ -438,12 +438,35 @@ inline fun <reified T> Column.typed(): TypedColumn<Any, T> = `as`<T>()
 fun lit(a: Any): Column = functions.lit(a)
 
 /**
+ * Returns a [TypedColumn] based on the given column name and type [T].
+ *
+ * This is just a shortcut to the function from [org.apache.spark.sql.functions] combined with an [as] call.
+ * For all the functions, simply add `import org.apache.spark.sql.functions.*` to your file.
+ *
+ * @see col
+ * @see as
+ */
+inline fun <reified T> typedCol(colName: String): TypedColumn<*, T> = functions.col(colName).`as`<T>()
+
+/**
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
  *    val new: Dataset<Pair<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
  * ```
+ * @see typedCol
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
+inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> = typedCol(column)
+
+/**
+ * Returns a [Column] based on the given class attribute, not connected to a dataset.
+ * ```kotlin
+ *    val dataset: Dataset<YourClass> = ...
+ *    val new: Dataset<Pair<TypeOfA, TypeOfB>> = dataset.select( typedCol(YourClass::a), typedCol(YourClass::b) )
+ * ```
+ * @see col
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <reified T, reified U> typedCol(column: KProperty1<T, U>): TypedColumn<T, U> =
     functions.col(column.name).`as`<U>() as TypedColumn<T, U>

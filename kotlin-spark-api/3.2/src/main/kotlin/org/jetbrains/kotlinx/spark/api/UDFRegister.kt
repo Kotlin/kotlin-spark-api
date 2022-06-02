@@ -29,54 +29,14 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.spark.sql.*
 import org.apache.spark.sql.api.java.*
 import org.apache.spark.sql.functions.udf
-import org.apache.spark.sql.types.DataType
-import scala.collection.mutable.WrappedArray
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.typeOf
 
-/** Unwraps [DataTypeWithClass]. */
-fun DataType.unWrap(): DataType =
-    when (this) {
-        is DataTypeWithClass -> DataType.fromJson(dt().json())
-        else -> this
-    }
-
-/**
- * Checks if [this] is of a valid type for a UDF, otherwise it throws a [TypeOfUDFParameterNotSupportedException]
- */
-@PublishedApi
-internal fun KClass<*>.checkForValidType(parameterName: String) {
-    if (this == String::class || isSubclassOf(WrappedArray::class))
-        return // Most of the time we need strings or WrappedArrays
-
-    if (isSubclassOf(Iterable::class)
-        || java.isArray
-        || isSubclassOf(Map::class)
-        || isSubclassOf(Array::class)
-        || isSubclassOf(ByteArray::class)
-        || isSubclassOf(CharArray::class)
-        || isSubclassOf(ShortArray::class)
-        || isSubclassOf(IntArray::class)
-        || isSubclassOf(LongArray::class)
-        || isSubclassOf(FloatArray::class)
-        || isSubclassOf(DoubleArray::class)
-        || isSubclassOf(BooleanArray::class)
-    ) throw TypeOfUDFParameterNotSupportedException(this, parameterName)
-}
-
-/**
- * An exception thrown when the UDF is generated with illegal types for the parameters
- */
-class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: String) : IllegalArgumentException(
-    "Parameter $parameterName is subclass of ${kClass.qualifiedName}. If you need to process an array use ${WrappedArray::class.qualifiedName}."
-)
 
 /**
  * A wrapper for a UDF with 0 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper0<R>(private val udfName: String, private val encoder: Encoder<R>) {
+class RegisteredUDF0<R>(private val udfName: String, private val encoder: Encoder<R>) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
     operator fun invoke(): TypedColumn<*, R> = functions.callUDF(udfName).`as`(encoder)
 }
@@ -95,23 +55,25 @@ inline fun <reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
     func: UDF0<R>,
-): UDFWrapper0<R> {
+): RegisteredUDF0<R> {
     register(
         name,
         udf(func, schema(typeOf<R>()).unWrap())
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper0(name, encoder())
+    return RegisteredUDF0(name, encoder())
 }
 
 /**
  * A wrapper for a UDF with 1 argument.
  * @property udfName the name of the UDF
  */
-class UDFWrapper1<T1, R>(private val udfName: String, private val encoder: Encoder<R>) {
+class RegisteredUDF1<T1, R>(private val udfName: String, private val encoder: Encoder<R>) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: TypedColumn<*, T1>): TypedColumn<*, R> = functions.callUDF(udfName, param1).`as`(encoder)
+    operator fun invoke(param1: TypedColumn<*, T1>): TypedColumn<*, R> =
+        functions.callUDF(udfName, param1).`as`(encoder)
+
     operator fun invoke(param1: Column): Column = functions.callUDF(udfName, param1)
 }
 
@@ -120,7 +82,7 @@ inline fun <reified T1, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
     func: UDF1<T1, R>,
-): UDFWrapper1<T1, R> {
+): RegisteredUDF1<T1, R> {
     T1::class.checkForValidType("T1")
     register(
         name,
@@ -128,16 +90,18 @@ inline fun <reified T1, reified R> UDFRegistration.register(
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper1(name, encoder())
+    return RegisteredUDF1(name, encoder())
 }
 
 /**
  * A wrapper for a UDF with 2 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper2<T1, T2, R>(private val udfName: String, private val encoder: Encoder<R>) {
+class RegisteredUDF2<T1, T2, R>(private val udfName: String, private val encoder: Encoder<R>) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: TypedColumn<*, T1>, param2: TypedColumn<*, T2>): TypedColumn<*, R> = functions.callUDF(udfName, param1, param2).`as`(encoder)
+    operator fun invoke(param1: TypedColumn<*, T1>, param2: TypedColumn<*, T2>): TypedColumn<*, R> =
+        functions.callUDF(udfName, param1, param2).`as`(encoder)
+
     operator fun invoke(param1: Column, param2: Column): Column = functions.callUDF(udfName, param1, param2)
 }
 
@@ -146,7 +110,7 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
     name: String,
     asNondeterministic: Boolean = false,
     func: UDF2<T1, T2, R>,
-): UDFWrapper2<T1, T2, R> {
+): RegisteredUDF2<T1, T2, R> {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     register(
@@ -155,16 +119,17 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper2(name, encoder())
+    return RegisteredUDF2(name, encoder())
 }
 
 /**
  * A wrapper for a UDF with 3 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper3(private val udfName: String) {
+class RegisteredUDF3(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column): Column = functions.callUDF(udfName, param1, param2, param3)
+    operator fun invoke(param1: Column, param2: Column, param3: Column): Column =
+        functions.callUDF(udfName, param1, param2, param3)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -172,7 +137,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3) -> R,
-): UDFWrapper3 {
+): RegisteredUDF3 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -182,16 +147,17 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper3(name)
+    return RegisteredUDF3(name)
 }
 
 /**
  * A wrapper for a UDF with 4 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper4(private val udfName: String) {
+class RegisteredUDF4(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4)
+    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column): Column =
+        functions.callUDF(udfName, param1, param2, param3, param4)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -199,7 +165,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4) -> R,
-): UDFWrapper4 {
+): RegisteredUDF4 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -210,16 +176,17 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper4(name)
+    return RegisteredUDF4(name)
 }
 
 /**
  * A wrapper for a UDF with 5 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper5(private val udfName: String) {
+class RegisteredUDF5(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5)
+    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column): Column =
+        functions.callUDF(udfName, param1, param2, param3, param4, param5)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -227,7 +194,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5) -> R,
-): UDFWrapper5 {
+): RegisteredUDF5 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -239,16 +206,23 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper5(name)
+    return RegisteredUDF5(name)
 }
 
 /**
  * A wrapper for a UDF with 6 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper6(private val udfName: String) {
+class RegisteredUDF6(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column
+    ): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -256,7 +230,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6) -> R,
-): UDFWrapper6 {
+): RegisteredUDF6 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -269,16 +243,24 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper6(name)
+    return RegisteredUDF6(name)
 }
 
 /**
  * A wrapper for a UDF with 7 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper7(private val udfName: String) {
+class RegisteredUDF7(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column
+    ): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -286,7 +268,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7) -> R,
-): UDFWrapper7 {
+): RegisteredUDF7 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -300,16 +282,25 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper7(name)
+    return RegisteredUDF7(name)
 }
 
 /**
  * A wrapper for a UDF with 8 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper8(private val udfName: String) {
+class RegisteredUDF8(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column
+    ): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -317,7 +308,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8) -> R,
-): UDFWrapper8 {
+): RegisteredUDF8 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -332,16 +323,26 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper8(name)
+    return RegisteredUDF8(name)
 }
 
 /**
  * A wrapper for a UDF with 9 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper9(private val udfName: String) {
+class RegisteredUDF9(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column
+    ): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -349,7 +350,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R,
-): UDFWrapper9 {
+): RegisteredUDF9 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -365,16 +366,28 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper9(name)
+    return RegisteredUDF9(name)
 }
 
 /**
  * A wrapper for a UDF with 10 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper10(private val udfName: String) {
+class RegisteredUDF10(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column
+    ): Column =
+        functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10)
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -382,7 +395,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R,
-): UDFWrapper10 {
+): RegisteredUDF10 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -399,16 +412,41 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper10(name)
+    return RegisteredUDF10(name)
 }
 
 /**
  * A wrapper for a UDF with 11 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper11(private val udfName: String) {
+class RegisteredUDF11(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -416,7 +454,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) -> R,
-): UDFWrapper11 {
+): RegisteredUDF11 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -434,16 +472,43 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper11(name)
+    return RegisteredUDF11(name)
 }
 
 /**
  * A wrapper for a UDF with 12 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper12(private val udfName: String) {
+class RegisteredUDF12(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -451,7 +516,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) -> R,
-): UDFWrapper12 {
+): RegisteredUDF12 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -470,16 +535,45 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper12(name)
+    return RegisteredUDF12(name)
 }
 
 /**
  * A wrapper for a UDF with 13 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper13(private val udfName: String) {
+class RegisteredUDF13(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -487,7 +581,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) -> R,
-): UDFWrapper13 {
+): RegisteredUDF13 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -507,16 +601,47 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper13(name)
+    return RegisteredUDF13(name)
 }
 
 /**
  * A wrapper for a UDF with 14 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper14(private val udfName: String) {
+class RegisteredUDF14(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -524,7 +649,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) -> R,
-): UDFWrapper14 {
+): RegisteredUDF14 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -545,16 +670,49 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper14(name)
+    return RegisteredUDF14(name)
 }
 
 /**
  * A wrapper for a UDF with 15 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper15(private val udfName: String) {
+class RegisteredUDF15(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -562,7 +720,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) -> R,
-): UDFWrapper15 {
+): RegisteredUDF15 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -584,16 +742,51 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper15(name)
+    return RegisteredUDF15(name)
 }
 
 /**
  * A wrapper for a UDF with 16 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper16(private val udfName: String) {
+class RegisteredUDF16(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column, param16: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column,
+        param16: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15,
+        param16
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -601,7 +794,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) -> R,
-): UDFWrapper16 {
+): RegisteredUDF16 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -624,16 +817,53 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper16(name)
+    return RegisteredUDF16(name)
 }
 
 /**
  * A wrapper for a UDF with 17 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper17(private val udfName: String) {
+class RegisteredUDF17(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column, param16: Column, param17: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column,
+        param16: Column,
+        param17: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15,
+        param16,
+        param17
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -641,7 +871,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) -> R,
-): UDFWrapper17 {
+): RegisteredUDF17 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -665,16 +895,55 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper17(name)
+    return RegisteredUDF17(name)
 }
 
 /**
  * A wrapper for a UDF with 18 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper18(private val udfName: String) {
+class RegisteredUDF18(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column, param16: Column, param17: Column, param18: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column,
+        param16: Column,
+        param17: Column,
+        param18: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15,
+        param16,
+        param17,
+        param18
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -682,7 +951,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) -> R,
-): UDFWrapper18 {
+): RegisteredUDF18 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -707,16 +976,57 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper18(name)
+    return RegisteredUDF18(name)
 }
 
 /**
  * A wrapper for a UDF with 19 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper19(private val udfName: String) {
+class RegisteredUDF19(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column, param16: Column, param17: Column, param18: Column, param19: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column,
+        param16: Column,
+        param17: Column,
+        param18: Column,
+        param19: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15,
+        param16,
+        param17,
+        param18,
+        param19
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -724,7 +1034,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) -> R,
-): UDFWrapper19 {
+): RegisteredUDF19 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -750,16 +1060,59 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper19(name)
+    return RegisteredUDF19(name)
 }
 
 /**
  * A wrapper for a UDF with 20 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper20(private val udfName: String) {
+class RegisteredUDF20(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column, param16: Column, param17: Column, param18: Column, param19: Column, param20: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column,
+        param16: Column,
+        param17: Column,
+        param18: Column,
+        param19: Column,
+        param20: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15,
+        param16,
+        param17,
+        param18,
+        param19,
+        param20
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -767,7 +1120,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) -> R,
-): UDFWrapper20 {
+): RegisteredUDF20 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -794,16 +1147,61 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper20(name)
+    return RegisteredUDF20(name)
 }
 
 /**
  * A wrapper for a UDF with 21 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper21(private val udfName: String) {
+class RegisteredUDF21(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column, param16: Column, param17: Column, param18: Column, param19: Column, param20: Column, param21: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20, param21)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column,
+        param16: Column,
+        param17: Column,
+        param18: Column,
+        param19: Column,
+        param20: Column,
+        param21: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15,
+        param16,
+        param17,
+        param18,
+        param19,
+        param20,
+        param21
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -811,7 +1209,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) -> R,
-): UDFWrapper21 {
+): RegisteredUDF21 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -839,16 +1237,63 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper21(name)
+    return RegisteredUDF21(name)
 }
 
 /**
  * A wrapper for a UDF with 22 arguments.
  * @property udfName the name of the UDF
  */
-class UDFWrapper22(private val udfName: String) {
+class RegisteredUDF22(private val udfName: String) {
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
-    operator fun invoke(param1: Column, param2: Column, param3: Column, param4: Column, param5: Column, param6: Column, param7: Column, param8: Column, param9: Column, param10: Column, param11: Column, param12: Column, param13: Column, param14: Column, param15: Column, param16: Column, param17: Column, param18: Column, param19: Column, param20: Column, param21: Column, param22: Column): Column = functions.callUDF(udfName, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20, param21, param22)
+    operator fun invoke(
+        param1: Column,
+        param2: Column,
+        param3: Column,
+        param4: Column,
+        param5: Column,
+        param6: Column,
+        param7: Column,
+        param8: Column,
+        param9: Column,
+        param10: Column,
+        param11: Column,
+        param12: Column,
+        param13: Column,
+        param14: Column,
+        param15: Column,
+        param16: Column,
+        param17: Column,
+        param18: Column,
+        param19: Column,
+        param20: Column,
+        param21: Column,
+        param22: Column
+    ): Column = functions.callUDF(
+        udfName,
+        param1,
+        param2,
+        param3,
+        param4,
+        param5,
+        param6,
+        param7,
+        param8,
+        param9,
+        param10,
+        param11,
+        param12,
+        param13,
+        param14,
+        param15,
+        param16,
+        param17,
+        param18,
+        param19,
+        param20,
+        param21,
+        param22
+    )
 }
 
 /** Registers the [func] with its [name] in [this]. */
@@ -856,7 +1301,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     asNondeterministic: Boolean = false,
     noinline func: (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22) -> R,
-): UDFWrapper22 {
+): RegisteredUDF22 {
     T1::class.checkForValidType("T1")
     T2::class.checkForValidType("T2")
     T3::class.checkForValidType("T3")
@@ -885,5 +1330,5 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
             .let { if (asNondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() }
     )
-    return UDFWrapper22(name)
+    return RegisteredUDF22(name)
 }
