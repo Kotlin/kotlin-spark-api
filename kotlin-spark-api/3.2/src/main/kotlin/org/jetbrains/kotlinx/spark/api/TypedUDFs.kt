@@ -49,6 +49,11 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
 
 // TODO
 
+/**
+ * @param name Will set (overwrite) the name in [udf] if specified
+ * @param udf The underlying UDF
+ * @param encoder Encoder for the return type of the UDF
+ */
 sealed class TypedUserDefinedFunction<R>(
     val name: String? = null,
     udf: UserDefinedFunction,
@@ -68,23 +73,26 @@ sealed class TypedUserDefinedFunction<R>(
 }
 
 /** Can be used to set the name of a UDF with a by-delegate. */
-inline operator fun <reified T : TypedUserDefinedFunction<*>> T.getValue(thisRef: Any?, property: KProperty<*>): T =
-    withName(property.name)
+inline operator fun <R, reified T : TypedUserDefinedFunction<R>> T.getValue(thisRef: Any?, property: KProperty<*>): T =
+    copy(name = property.name)
 
-/** Creates a copy of the original [TypedUserDefinedFunction] but with a new udf (with new name). */
-inline fun <reified T : TypedUserDefinedFunction<*>> T.withName(name: String): T =
-    T::class.primaryConstructor!!.run {
-        callBy(
-            parameters.associateWith {
-                when (it.name) {
-                    TypedUserDefinedFunction<*>::name.name -> name
-                    TypedUserDefinedFunction<*>::udf.name -> udf
-                    TypedUserDefinedFunction<*>::encoder.name -> encoder
-                    else -> error("Wrong arguments")
-                }
+/** Copy method for all [TypedUserDefinedFunction] functions. */
+inline fun <R, reified T : TypedUserDefinedFunction<R>> T.copy(
+    name: String? = this.name,
+    udf: UserDefinedFunction = this.udf,
+    encoder: Encoder<R> = this.encoder,
+): T = T::class.primaryConstructor!!.run {
+    callBy(
+        parameters.associateWith {
+            when (it.name) {
+                TypedUserDefinedFunction<*>::name.name -> name
+                TypedUserDefinedFunction<*>::udf.name -> udf
+                TypedUserDefinedFunction<*>::encoder.name -> encoder
+                else -> error("Wrong arguments")
             }
-        )
-    }
+        }
+    )
+}
 
 
 class TypedUserDefinedFunction0<R>(name: String?, udf: UserDefinedFunction, encoder: Encoder<R>) :
@@ -96,6 +104,20 @@ class TypedUserDefinedFunction0<R>(name: String?, udf: UserDefinedFunction, enco
     /** Calls the [functions.callUDF] for the UDF with the [udfName]. */
     fun invokeUntyped(): Column = super.invokeUntyped()
 }
+
+/** allows for functions as properties to me made into a udf */
+inline fun <reified R> udf(
+    func: KProperty0<() -> R>,
+    name: String = func.name,
+    nondeterministic: Boolean = false,
+): TypedUserDefinedFunction0<R> = udf(name, nondeterministic, func.get())
+
+/** allows for `::myFunction.toUdf()` */
+inline fun <reified R> udf(
+    func: KFunction0<R>,
+    name: String = func.name,
+    nondeterministic: Boolean = false,
+): TypedUserDefinedFunction0<R> = udf(name, nondeterministic, func)
 
 inline fun <reified R> udf(
     name: String? = null,

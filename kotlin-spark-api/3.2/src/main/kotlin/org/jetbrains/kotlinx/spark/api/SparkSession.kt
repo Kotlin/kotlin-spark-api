@@ -101,7 +101,9 @@ class KSparkSession(val spark: SparkSession) {
      */
     val udf: UDFRegistration get() = spark.udf()
 
-    fun <T : TypedUserDefinedFunction<*>> T.register(name: String = this.name ?: error("No name defined yet")): T = apply {
+    fun <T : TypedUserDefinedFunction<*>> T.register(
+        name: String = this.name ?: error("This UDF has no name defined yet, please define one in this function call."),
+    ): T = apply {
         spark.udf().register(name, udf)
     }
 }
