@@ -38,33 +38,20 @@ import kotlin.reflect.KFunction1
 import kotlin.reflect.KProperty0
 
 
-inline fun <R, reified T : TypedUserDefinedFunction<R>> UDFRegistration.register(
+inline fun <R, reified T : NamedTypedUserDefinedFunction<R, *>> UDFRegistration.register(
     typedUdf: T,
-): T = typedUdf.copy(
+): T = typedUdf.copy<R, T>(
     name = typedUdf.name,
     udf = register(typedUdf.name, typedUdf.udf),
 )
 
-fun <R> UDFRegistration.register(
-    unnamedTypedUdf: UnnamedTypedUserDefinedFunction0<R>,
+inline fun <reified R, reified N, reified U : TypedUserDefinedFunction<R, N>> UDFRegistration.register(
+    unnamedTypedUdf: U,
     name: String,
-): TypedUserDefinedFunction0<R> = unnamedTypedUdf.withName(name).copy(
-    udf = register(name, unnamedTypedUdf.udf),
-)
-
-fun <R, T1> UDFRegistration.register(
-    unnamedTypedUdf: UnnamedTypedUserDefinedFunction1<R, T1>,
-    name: String,
-): TypedUserDefinedFunction1<R, T1> = unnamedTypedUdf.withName(name).copy(
-    udf = register(name, unnamedTypedUdf.udf),
-)
-
-fun <R, T1, T2> UDFRegistration.register(
-    unnamedTypedUdf: UnnamedTypedUserDefinedFunction2<R, T1, T2>,
-    name: String,
-): TypedUserDefinedFunction2<R, T1, T2> = unnamedTypedUdf.withName(name).copy(
-    udf = register(name, unnamedTypedUdf.udf),
-)
+): N = unnamedTypedUdf.withName(name)
+    .copy<R, N>(
+        udf = register(name, unnamedTypedUdf.udf),
+    )
 
 fun main() = withSpark {
     val test = udf.register(udf { -> 1 }, "erwerewr")
@@ -87,16 +74,17 @@ inline fun <reified IN, reified BUF, reified OUT> aggregatorOf(
     override fun outputEncoder(): Encoder<OUT> = outputEncoder
 }
 
-/** Registers [agg] as a UDAF for SQL. Returns the UDAF as [TypedUserDefinedFunction].  */
+/** Registers [agg] as a UDAF for SQL. Returns the UDAF as [NamedTypedUserDefinedFunction].  */
 inline fun <reified T1, reified R> UDFRegistration.register(
     agg: Aggregator<T1, *, R>,
-    name: String? = agg::class.simpleName ?: error("Could not create a name for this UDAF, please define one in this function call."),
+    name: String? = agg::class.simpleName
+        ?: error("Could not create a name for this UDAF, please define one in this function call."),
     nondeterministic: Boolean = false,
 ) = register(
     udaf(agg = agg, name = name, nondeterministic = nondeterministic)
 )
 
-/** Registers a UDAF for SQL based on the given arguments. Returns the UDAF as [TypedUserDefinedFunction].  */
+/** Registers a UDAF for SQL based on the given arguments. Returns the UDAF as [NamedTypedUserDefinedFunction].  */
 inline fun <reified IN, reified BUF, reified OUT> UDFRegistration.register(
     name: String,
     zero: BUF,
