@@ -3,6 +3,8 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.spark.sql.*
 import org.apache.spark.sql.api.java.UDF0
 import org.apache.spark.sql.api.java.UDF1
+import org.apache.spark.sql.api.java.UDF2
+import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.types.DataType
 import scala.collection.mutable.WrappedArray
@@ -49,17 +51,34 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
 
 // TODO
 
+inline fun <reified IN, reified OUT, reified AGG : Aggregator<IN, *, OUT>> udafUnnamed(
+    agg: AGG,
+    nondeterministic: Boolean = false,
+): UnnamedTypedUserDefinedFunction1<IN, OUT> {
+    IN::class.checkForValidType("IN")
+    OUT::class.checkForValidType("OUT")
+
+    return UnnamedTypedUserDefinedFunction1(
+        udf = functions.udaf(agg, encoder<IN>())
+            .let { if (nondeterministic) it.asNondeterministic() else it }
+            .let { if (typeOf<OUT>().isMarkedNullable) it else it.asNonNullable() },
+        encoder = encoder<OUT>(),
+    )
+}
+
+inline fun <reified IN, reified OUT, reified AGG : Aggregator<IN, *, OUT>> udaf(
+    agg: AGG,
+    name: String = agg::class.simpleName ?: error("Could not obtain name from [agg], either supply a name or use [udafUnnamed()]"),
+    nondeterministic: Boolean = false,
+): TypedUserDefinedFunction1<IN, OUT> = udafUnnamed(agg = agg, nondeterministic = nondeterministic).withName(name)
+
 /**
- * @param name Will set (overwrite) the name in [udf] if specified
  * @param udf The underlying UDF
  * @param encoder Encoder for the return type of the UDF
  */
-sealed class TypedUserDefinedFunction<R>(
-    val name: String? = null,
-    udf: UserDefinedFunction,
-    val encoder: Encoder<R>,
-) {
-    val udf: UserDefinedFunction = name?.let { udf.withName(it) } ?: udf
+sealed interface UnnamedTypedUserDefinedFunction<R> {
+    val udf: UserDefinedFunction
+    val encoder: Encoder<R>
 
     /** Returns true when the UDF can return a nullable value. */
     val nullable: Boolean get() = udf.nullable()
@@ -67,18 +86,31 @@ sealed class TypedUserDefinedFunction<R>(
     /** Returns true iff the UDF is deterministic, i.e. the UDF produces the same output given the same input. */
     val deterministic: Boolean get() = udf.deterministic()
 
-    protected fun invokeUntyped(vararg params: Column): Column = udf.apply(*params)
+    fun invokeUntyped(vararg params: Column): Column = udf.apply(*params)
 
-    protected operator fun invoke(vararg params: Column): TypedColumn<*, R> = invokeUntyped(*params).`as`(encoder)
+    operator fun invoke(vararg params: Column): TypedColumn<*, R> = invokeUntyped(*params).`as`(encoder)
+
+    fun withName(name: String): TypedUserDefinedFunction<R>
+
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): TypedUserDefinedFunction<R>
 }
 
-/** Can be used to set the name of a UDF with a by-delegate. */
-inline operator fun <R, reified T : TypedUserDefinedFunction<R>> T.getValue(thisRef: Any?, property: KProperty<*>): T =
-    copy(name = property.name)
+/**
+ * @param name Will set (overwrite) the name in [udf] if specified
+ * @param udf The underlying UDF
+ * @param encoder Encoder for the return type of the UDF
+ */
+sealed interface TypedUserDefinedFunction<R> : UnnamedTypedUserDefinedFunction<R> {
+    val name: String
+}
+
+///** Can be used to set the name of a UDF with a by-delegate. */
+//inline operator fun <R, reified T : TypedUserDefinedFunction<R>> T.getValue(thisRef: Any?, property: KProperty<*>): T =
+//    copy(name = property.name)
 
 /** Copy method for all [TypedUserDefinedFunction] functions. */
 inline fun <R, reified T : TypedUserDefinedFunction<R>> T.copy(
-    name: String? = this.name,
+    name: String = this.name,
     udf: UserDefinedFunction = this.udf,
     encoder: Encoder<R> = this.encoder,
 ): T = T::class.primaryConstructor!!.run {
@@ -93,17 +125,46 @@ inline fun <R, reified T : TypedUserDefinedFunction<R>> T.copy(
         }
     )
 }
+//
+///** Copy method for all [TypedUserDefinedFunction] functions. */
+//inline fun <R, reified T : UnnamedTypedUserDefinedFunction<R>> T.withName(
+//    udf: UserDefinedFunction = this.udf,
+//    encoder: Encoder<R> = this.encoder,
+//): T = T::class.primaryConstructor!!.run {
+//    callBy(
+//        parameters.associateWith {
+//            when (it.name) {
+//                UnnamedTypedUserDefinedFunction<*>::udf.name -> udf
+//                UnnamedTypedUserDefinedFunction<*>::encoder.name -> encoder
+//                else -> error("Wrong arguments")
+//            }
+//        }
+//    )
+//}
 
-
-class TypedUserDefinedFunction0<R>(name: String?, udf: UserDefinedFunction, encoder: Encoder<R>) :
-    TypedUserDefinedFunction<R>(name, udf, encoder) {
+open class UnnamedTypedUserDefinedFunction0<R>(
+    override val udf: UserDefinedFunction,
+    override val encoder: Encoder<R>,
+) : UnnamedTypedUserDefinedFunction<R> {
 
     /** Calls the [functions.callUDF] for the UDF with the [udfName]. */
     operator fun invoke(): TypedColumn<*, R> = super.invoke()
 
     /** Calls the [functions.callUDF] for the UDF with the [udfName]. */
     fun invokeUntyped(): Column = super.invokeUntyped()
+
+    override fun withName(name: String): TypedUserDefinedFunction0<R> = TypedUserDefinedFunction0(
+        name = name,
+        udf = udf,
+        encoder = encoder,
+    )
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>): TypedUserDefinedFunction0<R> = withName(property.name)
 }
+
+class TypedUserDefinedFunction0<R>(override val name: String, udf: UserDefinedFunction, encoder: Encoder<R>) :
+    UnnamedTypedUserDefinedFunction0<R>(udf = udf.withName(name), encoder = encoder),
+    TypedUserDefinedFunction<R>
 
 /** allows for functions as properties to me made into a udf */
 inline fun <reified R> udf(
@@ -120,12 +181,16 @@ inline fun <reified R> udf(
 ): TypedUserDefinedFunction0<R> = udf(name, nondeterministic, func)
 
 inline fun <reified R> udf(
-    name: String? = null,
+    name: String,
     nondeterministic: Boolean = false,
     func: UDF0<R>,
-): TypedUserDefinedFunction0<R> {
-    return TypedUserDefinedFunction0(
-        name = name,
+): TypedUserDefinedFunction0<R> = udf(nondeterministic = nondeterministic, func = func).withName(name)
+
+inline fun <reified R> udf(
+    nondeterministic: Boolean = false,
+    func: UDF0<R>,
+): UnnamedTypedUserDefinedFunction0<R> {
+    return UnnamedTypedUserDefinedFunction0<R>(
         udf = functions.udf(func, schema(typeOf<R>()).unWrap())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
@@ -133,8 +198,10 @@ inline fun <reified R> udf(
     )
 }
 
-class TypedUserDefinedFunction1<T1, R>(name: String?, udf: UserDefinedFunction, encoder: Encoder<R>) :
-    TypedUserDefinedFunction<R>(name, udf, encoder) {
+open class UnnamedTypedUserDefinedFunction1<T1, R>(
+    override val udf: UserDefinedFunction,
+    override val encoder: Encoder<R>,
+) : UnnamedTypedUserDefinedFunction<R> {
 
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given column. */
     operator fun invoke(param1: TypedColumn<*, T1>): TypedColumn<*, R> = super.invoke(param1)
@@ -144,7 +211,19 @@ class TypedUserDefinedFunction1<T1, R>(name: String?, udf: UserDefinedFunction, 
 
     /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
     operator fun invoke(param1: Column): Column = super.invokeUntyped(param1)
+    override fun withName(name: String) = TypedUserDefinedFunction1<T1, R>(
+        name = name,
+        udf = udf,
+        encoder = encoder,
+    )
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>) = withName(property.name)
 }
+
+class TypedUserDefinedFunction1<T1, R>(override val name: String, udf: UserDefinedFunction, encoder: Encoder<R>) :
+    UnnamedTypedUserDefinedFunction1<T1, R>(udf = udf.withName(name), encoder = encoder),
+    TypedUserDefinedFunction<R>
+
 
 /** allows for functions as properties to me made into a udf */
 inline fun <reified T1, reified R> udf(
@@ -161,14 +240,82 @@ inline fun <reified T1, reified R> udf(
 ): TypedUserDefinedFunction1<T1, R> = udf(name, nondeterministic, func)
 
 inline fun <reified T1, reified R> udf(
-    name: String? = null,
+    name: String,
     nondeterministic: Boolean = false,
     func: UDF1<T1, R>,
-): TypedUserDefinedFunction1<T1, R> {
+): TypedUserDefinedFunction1<T1, R> = udf(nondeterministic = nondeterministic, func = func).withName(name)
+
+inline fun <reified T1, reified R> udf(
+    nondeterministic: Boolean = false,
+    func: UDF1<T1, R>,
+): UnnamedTypedUserDefinedFunction1<T1, R> {
     T1::class.checkForValidType("T1")
 
-    return TypedUserDefinedFunction1(
+    return UnnamedTypedUserDefinedFunction1(
+        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+            .let { if (nondeterministic) it.asNondeterministic() else it }
+            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+        encoder = encoder(),
+    )
+}
+
+
+open class UnnamedTypedUserDefinedFunction2<T1, T2, R>(
+    override val udf: UserDefinedFunction,
+    override val encoder: Encoder<R>,
+) : UnnamedTypedUserDefinedFunction<R> {
+
+    /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given column. */
+    operator fun invoke(param1: TypedColumn<*, T1>, param2: TypedColumn<*, T2>): TypedColumn<*, R> =
+        super.invoke(param1, param2)
+
+    /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given column. */
+    fun invokeUntyped(param1: Column, param2: Column): Column = super.invokeUntyped(param1, param2)
+
+    /** Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns. */
+    operator fun invoke(param1: Column, param2: Column): Column = super.invokeUntyped(param1, param2)
+
+    override fun withName(name: String) = TypedUserDefinedFunction2<T1, T2, R>(
         name = name,
+        udf = udf,
+        encoder = encoder,
+    )
+
+    override fun getValue(thisRef: Any?, property: KProperty<*>) = withName(property.name)
+}
+
+class TypedUserDefinedFunction2<T1, T2, R>(override val name: String, udf: UserDefinedFunction, encoder: Encoder<R>) :
+    UnnamedTypedUserDefinedFunction2<T1, T2, R>(udf = udf.withName(name), encoder = encoder),
+    TypedUserDefinedFunction<R>
+
+/** allows for functions as properties to me made into a udf */
+inline fun <reified T1, reified T2, reified R> udf(
+    func: KProperty0<(T1, T2) -> R>,
+    name: String = func.name,
+    nondeterministic: Boolean = false,
+): TypedUserDefinedFunction2<T1, T2, R> = udf(name, nondeterministic, func.get())
+
+/** allows for `::myFunction.toUdf()` */
+inline fun <reified T1, reified T2, reified R> udf(
+    func: KFunction2<T1, T2, R>,
+    name: String = func.name,
+    nondeterministic: Boolean = false,
+): TypedUserDefinedFunction2<T1, T2, R> = udf(name, nondeterministic, func)
+
+inline fun <reified T1, reified T2, reified R> udf(
+    name: String,
+    nondeterministic: Boolean = false,
+    func: UDF2<T1, T2, R>,
+): TypedUserDefinedFunction2<T1, T2, R> = udf(nondeterministic = nondeterministic, func = func).withName(name)
+
+inline fun <reified T1, reified T2, reified R> udf(
+    nondeterministic: Boolean = false,
+    func: UDF2<T1, T2, R>,
+): UnnamedTypedUserDefinedFunction2<T1, T2, R> {
+    T1::class.checkForValidType("T1")
+    T2::class.checkForValidType("T2")
+
+    return UnnamedTypedUserDefinedFunction2(
         udf = functions.udf(func, schema(typeOf<R>()).unWrap())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },

@@ -26,9 +26,13 @@
 
 package org.jetbrains.kotlinx.spark.api
 
+
+import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.UDFRegistration
 import org.apache.spark.sql.api.java.UDF0
 import org.apache.spark.sql.api.java.UDF1
+import org.apache.spark.sql.expressions.Aggregator
+import java.io.Serializable
 import kotlin.reflect.KFunction0
 import kotlin.reflect.KFunction1
 import kotlin.reflect.KProperty0
@@ -36,16 +40,85 @@ import kotlin.reflect.KProperty0
 
 inline fun <R, reified T : TypedUserDefinedFunction<R>> UDFRegistration.register(
     typedUdf: T,
-): T = register(
-    name = typedUdf.name ?: error("This UDF has no name defined yet, please define one in this function call."),
-    typedUdf = typedUdf,
-)
-inline fun <R, reified T : TypedUserDefinedFunction<R>> UDFRegistration.register(
-    typedUdf: T,
-    name: String,
 ): T = typedUdf.copy(
-    name = name,
-    udf = register(name, typedUdf.udf),
+    name = typedUdf.name,
+    udf = register(typedUdf.name, typedUdf.udf),
+)
+
+fun <R> UDFRegistration.register(
+    unnamedTypedUdf: UnnamedTypedUserDefinedFunction0<R>,
+    name: String,
+): TypedUserDefinedFunction0<R> = unnamedTypedUdf.withName(name).copy(
+    udf = register(name, unnamedTypedUdf.udf),
+)
+
+fun <R, T1> UDFRegistration.register(
+    unnamedTypedUdf: UnnamedTypedUserDefinedFunction1<R, T1>,
+    name: String,
+): TypedUserDefinedFunction1<R, T1> = unnamedTypedUdf.withName(name).copy(
+    udf = register(name, unnamedTypedUdf.udf),
+)
+
+fun <R, T1, T2> UDFRegistration.register(
+    unnamedTypedUdf: UnnamedTypedUserDefinedFunction2<R, T1, T2>,
+    name: String,
+): TypedUserDefinedFunction2<R, T1, T2> = unnamedTypedUdf.withName(name).copy(
+    udf = register(name, unnamedTypedUdf.udf),
+)
+
+fun main() = withSpark {
+    val test = udf.register(udf { -> 1 }, "erwerewr")
+}
+
+// udaf
+inline fun <reified IN, reified BUF, reified OUT> aggregatorOf(
+    zero: BUF,
+    noinline reduce: (b: BUF, a: IN) -> BUF,
+    noinline merge: (b1: BUF, b2: BUF) -> BUF,
+    noinline finish: (reduction: BUF) -> OUT,
+    bufferEncoder: Encoder<BUF> = encoder(),
+    outputEncoder: Encoder<OUT> = encoder(),
+): Aggregator<IN, BUF, OUT> = object : Aggregator<IN, BUF, OUT>(), Serializable {
+    override fun reduce(b: BUF, a: IN): BUF = reduce(b, a)
+    override fun merge(b1: BUF, b2: BUF): BUF = merge(b1, b2)
+    override fun finish(reduction: BUF): OUT = finish(reduction)
+    override fun bufferEncoder(): Encoder<BUF> = bufferEncoder
+    override fun zero(): BUF = zero
+    override fun outputEncoder(): Encoder<OUT> = outputEncoder
+}
+
+/** Registers [agg] as a UDAF for SQL. Returns the UDAF as [TypedUserDefinedFunction].  */
+inline fun <reified T1, reified R> UDFRegistration.register(
+    agg: Aggregator<T1, *, R>,
+    name: String? = agg::class.simpleName ?: error("Could not create a name for this UDAF, please define one in this function call."),
+    nondeterministic: Boolean = false,
+) = register(
+    udaf(agg = agg, name = name, nondeterministic = nondeterministic)
+)
+
+/** Registers a UDAF for SQL based on the given arguments. Returns the UDAF as [TypedUserDefinedFunction].  */
+inline fun <reified IN, reified BUF, reified OUT> UDFRegistration.register(
+    name: String,
+    zero: BUF,
+    noinline reduce: (b: BUF, a: IN) -> BUF,
+    noinline merge: (b1: BUF, b2: BUF) -> BUF,
+    noinline finish: (reduction: BUF) -> OUT,
+    bufferEncoder: Encoder<BUF> = encoder(),
+    outputEncoder: Encoder<OUT> = encoder(),
+    nondeterministic: Boolean = false,
+) = register(
+    udaf(
+        agg = aggregatorOf(
+            zero = zero,
+            reduce = reduce,
+            merge = merge,
+            finish = finish,
+            bufferEncoder = bufferEncoder,
+            outputEncoder = outputEncoder,
+        ),
+        name = name,
+        nondeterministic = nondeterministic,
+    )
 )
 
 // 0
