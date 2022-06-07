@@ -101,32 +101,13 @@ class KSparkSession(val spark: SparkSession) {
      */
     val udf: UDFRegistration get() = spark.udf()
 
-    inline fun <R, reified T : NamedTypedUserDefinedFunction<R>> T.register(
-        name: String = this.name,
-    ): T = copy(
-        name = name,
-        udf = spark.udf().register(name, udf),
-    )
+    inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>>
+            NAMED_UDF.register(): NAMED_UDF =
+        this@KSparkSession.udf.register(namedUdf = this)
 
-    fun <R> TypedUserDefinedFunction0<R>.register(
-        name: String,
-    ): NamedTypedUserDefinedFunction0<R> = withName(name).copy(
-        udf = spark.udf().register(name, udf),
-    )
-
-    fun <R, T1> TypedUserDefinedFunction1<R, T1>.register(
-        name: String,
-    ): NamedTypedUserDefinedFunction1<R, T1> = withName(name).copy(
-        udf = spark.udf().register(name, udf),
-    )
-
-    fun <R, T1, T2> TypedUserDefinedFunction2<R, T1, T2>.register(
-        name: String,
-    ): NamedTypedUserDefinedFunction2<R, T1, T2> = withName(name).copy(
-        udf = spark.udf().register(name, udf),
-    )
-
-    // TODO
+    inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>>
+            UserDefinedFunction<RETURN, NAMED_UDF>.register(name: String): NAMED_UDF =
+        this@KSparkSession.udf.register(name = name, udf = this)
 }
 
 /**
