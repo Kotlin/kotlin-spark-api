@@ -42,6 +42,8 @@ internal class SparkIntegration : Integration() {
                     .master(SparkConf().get("spark.master", "local[*]"))
                     .appName("Jupyter")
                     .config("spark.sql.codegen.wholeStage", false)
+                    .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
+                    .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
                     .getOrCreate()""".trimIndent(),
             """
                 spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)""".trimIndent(),
