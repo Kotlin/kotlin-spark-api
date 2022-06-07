@@ -128,7 +128,7 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("succeed call UDF-Wrapper by delegate in withColumn") {
 
-                    val stringArrayMerger by udf.register { it: WrappedArray<String> ->
+                    val stringArrayMerger by udf { it: WrappedArray<String> ->
                         it.asIterable().joinToString(" ")
                     }
 
@@ -147,7 +147,7 @@ class UDFRegisterTest : ShouldSpec({
                         NormalClass(name = "b", age = 20)
                     ).toDS()
 
-                    val nameConcatAge by udf.register { name: String, age: Int ->
+                    val nameConcatAge by udf { name: String, age: Int ->
                         "$name-$age"
                     }
 
@@ -167,7 +167,7 @@ class UDFRegisterTest : ShouldSpec({
         context("non deterministic") {
             withSpark(logLevel = SparkLogLevel.DEBUG) {
                 should("allow udfs to be non deterministic") {
-                    udf.register("random", asNondeterministic = true) { ->
+                    udf.register("random", nondeterministic = true) { ->
                         Random.nextInt()
                     }
 
@@ -185,15 +185,11 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("allow udfs to be non deterministic using delegate") {
 
-                    val random by udf.register(asNondeterministic = true) { ->
-                        Random.nextInt()
-                    }
+                    val random by udf(nondeterministic = true) { -> Random.nextInt() }
 
                     val executed = random()
 
-                    val map = udf.register("map") { it: Int ->
-                        "$it yay"
-                    }
+                    val map = udf.register(name = "map", func = { it: Int -> "$it yay" })
 
                     val a = dsOf(1)
                         .selectTyped(random())
@@ -202,7 +198,7 @@ class UDFRegisterTest : ShouldSpec({
 
                     val b = dsOf(1)
                         .selectTyped(random())
-                        .selectTyped(map.invoke(col("*").typed()))
+                        .selectTyped(map(col("*").typed()))
                         .showDS()
                         .takeAsList(1)
                         .single()
@@ -229,12 +225,10 @@ class UDFRegisterTest : ShouldSpec({
                 }
 
                 should("allow udfs to be non nullable using delegate") {
-                    val test by udf.register<Int?>() { ->
-                        null
-                    }
+                    val test by udf<Int?> { -> null }
 
                     // access it once
-                    test()
+                    test.register()
 
                     spark.sql("SELECT test()")
                         .selectTyped(col("test()").typed<Int?>())
@@ -258,9 +252,11 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("not return NormalClass using unaccessed by delegate") {
                     listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
-                    val toNormalClass2 by udf.register { a: String, b: Int ->
+                    val toNormalClass2 by udf { a: String, b: Int ->
                         NormalClass(b, a)
                     }
+                    toNormalClass2.register()
+
                     shouldThrow<AnalysisException> { // toNormalClass2 is never accessed, so the delegate getValue function is not executed
                         spark.sql("select toNormalClass2(first, second) from test2").show()
                     }
@@ -268,30 +264,11 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("return NormalClass using accessed by delegate") {
                     listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
-                    val toNormalClass3 by udf.register { a: String, b: Int ->
+                    val toNormalClass3 by udf { a: String, b: Int ->
                         NormalClass(b, a)
                     }
-                    val a = toNormalClass3
+                    toNormalClass3.register()
                     spark.sql("select toNormalClass3(first, second) from test2").show()
-                }
-
-                should("return NormalClass using accessed by multiple delegates") {
-                    listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
-
-                    val toNormalClass = udf.register { a: String, b: Int ->
-                        NormalClass(b, a)
-                    }
-
-                    val a by toNormalClass
-                    val a1 = a
-                    val b by toNormalClass
-                    val b1 = b
-                    val c by toNormalClass
-                    val c1 = c
-
-                    spark.sql("select a(first, second) from test2").show()
-                    spark.sql("select b(first, second) from test2").show()
-                    spark.sql("select c(first, second) from test2").show()
                 }
             }
         }
