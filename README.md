@@ -280,9 +280,21 @@ For more information, check the [wiki](https://github.com/JetBrains/kotlin-spark
 For more, check out [examples](examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples) module.
 To get up and running quickly, check out this [tutorial](https://github.com/JetBrains/kotlin-spark-api/wiki/Quick-Start-Guide). 
 
-## Reporting issues/Support
+## Reporting issues / support
 Please use [GitHub issues](https://github.com/JetBrains/kotlin-spark-api/issues) for filing feature requests and bug reports.
 You are also welcome to join [kotlin-spark channel](https://kotlinlang.slack.com/archives/C015B9ZRGJF) in the Kotlin Slack.
+
+## Contribution guide
+Contributions are more than welcome! Pull requests can be created for the [main](https://github.com/Kotlin/kotlin-spark-api/tree/main) branch
+and will be considered as soon as possible. Be sure to add the necessary tests for any new feature you add. The [main](https://github.com/Kotlin/kotlin-spark-api/tree/main)
+branch always aims to target the latest available [Apache Spark version](https://spark.apache.org/downloads.html).
+
+Of the [main](https://github.com/Kotlin/kotlin-spark-api/tree/main) branch, development versions of the library are published to 
+[Github Packages](https://github.com/orgs/Kotlin/packages?tab=packages&q=kotlin-spark-api). This way, new features can be
+tested quickly without having to wait for a full release. 
+
+For full releases, all `spark-X.x` branches are updated. At the moment, this includes Spark 3.0, 3.1, and 3.2. For this we also
+follow the [supported versions of Apache](https://spark.apache.org/downloads.html).
 
 ## Code of Conduct
 This project and the corresponding community is governed by the [JetBrains Open Source and Community Code of Conduct](https://confluence.jetbrains.com/display/ALL/JetBrains+Open+Source+and+Community+Code+of+Conduct). Please make sure you read it. 
