@@ -24,7 +24,7 @@ open class UserDefinedFunction0<R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(): TypedColumn<*, R> = super.invoke()
+    operator fun invoke(): TypedColumn<*, R> = super.invoke().`as`(encoder)
 
 
 
@@ -67,7 +67,8 @@ class NamedUserDefinedFunction0<R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction0]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
+ *
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -79,7 +80,7 @@ inline fun <reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction0]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -93,7 +94,7 @@ inline fun <reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction0]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -105,7 +106,7 @@ inline fun <reified R> UDFRegistration.register(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction0]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -119,7 +120,7 @@ inline fun <reified R> UDFRegistration.register(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction0]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -131,7 +132,7 @@ inline fun <reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction0]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -145,7 +146,7 @@ inline fun <reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction0]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -157,7 +158,7 @@ inline fun <reified R> UDFRegistration.register(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction0]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -172,8 +173,8 @@ inline fun <reified R> UDFRegistration.register(
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction0]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") {  -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf {  -> ... }```
+ * For example: `val myUdf = udf("myUdf") {  -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf {  -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -189,7 +190,7 @@ inline fun <reified R> udf(
 
 /**
  * Defines a UDF ([UserDefinedFunction0]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf {  -> ... }```
+ * For example: `val myUdf = udf {  -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -210,7 +211,7 @@ inline fun <reified R> udf(
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction0]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") {  -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") {  -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -243,7 +244,7 @@ open class UserDefinedFunction1<T1, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>): TypedColumn<*, R> = super.invoke(param0)
+    operator fun invoke(param0: TypedColumn<*, T1>): TypedColumn<*, R> = super.invoke(param0).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -291,7 +292,7 @@ class NamedUserDefinedFunction1<T1, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction1]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -303,7 +304,7 @@ inline fun <reified T1, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction1]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -317,7 +318,7 @@ inline fun <reified T1, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction1]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -329,7 +330,7 @@ inline fun <reified T1, reified R> UDFRegistration.register(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction1]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -343,7 +344,7 @@ inline fun <reified T1, reified R> UDFRegistration.register(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction1]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -355,7 +356,7 @@ inline fun <reified T1, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction1]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -369,7 +370,7 @@ inline fun <reified T1, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction1]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -381,7 +382,7 @@ inline fun <reified T1, reified R> UDFRegistration.register(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction1]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -396,8 +397,8 @@ inline fun <reified T1, reified R> UDFRegistration.register(
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction1]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -413,7 +414,7 @@ inline fun <reified T1, reified R> udf(
 
 /**
  * Defines a UDF ([UserDefinedFunction1]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1 -> ... }```
+ * For example: `val myUdf = udf { t1: T1 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -434,7 +435,7 @@ inline fun <reified T1, reified R> udf(
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction1]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -466,7 +467,7 @@ open class UserDefinedFunction2<T1, T2, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>): TypedColumn<*, R> = super.invoke(param0, param1)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>): TypedColumn<*, R> = super.invoke(param0, param1).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -513,7 +514,7 @@ class NamedUserDefinedFunction2<T1, T2, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction2]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -525,7 +526,7 @@ inline fun <reified T1, reified T2, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction2]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -539,7 +540,7 @@ inline fun <reified T1, reified T2, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction2]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -551,7 +552,7 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction2]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -565,7 +566,7 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction2]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -577,7 +578,7 @@ inline fun <reified T1, reified T2, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction2]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -591,7 +592,7 @@ inline fun <reified T1, reified T2, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction2]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -603,7 +604,7 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction2]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -618,8 +619,8 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction2]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -635,7 +636,7 @@ inline fun <reified T1, reified T2, reified R> udf(
 
 /**
  * Defines a UDF ([UserDefinedFunction2]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -657,7 +658,7 @@ inline fun <reified T1, reified T2, reified R> udf(
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction2]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -689,7 +690,7 @@ open class UserDefinedFunction3<T1, T2, T3, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>): TypedColumn<*, R> = super.invoke(param0, param1, param2)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>): TypedColumn<*, R> = super.invoke(param0, param1, param2).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -736,7 +737,7 @@ class NamedUserDefinedFunction3<T1, T2, T3, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction3]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -748,7 +749,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction3]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -762,7 +763,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction3]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -774,7 +775,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction3]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -788,7 +789,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction3]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -800,7 +801,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction3]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -814,7 +815,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction3]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -826,7 +827,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction3]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -841,8 +842,8 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction3]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -858,7 +859,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
 
 /**
  * Defines a UDF ([UserDefinedFunction3]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -881,7 +882,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction3]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -913,7 +914,7 @@ open class UserDefinedFunction4<T1, T2, T3, T4, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -960,7 +961,7 @@ class NamedUserDefinedFunction4<T1, T2, T3, T4, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction4]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -972,7 +973,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction4]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -986,7 +987,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction4]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -998,7 +999,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction4]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1012,7 +1013,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction4]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1024,7 +1025,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction4]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1038,7 +1039,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction4]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1050,7 +1051,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction4]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1065,8 +1066,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction4]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -1082,7 +1083,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
 
 /**
  * Defines a UDF ([UserDefinedFunction4]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -1106,7 +1107,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction4]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1138,7 +1139,7 @@ open class UserDefinedFunction5<T1, T2, T3, T4, T5, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1185,7 +1186,7 @@ class NamedUserDefinedFunction5<T1, T2, T3, T4, T5, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction5]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1197,7 +1198,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction5]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1211,7 +1212,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction5]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1223,7 +1224,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction5]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1237,7 +1238,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction5]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1249,7 +1250,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction5]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1263,7 +1264,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction5]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1275,7 +1276,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction5]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1290,8 +1291,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction5]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -1307,7 +1308,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction5]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -1332,7 +1333,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction5]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1364,7 +1365,7 @@ open class UserDefinedFunction6<T1, T2, T3, T4, T5, T6, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1411,7 +1412,7 @@ class NamedUserDefinedFunction6<T1, T2, T3, T4, T5, T6, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction6]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1423,7 +1424,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction6]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1437,7 +1438,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction6]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1449,7 +1450,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction6]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1463,7 +1464,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction6]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1475,7 +1476,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction6]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1489,7 +1490,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction6]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1501,7 +1502,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction6]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1516,8 +1517,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction6]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -1533,7 +1534,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction6]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -1559,7 +1560,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction6]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1591,7 +1592,7 @@ open class UserDefinedFunction7<T1, T2, T3, T4, T5, T6, T7, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1638,7 +1639,7 @@ class NamedUserDefinedFunction7<T1, T2, T3, T4, T5, T6, T7, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction7]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1650,7 +1651,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction7]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1664,7 +1665,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction7]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1676,7 +1677,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction7]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1690,7 +1691,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction7]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1702,7 +1703,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction7]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1716,7 +1717,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction7]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1728,7 +1729,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction7]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1743,8 +1744,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction7]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -1760,7 +1761,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction7]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -1787,7 +1788,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction7]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1819,7 +1820,7 @@ open class UserDefinedFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1866,7 +1867,7 @@ class NamedUserDefinedFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction8]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1878,7 +1879,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction8]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1892,7 +1893,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction8]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1904,7 +1905,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction8]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1918,7 +1919,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction8]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1930,7 +1931,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction8]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1944,7 +1945,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction8]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -1956,7 +1957,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction8]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -1971,8 +1972,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction8]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -1988,7 +1989,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction8]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -2016,7 +2017,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction8]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2048,7 +2049,7 @@ open class UserDefinedFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2095,7 +2096,7 @@ class NamedUserDefinedFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction9]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2107,7 +2108,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction9]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2121,7 +2122,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction9]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2133,7 +2134,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction9]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2147,7 +2148,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction9]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2159,7 +2160,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction9]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2173,7 +2174,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction9]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2185,7 +2186,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction9]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2200,8 +2201,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction9]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -2217,7 +2218,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction9]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -2246,7 +2247,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction9]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2278,7 +2279,7 @@ open class UserDefinedFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2325,7 +2326,7 @@ class NamedUserDefinedFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R>(
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction10]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2337,7 +2338,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction10]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2351,7 +2352,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction10]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2363,7 +2364,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction10]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2377,7 +2378,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction10]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2389,7 +2390,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction10]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2403,7 +2404,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction10]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2415,7 +2416,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction10]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2430,8 +2431,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction10]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -2447,7 +2448,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction10]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -2477,7 +2478,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction10]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2509,7 +2510,7 @@ open class UserDefinedFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2556,7 +2557,7 @@ class NamedUserDefinedFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction11]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2568,7 +2569,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction11]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2582,7 +2583,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction11]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2594,7 +2595,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction11]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2608,7 +2609,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction11]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2620,7 +2621,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction11]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2634,7 +2635,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction11]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2646,7 +2647,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction11]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2661,8 +2662,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction11]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -2678,7 +2679,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction11]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -2709,7 +2710,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction11]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2741,7 +2742,7 @@ open class UserDefinedFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2788,7 +2789,7 @@ class NamedUserDefinedFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction12]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2800,7 +2801,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction12]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2814,7 +2815,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction12]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2826,7 +2827,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction12]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2840,7 +2841,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction12]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2852,7 +2853,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction12]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2866,7 +2867,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction12]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -2878,7 +2879,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction12]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2893,8 +2894,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction12]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -2910,7 +2911,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction12]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -2942,7 +2943,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction12]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -2974,7 +2975,7 @@ open class UserDefinedFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3021,7 +3022,7 @@ class NamedUserDefinedFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction13]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3033,7 +3034,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction13]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3047,7 +3048,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction13]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3059,7 +3060,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction13]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3073,7 +3074,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction13]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3085,7 +3086,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction13]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3099,7 +3100,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction13]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3111,7 +3112,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction13]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3126,8 +3127,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction13]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -3143,7 +3144,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction13]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -3176,7 +3177,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction13]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3208,7 +3209,7 @@ open class UserDefinedFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3255,7 +3256,7 @@ class NamedUserDefinedFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction14]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3267,7 +3268,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction14]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3281,7 +3282,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction14]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3293,7 +3294,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction14]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3307,7 +3308,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction14]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3319,7 +3320,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction14]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3333,7 +3334,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction14]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3345,7 +3346,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction14]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3360,8 +3361,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction14]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -3377,7 +3378,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction14]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -3411,7 +3412,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction14]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3443,7 +3444,7 @@ open class UserDefinedFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3490,7 +3491,7 @@ class NamedUserDefinedFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction15]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3502,7 +3503,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction15]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3516,7 +3517,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction15]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3528,7 +3529,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction15]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3542,7 +3543,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction15]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3554,7 +3555,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction15]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3568,7 +3569,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction15]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3580,7 +3581,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction15]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3595,8 +3596,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction15]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -3612,7 +3613,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction15]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -3647,7 +3648,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction15]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3679,7 +3680,7 @@ open class UserDefinedFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3726,7 +3727,7 @@ class NamedUserDefinedFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction16]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3738,7 +3739,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction16]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3752,7 +3753,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction16]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3764,7 +3765,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction16]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3778,7 +3779,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction16]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3790,7 +3791,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction16]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3804,7 +3805,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction16]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3816,7 +3817,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction16]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3831,8 +3832,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction16]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -3848,7 +3849,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction16]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -3884,7 +3885,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction16]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3916,7 +3917,7 @@ open class UserDefinedFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3963,7 +3964,7 @@ class NamedUserDefinedFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction17]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -3975,7 +3976,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction17]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -3989,7 +3990,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction17]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4001,7 +4002,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction17]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4015,7 +4016,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction17]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4027,7 +4028,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction17]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4041,7 +4042,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction17]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4053,7 +4054,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction17]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4068,8 +4069,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction17]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -4085,7 +4086,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction17]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -4122,7 +4123,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction17]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4154,7 +4155,7 @@ open class UserDefinedFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4201,7 +4202,7 @@ class NamedUserDefinedFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction18]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4213,7 +4214,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction18]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4227,7 +4228,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction18]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4239,7 +4240,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction18]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4253,7 +4254,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction18]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4265,7 +4266,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction18]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4279,7 +4280,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction18]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4291,7 +4292,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction18]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4306,8 +4307,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction18]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -4323,7 +4324,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction18]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -4361,7 +4362,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction18]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4393,7 +4394,7 @@ open class UserDefinedFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4440,7 +4441,7 @@ class NamedUserDefinedFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction19]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4452,7 +4453,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction19]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4466,7 +4467,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction19]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4478,7 +4479,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction19]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4492,7 +4493,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction19]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4504,7 +4505,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction19]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4518,7 +4519,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction19]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4530,7 +4531,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction19]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4545,8 +4546,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction19]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -4562,7 +4563,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction19]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -4601,7 +4602,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction19]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4633,7 +4634,7 @@ open class UserDefinedFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4680,7 +4681,7 @@ class NamedUserDefinedFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction20]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4692,7 +4693,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction20]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4706,7 +4707,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction20]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4718,7 +4719,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction20]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4732,7 +4733,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction20]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4744,7 +4745,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction20]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4758,7 +4759,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction20]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4770,7 +4771,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction20]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4785,8 +4786,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction20]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -4802,7 +4803,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction20]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -4842,7 +4843,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction20]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4874,7 +4875,7 @@ open class UserDefinedFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>, param20: TypedColumn<*, T21>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>, param20: TypedColumn<*, T21>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4921,7 +4922,7 @@ class NamedUserDefinedFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction21]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4933,7 +4934,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction21]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4947,7 +4948,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction21]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4959,7 +4960,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction21]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4973,7 +4974,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction21]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -4985,7 +4986,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction21]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -4999,7 +5000,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction21]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -5011,7 +5012,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction21]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -5026,8 +5027,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction21]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -5043,7 +5044,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction21]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -5084,7 +5085,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction21]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -5116,7 +5117,7 @@ open class UserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>, param20: TypedColumn<*, T21>, param21: TypedColumn<*, T22>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20, param21)
+    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>, param20: TypedColumn<*, T21>, param21: TypedColumn<*, T22>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20, param21).`as`(encoder)
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -5163,7 +5164,7 @@ class NamedUserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction22]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -5175,7 +5176,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction22]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -5189,7 +5190,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction22]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -5201,7 +5202,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction22]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -5215,7 +5216,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction22]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf(::myFunction)```
+ * For example: `val myUdf = udf(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -5227,7 +5228,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction22]) from a function reference.
- * For example: ```val myUdf = udf("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -5241,7 +5242,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction22]) from a function reference adapting its name by reflection.
- * For example: ```val myUdf = udf.register(::myFunction)```
+ * For example: `val myUdf = udf.register(::myFunction)`
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
@@ -5253,7 +5254,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Creates and registers a UDF ([NamedUserDefinedFunction22]) from a function reference.
- * For example: ```val myUdf = udf.register("myFunction", ::myFunction)```
+ * For example: `val myUdf = udf.register("myFunction", ::myFunction)`
  * @param name Optional. Name for the UDF.
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
@@ -5268,8 +5269,8 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction22]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }```
- * Name can also be supplied using delegate: ```val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }```
+ * For example: `val myUdf = udf("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }`
+ * Name can also be supplied using delegate: `val myUdf by udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }`
  * @see UserDefinedFunction.getValue
  *
  * @param name The name for this UDF.
@@ -5285,7 +5286,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines a UDF ([UserDefinedFunction22]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }```
+ * For example: `val myUdf = udf { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }`
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @param func The function to convert to a UDF. Can be a lambda.
@@ -5327,7 +5328,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 /**
  * Defines and registers a named UDF ([NamedUserDefinedFunction22]) instance based on the (lambda) function [func].
- * For example: ```val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }```
+ * For example: `val myUdf = udf.register("myUdf") { t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22 -> ... }`
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.

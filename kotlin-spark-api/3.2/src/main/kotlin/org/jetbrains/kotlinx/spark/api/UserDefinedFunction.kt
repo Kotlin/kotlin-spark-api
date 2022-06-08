@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.*
@@ -43,8 +45,30 @@ internal fun KClass<*>.checkForValidType(parameterName: String) {
  * An exception thrown when the UDF is generated with illegal types for the parameters
  */
 class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: String) : IllegalArgumentException(
-    "Parameter $parameterName is subclass of ${kClass.qualifiedName}. If you need to process an array use ${WrappedArray::class.qualifiedName}."
+    "Parameter $parameterName is subclass of ${kClass.qualifiedName}. If you need to process an array use ${WrappedArray::class.qualifiedName}. You can convert any typed array/list-like column using [asWrappedArray()]."
 )
+
+@JvmName("arrayColumnAsWrappedArray")
+fun <T> TypedColumn<*, Array<T>>.asWrappedArray(): TypedColumn<*, WrappedArray<T>> = typed()
+@JvmName("iterableColumnAsWrappedArray")
+fun <T> TypedColumn<*, Iterable<T>>.asWrappedArray(): TypedColumn<*, WrappedArray<T>> = typed()
+@JvmName("byteArrayColumnAsWrappedArray")
+fun TypedColumn<*, ByteArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Byte>> = typed()
+@JvmName("charArrayColumnAsWrappedArray")
+fun TypedColumn<*, CharArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Char>> = typed()
+@JvmName("shortArrayColumnAsWrappedArray")
+fun TypedColumn<*, ShortArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Short>> = typed()
+@JvmName("intArrayColumnAsWrappedArray")
+fun TypedColumn<*, IntArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Int>> = typed()
+@JvmName("longArrayColumnAsWrappedArray")
+fun TypedColumn<*, LongArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Long>> = typed()
+@JvmName("floatArrayColumnAsWrappedArray")
+fun TypedColumn<*, FloatArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Float>> = typed()
+@JvmName("doubleArrayColumnAsWrappedArray")
+fun TypedColumn<*, DoubleArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Double>> = typed()
+@JvmName("booleanArrayColumnAsWrappedArray")
+fun TypedColumn<*, BooleanArray>.asWrappedArray(): TypedColumn<*, WrappedArray<Boolean>> = typed()
+
 
 /**
  * Registers a user-defined function (UDF) with name, for a UDF that's already defined using the Dataset
@@ -80,7 +104,7 @@ sealed interface UserDefinedFunction<RETURN, NAMED> {
 
     fun invokeUntyped(vararg params: Column): Column = udf.apply(*params)
 
-    operator fun invoke(vararg params: Column): TypedColumn<*, RETURN> = invokeUntyped(*params).`as`(encoder)
+    operator fun invoke(vararg params: Column): Column = invokeUntyped(*params)
 
     /** Converts this [UserDefinedFunction] to a [NamedUserDefinedFunction]. */
     fun withName(name: String): NAMED
@@ -120,3 +144,4 @@ inline fun <R, reified T : NamedUserDefinedFunction<R, *>> T.copy(
         }
     )
 }
+

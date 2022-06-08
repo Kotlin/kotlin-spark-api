@@ -27,12 +27,8 @@ import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions.col
 import org.junit.jupiter.api.assertThrows
-import scala.collection.JavaConverters
 import scala.collection.mutable.WrappedArray
 import kotlin.random.Random
-
-@Suppress("unused")
-private fun <T> scala.collection.Iterable<T>.asIterable(): Iterable<T> = JavaConverters.asJavaIterable(this)
 
 @Suppress("unused")
 class UDFRegisterTest : ShouldSpec({
@@ -85,12 +81,12 @@ class UDFRegisterTest : ShouldSpec({
 
                 should("succeed when using a WrappedArray") {
                     udf.register("shouldSucceed") { array: WrappedArray<String> ->
-                        array.asIterable().joinToString(" ")
+                        array.asKotlinIterable().joinToString(" ")
                     }
                 }
 
                 should("succeed when return a List") {
-                    udf.register<String, List<Int>>("StringToIntList") { a ->
+                    udf.register("StringToIntList") { a: String ->
                         a.asIterable().map { it.code }
                     }
 
@@ -113,12 +109,12 @@ class UDFRegisterTest : ShouldSpec({
             withSpark(logLevel = SparkLogLevel.DEBUG) {
                 should("succeed call UDF-Wrapper in withColumn") {
 
-                    val stringArrayMerger = udf.register<WrappedArray<String>, String>("stringArrayMerger") {
-                        it.asIterable().joinToString(" ")
+                    val stringArrayMerger = udf.register("stringArrayMerger") { it: WrappedArray<String> ->
+                        it.asKotlinIterable().joinToString(" ")
                     }
 
-                    val testData = dsOf(listOf("a", "b"))
-                    val newData = testData.withColumn("text", stringArrayMerger(testData.col("value").typed()))
+                    val testData = dsOf(arrayOf("a", "b"))
+                    val newData = testData.withColumn("text", stringArrayMerger(typedCol<Array<String>>("value").asWrappedArray()))
 
                     (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
@@ -129,7 +125,7 @@ class UDFRegisterTest : ShouldSpec({
                 should("succeed call UDF-Wrapper by delegate in withColumn") {
 
                     val stringArrayMerger by udf { it: WrappedArray<String> ->
-                        it.asIterable().joinToString(" ")
+                        it.asKotlinIterable().joinToString(" ")
                     }
 
                     val testData = dsOf(listOf("a", "b"))
