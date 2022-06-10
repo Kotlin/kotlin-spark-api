@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.7.0</kotlin.version>
         <dokka.version>1.6.10</dokka.version>
         <atrium.version>0.17.0</atrium.version>
         <kotest.version>5.2.3</kotest.version>

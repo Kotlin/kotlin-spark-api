@@ -1,3 +1,22 @@
+/*-
+ * =LICENSE=
+ * Kotlin Spark API: API for Spark 3.2+ (Scala 2.12)
+ * ----------
+ * Copyright (C) 2019 - 2022 JetBrains
+ * ----------
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =LICENSEEND=
+ */
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.*
@@ -68,7 +87,6 @@ class NamedUserDefinedFunction0<R>(
 /**
  * Creates a UDF ([NamedUserDefinedFunction0]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
- *
  * @param func function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf

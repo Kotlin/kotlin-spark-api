@@ -1,10 +1,31 @@
+/*-
+ * =LICENSE=
+ * Kotlin Spark API: API for Spark 3.2+ (Scala 2.12)
+ * ----------
+ * Copyright (C) 2019 - 2022 JetBrains
+ * ----------
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =LICENSEEND=
+ */
 package org.jetbrains.kotlinx.spark.api
 
+import org.apache.spark.SparkConf
 import org.apache.spark.sql.*
-import kotlin.reflect.KFunction1
-import kotlin.reflect.KProperty
-import kotlin.reflect.KProperty0
-import kotlin.reflect.typeOf
+import org.apache.spark.sql.api.java.*
+import org.apache.spark.sql.internal.SQLConf
+import kotlin.reflect.*
+import org.apache.spark.sql.expressions.UserDefinedFunction as SparkUserDefinedFunction
+
 
 /**
  * Instance of a UDF with vararg arguments of the same type.
@@ -58,9 +79,23 @@ class NamedUserDefinedFunctionVararg<T, R>(
 ): NamedUserDefinedFunction<R, NamedUserDefinedFunctionVararg<T, R>>,
     UserDefinedFunctionVararg<T, R>(udf = udf.withName(name), encoder = encoder)
 
+@PublishedApi
+internal inline fun <R> withAllowUntypedScalaUDF(block: () -> R): R {
+    val sqlConf = SQLConf.get()
+    val confString = "spark.sql.legacy.allowUntypedScalaUDF"
+    val prev = sqlConf.getConfString(confString, "false")
+    sqlConf.setConfString(confString, "true")
+    return try {
+        block()
+    } finally {
+        sqlConf.setConfString(confString, prev)
+    }
+}
+
+
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: ByteArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: ByteArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -69,71 +104,73 @@ class NamedUserDefinedFunctionVararg<T, R>(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargByte")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (ByteArray) -> R,
+    varargFunc: UDF1<ByteArray, R>,
 ): NamedUserDefinedFunctionVararg<Byte, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: ByteArray -> ... }`
  *
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargByte")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (ByteArray) -> R,
+    varargFunc: UDF1<ByteArray, R>,
 ): UserDefinedFunctionVararg<Byte, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::ByteArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: ByteArray -> ... }`
  *
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargByte")
+@JvmName("registerVarargByte")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (ByteArray) -> R,
+    varargFunc: UDF1<ByteArray, R>,
 ): NamedUserDefinedFunctionVararg<Byte, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargByte")
 inline fun <reified R> udf(
-    func: KProperty0<(ByteArray) -> R>,
+    varargFunc: KProperty0<(ByteArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Byte, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -142,16 +179,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargByte")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(ByteArray) -> R>,
+    varargFunc: KProperty0<(ByteArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Byte, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -159,15 +196,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargByte")
+@JvmName("registerVarargByte")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(ByteArray) -> R>,
+    varargFunc: KProperty0<(ByteArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -176,16 +213,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargByte")
+@JvmName("registerVarargByte")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(ByteArray) -> R>,
+    varargFunc: KProperty0<(ByteArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -193,15 +230,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargByte")
 inline fun <reified R> udf(
-    func: KFunction1<ByteArray, R>,
+    varargFunc: KFunction1<ByteArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Byte, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -210,16 +247,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargByte")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<ByteArray, R>,
+    varargFunc: KFunction1<ByteArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Byte, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -227,15 +264,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargByte")
+@JvmName("registerVarargByte")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<ByteArray, R>,
+    varargFunc: KFunction1<ByteArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -244,20 +281,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an ByteArray instead, use WrappedArray<Byte>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargByte")
+@JvmName("registerVarargByte")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<ByteArray, R>,
+    varargFunc: KFunction1<ByteArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Byte, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: CharArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: CharArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -266,71 +303,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargChar")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (CharArray) -> R,
+    varargFunc: UDF1<CharArray, R>,
 ): NamedUserDefinedFunctionVararg<Char, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: CharArray -> ... }`
  *
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargChar")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (CharArray) -> R,
+    varargFunc: UDF1<CharArray, R>,
 ): UserDefinedFunctionVararg<Char, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::CharArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: CharArray -> ... }`
  *
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargChar")
+@JvmName("registerVarargChar")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (CharArray) -> R,
+    varargFunc: UDF1<CharArray, R>,
 ): NamedUserDefinedFunctionVararg<Char, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargChar")
 inline fun <reified R> udf(
-    func: KProperty0<(CharArray) -> R>,
+    varargFunc: KProperty0<(CharArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Char, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -339,16 +378,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargChar")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(CharArray) -> R>,
+    varargFunc: KProperty0<(CharArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Char, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -356,15 +395,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargChar")
+@JvmName("registerVarargChar")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(CharArray) -> R>,
+    varargFunc: KProperty0<(CharArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Char, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -373,16 +412,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargChar")
+@JvmName("registerVarargChar")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(CharArray) -> R>,
+    varargFunc: KProperty0<(CharArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Char, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -390,15 +429,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargChar")
 inline fun <reified R> udf(
-    func: KFunction1<CharArray, R>,
+    varargFunc: KFunction1<CharArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Char, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -407,16 +446,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargChar")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<CharArray, R>,
+    varargFunc: KFunction1<CharArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Char, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -424,15 +463,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargChar")
+@JvmName("registerVarargChar")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<CharArray, R>,
+    varargFunc: KFunction1<CharArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Char, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -441,20 +480,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an CharArray instead, use WrappedArray<Char>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargChar")
+@JvmName("registerVarargChar")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<CharArray, R>,
+    varargFunc: KFunction1<CharArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Char, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Char, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: ShortArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: ShortArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -463,71 +502,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargShort")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (ShortArray) -> R,
+    varargFunc: UDF1<ShortArray, R>,
 ): NamedUserDefinedFunctionVararg<Short, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: ShortArray -> ... }`
  *
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargShort")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (ShortArray) -> R,
+    varargFunc: UDF1<ShortArray, R>,
 ): UserDefinedFunctionVararg<Short, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::ShortArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: ShortArray -> ... }`
  *
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargShort")
+@JvmName("registerVarargShort")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (ShortArray) -> R,
+    varargFunc: UDF1<ShortArray, R>,
 ): NamedUserDefinedFunctionVararg<Short, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargShort")
 inline fun <reified R> udf(
-    func: KProperty0<(ShortArray) -> R>,
+    varargFunc: KProperty0<(ShortArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Short, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -536,16 +577,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargShort")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(ShortArray) -> R>,
+    varargFunc: KProperty0<(ShortArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Short, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -553,15 +594,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargShort")
+@JvmName("registerVarargShort")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(ShortArray) -> R>,
+    varargFunc: KProperty0<(ShortArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Short, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -570,16 +611,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargShort")
+@JvmName("registerVarargShort")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(ShortArray) -> R>,
+    varargFunc: KProperty0<(ShortArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Short, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -587,15 +628,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargShort")
 inline fun <reified R> udf(
-    func: KFunction1<ShortArray, R>,
+    varargFunc: KFunction1<ShortArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Short, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -604,16 +645,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargShort")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<ShortArray, R>,
+    varargFunc: KFunction1<ShortArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Short, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -621,15 +662,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargShort")
+@JvmName("registerVarargShort")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<ShortArray, R>,
+    varargFunc: KFunction1<ShortArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Short, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -638,20 +679,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an ShortArray instead, use WrappedArray<Short>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargShort")
+@JvmName("registerVarargShort")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<ShortArray, R>,
+    varargFunc: KFunction1<ShortArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Short, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Short, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: IntArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: IntArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -660,71 +701,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargInt")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (IntArray) -> R,
+    varargFunc: UDF1<IntArray, R>,
 ): NamedUserDefinedFunctionVararg<Int, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: IntArray -> ... }`
  *
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargInt")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (IntArray) -> R,
+    varargFunc: UDF1<IntArray, R>,
 ): UserDefinedFunctionVararg<Int, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::IntArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: IntArray -> ... }`
  *
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargInt")
+@JvmName("registerVarargInt")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (IntArray) -> R,
+    varargFunc: UDF1<IntArray, R>,
 ): NamedUserDefinedFunctionVararg<Int, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargInt")
 inline fun <reified R> udf(
-    func: KProperty0<(IntArray) -> R>,
+    varargFunc: KProperty0<(IntArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Int, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -733,16 +776,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargInt")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(IntArray) -> R>,
+    varargFunc: KProperty0<(IntArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Int, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -750,15 +793,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargInt")
+@JvmName("registerVarargInt")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(IntArray) -> R>,
+    varargFunc: KProperty0<(IntArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Int, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -767,16 +810,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargInt")
+@JvmName("registerVarargInt")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(IntArray) -> R>,
+    varargFunc: KProperty0<(IntArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Int, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -784,15 +827,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargInt")
 inline fun <reified R> udf(
-    func: KFunction1<IntArray, R>,
+    varargFunc: KFunction1<IntArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Int, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -801,16 +844,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargInt")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<IntArray, R>,
+    varargFunc: KFunction1<IntArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Int, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -818,15 +861,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargInt")
+@JvmName("registerVarargInt")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<IntArray, R>,
+    varargFunc: KFunction1<IntArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Int, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -835,20 +878,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an IntArray instead, use WrappedArray<Int>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargInt")
+@JvmName("registerVarargInt")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<IntArray, R>,
+    varargFunc: KFunction1<IntArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Int, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Int, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: LongArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: LongArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -857,71 +900,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargLong")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (LongArray) -> R,
+    varargFunc: UDF1<LongArray, R>,
 ): NamedUserDefinedFunctionVararg<Long, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: LongArray -> ... }`
  *
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargLong")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (LongArray) -> R,
+    varargFunc: UDF1<LongArray, R>,
 ): UserDefinedFunctionVararg<Long, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::LongArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: LongArray -> ... }`
  *
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargLong")
+@JvmName("registerVarargLong")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (LongArray) -> R,
+    varargFunc: UDF1<LongArray, R>,
 ): NamedUserDefinedFunctionVararg<Long, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargLong")
 inline fun <reified R> udf(
-    func: KProperty0<(LongArray) -> R>,
+    varargFunc: KProperty0<(LongArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Long, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -930,16 +975,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargLong")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(LongArray) -> R>,
+    varargFunc: KProperty0<(LongArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Long, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -947,15 +992,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargLong")
+@JvmName("registerVarargLong")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(LongArray) -> R>,
+    varargFunc: KProperty0<(LongArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Long, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -964,16 +1009,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargLong")
+@JvmName("registerVarargLong")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(LongArray) -> R>,
+    varargFunc: KProperty0<(LongArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Long, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -981,15 +1026,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargLong")
 inline fun <reified R> udf(
-    func: KFunction1<LongArray, R>,
+    varargFunc: KFunction1<LongArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Long, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -998,16 +1043,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargLong")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<LongArray, R>,
+    varargFunc: KFunction1<LongArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Long, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1015,15 +1060,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargLong")
+@JvmName("registerVarargLong")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<LongArray, R>,
+    varargFunc: KFunction1<LongArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Long, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1032,20 +1077,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an LongArray instead, use WrappedArray<Long>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargLong")
+@JvmName("registerVarargLong")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<LongArray, R>,
+    varargFunc: KFunction1<LongArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Long, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Long, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: FloatArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: FloatArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -1054,71 +1099,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargFloat")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (FloatArray) -> R,
+    varargFunc: UDF1<FloatArray, R>,
 ): NamedUserDefinedFunctionVararg<Float, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: FloatArray -> ... }`
  *
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargFloat")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (FloatArray) -> R,
+    varargFunc: UDF1<FloatArray, R>,
 ): UserDefinedFunctionVararg<Float, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::FloatArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: FloatArray -> ... }`
  *
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargFloat")
+@JvmName("registerVarargFloat")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (FloatArray) -> R,
+    varargFunc: UDF1<FloatArray, R>,
 ): NamedUserDefinedFunctionVararg<Float, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargFloat")
 inline fun <reified R> udf(
-    func: KProperty0<(FloatArray) -> R>,
+    varargFunc: KProperty0<(FloatArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Float, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1127,16 +1174,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargFloat")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(FloatArray) -> R>,
+    varargFunc: KProperty0<(FloatArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Float, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1144,15 +1191,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargFloat")
+@JvmName("registerVarargFloat")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(FloatArray) -> R>,
+    varargFunc: KProperty0<(FloatArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Float, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1161,16 +1208,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargFloat")
+@JvmName("registerVarargFloat")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(FloatArray) -> R>,
+    varargFunc: KProperty0<(FloatArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Float, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1178,15 +1225,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargFloat")
 inline fun <reified R> udf(
-    func: KFunction1<FloatArray, R>,
+    varargFunc: KFunction1<FloatArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Float, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1195,16 +1242,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargFloat")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<FloatArray, R>,
+    varargFunc: KFunction1<FloatArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Float, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1212,15 +1259,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargFloat")
+@JvmName("registerVarargFloat")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<FloatArray, R>,
+    varargFunc: KFunction1<FloatArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Float, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1229,20 +1276,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an FloatArray instead, use WrappedArray<Float>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargFloat")
+@JvmName("registerVarargFloat")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<FloatArray, R>,
+    varargFunc: KFunction1<FloatArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Float, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Float, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: DoubleArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: DoubleArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -1251,71 +1298,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargDouble")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (DoubleArray) -> R,
+    varargFunc: UDF1<DoubleArray, R>,
 ): NamedUserDefinedFunctionVararg<Double, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: DoubleArray -> ... }`
  *
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargDouble")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (DoubleArray) -> R,
+    varargFunc: UDF1<DoubleArray, R>,
 ): UserDefinedFunctionVararg<Double, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::DoubleArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: DoubleArray -> ... }`
  *
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargDouble")
+@JvmName("registerVarargDouble")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (DoubleArray) -> R,
+    varargFunc: UDF1<DoubleArray, R>,
 ): NamedUserDefinedFunctionVararg<Double, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargDouble")
 inline fun <reified R> udf(
-    func: KProperty0<(DoubleArray) -> R>,
+    varargFunc: KProperty0<(DoubleArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Double, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1324,16 +1373,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargDouble")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(DoubleArray) -> R>,
+    varargFunc: KProperty0<(DoubleArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Double, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1341,15 +1390,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargDouble")
+@JvmName("registerVarargDouble")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(DoubleArray) -> R>,
+    varargFunc: KProperty0<(DoubleArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Double, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1358,16 +1407,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargDouble")
+@JvmName("registerVarargDouble")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(DoubleArray) -> R>,
+    varargFunc: KProperty0<(DoubleArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Double, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1375,15 +1424,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargDouble")
 inline fun <reified R> udf(
-    func: KFunction1<DoubleArray, R>,
+    varargFunc: KFunction1<DoubleArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Double, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1392,16 +1441,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargDouble")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<DoubleArray, R>,
+    varargFunc: KFunction1<DoubleArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Double, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1409,15 +1458,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargDouble")
+@JvmName("registerVarargDouble")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<DoubleArray, R>,
+    varargFunc: KFunction1<DoubleArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Double, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1426,20 +1475,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an DoubleArray instead, use WrappedArray<Double>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargDouble")
+@JvmName("registerVarargDouble")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<DoubleArray, R>,
+    varargFunc: KFunction1<DoubleArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Double, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Double, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: BooleanArray -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: BooleanArray -> ... }`
  * @see UserDefinedFunction.getValue
@@ -1448,71 +1497,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargBoolean")
 inline fun <reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (BooleanArray) -> R,
+    varargFunc: UDF1<BooleanArray, R>,
 ): NamedUserDefinedFunctionVararg<Boolean, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: BooleanArray -> ... }`
  *
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargBoolean")
 inline fun <reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (BooleanArray) -> R,
+    varargFunc: UDF1<BooleanArray, R>,
 ): UserDefinedFunctionVararg<Boolean, R> {
 
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::BooleanArray), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: BooleanArray -> ... }`
  *
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargBoolean")
+@JvmName("registerVarargBoolean")
 inline fun <reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (BooleanArray) -> R,
+    varargFunc: UDF1<BooleanArray, R>,
 ): NamedUserDefinedFunctionVararg<Boolean, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargBoolean")
 inline fun <reified R> udf(
-    func: KProperty0<(BooleanArray) -> R>,
+    varargFunc: KProperty0<(BooleanArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Boolean, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1521,16 +1572,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargBoolean")
 inline fun <reified R> udf(
     name: String,
-    func: KProperty0<(BooleanArray) -> R>,
+    varargFunc: KProperty0<(BooleanArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<Boolean, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1538,15 +1589,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargBoolean")
+@JvmName("registerVarargBoolean")
 inline fun <reified R> UDFRegistration.register(
-    func: KProperty0<(BooleanArray) -> R>,
+    varargFunc: KProperty0<(BooleanArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1555,16 +1606,16 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargBoolean")
+@JvmName("registerVarargBoolean")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(BooleanArray) -> R>,
+    varargFunc: KProperty0<(BooleanArray) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1572,15 +1623,15 @@ inline fun <reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargBoolean")
 inline fun <reified R> udf(
-    func: KFunction1<BooleanArray, R>,
+    varargFunc: KFunction1<BooleanArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<Boolean, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1589,16 +1640,16 @@ inline fun <reified R> udf(
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargBoolean")
 inline fun <reified R> udf(
     name: String,
-    func: KFunction1<BooleanArray, R>,
+    varargFunc: KFunction1<BooleanArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<Boolean, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1606,15 +1657,15 @@ inline fun <reified R> udf(
  *
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargBoolean")
+@JvmName("registerVarargBoolean")
 inline fun <reified R> UDFRegistration.register(
-    func: KFunction1<BooleanArray, R>,
+    varargFunc: KFunction1<BooleanArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1623,20 +1674,20 @@ inline fun <reified R> UDFRegistration.register(
  * If you want to process a column containing an BooleanArray instead, use WrappedArray<Boolean>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargBoolean")
+@JvmName("registerVarargBoolean")
 inline fun <reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<BooleanArray, R>,
+    varargFunc: KFunction1<BooleanArray, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<Boolean, R> = register(udf(name, varargFunc, nondeterministic))
 
 
 /**
- * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf("myUdf") { t1: Array<T> -> ... }`
  * Name can also be supplied using delegate: `val myUdf by udf { t1: Array<T> -> ... }`
  * @see UserDefinedFunction.getValue
@@ -1645,71 +1696,73 @@ inline fun <reified R> UDFRegistration.register(
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargT")
 inline fun <reified T, reified R> udf(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (Array<T>) -> R,
+    varargFunc: UDF1<Array<T>, R>,
 ): NamedUserDefinedFunctionVararg<T, R> =
-    udf(nondeterministic, func).withName(name)
+    udf(nondeterministic, varargFunc).withName(name)
 
 /**
- * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines a vararg UDF ([UserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf { t1: Array<T> -> ... }`
  *
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
 @JvmName("udfVarargT")
 inline fun <reified T, reified R> udf(
     nondeterministic: Boolean = false,
-    noinline func: (Array<T>) -> R,
+    varargFunc: UDF1<Array<T>, R>,
 ): UserDefinedFunctionVararg<T, R> {
     T::class.checkForValidType("T")
 
-    return UserDefinedFunctionVararg(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
-            .let { if (nondeterministic) it.asNondeterministic() else it }
-            .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
-    )
+    return withAllowUntypedScalaUDF {
+        UserDefinedFunctionVararg(
+            udf = functions.udf(VarargUnwrapper(varargFunc::call, ::Array), schema(typeOf<R>()).unWrap())
+                .let { if (nondeterministic) it.asNondeterministic() else it }
+                .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
+            encoder = encoder<R>(),
+        )
+    }
 }
 /**
- * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [func].
+ * Defines and registers a named vararg UDF ([NamedUserDefinedFunctionVararg]) instance based on the (lambda) function [varargFunc].
  * For example: `val myUdf = udf.register("myUdf") { t1: Array<T> -> ... }`
  *
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
  * @param name The name for this UDF.
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- * @param func The function to convert to a UDF. Can be a lambda.
+ * @param varargFunc The function to convert to a UDF. Can be a lambda.
  */
-@JvmName("registerUdfVarargT")
+@JvmName("registerVarargT")
 inline fun <reified T, reified R> UDFRegistration.register(
     name: String,
     nondeterministic: Boolean = false,
-    noinline func: (Array<T>) -> R,
+    varargFunc: UDF1<Array<T>, R>,
 ): NamedUserDefinedFunctionVararg<T, R> =
-    register(udf(name, nondeterministic, func))
+    register(udf(name, nondeterministic, varargFunc))
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
  * For example: `val myUdf = udf(::myFunction)`
  *
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargT")
 inline fun <reified T, reified R> udf(
-    func: KProperty0<(Array<T>) -> R>,
+    varargFunc: KProperty0<(Array<T>) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<T, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1718,16 +1771,16 @@ inline fun <reified T, reified R> udf(
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargT")
 inline fun <reified T, reified R> udf(
     name: String,
-    func: KProperty0<(Array<T>) -> R>,
+    varargFunc: KProperty0<(Array<T>) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = udf(name, nondeterministic, func.get())
+): NamedUserDefinedFunctionVararg<T, R> = udf(name, nondeterministic, varargFunc.get())
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1735,15 +1788,15 @@ inline fun <reified T, reified R> udf(
  *
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargT")
+@JvmName("registerVarargT")
 inline fun <reified T, reified R> UDFRegistration.register(
-    func: KProperty0<(Array<T>) -> R>,
+    varargFunc: KProperty0<(Array<T>) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<T, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1752,16 +1805,16 @@ inline fun <reified T, reified R> UDFRegistration.register(
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargT")
+@JvmName("registerVarargT")
 inline fun <reified T, reified R> UDFRegistration.register(
     name: String,
-    func: KProperty0<(Array<T>) -> R>,
+    varargFunc: KProperty0<(Array<T>) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<T, R> = register(udf(name, varargFunc, nondeterministic))
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1769,15 +1822,15 @@ inline fun <reified T, reified R> UDFRegistration.register(
  *
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargT")
 inline fun <reified T, reified R> udf(
-    func: KFunction1<Array<T>, R>,
+    varargFunc: KFunction1<Array<T>, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = udf(func.name, func, nondeterministic)
+): NamedUserDefinedFunctionVararg<T, R> = udf(varargFunc.name, varargFunc, nondeterministic)
 
 /**
  * Creates a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1786,16 +1839,16 @@ inline fun <reified T, reified R> udf(
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
 @JvmName("udfVarargT")
 inline fun <reified T, reified R> udf(
     name: String,
-    func: KFunction1<Array<T>, R>,
+    varargFunc: KFunction1<Array<T>, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = udf(name, nondeterministic, func)
+): NamedUserDefinedFunctionVararg<T, R> = udf(name, nondeterministic, varargFunc)
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference adapting its name by reflection.
@@ -1803,15 +1856,15 @@ inline fun <reified T, reified R> udf(
  *
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargT")
+@JvmName("registerVarargT")
 inline fun <reified T, reified R> UDFRegistration.register(
-    func: KFunction1<Array<T>, R>,
+    varargFunc: KFunction1<Array<T>, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = register(udf(func, nondeterministic))
+): NamedUserDefinedFunctionVararg<T, R> = register(udf(varargFunc, nondeterministic))
 
 /**
  * Creates and registers a vararg UDF ([NamedUserDefinedFunctionVararg]) from a function reference.
@@ -1820,13 +1873,13 @@ inline fun <reified T, reified R> UDFRegistration.register(
  * If you want to process a column containing an Array<T> instead, use WrappedArray<T>.
  *
  * @param name Optional. Name for the UDF.
- * @param func function reference
+ * @param varargFunc function reference
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  * @see udf
  */
-@JvmName("registerUdfVarargT")
+@JvmName("registerVarargT")
 inline fun <reified T, reified R> UDFRegistration.register(
     name: String,
-    func: KFunction1<Array<T>, R>,
+    varargFunc: KFunction1<Array<T>, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunctionVararg<T, R> = register(udf(name, func, nondeterministic))
+): NamedUserDefinedFunctionVararg<T, R> = register(udf(name, varargFunc, nondeterministic))
