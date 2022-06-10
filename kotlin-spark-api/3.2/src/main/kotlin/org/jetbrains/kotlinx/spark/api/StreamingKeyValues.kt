@@ -247,7 +247,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKeyAndWindow(
             /* slideDuration = */ slideDuration,
             /* numPartitions = */ numPartitions,
             /* filterFunc = */ filterFunc?.let {
-                { tuple ->
+                { tuple: Tuple2<K, V> ->
                     filterFunc(tuple)
                 }
             }
@@ -289,7 +289,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.reduceByKeyAndWindow(
             /* slideDuration = */ slideDuration,
             /* partitioner = */ partitioner,
             /* filterFunc = */ filterFunc?.let {
-                { tuple ->
+                { tuple: Tuple2<K, V> ->
                     filterFunc(tuple)
                 }
             }
