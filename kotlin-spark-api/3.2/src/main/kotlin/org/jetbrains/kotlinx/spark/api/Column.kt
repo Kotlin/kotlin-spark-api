@@ -32,20 +32,37 @@ import org.apache.spark.sql.functions
 import kotlin.reflect.KProperty1
 
 /**
- * Selects column based on the column name and returns it as a [Column].
+ * Selects column based on the column name and returns it as a [TypedColumn].
  *
- * TODO unfortunately shadowed
+ * For example:
+ * ```kotlin
+ * dataset.col<_, Int>("a")
+ * ```
  *
  * @note The column name can also reference to a nested column like `a.b`.
  */
-//inline fun <T, reified R> Dataset<T>.col(colName: String): TypedColumn<T, R> = invoke<T, R>(colName)
+inline fun <T, reified R> Dataset<T>.col(colName: String): TypedColumn<T, R> =
+    org.jetbrains.kotlinx.spark.api.col<T, R>(colName)
+
+/**
+ * Selects column based on the column name and returns it as a [TypedColumn].
+ *
+ * For example:
+ * ```kotlin
+ * dataset<_, Int>("a")
+ * ```
+ * @note The column name can also reference to a nested column like `a.b`.
+ */
+inline operator fun <T, reified R> Dataset<T>.invoke(colName: String): TypedColumn<T, R> =
+    org.jetbrains.kotlinx.spark.api.col<T, R>(colName)
 
 /**
  * Selects column based on the column name and returns it as a [Column].
  *
  * @note The column name can also reference to a nested column like `a.b`.
+ *
  */
-inline operator fun <T, reified R> Dataset<T>.invoke(colName: String): TypedColumn<T, R> = col<T, R>(colName)
+operator fun Dataset<*>.invoke(colName: String): Column = apply(colName)
 
 /**
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
@@ -70,6 +87,15 @@ inline fun <T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<
  */
 inline operator fun <T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
 
+
+/**
+ * Can be used to create a [TypedColumn] for a simple [Dataset]
+ * with just one single column called "value".
+ */
+inline fun <reified T> Dataset<T>.singleCol(colName: String = "value"): TypedColumn<T, T> {
+    require(schema().fields().size == 1) { "This Dataset<${T::class.simpleName}> contains more than 1 column" }
+    return org.jetbrains.kotlinx.spark.api.singleCol(colName)
+}
 
 @Suppress("FunctionName")
 @Deprecated(
@@ -456,6 +482,18 @@ fun lit(a: Any): Column = functions.lit(a)
  * @see as
  */
 inline fun <DsType, reified U> col(colName: String): TypedColumn<DsType, U> = functions.col(colName).`as`()
+
+/**
+ * Can be used to create a [TypedColumn] for a simple [Dataset]
+ * with just one single column called "value".
+ */
+inline fun <reified DsType> singleCol(colName: String = "value"): TypedColumn<DsType, DsType> = functions.col(colName).`as`()
+
+/**
+ * Returns a [Column] based on the given column name.
+ *
+ */
+fun col(colName: String): Column = functions.col(colName)
 
 /**
  * Returns a [Column] based on the given class attribute, not connected to a dataset.

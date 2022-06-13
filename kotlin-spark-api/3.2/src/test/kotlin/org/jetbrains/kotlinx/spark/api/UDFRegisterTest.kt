@@ -114,7 +114,9 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     val testData = dsOf(arrayOf("a", "b"))
-                    val newData = testData.withColumn("text", stringArrayMerger(col<Array<String>>("value").asWrappedArray()))
+                    val newData = testData.withColumn("text", stringArrayMerger(
+                        testData.singleCol().asWrappedArray()
+                    ))
 
                     (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
@@ -129,7 +131,7 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     val testData = dsOf(listOf("a", "b"))
-                    val newData = testData.withColumn("text", stringArrayMerger(testData("value").typed()))
+                    val newData = testData.withColumn("text", stringArrayMerger(testData("value")))
 
                     (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
@@ -171,11 +173,11 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     val a = spark.sql("SELECT random()")
-                        .selectTyped(col("random()").typed<Int>())
+                        .select(col<_, Int>("random()"))
                         .takeAsList(1)
                         .single()
                     val b = spark.sql("SELECT random()")
-                        .selectTyped(col("random()").typed<Int>())
+                        .select(col<_, Int>("random()"))
                         .takeAsList(1)
                         .single()
 
@@ -186,7 +188,7 @@ class UDFRegisterTest : ShouldSpec({
 
                     val random by udf(nondeterministic = true) { -> Random.nextInt() }
 
-                    val executed = random()
+                    val executed = random<Any?>()
 
                     val map = udf.register(name = "map", func = { it: Int -> "$it yay" })
 
@@ -216,7 +218,7 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     spark.sql("SELECT test()")
-                        .selectTyped(col("test()").typed<Int?>())
+                        .select(col<_, Int?>("test()"))
                         .showDS()
                         .takeAsList(1)
                         .single()
@@ -230,7 +232,7 @@ class UDFRegisterTest : ShouldSpec({
                     test.register()
 
                     spark.sql("SELECT test()")
-                        .selectTyped(col("test()").typed<Int?>())
+                        .select(col<_, Int?>("test()"))
                         .showDS()
                         .takeAsList(1)
                         .single()

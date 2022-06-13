@@ -29,6 +29,7 @@ import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions
+import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.jetbrains.kotlinx.spark.api.tuples.*
@@ -341,25 +342,25 @@ class DatasetFunctionTest : ShouldSpec({
                     SomeClass(intArrayOf(1, 2, 4), 5),
                 )
 
-                val newDS1WithAs: Dataset<IntArray> = dataset.selectTyped(
-                    functions.col("a").`as`<IntArray>(),
+                val newDS1WithAs: Dataset<IntArray> = dataset.select(
+                    col("a").typed(),
                 )
                 newDS1WithAs.collectAsList()
 
-                val newDS2: Dataset<Tuple2<IntArray, Int>> = dataset.selectTyped(
+                val newDS2: Dataset<Tuple2<IntArray, Int>> = dataset.select(
                     col(SomeClass::a), // NOTE: this only works on 3.0, returning a data class with an array in it
                     col(SomeClass::b),
                 )
                 newDS2.collectAsList()
 
-                val newDS3: Dataset<Tuple3<IntArray, Int, Int>> = dataset.selectTyped(
+                val newDS3: Dataset<Tuple3<IntArray, Int, Int>> = dataset.select(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
                 )
                 newDS3.collectAsList()
 
-                val newDS4: Dataset<Tuple4<IntArray, Int, Int, Int>> = dataset.selectTyped(
+                val newDS4: Dataset<Tuple4<IntArray, Int, Int, Int>> = dataset.select(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
@@ -367,7 +368,7 @@ class DatasetFunctionTest : ShouldSpec({
                 )
                 newDS4.collectAsList()
 
-                val newDS5: Dataset<Tuple5<IntArray, Int, Int, Int, Int>> = dataset.selectTyped(
+                val newDS5: Dataset<Tuple5<IntArray, Int, Int, Int, Int>> = dataset.select(
                     col(SomeClass::a),
                     col(SomeClass::b),
                     col(SomeClass::b),
@@ -383,7 +384,7 @@ class DatasetFunctionTest : ShouldSpec({
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
 
-                dataset.col("a") shouldBe dataset("a")
+                dataset.col("a") shouldBe dataset<_, IntArray>("a")
             }
 
             should("Use infix- and operator funs on columns") {
@@ -440,7 +441,7 @@ class DatasetFunctionTest : ShouldSpec({
                 )
                 dataset.collectAsList()
 
-                val column = functions.col("b").`as`<IntArray>()
+                val column = dataset.col<_, IntArray>("b")
 
                 val b = dataset.where(column gt 3 and col(SomeOtherClass::c))
 
