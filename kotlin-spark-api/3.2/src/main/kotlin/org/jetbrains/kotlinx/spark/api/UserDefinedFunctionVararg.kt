@@ -46,7 +46,7 @@ open class UserDefinedFunctionVararg<T, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(vararg params: TypedColumn<*, T>): TypedColumn<*, R> = super.invoke(*params).`as`(encoder)
+    operator fun <DsType> invoke(vararg params: TypedColumn<DsType, T>): TypedColumn<DsType, R> = super.invoke(*params).`as`(encoder) as TypedColumn<DsType, R>
 
     /** Returns named variant of this UDF. */
     override fun withName(name: String): NamedUserDefinedFunctionVararg<T, R> = NamedUserDefinedFunctionVararg(
@@ -1884,3 +1884,4 @@ inline fun <reified T, reified R> UDFRegistration.register(
     varargFunc: KFunction1<Array<T>, R>,
     nondeterministic: Boolean = false,
 ): NamedUserDefinedFunctionVararg<T, R> = register(udf(name, varargFunc, nondeterministic))
+

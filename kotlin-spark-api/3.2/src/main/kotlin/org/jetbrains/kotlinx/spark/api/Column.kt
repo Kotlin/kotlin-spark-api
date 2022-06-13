@@ -34,9 +34,18 @@ import kotlin.reflect.KProperty1
 /**
  * Selects column based on the column name and returns it as a [Column].
  *
+ * TODO unfortunately shadowed
+ *
  * @note The column name can also reference to a nested column like `a.b`.
  */
-operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
+//inline fun <T, reified R> Dataset<T>.col(colName: String): TypedColumn<T, R> = invoke<T, R>(colName)
+
+/**
+ * Selects column based on the column name and returns it as a [Column].
+ *
+ * @note The column name can also reference to a nested column like `a.b`.
+ */
+inline operator fun <T, reified R> Dataset<T>.invoke(colName: String): TypedColumn<T, R> = col<T, R>(colName)
 
 /**
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
@@ -47,8 +56,8 @@ operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
  * @see invoke
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    col(column.name).`as`<U>() as TypedColumn<T, U>
+inline fun <T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
+    col(column.name).`as`()
 
 
 /**
@@ -59,7 +68,7 @@ inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): Type
  * ```
  * @see col
  */
-inline operator fun <reified T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
+inline operator fun <T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
 
 
 @Suppress("FunctionName")
@@ -408,7 +417,7 @@ operator fun Column.get(key: Any): Column = getItem(key)
  * @see typed
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> Column.`as`(): TypedColumn<*, T> = `as`(encoder<T>())
+inline fun <DsType, reified U> Column.`as`(): TypedColumn<DsType, U> = `as`(encoder<U>()) as TypedColumn<DsType, U>
 
 /**
  * Provides a type hint about the expected return value of this column. This information can
@@ -423,7 +432,7 @@ inline fun <reified T> Column.`as`(): TypedColumn<*, T> = `as`(encoder<T>())
  * @see as
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> Column.typed(): TypedColumn<*, T> = `as`<T>()
+inline fun <DsType, reified T> Column.typed(): TypedColumn<DsType, T> = `as`()
 
 /**
  * Creates a [Column] of literal value.
@@ -438,7 +447,7 @@ inline fun <reified T> Column.typed(): TypedColumn<*, T> = `as`<T>()
 fun lit(a: Any): Column = functions.lit(a)
 
 /**
- * Returns a [TypedColumn] based on the given column name and type [T].
+ * Returns a [TypedColumn] based on the given column name and type [DsType].
  *
  * This is just a shortcut to the function from [org.apache.spark.sql.functions] combined with an [as] call.
  * For all the functions, simply add `import org.apache.spark.sql.functions.*` to your file.
@@ -446,27 +455,16 @@ fun lit(a: Any): Column = functions.lit(a)
  * @see col
  * @see as
  */
-inline fun <reified T> typedCol(colName: String): TypedColumn<*, T> = functions.col(colName).`as`<T>()
+inline fun <DsType, reified U> col(colName: String): TypedColumn<DsType, U> = functions.col(colName).`as`()
 
 /**
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
- *    val new: Dataset<Pair<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
- * ```
- * @see typedCol
- */
-@Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> = typedCol(column)
-
-/**
- * Returns a [Column] based on the given class attribute, not connected to a dataset.
- * ```kotlin
- *    val dataset: Dataset<YourClass> = ...
- *    val new: Dataset<Pair<TypeOfA, TypeOfB>> = dataset.select( typedCol(YourClass::a), typedCol(YourClass::b) )
+ *    val new: Dataset<Tuple2<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
  * ```
  * @see col
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> typedCol(column: KProperty1<T, U>): TypedColumn<T, U> =
-    functions.col(column.name).`as`<U>() as TypedColumn<T, U>
+inline fun <DsType, reified U> col(column: KProperty1<DsType, U>): TypedColumn<DsType, U> =
+    functions.col(column.name).`as`()

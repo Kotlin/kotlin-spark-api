@@ -114,7 +114,7 @@ class UDFRegisterTest : ShouldSpec({
                     }
 
                     val testData = dsOf(arrayOf("a", "b"))
-                    val newData = testData.withColumn("text", stringArrayMerger(typedCol<Array<String>>("value").asWrappedArray()))
+                    val newData = testData.withColumn("text", stringArrayMerger(col<Array<String>>("value").asWrappedArray()))
 
                     (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
                         .forEach { (text, textArray) ->
@@ -149,7 +149,10 @@ class UDFRegisterTest : ShouldSpec({
 
                     val collectAsList = dataset.withColumn(
                         "nameAndAge",
-                        nameConcatAge(col(NormalClass::name), col(NormalClass::age))
+                        nameConcatAge(
+                            col(NormalClass::name),
+                            col(NormalClass::age)
+                        )
                     )
                         .select("nameAndAge")
                         .collectAsList()

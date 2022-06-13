@@ -43,7 +43,7 @@ open class UserDefinedFunction0<R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(): TypedColumn<*, R> = super.invoke().`as`(encoder)
+    operator fun <DsType> invoke(): TypedColumn<DsType, R> = super.invoke().`as`(encoder) as TypedColumn<DsType, R>
 
 
 
@@ -262,7 +262,7 @@ open class UserDefinedFunction1<T1, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>): TypedColumn<*, R> = super.invoke(param0).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>): TypedColumn<DsType, R> = super.invoke(param0).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -485,7 +485,7 @@ open class UserDefinedFunction2<T1, T2, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>): TypedColumn<*, R> = super.invoke(param0, param1).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>): TypedColumn<DsType, R> = super.invoke(param0, param1).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -708,7 +708,7 @@ open class UserDefinedFunction3<T1, T2, T3, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>): TypedColumn<*, R> = super.invoke(param0, param1, param2).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -932,7 +932,7 @@ open class UserDefinedFunction4<T1, T2, T3, T4, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1157,7 +1157,7 @@ open class UserDefinedFunction5<T1, T2, T3, T4, T5, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1383,7 +1383,7 @@ open class UserDefinedFunction6<T1, T2, T3, T4, T5, T6, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1610,7 +1610,7 @@ open class UserDefinedFunction7<T1, T2, T3, T4, T5, T6, T7, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -1838,7 +1838,7 @@ open class UserDefinedFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2067,7 +2067,7 @@ open class UserDefinedFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2297,7 +2297,7 @@ open class UserDefinedFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R>(
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2528,7 +2528,7 @@ open class UserDefinedFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2760,7 +2760,7 @@ open class UserDefinedFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -2993,7 +2993,7 @@ open class UserDefinedFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3227,7 +3227,7 @@ open class UserDefinedFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3462,7 +3462,7 @@ open class UserDefinedFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3698,7 +3698,7 @@ open class UserDefinedFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>, param15: TypedColumn<DsType, T16>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -3935,7 +3935,7 @@ open class UserDefinedFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>, param15: TypedColumn<DsType, T16>, param16: TypedColumn<DsType, T17>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4173,7 +4173,7 @@ open class UserDefinedFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>, param15: TypedColumn<DsType, T16>, param16: TypedColumn<DsType, T17>, param17: TypedColumn<DsType, T18>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4412,7 +4412,7 @@ open class UserDefinedFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>, param15: TypedColumn<DsType, T16>, param16: TypedColumn<DsType, T17>, param17: TypedColumn<DsType, T18>, param18: TypedColumn<DsType, T19>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4652,7 +4652,7 @@ open class UserDefinedFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>, param15: TypedColumn<DsType, T16>, param16: TypedColumn<DsType, T17>, param17: TypedColumn<DsType, T18>, param18: TypedColumn<DsType, T19>, param19: TypedColumn<DsType, T20>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -4893,7 +4893,7 @@ open class UserDefinedFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>, param20: TypedColumn<*, T21>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>, param15: TypedColumn<DsType, T16>, param16: TypedColumn<DsType, T17>, param17: TypedColumn<DsType, T18>, param18: TypedColumn<DsType, T19>, param19: TypedColumn<DsType, T20>, param20: TypedColumn<DsType, T21>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -5135,7 +5135,7 @@ open class UserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T
      * @see typedCol to create typed columns.
      * @see org.apache.spark.sql.expressions.UserDefinedFunction.apply
      */
-    operator fun invoke(param0: TypedColumn<*, T1>, param1: TypedColumn<*, T2>, param2: TypedColumn<*, T3>, param3: TypedColumn<*, T4>, param4: TypedColumn<*, T5>, param5: TypedColumn<*, T6>, param6: TypedColumn<*, T7>, param7: TypedColumn<*, T8>, param8: TypedColumn<*, T9>, param9: TypedColumn<*, T10>, param10: TypedColumn<*, T11>, param11: TypedColumn<*, T12>, param12: TypedColumn<*, T13>, param13: TypedColumn<*, T14>, param14: TypedColumn<*, T15>, param15: TypedColumn<*, T16>, param16: TypedColumn<*, T17>, param17: TypedColumn<*, T18>, param18: TypedColumn<*, T19>, param19: TypedColumn<*, T20>, param20: TypedColumn<*, T21>, param21: TypedColumn<*, T22>): TypedColumn<*, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20, param21).`as`(encoder)
+    operator fun <DsType> invoke(param0: TypedColumn<DsType, T1>, param1: TypedColumn<DsType, T2>, param2: TypedColumn<DsType, T3>, param3: TypedColumn<DsType, T4>, param4: TypedColumn<DsType, T5>, param5: TypedColumn<DsType, T6>, param6: TypedColumn<DsType, T7>, param7: TypedColumn<DsType, T8>, param8: TypedColumn<DsType, T9>, param9: TypedColumn<DsType, T10>, param10: TypedColumn<DsType, T11>, param11: TypedColumn<DsType, T12>, param12: TypedColumn<DsType, T13>, param13: TypedColumn<DsType, T14>, param14: TypedColumn<DsType, T15>, param15: TypedColumn<DsType, T16>, param16: TypedColumn<DsType, T17>, param17: TypedColumn<DsType, T18>, param18: TypedColumn<DsType, T19>, param19: TypedColumn<DsType, T20>, param20: TypedColumn<DsType, T21>, param21: TypedColumn<DsType, T22>): TypedColumn<DsType, R> = super.invoke(param0, param1, param2, param3, param4, param5, param6, param7, param8, param9, param10, param11, param12, param13, param14, param15, param16, param17, param18, param19, param20, param21).`as`(encoder) as TypedColumn<DsType, R>
 
     /**
      * Returns an expression that invokes the UDF in untyped manner, using the given arguments.
@@ -5358,3 +5358,5 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     func: UDF22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R>,
 ): NamedUserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> =
     register(udf(name, nondeterministic, func))
+
+
