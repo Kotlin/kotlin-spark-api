@@ -4,11 +4,11 @@
 
   <name>Kotlin Spark API: Parent (Scala 2.12)</name>
   <description>Parent project for Kotlin for Apache Spark</description>
-  <artifactId>kotlin-spark-api-parent_2.12</artifactId>
+  <artifactId>kotlin-spark-api-parent-3.2_2.12</artifactId>
   <parent>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
-    <artifactId>kotlin-spark-api-parent</artifactId>
-    <version>1.0.4-SNAPSHOT</version>
+    <artifactId>kotlin-spark-api-parent-3.2</artifactId>
+    <version>1.1.1-SNAPSHOT</version>
     <relativePath>pom.xml</relativePath>
   </parent>
   <packaging>pom</packaging>
@@ -36,7 +36,7 @@
       </dependency>
       <dependency>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>scala-tuples-in-kotlin</artifactId>
+        <artifactId>scala-tuples-in-kotlin-3.2</artifactId>
         <version>${project.version}</version>
       </dependency>
     </dependencies>

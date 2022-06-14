@@ -40,7 +40,7 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.toPairDStream(): JavaPairDStream<K, V> =
 fun <K, V> JavaPairDStream<K, V>.toTupleDStream(): JavaDStream<Tuple2<K, V>> =
     toJavaDStream()
 
-fun <K, V> JavaRDD<Tuple2<K, V>>.toPairRDD(): JavaPairRDD<K, V> = 
+fun <K, V> JavaRDD<Tuple2<K, V>>.toPairRDD(): JavaPairRDD<K, V> =
     JavaPairRDD.fromJavaRDD(this)
 
 fun <K, V> JavaPairRDD<K, V>.toTupleRDD(): JavaRDD<Tuple2<K, V>> =

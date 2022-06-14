@@ -21,10 +21,11 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 
 
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlinx.jupyter.api.FieldValue
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 
 /**
- * %use kotlin-spark-api
+ * %use spark
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
@@ -49,7 +50,7 @@ internal class SparkIntegration : Integration() {
                     org.apache.spark.api.java.JavaSparkContext(spark.sparkContext) 
                 }""".trimIndent(),
             """
-                println("Spark session has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use kotlin-spark-api-streaming` instead.")""".trimIndent(),
+                println("Spark session has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use spark-streaming` instead.")""".trimIndent(),
             """
                 inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
             """
@@ -69,5 +70,9 @@ internal class SparkIntegration : Integration() {
             """
                 val udf: UDFRegistration get() = spark.udf()""".trimIndent(),
         ).map(::execute)
+    }
+
+    override fun KotlinKernelHost.onShutdown() {
+        execute("""spark.stop()""")
     }
 }
