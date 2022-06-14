@@ -134,7 +134,7 @@ inline fun <reified R> UDFRegistration.register(
     name: String,
     func: KProperty0<() -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction0<R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction0<R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction0]) from a function reference adapting its name by reflection.
@@ -186,7 +186,7 @@ inline fun <reified R> UDFRegistration.register(
     name: String,
     func: KFunction0<R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction0<R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction0<R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -358,7 +358,7 @@ inline fun <reified T1, reified R> UDFRegistration.register(
     name: String,
     func: KProperty0<(T1) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction1<T1, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction1<T1, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction1]) from a function reference adapting its name by reflection.
@@ -410,7 +410,7 @@ inline fun <reified T1, reified R> UDFRegistration.register(
     name: String,
     func: KFunction1<T1, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction1<T1, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction1<T1, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -580,7 +580,7 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
     name: String,
     func: KProperty0<(T1, T2) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction2<T1, T2, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction2<T1, T2, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction2]) from a function reference adapting its name by reflection.
@@ -632,7 +632,7 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
     name: String,
     func: KFunction2<T1, T2, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction2<T1, T2, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction2<T1, T2, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -803,7 +803,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
     name: String,
     func: KProperty0<(T1, T2, T3) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction3<T1, T2, T3, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction3<T1, T2, T3, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction3]) from a function reference adapting its name by reflection.
@@ -855,7 +855,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
     name: String,
     func: KFunction3<T1, T2, T3, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction3<T1, T2, T3, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction3<T1, T2, T3, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -1027,7 +1027,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
     name: String,
     func: KProperty0<(T1, T2, T3, T4) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction4<T1, T2, T3, T4, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction4<T1, T2, T3, T4, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction4]) from a function reference adapting its name by reflection.
@@ -1079,7 +1079,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
     name: String,
     func: KFunction4<T1, T2, T3, T4, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction4<T1, T2, T3, T4, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction4<T1, T2, T3, T4, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -1252,7 +1252,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction5<T1, T2, T3, T4, T5, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction5<T1, T2, T3, T4, T5, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction5]) from a function reference adapting its name by reflection.
@@ -1304,7 +1304,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction5<T1, T2, T3, T4, T5, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction5<T1, T2, T3, T4, T5, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction5<T1, T2, T3, T4, T5, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -1478,7 +1478,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction6<T1, T2, T3, T4, T5, T6, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction6<T1, T2, T3, T4, T5, T6, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction6]) from a function reference adapting its name by reflection.
@@ -1530,7 +1530,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction6<T1, T2, T3, T4, T5, T6, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction6<T1, T2, T3, T4, T5, T6, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction6<T1, T2, T3, T4, T5, T6, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -1705,7 +1705,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction7<T1, T2, T3, T4, T5, T6, T7, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction7<T1, T2, T3, T4, T5, T6, T7, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction7]) from a function reference adapting its name by reflection.
@@ -1757,7 +1757,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction7<T1, T2, T3, T4, T5, T6, T7, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction7<T1, T2, T3, T4, T5, T6, T7, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction7<T1, T2, T3, T4, T5, T6, T7, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -1933,7 +1933,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction8]) from a function reference adapting its name by reflection.
@@ -1985,7 +1985,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction8<T1, T2, T3, T4, T5, T6, T7, T8, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -2162,7 +2162,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction9]) from a function reference adapting its name by reflection.
@@ -2214,7 +2214,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -2392,7 +2392,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction10]) from a function reference adapting its name by reflection.
@@ -2444,7 +2444,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -2623,7 +2623,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction11]) from a function reference adapting its name by reflection.
@@ -2675,7 +2675,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -2855,7 +2855,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction12]) from a function reference adapting its name by reflection.
@@ -2907,7 +2907,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -3088,7 +3088,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction13]) from a function reference adapting its name by reflection.
@@ -3140,7 +3140,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -3322,7 +3322,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction14]) from a function reference adapting its name by reflection.
@@ -3374,7 +3374,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -3557,7 +3557,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction15]) from a function reference adapting its name by reflection.
@@ -3609,7 +3609,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -3793,7 +3793,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction16]) from a function reference adapting its name by reflection.
@@ -3845,7 +3845,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -4030,7 +4030,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction17]) from a function reference adapting its name by reflection.
@@ -4082,7 +4082,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -4268,7 +4268,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction18]) from a function reference adapting its name by reflection.
@@ -4320,7 +4320,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -4507,7 +4507,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction19]) from a function reference adapting its name by reflection.
@@ -4559,7 +4559,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -4747,7 +4747,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction20]) from a function reference adapting its name by reflection.
@@ -4799,7 +4799,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -4988,7 +4988,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction21]) from a function reference adapting its name by reflection.
@@ -5040,7 +5040,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -5230,7 +5230,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KProperty0<(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22) -> R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> = register(udf(name, func, nondeterministic))
 
 /**
  * Creates a UDF ([NamedUserDefinedFunction22]) from a function reference adapting its name by reflection.
@@ -5282,7 +5282,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     name: String,
     func: KFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R>,
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> = udf(name, func, nondeterministic)
+): NamedUserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> = register(udf(name, func, nondeterministic))
 
 
 /**
@@ -5358,5 +5358,6 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     func: UDF22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R>,
 ): NamedUserDefinedFunction22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> =
     register(udf(name, nondeterministic, func))
+
 
 

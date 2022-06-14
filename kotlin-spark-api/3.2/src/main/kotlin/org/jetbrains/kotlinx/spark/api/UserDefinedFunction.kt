@@ -94,26 +94,24 @@ fun <DsType> TypedColumn<DsType, BooleanArray>.asWrappedArray(): TypedColumn<DsT
  * API (i.e. of type [NamedUserDefinedFunction]).
  * @see UDFRegistration.register
  */
-inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>> UDFRegistration.register(
-    namedUdf: NAMED_UDF,
-): NAMED_UDF =
-    namedUdf.copy(udf = register(namedUdf.name, namedUdf.udf))
+inline fun <Return, reified NamedUdf : NamedUserDefinedFunction<Return, *>> UDFRegistration.register(
+    namedUdf: NamedUdf,
+): NamedUdf = namedUdf.copy(udf = register(namedUdf.name, namedUdf.udf))
 
-inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>> UDFRegistration.register(
+inline fun <Return, reified NamedUdf : NamedUserDefinedFunction<Return, *>> UDFRegistration.register(
     name: String,
-    udf: UserDefinedFunction<RETURN, NAMED_UDF>,
-): NAMED_UDF =
-    udf.withName(name).copy(udf = register(name, udf.udf))
+    udf: UserDefinedFunction<Return, NamedUdf>,
+): NamedUdf = udf.withName(name).copy(udf = register(name, udf.udf))
 
 /**
  * Typed wrapper around [SparkUserDefinedFunction] with defined encoder.
  *
- * @param RETURN the return type of the udf
- * @param NAMED a type reference to the named version of the [SparkUserDefinedFunction] implementing class
+ * @param Return the return type of the udf
+ * @param NamedUdf a type reference to the named version of the [SparkUserDefinedFunction] implementing class
  */
-sealed interface UserDefinedFunction<RETURN, NAMED> {
+sealed interface UserDefinedFunction<Return, NamedUdf> {
     val udf: SparkUserDefinedFunction
-    val encoder: Encoder<RETURN>
+    val encoder: Encoder<Return>
 
     /** Returns true when the UDF can return a nullable value. */
     val nullable: Boolean get() = udf.nullable()
@@ -126,23 +124,23 @@ sealed interface UserDefinedFunction<RETURN, NAMED> {
     operator fun invoke(vararg params: Column): Column = invokeUntyped(*params)
 
     /** Converts this [UserDefinedFunction] to a [NamedUserDefinedFunction]. */
-    fun withName(name: String): NAMED
+    fun withName(name: String): NamedUdf
 
     /**
      * Converts this [UserDefinedFunction] to a [NamedUserDefinedFunction].
      * @see withName
      */
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): NAMED
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): NamedUdf
 }
 
 /**
  * Typed and named wrapper around [SparkUserDefinedFunction] with defined encoder.
  *
- * @param RETURN    the return type of the udf
- * @param THIS      a self reference to the named version of the [SparkUserDefinedFunction] implementing class.
+ * @param Return    the return type of the udf
+ * @param This      a self reference to the named version of the [SparkUserDefinedFunction] implementing class.
  *                  Unfortunately needed to allow functions to treat any [NamedTypedUserDefinedFunction] as a normal [TypedUserDefinedFunction].
  */
-sealed interface NamedUserDefinedFunction<RETURN, THIS> : UserDefinedFunction<RETURN, THIS> {
+sealed interface NamedUserDefinedFunction<Return, This> : UserDefinedFunction<Return, This> {
     val name: String
 }
 

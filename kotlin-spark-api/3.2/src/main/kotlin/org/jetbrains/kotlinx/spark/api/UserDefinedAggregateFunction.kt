@@ -37,28 +37,44 @@ import kotlin.reflect.typeOf
  * @param outputEncoder Optional. Specifies the `Encoder` for the final output value type.
  * */
 inline fun <reified IN, reified BUF, reified OUT> aggregatorOf(
-    zero: BUF,
+    noinline zero: () -> BUF,
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
     bufferEncoder: Encoder<BUF> = encoder(),
     outputEncoder: Encoder<OUT> = encoder(),
-): Aggregator<IN, BUF, OUT> = object : Aggregator<IN, BUF, OUT>(), Serializable {
-    override fun reduce(b: BUF, a: IN): BUF = reduce(b, a)
-    override fun merge(b1: BUF, b2: BUF): BUF = merge(b1, b2)
-    override fun finish(reduction: BUF): OUT = finish(reduction)
+): Aggregator<IN, BUF, OUT> = Aggregator(zero, reduce, merge, finish, bufferEncoder, outputEncoder)
+
+class Aggregator<IN, BUF, OUT>(
+    zero: () -> BUF,
+    reduce: (b: BUF, a: IN) -> BUF,
+    merge: (b1: BUF, b2: BUF) -> BUF,
+    finish: (reduction: BUF) -> OUT,
+    private val bufferEncoder: Encoder<BUF>,
+    private val outputEncoder: Encoder<OUT>,
+) : Aggregator<IN, BUF, OUT>(), Serializable {
+
+    private val _zero: () -> BUF = zero
+    private val _reduce: (b: BUF, a: IN) -> BUF = reduce
+    private val _merge: (b1: BUF, b2: BUF) -> BUF = merge
+    private val _finish: (reduction: BUF) -> OUT = finish
+
+    override fun zero(): BUF = _zero()
+    override fun reduce(b: BUF, a: IN): BUF = _reduce(b, a)
+    override fun merge(b1: BUF, b2: BUF): BUF = _merge(b1, b2)
+    override fun finish(reduction: BUF): OUT = _finish(reduction)
     override fun bufferEncoder(): Encoder<BUF> = bufferEncoder
-    override fun zero(): BUF = zero
     override fun outputEncoder(): Encoder<OUT> = outputEncoder
 }
+
 
 /**
  * Obtains a [NamedUserDefinedFunction1] that wraps the given [agg] so that it may be used with Data Frames.
  * @see functions.udaf
  *
- * @param agg the given [Aggregator] to convert into a UDAF. Can also be created using [aggregatorOf].
  * @param name Optional. Tries to obtain name from the class of [agg] if not supplied.
  *      Use [udafUnnamed] if no name is wanted.
+ * @param agg the given [Aggregator] to convert into a UDAF. Can also be created using [aggregatorOf].
  * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
  *
  * @return a [NamedUserDefinedFunction1] that can be used as an aggregating expression
@@ -67,8 +83,30 @@ inline fun <reified IN, reified BUF, reified OUT> aggregatorOf(
  */
 inline fun <reified IN, reified OUT, reified AGG : Aggregator<IN, *, OUT>> udaf(
     agg: AGG,
-    name: String = agg::class.simpleName
+    nondeterministic: Boolean = false,
+): NamedUserDefinedFunction1<IN, OUT> = udaf(
+    name = agg::class.simpleName
         ?: error("Could not obtain name from [agg], either supply a name or use [udafUnnamed()]"),
+    agg = agg,
+    nondeterministic = nondeterministic,
+)
+
+/**
+ * Obtains a [NamedUserDefinedFunction1] that wraps the given [agg] so that it may be used with Data Frames.
+ * @see functions.udaf
+ *
+ * @param name Optional. Tries to obtain name from the class of [agg] if not supplied.
+ *      Use [udafUnnamed] if no name is wanted.
+ * @param agg the given [Aggregator] to convert into a UDAF. Can also be created using [aggregatorOf].
+ * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
+ *
+ * @return a [NamedUserDefinedFunction1] that can be used as an aggregating expression
+ *
+ * @see udaf for a named variant.
+ */
+inline fun <reified IN, reified OUT, reified AGG : Aggregator<IN, *, OUT>> udaf(
+    name: String,
+    agg: AGG,
     nondeterministic: Boolean = false,
 ): NamedUserDefinedFunction1<IN, OUT> =
     udafUnnamed(agg = agg, nondeterministic = nondeterministic).withName(name)
@@ -89,7 +127,6 @@ inline fun <reified IN, reified OUT, reified AGG : Aggregator<IN, *, OUT>> udafU
     nondeterministic: Boolean = false,
 ): UserDefinedFunction1<IN, OUT> {
     IN::class.checkForValidType("IN")
-    OUT::class.checkForValidType("OUT")
 
     return UserDefinedFunction1(
         udf = functions.udaf(agg, encoder<IN>())
@@ -118,8 +155,8 @@ inline fun <reified IN, reified OUT, reified AGG : Aggregator<IN, *, OUT>> udafU
  *
  * @see udaf for a named variant.
  */
-inline fun <reified IN, reified BUF, reified OUT> udafUnnamed(
-    zero: BUF,
+inline fun <reified IN, reified BUF, reified OUT> udaf(
+    noinline zero: () -> BUF,
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
@@ -127,7 +164,7 @@ inline fun <reified IN, reified BUF, reified OUT> udafUnnamed(
     outputEncoder: Encoder<OUT> = encoder(),
     nondeterministic: Boolean = false,
 ): UserDefinedFunction1<IN, OUT> = udafUnnamed(
-    agg = aggregatorOf(
+    aggregatorOf(
         zero = zero,
         reduce = reduce,
         merge = merge,
@@ -135,43 +172,6 @@ inline fun <reified IN, reified BUF, reified OUT> udafUnnamed(
         bufferEncoder = bufferEncoder,
         outputEncoder = outputEncoder,
     ),
-    nondeterministic = nondeterministic,
-)
-
-/**
- * Obtains a [UserDefinedFunction1] created from an [Aggregator] created by the given arguments
- * so that it may be used with Data Frames.
- * @see functions.udaf
- * @see aggregatorOf
- *
- * @param zero A zero value for this aggregation. Should satisfy the property that any b + zero = b.
- * @param reduce Combine two values to produce a new value. For performance, the function may modify `b` and
- *      return it instead of constructing new object for b.
- * @param merge Merge two intermediate values.
- * @param finish Transform the output of the reduction.
- * @param bufferEncoder Optional. Specifies the `Encoder` for the intermediate value type.
- * @param outputEncoder Optional. Specifies the `Encoder` for the final output value type.
- * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
- *
- * @return a [UserDefinedFunction1] that can be used as an aggregating expression
- *
- * @see udaf for a named variant.
- */
-inline fun <reified IN, reified BUF, reified OUT> udaf(
-    zero: BUF,
-    noinline reduce: (b: BUF, a: IN) -> BUF,
-    noinline merge: (b1: BUF, b2: BUF) -> BUF,
-    noinline finish: (reduction: BUF) -> OUT,
-    bufferEncoder: Encoder<BUF> = encoder(),
-    outputEncoder: Encoder<OUT> = encoder(),
-    nondeterministic: Boolean = false,
-): UserDefinedFunction1<IN, OUT> = udafUnnamed(
-    zero = zero,
-    reduce = reduce,
-    merge = merge,
-    finish = finish,
-    bufferEncoder = bufferEncoder,
-    outputEncoder = outputEncoder,
     nondeterministic = nondeterministic,
 )
 
@@ -198,7 +198,7 @@ inline fun <reified IN, reified BUF, reified OUT> udaf(
  */
 inline fun <reified IN, reified BUF, reified OUT> udaf(
     name: String,
-    zero: BUF,
+    noinline zero: () -> BUF,
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
@@ -206,6 +206,7 @@ inline fun <reified IN, reified BUF, reified OUT> udaf(
     outputEncoder: Encoder<OUT> = encoder(),
     nondeterministic: Boolean = false,
 ): NamedUserDefinedFunction1<IN, OUT> = udaf(
+    name = name,
     agg = aggregatorOf(
         zero = zero,
         reduce = reduce,
@@ -214,7 +215,6 @@ inline fun <reified IN, reified BUF, reified OUT> udaf(
         bufferEncoder = bufferEncoder,
         outputEncoder = outputEncoder,
     ),
-    name = name,
     nondeterministic = nondeterministic,
 )
 
@@ -232,13 +232,28 @@ inline fun <reified IN, reified BUF, reified OUT> udaf(
  * @return a [NamedUserDefinedFunction1] that can be used as an aggregating expression
  */
 inline fun <reified T1, reified R> UDFRegistration.register(
+    name: String,
     agg: Aggregator<T1, *, R>,
-    name: String = agg::class.simpleName
-        ?: error("Could not create a name for this UDAF, please define one in this function call."),
     nondeterministic: Boolean = false,
-): NamedUserDefinedFunction1<T1, R> = register(
-    udaf(agg = agg, name = name, nondeterministic = nondeterministic)
-)
+): NamedUserDefinedFunction1<T1, R> = register(udaf(name, agg, nondeterministic))
+
+/**
+ * Registers [agg] as a UDAF for SQL. Returns the UDAF as [NamedUserDefinedFunction].
+ * Obtains a [NamedUserDefinedFunction1] that wraps the given [agg] so that it may be used with Data Frames.
+ * @see UDFRegistration.register
+ * @see functions.udaf
+ *
+ * @param agg the given [Aggregator] to convert into a UDAF. Can also be created using [aggregatorOf].
+ * @param name Optional. Tries to obtain name from the class of [agg] if not supplied.
+ *      Use [udafUnnamed] if no name is wanted.
+ * @param nondeterministic Optional. If true, sets the UserDefinedFunction as nondeterministic.
+ *
+ * @return a [NamedUserDefinedFunction1] that can be used as an aggregating expression
+ */
+inline fun <reified T1, reified R> UDFRegistration.register(
+    agg: Aggregator<T1, *, R>,
+    nondeterministic: Boolean = false,
+): NamedUserDefinedFunction1<T1, R> = register(udaf(agg, nondeterministic))
 
 /**
  * Registers a UDAF for SQL based on the given arguments. Returns the UDAF as [NamedUserDefinedFunction].
@@ -260,7 +275,7 @@ inline fun <reified T1, reified R> UDFRegistration.register(
  */
 inline fun <reified IN, reified BUF, reified OUT> UDFRegistration.register(
     name: String,
-    zero: BUF,
+    noinline zero: () -> BUF,
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
@@ -268,14 +283,5 @@ inline fun <reified IN, reified BUF, reified OUT> UDFRegistration.register(
     outputEncoder: Encoder<OUT> = encoder(),
     nondeterministic: Boolean = false,
 ): NamedUserDefinedFunction1<IN, OUT> = register(
-    udaf(
-        zero = zero,
-        reduce = reduce,
-        merge = merge,
-        finish = finish,
-        bufferEncoder = bufferEncoder,
-        outputEncoder = outputEncoder,
-        name = name,
-        nondeterministic = nondeterministic,
-    )
+    udaf(name, zero, reduce, merge, finish, bufferEncoder, outputEncoder, nondeterministic)
 )
