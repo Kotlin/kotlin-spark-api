@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-@file:Suppress("FunctionName", "RemoveExplicitTypeArguments")
+@file:Suppress("FunctionName", "RemoveExplicitTypeArguments", "UNUSED_PARAMETER")
 package org.jetbrains.kotlinx.spark.api.tuples
 
 import scala.Tuple1

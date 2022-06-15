@@ -23,7 +23,7 @@
  * and Kotlin/Java variants.
  */
 
-@file:Suppress("NOTHING_TO_INLINE", "RemoveExplicitTypeArguments", "unused")
+@file:Suppress("NOTHING_TO_INLINE", "RemoveExplicitTypeArguments", "unused", "DEPRECATION")
 
 package org.jetbrains.kotlinx.spark.api
 

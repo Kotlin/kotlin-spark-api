@@ -197,6 +197,7 @@ inline fun <reified T1, T2> Dataset<Pair<T1, T2>>.takeKeys(): Dataset<T1> = map 
  * (Kotlin-specific)
  * Maps the Dataset to only retain the "keys" or [Arity2._1] values.
  */
+@Suppress("DEPRECATION")
 @JvmName("takeKeysArity2")
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 inline fun <reified T1, T2> Dataset<Arity2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1 }
@@ -218,6 +219,7 @@ inline fun <T1, reified T2> Dataset<Pair<T1, T2>>.takeValues(): Dataset<T2> = ma
  * (Kotlin-specific)
  * Maps the Dataset to only retain the "values" or [Arity2._2] values.
  */
+@Suppress("DEPRECATION")
 @JvmName("takeValuesArity2")
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 inline fun <T1, reified T2> Dataset<Arity2<T1, T2>>.takeValues(): Dataset<T2> = map { it._2 }
