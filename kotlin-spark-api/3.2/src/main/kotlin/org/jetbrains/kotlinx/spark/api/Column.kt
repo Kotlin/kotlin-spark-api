@@ -437,7 +437,7 @@ operator fun Column.get(key: Any): Column = getItem(key)
  *
  * ```
  * val df: Dataset<Row> = ...
- * val typedColumn: Dataset<Int> = df.selectTyped( col("a").`as`<Int>() )
+ * val typedColumn: Dataset<Int> = df.select( col("a").`as`<_, Int>() )
  * ```
  *
  * @see typed
@@ -452,13 +452,45 @@ inline fun <DsType, reified U> Column.`as`(): TypedColumn<DsType, U> = `as`(enco
  *
  * ```
  * val df: Dataset<Row> = ...
- * val typedColumn: Dataset<Int> = df.selectTyped( col("a").typed<Int>() )
+ * val typedColumn: Dataset<Int> = df.select( col("a").`as`<_, Int>() )
+ * ```
+ *
+ * @see typed
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <DsType, reified U> TypedColumn<DsType, *>.`as`(): TypedColumn<DsType, U> = `as`(encoder<U>()) as TypedColumn<DsType, U>
+
+/**
+ * Provides a type hint about the expected return value of this column. This information can
+ * be used by operations such as `select` on a [Dataset] to automatically convert the
+ * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.select( col("a").typed<_, Int>() )
+ * ```
+ *
+ * @see as
+ */
+
+@Suppress("UNCHECKED_CAST")
+inline fun <DsType, reified T> Column.typed(): TypedColumn<DsType, T> = `as`()
+
+/**
+ * Provides a type hint about the expected return value of this column. This information can
+ * be used by operations such as `select` on a [Dataset] to automatically convert the
+ * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.select( col("a").typed<_, Int>() )
  * ```
  *
  * @see as
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <DsType, reified T> Column.typed(): TypedColumn<DsType, T> = `as`()
+inline fun <DsType, reified T> TypedColumn<DsType, *>.typed(): TypedColumn<DsType, T> = `as`()
+
 
 /**
  * Creates a [Column] of literal value.

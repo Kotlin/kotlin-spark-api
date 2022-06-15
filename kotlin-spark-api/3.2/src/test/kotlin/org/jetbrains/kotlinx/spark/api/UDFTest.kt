@@ -31,6 +31,7 @@ import io.kotest.matchers.types.beOfType
 import org.apache.spark.sql.AnalysisException
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Encoder
+import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.Aggregator
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.assertThrows
@@ -44,6 +45,7 @@ class UDFTest : ShouldSpec({
     context("UDF tests") {
         context("the function checkForValidType") {
             val invalidTypes = listOf(
+                Char::class,
                 Array::class,
                 Iterable::class,
                 List::class,
@@ -233,7 +235,7 @@ class UDFTest : ShouldSpec({
 
         context("calling the UDF-Wrapper") {
             withSpark(logLevel = SparkLogLevel.DEBUG) {
-                should("succeed call UDF-Wrapper in withColumn") {
+                should("succeed in withColumn") {
 
                     val stringArrayMerger = udf { it: WrappedArray<String> ->
                         it.asKotlinIterable().joinToString(" ")
@@ -256,7 +258,7 @@ class UDFTest : ShouldSpec({
                 should("succeed in dataset") {
                     val dataset = listOf(
                         NormalClass(name = "a", age = 10),
-                        NormalClass(name = "b", age = 20)
+                        NormalClass(name = "b", age = 20),
                     ).toDS()
 
                     val nameConcatAge by udf { name: String, age: Int ->
@@ -266,15 +268,66 @@ class UDFTest : ShouldSpec({
                     val ds = dataset.select(
                         nameConcatAge(
                             col(NormalClass::name),
-                            col(NormalClass::age)
+                            col(NormalClass::age),
                         )
                     )
+                    ds should beOfType<Dataset<String>>()
 
                     "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns().single()
 
                     val collectAsList = ds.collectAsList()
                     collectAsList[0] shouldBe "a-10"
                     collectAsList[1] shouldBe "b-20"
+                }
+
+                should("Return Dataset<Row> if types are not adhered to") {
+                    val dataset = listOf(
+                        NormalClass(name = "a", age = 10),
+                        NormalClass(name = "b", age = 20),
+                    ).toDS()
+
+                    val nameConcatAge by udf { name: String, age: Int ->
+                        "$name-$age"
+                    }
+
+                    val ds = dataset.select(
+                        nameConcatAge(
+                            col(NormalClass::name),
+                            col(NormalClass::age).typed<_, Int?>(),
+                        )
+                    )
+                    ds should beOfType<Dataset<Row>>()
+
+                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns().single()
+
+                    val collectAsList = ds.collectAsList()
+                    collectAsList[0].getAs<String>(0) shouldBe "a-10"
+                    collectAsList[1].getAs<String>(0) shouldBe "b-20"
+                }
+
+                should("Return Dataset<Row> if using invokeUntyped") {
+                    val dataset = listOf(
+                        NormalClass(name = "a", age = 10),
+                        NormalClass(name = "b", age = 20),
+                    ).toDS()
+
+                    val nameConcatAge by udf { name: String, age: Int ->
+                        "$name-$age"
+                    }
+
+                    val ds = dataset.select(
+                        nameConcatAge.invokeUntyped(
+                            col(NormalClass::name),
+                            col(NormalClass::age),
+                        )
+                    )
+                    ds should beOfType<Dataset<Row>>()
+
+                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns().single()
+
+                    val collectAsList = ds.collectAsList()
+                    collectAsList[0].getAs<String>(0) shouldBe "a-10"
+                    collectAsList[1].getAs<String>(0) shouldBe "b-20"
                 }
             }
         }
@@ -565,10 +618,617 @@ class UDFTest : ShouldSpec({
     }
 
     context("vararg UDF tests") {
+        fun firstByte(vararg a: Byte) = a.firstOrNull()
+        fun firstShort(vararg a: Short) = a.firstOrNull()
+        fun firstInt(vararg a: Int) = a.firstOrNull()
+        fun firstLong(vararg a: Long) = a.firstOrNull()
+        fun firstFloat(vararg a: Float) = a.firstOrNull()
+        fun firstDouble(vararg a: Double) = a.firstOrNull()
+        fun firstBoolean(vararg a: Boolean) = a.firstOrNull()
+        fun firstString(vararg a: String) = a.firstOrNull()
+
+
+        context("Creating Vararg UDF") {
+            withSpark(logLevel = SparkLogLevel.DEBUG) {
+
+                should("Create Byte vararg udf") {
+                    udf(::firstByte).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Byte, Byte?>>()
+                        it.name shouldBe "firstByte"
+                    }
+                    udf("test", ::firstByte).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Byte, Byte?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstByteVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Byte, Byte?>>()
+                        it.name shouldBe "firstByteVal"
+                    }
+                    udf("test", ::firstByteVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Byte, Byte?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: ByteArray -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<Byte, Byte?>>()
+                    }
+                    udf("test") { a: ByteArray -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Byte, Byte?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+
+                should("Create Short vararg udf") {
+                    udf(::firstShort).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Short, Short?>>()
+                        it.name shouldBe "firstShort"
+                    }
+                    udf("test", ::firstShort).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Short, Short?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstShortVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Short, Short?>>()
+                        it.name shouldBe "firstShortVal"
+                    }
+                    udf("test", ::firstShortVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Short, Short?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: ShortArray -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<Short, Short?>>()
+                    }
+                    udf("test") { a: ShortArray -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Short, Short?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+
+                should("Create Int vararg udf") {
+                    udf(::firstInt).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Int, Int?>>()
+                        it.name shouldBe "firstInt"
+                    }
+                    udf("test", ::firstInt).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Int, Int?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstIntVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Int, Int?>>()
+                        it.name shouldBe "firstIntVal"
+                    }
+                    udf("test", ::firstIntVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Int, Int?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: IntArray -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<Int, Int?>>()
+                    }
+                    udf("test") { a: IntArray -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Int, Int?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+
+                should("Create Long vararg udf") {
+                    udf(::firstLong).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Long, Long?>>()
+                        it.name shouldBe "firstLong"
+                    }
+                    udf("test", ::firstLong).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Long, Long?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstLongVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Long, Long?>>()
+                        it.name shouldBe "firstLongVal"
+                    }
+                    udf("test", ::firstLongVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Long, Long?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: LongArray -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<Long, Long?>>()
+                    }
+                    udf("test") { a: LongArray -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Long, Long?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+
+                should("Create Float vararg udf") {
+                    udf(::firstFloat).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Float, Float?>>()
+                        it.name shouldBe "firstFloat"
+                    }
+                    udf("test", ::firstFloat).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Float, Float?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstFloatVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Float, Float?>>()
+                        it.name shouldBe "firstFloatVal"
+                    }
+                    udf("test", ::firstFloatVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Float, Float?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: FloatArray -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<Float, Float?>>()
+                    }
+                    udf("test") { a: FloatArray -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Float, Float?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+
+                should("Create Double vararg udf") {
+                    udf(::firstDouble).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Double, Double?>>()
+                        it.name shouldBe "firstDouble"
+                    }
+                    udf("test", ::firstDouble).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Double, Double?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstDoubleVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Double, Double?>>()
+                        it.name shouldBe "firstDoubleVal"
+                    }
+                    udf("test", ::firstDoubleVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Double, Double?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: DoubleArray -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<Double, Double?>>()
+                    }
+                    udf("test") { a: DoubleArray -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Double, Double?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+
+                should("Create Boolean vararg udf") {
+                    udf(::firstBoolean).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Boolean, Boolean?>>()
+                        it.name shouldBe "firstBoolean"
+                    }
+                    udf("test", ::firstBoolean).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Boolean, Boolean?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstBooleanVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Boolean, Boolean?>>()
+                        it.name shouldBe "firstBooleanVal"
+                    }
+                    udf("test", ::firstBooleanVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Boolean, Boolean?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: BooleanArray -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<Boolean, Boolean?>>()
+                    }
+                    udf("test") { a: BooleanArray -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<Boolean, Boolean?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+
+                should("Create Any vararg udf") {
+                    udf(::firstString).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<String, String?>>()
+                        it.name shouldBe "firstString"
+                    }
+                    udf("test", ::firstString).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<String, String?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf(::firstStringVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<String, String?>>()
+                        it.name shouldBe "firstStringVal"
+                    }
+                    udf("test", ::firstStringVal).let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<String, String?>>()
+                        it.name shouldBe "test"
+                    }
+                    udf { a: Array<String> -> a.firstOrNull() }.let {
+                        it should beOfType<UserDefinedFunctionVararg<String, String?>>()
+                    }
+                    udf("test") { a: Array<String> -> a.firstOrNull() }.let {
+                        it should beOfType<NamedUserDefinedFunctionVararg<String, String?>>()
+                        it.name shouldBe "test"
+                    }
+                }
+            }
+        }
+
+        context("Call vararg udf from sql") {
+            withSpark(logLevel = SparkLogLevel.DEBUG) {
+                should("with Bytes") {
+                    val value = 1.toByte()
+                    udf.register(::firstByte)
+
+                    spark.sql("select firstByte()")
+                        .collectAsList()
+                        .single()
+                        .getAs<Byte?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstByte(" + values.joinToString() + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<Byte?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstByte(" + values.joinToString() + ")")
+                    }
+                }
+
+                should("with Shorts") {
+                    val value = 1.toShort()
+                    udf.register(::firstShort)
+
+                    spark.sql("select firstShort()")
+                        .collectAsList()
+                        .single()
+                        .getAs<Short?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstShort(" + values.joinToString() + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<Short?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstShort(" + values.joinToString() + ")")
+                    }
+                }
+
+                should("with Ints") {
+                    val value = 1
+                    udf.register(::firstInt)
+
+                    spark.sql("select firstInt()")
+                        .collectAsList()
+                        .single()
+                        .getAs<Int?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstInt(" + values.joinToString() + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<Int?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstInt(" + values.joinToString() + ")")
+                    }
+                }
+
+                should("with Longs") {
+                    val value = 1L
+                    udf.register(::firstLong)
+
+                    spark.sql("select firstLong()")
+                        .collectAsList()
+                        .single()
+                        .getAs<Long?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstLong(" + values.joinToString() + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<Long?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstLong(" + values.joinToString() + ")")
+                    }
+                }
+
+                should("with Floats") {
+                    val value = 1f
+                    udf.register(::firstFloat)
+
+                    spark.sql("select firstFloat()")
+                        .collectAsList()
+                        .single()
+                        .getAs<Float?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstFloat(" + values.joinToString() + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<Float?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstFloat(" + values.joinToString() + ")")
+                    }
+                }
+
+                should("with Doubles") {
+                    val value = 1.0
+                    udf.register(::firstDouble)
+
+                    spark.sql("select firstDouble()")
+                        .collectAsList()
+                        .single()
+                        .getAs<Double?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstDouble(" + values.joinToString() + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<Double?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstDouble(" + values.joinToString() + ")")
+                    }
+                }
+
+                should("with Booleans") {
+                    val value = true
+                    udf.register(::firstBoolean)
+
+                    spark.sql("select firstBoolean()")
+                        .collectAsList()
+                        .single()
+                        .getAs<Boolean?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstBoolean(" + values.joinToString() + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<Boolean?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstBoolean(" + values.joinToString() + ")")
+                    }
+                }
+
+                should("with Anys") {
+                    val value = "test"
+                    udf.register(::firstString)
+
+                    spark.sql("select firstString()")
+                        .collectAsList()
+                        .single()
+                        .getAs<String?>(0) shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { value }
+                        spark.sql("select firstString(" + values.joinToString { "\"$it\"" } + ")")
+                            .collectAsList()
+                            .single()
+                            .getAs<String?>(0) shouldBe value
+                    }
+
+                    val values = (1..23).map { value }
+                    shouldThrow<scala.MatchError> {
+                        spark.sql("select firstString(" + values.joinToString { "\"$it\"" } + ")")
+                    }
+                }
+
+
+            }
+        }
+
+        context("Call vararg udf from dataset select") {
+            withSpark(logLevel = SparkLogLevel.DEBUG) {
+                should("with Bytes") {
+                    val value = 1.toByte()
+                    val ds = dsOf(value)
+
+                    val firstByte = udf.register(::firstByte)
+
+                    ds.select(firstByte())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstByte(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstByte(*values))
+                    }
+                }
+
+                should("with Shorts") {
+                    val value = 1.toShort()
+                    val ds = dsOf(value)
+
+                    val firstShort = udf.register(::firstShort)
+
+                    ds.select(firstShort())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstShort(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstShort(*values))
+                    }
+                }
+
+                should("with Ints") {
+                    val value = 1
+                    val ds = dsOf(value)
+
+                    val firstInt = udf.register(::firstInt)
+
+                    ds.select(firstInt())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstInt(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstInt(*values))
+                    }
+                }
+
+                should("with Longs") {
+                    val value = 1L
+                    val ds = dsOf(value)
+
+                    val firstLong = udf.register(::firstLong)
+
+                    ds.select(firstLong())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstLong(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstLong(*values))
+                    }
+                }
+
+                should("with Floats") {
+                    val value = 1f
+                    val ds = dsOf(value)
+
+                    val firstFloat = udf.register(::firstFloat)
+
+                    ds.select(firstFloat())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstFloat(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstFloat(*values))
+                    }
+                }
+
+                should("with Doubles") {
+                    val value = 1.0
+                    val ds = dsOf(value)
+
+                    val firstDouble = udf.register(::firstDouble)
+
+                    ds.select(firstDouble())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstDouble(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstDouble(*values))
+                    }
+                }
+
+                should("with Booleans") {
+                    val value = true
+                    val ds = dsOf(value)
+
+                    val firstBoolean = udf.register(::firstBoolean)
+
+                    ds.select(firstBoolean())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstBoolean(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstBoolean(*values))
+                    }
+                }
+
+                should("with Anys") {
+                    val value = "test"
+                    val ds = dsOf(value)
+
+                    val firstString = udf.register(::firstString)
+
+                    ds.select(firstString())
+                        .collectAsList()
+                        .single() shouldBe null
+
+                    (1..22).forEach { nr ->
+                        val values = (1..nr).map { ds.singleCol() }.toTypedArray()
+
+                        ds.select(firstString(*values))
+                            .collectAsList()
+                            .single() shouldBe value
+                    }
+
+                    val values = (1..23).map { ds.singleCol() }.toTypedArray()
+                    shouldThrow<scala.MatchError> {
+                        ds.select(firstString(*values))
+                    }
+                }
+            }
+        }
 
     }
 })
-
 
 data class Employee(val name: String, val salary: Long)
 data class Average(var sum: Long, var count: Long)
@@ -629,3 +1289,12 @@ data class NormalClass(
     val age: Int,
     val name: String
 )
+
+private val firstByteVal = { a: ByteArray -> a.firstOrNull() }
+private val firstShortVal = { a: ShortArray -> a.firstOrNull() }
+private val firstIntVal = { a: IntArray -> a.firstOrNull() }
+private val firstLongVal = { a: LongArray -> a.firstOrNull() }
+private val firstFloatVal = { a: FloatArray -> a.firstOrNull() }
+private val firstDoubleVal = { a: DoubleArray -> a.firstOrNull() }
+private val firstBooleanVal = { a: BooleanArray -> a.firstOrNull() }
+private val firstStringVal = { a: Array<String> -> a.firstOrNull() }

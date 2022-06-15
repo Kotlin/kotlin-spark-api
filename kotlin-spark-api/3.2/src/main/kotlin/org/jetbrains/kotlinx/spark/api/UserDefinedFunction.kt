@@ -47,6 +47,7 @@ internal fun KClass<*>.checkForValidType(parameterName: String) {
 
     if (isSubclassOf(Iterable::class)
         || java.isArray
+        || isSubclassOf(Char::class)
         || isSubclassOf(Map::class)
         || isSubclassOf(Array::class)
         || isSubclassOf(ByteArray::class)
@@ -118,10 +119,6 @@ sealed interface UserDefinedFunction<Return, NamedUdf> {
 
     /** Returns true iff the UDF is deterministic, i.e. the UDF produces the same output given the same input. */
     val deterministic: Boolean get() = udf.deterministic()
-
-    fun invokeUntyped(vararg params: Column): Column = udf.apply(*params)
-
-    operator fun invoke(vararg params: Column): Column = invokeUntyped(*params)
 
     /** Converts this [UserDefinedFunction] to a [NamedUserDefinedFunction]. */
     fun withName(name: String): NamedUdf
