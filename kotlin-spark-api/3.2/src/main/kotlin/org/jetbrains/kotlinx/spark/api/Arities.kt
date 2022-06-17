@@ -19,6 +19,8 @@
  */
 
 /**
+ * DEPRECATED: Use Scala tuples instead.
+ *
  * Helper classes and functions to work with unnamed tuples we call Arities.
  * Arities are easier to work with in Kotlin than Scala Tuples since they are Kotlin data classes.
  * This means they can be destructured, copied, etc.
@@ -39,7 +41,7 @@
  * }
  * ```
  */
-
+@file:Suppress("DEPRECATION")
 package org.jetbrains.kotlinx.spark.api
 
 import java.io.Serializable

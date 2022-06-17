@@ -42,6 +42,8 @@ internal class SparkIntegration : Integration() {
                     .master(SparkConf().get("spark.master", "local[*]"))
                     .appName("Jupyter")
                     .config("spark.sql.codegen.wholeStage", false)
+                    .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
+                    .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
                     .getOrCreate()""".trimIndent(),
             """
                 spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)""".trimIndent(),
@@ -54,19 +56,27 @@ internal class SparkIntegration : Integration() {
             """
                 inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
             """
-                inline fun <reified T> Array<T>.toDS(): Dataset<T> = spark.dsOf(*this)""".trimIndent(),
+                inline fun <reified T> List<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)""".trimIndent(),
+            """
+                inline fun <reified T> Array<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
+            """
+                inline fun <reified T> Array<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)""".trimIndent(),
             """
                 inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)""".trimIndent(),
             """
+                inline fun <reified T> dfOf(vararg arg: T): Dataset<Row> = spark.dfOf(*arg)""".trimIndent(),
+            """
                 inline fun <reified T> emptyDataset(): Dataset<T> = spark.emptyDataset(encoder<T>())""".trimIndent(),
+            """
+                inline fun <reified T> dfOf(colNames: Array<String>, vararg arg: T): Dataset<Row> = spark.dfOf(colNames, *arg)""".trimIndent(),
             """
                 inline fun <reified T> RDD<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
             """
                 inline fun <reified T> JavaRDDLike<T, *>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
             """
-                inline fun <reified T> RDD<T>.toDF(): Dataset<Row> = toDF(spark)""".trimIndent(),
+                inline fun <reified T> RDD<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)""".trimIndent(),
             """
-                inline fun <reified T> JavaRDDLike<T, *>.toDF(): Dataset<Row> = toDF(spark)""".trimIndent(),
+                inline fun <reified T> JavaRDDLike<T, *>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)""".trimIndent(),
             """
                 val udf: UDFRegistration get() = spark.udf()""".trimIndent(),
         ).map(::execute)
