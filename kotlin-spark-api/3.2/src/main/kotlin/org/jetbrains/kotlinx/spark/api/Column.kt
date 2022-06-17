@@ -505,6 +505,18 @@ inline fun <DsType, reified T> TypedColumn<DsType, *>.typed(): TypedColumn<DsTyp
 fun lit(a: Any): Column = functions.lit(a)
 
 /**
+ * Creates a [Column] of literal value.
+ *
+ * The passed in object is returned directly if it is already a [Column].
+ * If the object is a Scala Symbol, it is converted into a [Column] also.
+ * Otherwise, a new [Column] is created to represent the literal value.
+ * The difference between this function and [lit] is that this function
+ * can handle types and parameterized scala types e.g.: List, Seq and Map.
+ *
+ */
+inline fun <DsType, reified U> typedLit(literal: U): TypedColumn<DsType, U> = functions.lit(literal).typed()
+
+/**
  * Returns a [TypedColumn] based on the given column name and type [DsType].
  *
  * This is just a shortcut to the function from [org.apache.spark.sql.functions] combined with an [as] call.

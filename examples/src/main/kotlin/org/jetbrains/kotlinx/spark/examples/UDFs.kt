@@ -1,12 +1,15 @@
 package org.jetbrains.kotlinx.spark.examples
 
+import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.functions.*
 import org.jetbrains.kotlinx.spark.api.*
+import scala.Tuple2
 
 
 fun main() {
-    sparkExample()
-    smartNames()
-    functionToUDF()
+//    sparkExample()
+//    smartNames()
+//    functionToUDF()
     strongTypingInDatasets()
 }
 
@@ -130,7 +133,52 @@ private fun functionToUDF(): Unit = withSpark {
 private val minusOne = { x: Int -> x - 1 }
 
 private fun strongTypingInDatasets() = withSpark {
-    TODO()
+    data class User(val name: String, val age: Int?)
+    val ds: Dataset<User> = dsOf(
+        User("A", null),
+        User("B", 23),
+        User("C", 60),
+        User("D", 14),
+    ).showDS()
+//    +----+----+
+//    |name| age|
+//    +----+----+
+//    |   A|null|
+//    |   B|  23|
+//    |   C|  60|
+//    |   D|  14|
+//    +----+----+
+
+
+    // UDFs can also be used, no registering needed, to perform operations on columns
+    // using the Dataset API. UDFs are not as optimized as other Spark functions in terms of
+    // raw performance, however, in return you get infinitely more versatility.
+    // UDFs are usually executed using the [apply] method present in them, but,
+    // of course, we had to Kotlin-ify those too, which means you can do:
+    val replaceMissingAge = udf { age: Int?, value: Int -> age ?: value }
+
+    val result = ds.select(
+        col(User::name), replaceMissingAge(col(User::age), typedLit(-1))
+    ).showDS()
+//    +----+------------+
+//    |name|UDF(age, -1)|
+//    +----+------------+
+//    |   A|          -1|
+//    |   B|          23|
+//    |   C|          60|
+//    |   D|          14|
+//    +----+------------+
+
+    // As you can see, the resulting dataset type is Tuple2<String, Int>
+    // This is possible since we know what types go in and our of the replaceMissingAge udf.
+    // We can thus provide TypedColumns instead of normal ones which the select function takes
+    // advantage of!
+
+    // Also when you have no specific types
+
+
+
+
 }
 
 private fun varargUDFs() = withSpark {
