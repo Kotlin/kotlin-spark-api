@@ -26,6 +26,7 @@ import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.t
 import org.json4s.jackson.Json
 import scala.Tuple2
+import scala.collection.mutable.WrappedArray
 
 
 fun main() {
@@ -33,7 +34,8 @@ fun main() {
 //    smartNames()
 //    functionToUDF()
 //    strongTypingInDatasets()
-    UDAF()
+//    UDAF()
+    varargUDFs()
 }
 
 
@@ -197,37 +199,42 @@ private fun strongTypingInDatasets() = withSpark {
     // We can thus provide TypedColumns instead of normal ones which the select function takes
     // advantage of!
 
-    val toJson by udf { age: Int, name: String -> """{ "age" : $age, "name" : "$name" }""" }
+    // NOTE: In UDFs, iterables, lists, arrays and such need to be represented as WrappedArray
+    val toJson by udf { age: Int, name: String, pets: WrappedArray<String> ->
+        """{ "age" : $age, "name" : "$name", "pets" : [${pets.asKotlinIterable().joinToString { "\"$it\"" }}] }"""
+    }
 
     // Also when you are using Dataframes (untyped Datasets), you can still provide type hints for columns manually
     // if you want to receive type hints after calling the UDF
     val df: Dataset<Row> = dfOf(
-        colNames = arrayOf("name", "age"),
-        t("Alice", 12),
-        t("Bob", 24),
-        t("Charlie", 18),
+        colNames = arrayOf("name", "age", "pets"),
+        t("Alice", 12, emptyList()),
+        t("Bob", 24, listOf("Dog", "Cat")),
+        t("Charlie", 18, listOf("Bunny")),
     ).showDS()
-//    +-------+---+
-//    |   name|age|
-//    +-------+---+
-//    |  Alice| 12|
-//    |    Bob| 24|
-//    |Charlie| 18|
-//    +-------+---+
+//    +-------+---+----------+
+//    |   name|age|      pets|
+//    +-------+---+----------+
+//    |  Alice| 12|        []|
+//    |    Bob| 24|[Dog, Cat]|
+//    |Charlie| 18|   [Bunny]|
+//    +-------+---+----------+
 
     val result2 = df.select(
         toJson(
             col<_, Int>("age"),
             col<_, String>("name"),
+            col<Row, List<String>>("pets").asWrappedArray(),
+//      or `col<_, WrappedArray<String>>("pets")` if you want to be less strict
         )
     ).showDS(truncate = false)
-//    +----------------------------------+
-//    |toJson(age, name)                 |
-//    +----------------------------------+
-//    |{ "age" : 12, "name" : "Alice" }  |
-//    |{ "age" : 24, "name" : "Bob" }    |
-//    |{ "age" : 18, "name" : "Charlie" }|
-//    +----------------------------------+
+//    +-------------------------------------------------------+
+//    |toJson(age, name, pets)                                |
+//    +-------------------------------------------------------+
+//    |{ "age" : 12, "name" : "Alice", "pets" : [] }          |
+//    |{ "age" : 24, "name" : "Bob", "pets" : ["Dog", "Cat"] }|
+//    |{ "age" : 18, "name" : "Charlie", "pets" : ["Bunny"] } |
+//    +-------------------------------------------------------+
 }
 
 data class Employee(val name: String, val salary: Long)
@@ -372,5 +379,63 @@ private fun UDAF() = withSpark {
 }
 
 private fun varargUDFs() = withSpark {
-    TODO()
+    // Finally, let's go over something unique to the Kotlin version of the Spark API: Simple Vararg UDFs
+
+    // Wouldn't it be nice to convert a function like this into a UDF you can call with any number of columns?
+    fun sumOf(vararg double: Double): Double = double.sum()
+    // Well, why don't we try ;)
+
+    // As you can see, we get a `NamedUserDefinedFunctionVararg`
+    val sumUDF = udf.register(::sumOf)
+
+    data class Values(val v1: Double, val v2: Double, val v3: Double, val v4: Double)
+    val ds = dsOf(
+        Values(1.0, 2.0, 3.0, 4.0),
+        Values(4.0, 3.0, 2.0, 1.0),
+        Values(1.0, 1.0, 1.0, 1.0),
+    ).showDS()
+//    +---+---+---+---+
+//    | v1| v2| v3| v4|
+//    +---+---+---+---+
+//    |1.0|2.0|3.0|4.0|
+//    |4.0|3.0|2.0|1.0|
+//    |1.0|1.0|1.0|1.0|
+//    +---+---+---+---+
+
+    ds.createOrReplaceTempView("values")
+    spark.sql("""SELECT sumOf(v1, v4), sumOf(), sumOf(v1, v2, v3, v4) FROM values""")
+        .showDS()
+//    +-------------+-------+---------------------+
+//    |sumOf(v1, v4)|sumOf()|sumOf(v1, v2, v3, v4)|
+//    +-------------+-------+---------------------+
+//    |          5.0|    0.0|                 10.0|
+//    |          5.0|    0.0|                 10.0|
+//    |          2.0|    0.0|                  4.0|
+//    +-------------+-------+---------------------+
+
+    val result = ds.select(
+        sumUDF(col(Values::v1), col(Values::v4)),
+        sumUDF(),
+        sumUDF(col(Values::v1), col(Values::v2), col(Values::v3), col(Values::v4)),
+    ).showDS()
+//    +-------------+-------+---------------------+
+//    |sumOf(v1, v4)|sumOf()|sumOf(v1, v2, v3, v4)|
+//    +-------------+-------+---------------------+
+//    |          5.0|    0.0|                 10.0|
+//    |          5.0|    0.0|                 10.0|
+//    |          2.0|    0.0|                  4.0|
+//    +-------------+-------+---------------------+
+
+
+    // As you can see, it just works :), up to 22 parameters!
+    // In fact, since UDFs don't support arrays (only scala's WrappedArray), any udf that contains just an array
+    // as parameter will become a vararg udf:
+    udf.register("joinToString") { strings: Array<String> -> strings.joinToString(separator = "-") }
+    spark.sql("""SELECT joinToString("a", "hi there", "test"), joinToString(), joinToString("b", "c")""")
+        .showDS()
+//    +-------------------------------+--------------+------------------+
+//    |joinToString(a, hi there, test)|joinToString()|joinToString(b, c)|
+//    +-------------------------------+--------------+------------------+
+//    |                a-hi there-test|              |               b-c|
+//    +-------------------------------+--------------+------------------+
 }

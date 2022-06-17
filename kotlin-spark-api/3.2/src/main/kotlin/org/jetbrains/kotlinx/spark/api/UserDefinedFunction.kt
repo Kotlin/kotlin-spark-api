@@ -71,7 +71,7 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
 @JvmName("arrayColumnAsWrappedArray")
 fun <DsType, T> TypedColumn<DsType, Array<T>>.asWrappedArray(): TypedColumn<DsType, WrappedArray<T>> = typed()
 @JvmName("iterableColumnAsWrappedArray")
-fun <DsType, T> TypedColumn<DsType, Iterable<T>>.asWrappedArray(): TypedColumn<DsType, WrappedArray<T>> = typed()
+fun <DsType, T, I : Iterable<T>> TypedColumn<DsType, I>.asWrappedArray(): TypedColumn<DsType, WrappedArray<T>> = typed()
 @JvmName("byteArrayColumnAsWrappedArray")
 fun <DsType> TypedColumn<DsType, ByteArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Byte>> = typed()
 @JvmName("charArrayColumnAsWrappedArray")
