@@ -60,11 +60,23 @@ class KSparkSession(val spark: SparkSession) {
     /** Utility method to create dataset from list. */
     inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)
 
+    /** Utility method to create dataframe from list. */
+    inline fun <reified T> List<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)
+
     /** Utility method to create dataset from [Array]. */
-    inline fun <reified T> Array<T>.toDS(): Dataset<T> = spark.dsOf(*this)
+    inline fun <reified T> Array<T>.toDS(): Dataset<T> = toDS(spark)
+
+    /** Utility method to create dataframe from [Array]. */
+    inline fun <reified T> Array<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)
 
     /** Utility method to create dataset from vararg arguments. */
     inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)
+
+    /** Utility method to create dataframe from *array or vararg arguments */
+    inline fun <reified T> dfOf(vararg arg: T): Dataset<Row> = spark.dfOf(*arg)
+
+    /**Utility method to create dataframe from *array or vararg arguments with given column names */
+    inline fun <reified T> dfOf(colNames: Array<String>, vararg arg: T): Dataset<Row> = spark.dfOf(colNames, *arg)
 
     /** Utility method to create dataset from Scala [RDD]. */
     inline fun <reified T> RDD<T>.toDS(): Dataset<T> = toDS(spark)
@@ -76,13 +88,13 @@ class KSparkSession(val spark: SparkSession) {
      * Utility method to create Dataset<Row> (Dataframe) from RDD.
      * NOTE: [T] must be [Serializable].
      */
-    inline fun <reified T> RDD<T>.toDF(): Dataset<Row> = toDF(spark)
+    inline fun <reified T> RDD<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)
 
     /**
      * Utility method to create Dataset<Row> (Dataframe) from JavaRDD.
      * NOTE: [T] must be [Serializable].
      */
-    inline fun <reified T> JavaRDDLike<T, *>.toDF(): Dataset<Row> = toDF(spark)
+    inline fun <reified T> JavaRDDLike<T, *>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)
 
     /**
      * A collection of methods for registering user-defined functions (UDF).

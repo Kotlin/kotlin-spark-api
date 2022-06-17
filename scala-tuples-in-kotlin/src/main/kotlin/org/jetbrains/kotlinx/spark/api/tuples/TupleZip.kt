@@ -17,6 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+@file:Suppress("UNUSED_PARAMETER")
 package org.jetbrains.kotlinx.spark.api.tuples
 
 import scala.*

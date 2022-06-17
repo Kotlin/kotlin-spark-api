@@ -29,6 +29,11 @@
             <artifactId>spark-streaming_${scala.compat.version}</artifactId>
             <version>${spark3.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_${scala.compat.version}</artifactId>
+            <version>${spark3.version}</version>
+        </dependency>
         <dependency><!-- Only needed for Qodana -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming-kafka-0-10_${scala.compat.version}</artifactId>
