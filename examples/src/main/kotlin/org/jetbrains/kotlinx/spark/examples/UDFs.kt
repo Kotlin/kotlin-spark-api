@@ -1,8 +1,30 @@
+/*-
+ * =LICENSE=
+ * Kotlin Spark API: Examples for Spark 3.2+ (Scala 2.12)
+ * ----------
+ * Copyright (C) 2019 - 2022 JetBrains
+ * ----------
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * =LICENSEEND=
+ */
 package org.jetbrains.kotlinx.spark.examples
 
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.*
+import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.functions.*
 import org.jetbrains.kotlinx.spark.api.*
+import org.jetbrains.kotlinx.spark.api.tuples.t
+import org.json4s.jackson.Json
 import scala.Tuple2
 
 
@@ -10,7 +32,8 @@ fun main() {
 //    sparkExample()
 //    smartNames()
 //    functionToUDF()
-    strongTypingInDatasets()
+//    strongTypingInDatasets()
+    UDAF()
 }
 
 
@@ -157,7 +180,7 @@ private fun strongTypingInDatasets() = withSpark {
     // of course, we had to Kotlin-ify those too, which means you can do:
     val replaceMissingAge = udf { age: Int?, value: Int -> age ?: value }
 
-    val result = ds.select(
+    val result1: Dataset<Tuple2<String, Int>> = ds.select(
         col(User::name), replaceMissingAge(col(User::age), typedLit(-1))
     ).showDS()
 //    +----+------------+
@@ -174,11 +197,178 @@ private fun strongTypingInDatasets() = withSpark {
     // We can thus provide TypedColumns instead of normal ones which the select function takes
     // advantage of!
 
-    // Also when you have no specific types
+    val toJson by udf { age: Int, name: String -> """{ "age" : $age, "name" : "$name" }""" }
 
+    // Also when you are using Dataframes (untyped Datasets), you can still provide type hints for columns manually
+    // if you want to receive type hints after calling the UDF
+    val df: Dataset<Row> = dfOf(
+        colNames = arrayOf("name", "age"),
+        t("Alice", 12),
+        t("Bob", 24),
+        t("Charlie", 18),
+    ).showDS()
+//    +-------+---+
+//    |   name|age|
+//    +-------+---+
+//    |  Alice| 12|
+//    |    Bob| 24|
+//    |Charlie| 18|
+//    +-------+---+
 
+    val result2 = df.select(
+        toJson(
+            col<_, Int>("age"),
+            col<_, String>("name"),
+        )
+    ).showDS(truncate = false)
+//    +----------------------------------+
+//    |toJson(age, name)                 |
+//    +----------------------------------+
+//    |{ "age" : 12, "name" : "Alice" }  |
+//    |{ "age" : 24, "name" : "Bob" }    |
+//    |{ "age" : 18, "name" : "Charlie" }|
+//    +----------------------------------+
+}
 
+data class Employee(val name: String, val salary: Long)
+data class Average(var sum: Long, var count: Long)
 
+private object MyAverage : Aggregator<Employee, Average, Double>() {
+    // A zero value for this aggregation. Should satisfy the property that any b + zero = b
+
+    override fun zero(): Average = Average(0L, 0L)
+
+    // Combine two values to produce a new value. For performance, the function may modify `buffer`
+    // and return it instead of constructing a new object
+    override fun reduce(buffer: Average, employee: Employee): Average {
+        buffer.sum += employee.salary
+        buffer.count += 1L
+        return buffer
+    }
+
+    // Merge two intermediate values
+    override fun merge(b1: Average, b2: Average): Average {
+        b1.sum += b2.sum
+        b1.count += b2.count
+        return b1
+    }
+
+    // Transform the output of the reduction
+    override fun finish(reduction: Average): Double = reduction.sum.toDouble() / reduction.count
+
+    // Specifies the Encoder for the intermediate value type
+    override fun bufferEncoder(): Encoder<Average> = encoder()
+
+    // Specifies the Encoder for the final output value type
+    override fun outputEncoder(): Encoder<Double> = encoder()
+
+}
+
+private fun UDAF() = withSpark {
+    // First let's go over the example from Spark for User defined aggregate functions:
+    // https://spark.apache.org/docs/latest/sql-ref-functions-udf-aggregate.html
+    // See above for Employee, Average, and MyAverage
+
+    val ds: Dataset<Employee> = dsOf(
+        Employee("Michael", 3000),
+        Employee("Andy", 4500),
+        Employee("Justin", 3500),
+        Employee("Berta", 4000),
+    ).showDS()
+//    +-------+------+
+//    |   name|salary|
+//    +-------+------+
+//    |Michael|  3000|
+//    |   Andy|  4500|
+//    | Justin|  3500|
+//    |  Berta|  4000|
+//    +-------+------+
+
+    // Convert the function to a `TypedColumn` and give it a name
+    val averageSalary: TypedColumn<Employee, Double> = MyAverage.toColumn().name("average_salary")
+    val result1: Dataset<Double> = ds.select(averageSalary)
+        .showDS()
+//    +--------------+
+//    |average_salary|
+//    +--------------+
+//    |        3750.0|
+//    +--------------+
+
+    // While this method can work on all columns of a Dataset, if we want to be able
+    // to select the columns specifically, we need to convert MyAverage to a UDAF
+    // Let's first create a new one with Long as input:
+    val myAverage = aggregatorOf<Long, Average, Double>(
+        zero = { Average(0L, 0L) },
+        reduce = { buffer, it ->
+            buffer.sum += it
+            buffer.count += 1
+            buffer
+        },
+        merge = { buffer, it ->
+            buffer.sum += it.sum
+            buffer.count += it.count
+            buffer
+        },
+        finish = { it.sum.toDouble() / it.count },
+    )
+
+    // Now we need to define a name, otherwise it will default to "Aggregator", since that's
+    // the name of the class `aggregatorOf` will implement and return.
+    // We can register it again for SQL or call it directly in Dataset select
+    val myAverageUdf = udaf("myAverage", myAverage).register()
+
+    ds.createOrReplaceTempView("employees")
+    spark.sql("""SELECT myAverage(salary) as average_salary from employees""")
+        .showDS()
+//    +--------------+
+//    |average_salary|
+//    +--------------+
+//    |        3750.0|
+//    +--------------+
+
+    val result2: Dataset<Double> = ds.select(
+        myAverageUdf(
+            col(Employee::salary)
+        ).name("average_salary")
+    ).showDS()
+//    +--------------+
+//    |average_salary|
+//    +--------------+
+//    |        3750.0|
+//    +--------------+
+
+    // Finally, if you don't need an aggregator directly but just a udaf, you can use something like this:
+    val udaf: UserDefinedFunction1<Long, Double> = udaf(
+        zero = { Average(0L, 0L) },
+        reduce = { buffer, it ->
+            buffer.sum += it
+            buffer.count += 1
+            buffer
+        },
+        merge = { buffer, it ->
+            buffer.sum += it.sum
+            buffer.count += it.count
+            buffer
+        },
+        finish = { it.sum.toDouble() / it.count },
+    )
+
+    // Or you can even register it right away (note a name is required)
+    val registeredUdaf: NamedUserDefinedFunction1<Long, Double> = udf.register(
+        name = "average",
+        zero = { Average(0L, 0L) },
+        reduce = { buffer, it ->
+            buffer.sum += it
+            buffer.count += 1
+            buffer
+        },
+        merge = { buffer, it ->
+            buffer.sum += it.sum
+            buffer.count += it.count
+            buffer
+        },
+        finish = { it.sum.toDouble() / it.count },
+    )
 }
 
 private fun varargUDFs() = withSpark {

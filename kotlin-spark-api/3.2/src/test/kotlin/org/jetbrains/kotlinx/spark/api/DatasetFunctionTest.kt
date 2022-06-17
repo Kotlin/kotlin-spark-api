@@ -48,7 +48,7 @@ class DatasetFunctionTest : ShouldSpec({
                 val result = dsOf(1, 2, 3, 4, 5)
                     .map { it X (it + 2) }
                     .withCached {
-                        expect(collectAsList()).contains.inAnyOrder.only.values(
+                        expect(collectAsList()).toContain.inAnyOrder.only.values(
                             1 X 3,
                             2 X 4,
                             3 X 5,
@@ -57,14 +57,14 @@ class DatasetFunctionTest : ShouldSpec({
                         )
 
                         val next = filter { it._1 % 2 == 0 }
-                        expect(next.collectAsList()).contains.inAnyOrder.only.values(2 X 4, 4 X 6)
+                        expect(next.collectAsList()).toContain.inAnyOrder.only.values(2 X 4, 4 X 6)
                         next
                     }
                     .map { it: Tuple2<Int, Int> ->
                         it + (it._1 + it._2) * 2
                     }
                     .collectAsList()
-                expect(result).contains.inOrder.only.values(2 X 4 X 12, 4 X 6 X 20)
+                expect(result).toContain.inOrder.only.values(2 X 4 X 12, 4 X 6 X 20)
             }
 
             should("handle join operations") {
@@ -78,7 +78,7 @@ class DatasetFunctionTest : ShouldSpec({
                     .leftJoin(second, first.col("id") eq second.col("id"))
                     .map { it._1.id X it._1.name X it._2?.value }
                     .collectAsList()
-                expect(result).contains.inOrder.only.values(t(1, "a", 100), t(2, "b", null))
+                expect(result).toContain.inOrder.only.values(t(1, "a", 100), t(2, "b", null))
             }
 
             should("handle map operations") {
@@ -87,7 +87,7 @@ class DatasetFunctionTest : ShouldSpec({
                     .map { it + 4 }
                     .filter { it < 10 }
                     .collectAsList()
-                expect(result).contains.inAnyOrder.only.values(5, 6, 7, 8, 7, 8, 9)
+                expect(result).toContain.inAnyOrder.only.values(5, 6, 7, 8, 7, 8, 9)
             }
 
             should("Allow simple forEachPartition in datasets") {
@@ -384,7 +384,7 @@ class DatasetFunctionTest : ShouldSpec({
                     SomeClass(intArrayOf(4, 3, 2), 1),
                 )
 
-                dataset.col("a") shouldBe dataset<_, IntArray>("a")
+                dataset.col("a") shouldBe dataset("a")
             }
 
             should("Use infix- and operator funs on columns") {
