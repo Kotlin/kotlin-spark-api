@@ -3,12 +3,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Kotlin Spark API: Examples for Spark 3.2+ (Scala 2.12)</name>
+    <name>Kotlin Spark API: Examples for Spark 3.3+ (Scala 2.12)</name>
     <description>Example of usage</description>
-    <artifactId>examples-3.2_2.12</artifactId>
+    <artifactId>examples-3.3_2.12</artifactId>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-spark-api-parent-3.2_2.12</artifactId>
+        <artifactId>kotlin-spark-api-parent-3.3_2.12</artifactId>
         <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom_2.12.xml</relativePath>
     </parent>
@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlinx.spark</groupId>
-            <artifactId>kotlin-spark-api-3.2</artifactId>
+            <artifactId>kotlin-spark-api-3.3</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -44,7 +44,7 @@
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-        <directory>target/3.2/${scala.compat.version}</directory>
+        <directory>target/3.3/${scala.compat.version}</directory>
         <plugins>
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>

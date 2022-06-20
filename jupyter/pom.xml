@@ -3,12 +3,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Kotlin Spark API: Jupyter integration for Spark 3.2+ (Scala 2.12)</name>
-    <artifactId>kotlin-spark-api-jupyter-3.2</artifactId>
+    <name>Kotlin Spark API: Jupyter integration for Spark 3.3+ (Scala 2.12)</name>
+    <artifactId>kotlin-spark-api-jupyter-3.3</artifactId>
     <description>Jupyter integration</description>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-spark-api-parent-3.2_2.12</artifactId>
+        <artifactId>kotlin-spark-api-parent-3.3_2.12</artifactId>
         <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom_2.12.xml</relativePath>
     </parent>
@@ -36,7 +36,7 @@
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlinx.spark</groupId>
-            <artifactId>kotlin-spark-api-3.2</artifactId>
+            <artifactId>kotlin-spark-api-3.3</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

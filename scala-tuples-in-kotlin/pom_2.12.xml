@@ -4,10 +4,10 @@
 
     <name>Kotlin Spark API: Scala Tuples in Kotlin</name>
     <description>Scala Tuple helper functions for kotlin</description>
-    <artifactId>scala-tuples-in-kotlin-3.2</artifactId>
+    <artifactId>scala-tuples-in-kotlin-3.3</artifactId>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-spark-api-parent-3.2_2.12</artifactId>
+        <artifactId>kotlin-spark-api-parent-3.3_2.12</artifactId>
         <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom_2.12.xml</relativePath>
     </parent>

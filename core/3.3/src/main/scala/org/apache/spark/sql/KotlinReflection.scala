@@ -20,9 +20,10 @@
 
 package org.apache.spark.sql
 
+import org.apache.commons.lang3.reflect.ConstructorUtils
 import org.apache.spark.internal.Logging
 import org.apache.spark.sql.catalyst.DeserializerBuildHelper._
-import org.apache.spark.sql.catalyst.ScalaReflection.{Schema, dataTypeFor, getClassFromType, isSubtype, javaBoxedType, localTypeOf}
+import org.apache.spark.sql.catalyst.ScalaReflection.{Schema, dataTypeFor, getClassFromType, isSubtype, javaBoxedType, localTypeOf, mirror, universe}
 import org.apache.spark.sql.catalyst.SerializerBuildHelper._
 import org.apache.spark.sql.catalyst.analysis.GetColumnByOrdinal
 import org.apache.spark.sql.catalyst.expressions.objects._
@@ -120,7 +121,7 @@ object KotlinReflection extends KotlinReflection {
                 val className = getClassNameFromType(tpe)
                 className match {
                     case "scala.Array" => {
-                        val TypeRef(_, _, Seq(elementType)) = tpe
+                        val TypeRef(_, _, Seq(elementType)) = tpe.dealias
                         arrayClassFor(elementType)
                     }
                     case _ => {
@@ -1242,6 +1243,40 @@ object KotlinReflection extends KotlinReflection {
     }
 
     /**
+     * Finds an accessible constructor with compatible parameters. This is a more flexible search than
+     * the exact matching algorithm in `Class.getConstructor`. The first assignment-compatible
+     * matching constructor is returned if it exists. Otherwise, we check for additional compatible
+     * constructors defined in the companion object as `apply` methods. Otherwise, it returns `None`.
+     */
+    def findConstructor[T](cls: Class[T], paramTypes: Seq[Class[_]]): Option[Seq[AnyRef] => T] = {
+        Option(ConstructorUtils.getMatchingAccessibleConstructor(cls, paramTypes: _*)) match {
+            case Some(c) => Some(x => c.newInstance(x: _*))
+            case None =>
+                val companion = mirror.staticClass(cls.getName).companion
+                val moduleMirror = mirror.reflectModule(companion.asModule)
+                val applyMethods = companion.asTerm.typeSignature
+                    .member(universe.TermName("apply")).asTerm.alternatives
+                applyMethods.find { method =>
+                    val params = method.typeSignature.paramLists.head
+                    // Check that the needed params are the same length and of matching types
+                    params.size == paramTypes.tail.size &&
+                        params.zip(paramTypes.tail).forall { case(ps, pc) =>
+                            ps.typeSignature.typeSymbol == mirror.classSymbol(pc)
+                        }
+                }.map { applyMethodSymbol =>
+                    val expectedArgsCount = applyMethodSymbol.typeSignature.paramLists.head.size
+                    val instanceMirror = mirror.reflect(moduleMirror.instance)
+                    val method = instanceMirror.reflectMethod(applyMethodSymbol.asMethod)
+                    (_args: Seq[AnyRef]) => {
+                        // Drop the "outer" argument if it is provided
+                        val args = if (_args.size == expectedArgsCount) _args else _args.tail
+                        method.apply(args: _*).asInstanceOf[T]
+                    }
+                }
+        }
+    }
+
+    /**
      * Whether the fields of the given type is defined entirely by its constructor parameters.
      */
     def definedByConstructorParams(tpe: Type): Boolean = cleanUpReflectionObjects {
@@ -1325,6 +1360,15 @@ trait KotlinReflection extends Logging {
         tag.in(mirror).tpe.dealias
     }
 
+    private def isValueClass(tpe: Type): Boolean = {
+        tpe.typeSymbol.isClass && tpe.typeSymbol.asClass.isDerivedValueClass
+    }
+
+    /** Returns the name and type of the underlying parameter of value class `tpe`. */
+    private def getUnderlyingTypeOfValueClass(tpe: `Type`): Type = {
+        getConstructorParameters(tpe).head._2
+    }
+
     /**
      * Returns the full class name for a type. The returned name is the canonical
      * Scala name, where each component is separated by a period. It is NOT the
@@ -1350,15 +1394,13 @@ trait KotlinReflection extends Logging {
         val formalTypeArgs = dealiasedTpe.typeSymbol.asClass.typeParams
         val TypeRef(_, _, actualTypeArgs) = dealiasedTpe
         val params = constructParams(dealiasedTpe)
-        // if there are type variables to fill in, do the substitution (SomeClass[T] -> SomeClass[Int])
-        if (actualTypeArgs.nonEmpty) {
-            params.map { p =>
-                p.name.decodedName.toString ->
-                    p.typeSignature.substituteTypes(formalTypeArgs, actualTypeArgs)
-            }
-        } else {
-            params.map { p =>
-                p.name.decodedName.toString -> p.typeSignature
+        params.map { p =>
+            val paramTpe = p.typeSignature
+            if (isValueClass(paramTpe)) {
+                // Replace value class with underlying type
+                p.name.decodedName.toString -> getUnderlyingTypeOfValueClass(paramTpe)
+            } else {
+                p.name.decodedName.toString -> paramTpe.substituteTypes(formalTypeArgs, actualTypeArgs)
             }
         }
     }

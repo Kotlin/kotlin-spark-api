@@ -3,12 +3,12 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Kotlin Spark API: API for Spark 3.2+ (Scala 2.12)</name>
-    <artifactId>kotlin-spark-api-3.2</artifactId>
-    <description>Kotlin API compatible with spark 3.2.0 Kotlin for Apache Spark</description>
+    <name>Kotlin Spark API: API for Spark 3.3+ (Scala 2.12)</name>
+    <artifactId>kotlin-spark-api-3.3</artifactId>
+    <description>Kotlin API compatible with spark 3.3.0 Kotlin for Apache Spark</description>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-spark-api-parent-3.2_2.12</artifactId>
+        <artifactId>kotlin-spark-api-parent-3.3_2.12</artifactId>
         <version>1.1.1-SNAPSHOT</version>
         <relativePath>../../pom_2.12.xml</relativePath>
     </parent>
@@ -26,11 +26,11 @@
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx.spark</groupId>
-            <artifactId>core-3.2_${scala.compat.version}</artifactId>
+            <artifactId>core-3.3_${scala.compat.version}</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx.spark</groupId>
-            <artifactId>scala-tuples-in-kotlin-3.2</artifactId>
+            <artifactId>scala-tuples-in-kotlin-3.3</artifactId>
         </dependency>
 
         <!-- Provided dependencies -->
