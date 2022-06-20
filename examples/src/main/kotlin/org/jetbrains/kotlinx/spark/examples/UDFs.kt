@@ -23,18 +23,17 @@ import org.apache.spark.sql.*
 import org.apache.spark.sql.expressions.Aggregator
 import org.apache.spark.sql.functions.*
 import org.jetbrains.kotlinx.spark.api.*
-import org.jetbrains.kotlinx.spark.api.tuples.t
-import org.json4s.jackson.Json
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
 import scala.collection.mutable.WrappedArray
 
 
 fun main() {
-//    sparkExample()
-//    smartNames()
-//    functionToUDF()
-//    strongTypingInDatasets()
-//    UDAF()
+    sparkExample()
+    smartNames()
+    functionToUDF()
+    strongTypingInDatasets()
+    UDAF()
     varargUDFs()
 }
 
@@ -128,7 +127,7 @@ private fun smartNames(): Unit = withSpark {
 
 
 /**
- * Shows how UDFs can be created from normal functions as well
+ * Shows how UDFs can be created from normal functions as well.
  */
 private fun functionToUDF(): Unit = withSpark {
 
@@ -157,6 +156,10 @@ private fun functionToUDF(): Unit = withSpark {
 
 private val minusOne = { x: Int -> x - 1 }
 
+/**
+ * Shows how UDFs in Kotlin carry typing information, which allows you to do
+ * typesafe column operations with them.
+ */
 private fun strongTypingInDatasets() = withSpark {
     data class User(val name: String, val age: Int?)
     val ds: Dataset<User> = dsOf(
@@ -271,6 +274,9 @@ private object MyAverage : Aggregator<Employee, Average, Double>() {
 
 }
 
+/**
+ * Shows how UDAFs can be used from Kotlin.
+ */
 private fun UDAF() = withSpark {
     // First let's go over the example from Spark for User defined aggregate functions:
     // https://spark.apache.org/docs/latest/sql-ref-functions-udf-aggregate.html
@@ -378,6 +384,9 @@ private fun UDAF() = withSpark {
     )
 }
 
+/**
+ * Shows the new and unique vararg UDFs the Kotlin Spark API has to offer and how to use them.
+ */
 private fun varargUDFs() = withSpark {
     // Finally, let's go over something unique to the Kotlin version of the Spark API: Simple Vararg UDFs
 
