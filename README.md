@@ -28,6 +28,7 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
     - [Overload Resolution Ambiguity](#overload-resolution-ambiguity)
     - [Tuples](#tuples)
     - [Streaming](#streaming)
+    - [User Defined Functions](#user-defined-functions)
 - [Examples](#examples)
 - [Reporting issues/Support](#reporting-issuessupport)
 - [Code of Conduct](#code-of-conduct)
@@ -274,6 +275,48 @@ withSparkStreaming(batchDuration = Durations.seconds(1), timeout = 10_000) { // 
 ```
 
 For more information, check the [wiki](https://github.com/JetBrains/kotlin-spark-api/wiki/Streaming).
+
+### User Defined Functions
+
+Spark has a way to call functions from SQL using so-called [UDFs](https://spark.apache.org/docs/latest/sql-ref-functions-udf-scalar.html).
+Using the Scala/Java API from Kotlin is not that obvious, so we decided to add special UDF support for Kotlin.
+This support grew into a typesafe, name-safe, and feature-rich solution for which we will give an example:
+```kotlin
+// example of creation/naming, and registering of a simple UDF
+val plusOne by udf { x: Int -> x + 1 }
+plusOne.register()
+spark.sql("SELECT plusOne(5)").show()
+// +----------+
+// |plusOne(5)|
+// +----------+
+// |         6|
+// +----------+
+
+// directly registering
+udf.register("plusTwo") { x: Double -> x + 2.0 }
+spark.sql("SELECT plusTwo(2.0d)").show()
+// +------------+
+// |plusTwo(2.0)|
+// +------------+
+// |         4.0|
+// +------------+
+
+// dataset select
+val result: Dataset<Int> = myDs.select(
+  plusOne(col(MyType::age))
+)
+```
+
+We support:
+  - a notation close to Spark's
+  - smart naming (with reflection)
+  - creation from function references
+  - typed column operations
+  - UDAF support and functional creation
+  - (Unique!) simple vararg UDF support
+
+For more, check the [extensive examples](examples/src/main/kotlin/org/jetbrains/kotlinx/spark/examples/UDFs.kt).
+Also, check out the [wiki](https://github.com/Kotlin/kotlin-spark-api/wiki/UDF).
 
 ## Examples
 

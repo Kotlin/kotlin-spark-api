@@ -27,62 +27,17 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.Column
-import org.apache.spark.sql.DataTypeWithClass
 import org.apache.spark.sql.UDFRegistration
 import org.apache.spark.sql.api.java.*
 import org.apache.spark.sql.functions
-import org.apache.spark.sql.types.DataType
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.typeOf
-import scala.collection.Seq
 
-
-/** Unwraps [DataTypeWithClass]. */
-fun DataType.unWrap(): DataType =
-    when (this) {
-        is DataTypeWithClass -> DataType.fromJson(dt().json())
-        else -> this
-    }
-
-/**
- * Checks if [this] is of a valid type for a UDF, otherwise it throws a [TypeOfUDFParameterNotSupportedException]
- */
-@PublishedApi
-internal fun KClass<*>.checkForValidType(parameterName: String) {
-    if (this == String::class || isSubclassOf(Seq::class)
-    //#if scala.compat.version < 2.13
-    //$|| isSubclassOf(scala.collection.mutable.WrappedArray::class)
-    //#endif
-    )
-        return // Most of the time we need strings or WrappedArrays
-
-    if (isSubclassOf(Iterable::class)
-        || java.isArray
-        || isSubclassOf(Map::class)
-        || isSubclassOf(Array::class)
-        || isSubclassOf(ByteArray::class)
-        || isSubclassOf(CharArray::class)
-        || isSubclassOf(ShortArray::class)
-        || isSubclassOf(IntArray::class)
-        || isSubclassOf(LongArray::class)
-        || isSubclassOf(FloatArray::class)
-        || isSubclassOf(DoubleArray::class)
-        || isSubclassOf(BooleanArray::class)
-    ) throw TypeOfUDFParameterNotSupportedException(this, parameterName)
-}
-
-/**
- * An exception thrown when the UDF is generated with illegal types for the parameters
- */
-class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: String) : IllegalArgumentException(
-    "Parameter $parameterName is subclass of ${kClass.qualifiedName}. If you need to process an array use ${Seq::class.qualifiedName}."
-)
 
 /**
  * A wrapper for a UDF with 0 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction0"))
 class UDFWrapper0(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -96,6 +51,7 @@ class UDFWrapper0(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified R> UDFRegistration.register(name: String, noinline func: () -> R): UDFWrapper0 {
     register(name, UDF0(func), schema(typeOf<R>()).unWrap())
     return UDFWrapper0(name)
@@ -105,6 +61,7 @@ inline fun <reified R> UDFRegistration.register(name: String, noinline func: () 
  * A wrapper for a UDF with 1 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction1"))
 class UDFWrapper1(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -118,6 +75,7 @@ class UDFWrapper1(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified R> UDFRegistration.register(name: String, noinline func: (T0) -> R): UDFWrapper1 {
     T0::class.checkForValidType("T0")
     register(name, UDF1(func), schema(typeOf<R>()).unWrap())
@@ -128,6 +86,7 @@ inline fun <reified T0, reified R> UDFRegistration.register(name: String, noinli
  * A wrapper for a UDF with 2 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction2"))
 class UDFWrapper2(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -141,6 +100,7 @@ class UDFWrapper2(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1) -> R,
@@ -155,6 +115,7 @@ inline fun <reified T0, reified T1, reified R> UDFRegistration.register(
  * A wrapper for a UDF with 3 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction3"))
 class UDFWrapper3(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -168,6 +129,7 @@ class UDFWrapper3(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2) -> R,
@@ -183,6 +145,7 @@ inline fun <reified T0, reified T1, reified T2, reified R> UDFRegistration.regis
  * A wrapper for a UDF with 4 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction4"))
 class UDFWrapper4(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -196,6 +159,7 @@ class UDFWrapper4(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3) -> R,
@@ -212,6 +176,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified R> UDFRegist
  * A wrapper for a UDF with 5 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction5"))
 class UDFWrapper5(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -225,6 +190,7 @@ class UDFWrapper5(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4) -> R,
@@ -242,6 +208,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 6 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction6"))
 class UDFWrapper6(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -262,6 +229,7 @@ class UDFWrapper6(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5) -> R,
@@ -280,6 +248,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 7 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction7"))
 class UDFWrapper7(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -301,6 +270,7 @@ class UDFWrapper7(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6) -> R,
@@ -320,6 +290,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 8 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction8"))
 class UDFWrapper8(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -342,6 +313,7 @@ class UDFWrapper8(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7) -> R,
@@ -362,6 +334,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 9 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction9"))
 class UDFWrapper9(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -385,6 +358,7 @@ class UDFWrapper9(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8) -> R,
@@ -406,6 +380,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 10 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction10"))
 class UDFWrapper10(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -442,6 +417,7 @@ class UDFWrapper10(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9) -> R,
@@ -464,6 +440,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 11 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction11"))
 class UDFWrapper11(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -502,6 +479,7 @@ class UDFWrapper11(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) -> R,
@@ -525,6 +503,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 12 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction12"))
 class UDFWrapper12(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -565,6 +544,7 @@ class UDFWrapper12(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) -> R,
@@ -589,6 +569,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 13 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction13"))
 class UDFWrapper13(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -631,6 +612,7 @@ class UDFWrapper13(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) -> R,
@@ -656,6 +638,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 14 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction14"))
 class UDFWrapper14(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -700,6 +683,7 @@ class UDFWrapper14(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) -> R,
@@ -726,6 +710,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 15 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction15"))
 class UDFWrapper15(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -772,6 +757,7 @@ class UDFWrapper15(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) -> R,
@@ -799,6 +785,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 16 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction16"))
 class UDFWrapper16(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -847,6 +834,7 @@ class UDFWrapper16(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) -> R,
@@ -875,6 +863,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 17 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction17"))
 class UDFWrapper17(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -925,6 +914,7 @@ class UDFWrapper17(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) -> R,
@@ -954,6 +944,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 18 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction18"))
 class UDFWrapper18(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -1006,6 +997,7 @@ class UDFWrapper18(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) -> R,
@@ -1036,6 +1028,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 19 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction19"))
 class UDFWrapper19(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -1090,6 +1083,7 @@ class UDFWrapper19(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) -> R,
@@ -1121,6 +1115,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 20 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction20"))
 class UDFWrapper20(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -1177,6 +1172,7 @@ class UDFWrapper20(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) -> R,
@@ -1209,6 +1205,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 21 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction21"))
 class UDFWrapper21(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -1267,6 +1264,7 @@ class UDFWrapper21(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) -> R,
@@ -1300,6 +1298,7 @@ inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified 
  * A wrapper for a UDF with 22 arguments.
  * @property udfName the name of the UDF
  */
+@Deprecated("Use new UDF notation", replaceWith = ReplaceWith("UserDefinedFunction22"))
 class UDFWrapper22(private val udfName: String) {
     /**
      * Calls the [functions.callUDF] for the UDF with the [udfName] and the given columns.
@@ -1360,6 +1359,7 @@ class UDFWrapper22(private val udfName: String) {
  * Registers the [func] with its [name] in [this].
  */
 @OptIn(ExperimentalStdlibApi::class)
+@Deprecated("Use new UDF notation", ReplaceWith("this.register(name, func)"), DeprecationLevel.HIDDEN)
 inline fun <reified T0, reified T1, reified T2, reified T3, reified T4, reified T5, reified T6, reified T7, reified T8, reified T9, reified T10, reified T11, reified T12, reified T13, reified T14, reified T15, reified T16, reified T17, reified T18, reified T19, reified T20, reified T21, reified R> UDFRegistration.register(
     name: String,
     noinline func: (T0, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) -> R,
