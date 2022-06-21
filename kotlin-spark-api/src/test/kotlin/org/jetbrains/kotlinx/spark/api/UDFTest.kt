@@ -35,7 +35,6 @@ import org.apache.spark.sql.expressions.Aggregator
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.assertThrows
 import scala.collection.Seq
-import scala.collection.mutable.WrappedArray
 import java.io.Serializable
 import kotlin.random.Random
 
@@ -201,12 +200,6 @@ class UDFTest : ShouldSpec({
                         udf(func = { array: Array<String> ->
                             array.joinToString(" ")
                         })
-                    }
-                }
-
-                should("succeed when using a WrappedArray") {
-                    udf.register("shouldSucceed") { array: WrappedArray<String> ->
-                        array.asKotlinIterable().joinToString(" ")
                     }
                 }
 
