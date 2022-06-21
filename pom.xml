@@ -163,35 +163,6 @@
         </pluginManagement>
         <plugins>
 
-<!--            <plugin>-->
-<!--                <groupId>com.igormaznitsa</groupId>-->
-<!--                <artifactId>jcp</artifactId>-->
-<!--                <version>7.0.5</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>preprocessSources</id>-->
-<!--                        <phase>generate-sources</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>preprocess</goal>-->
-<!--                        </goals>-->
-<!--                        <configuration>-->
-<!--                            <vars>-->
-<!--                                <spark3.version>${spark3.version}</spark3.version>-->
-<!--&lt;!&ndash;                                <scala.version>${scala.version}</scala.version>&ndash;&gt;-->
-<!--&lt;!&ndash;                                <scala.compat.version>${scala.compat.version}</scala.compat.version>&ndash;&gt;-->
-<!--                            </vars>-->
-<!--                            <extensions>-->
-<!--                                <extension>scala</extension>-->
-<!--                                <extension>kt</extension>-->
-<!--                                <extension>java</extension>-->
-<!--                            </extensions>-->
-<!--                            <clearTarget>true</clearTarget>-->
-<!--                            <replaceSources>true</replaceSources>-->
-<!--                        </configuration>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>

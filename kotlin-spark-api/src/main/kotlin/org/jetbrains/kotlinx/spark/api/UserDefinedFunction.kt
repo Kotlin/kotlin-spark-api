@@ -24,7 +24,6 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.spark.sql.*
 import org.apache.spark.sql.types.DataType
 import scala.collection.Seq
-import scala.collection.mutable.WrappedArray
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.isSubclassOf
@@ -43,7 +42,11 @@ fun DataType.unWrap(): DataType =
  */
 @PublishedApi
 internal fun KClass<*>.checkForValidType(parameterName: String) {
-    if (this == String::class || isSubclassOf(WrappedArray::class) || isSubclassOf(Seq::class))
+    if (this == String::class || isSubclassOf(Seq::class)
+    //#if scala.compat.version < 2.13
+    //$|| isSubclassOf(scala.collection.mutable.WrappedArray::class)
+    //#endif
+    )
         return // Most of the time we need strings or WrappedArrays/Seqs
 
     if (isSubclassOf(Iterable::class)

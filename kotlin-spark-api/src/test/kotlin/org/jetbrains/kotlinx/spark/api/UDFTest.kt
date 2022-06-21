@@ -210,6 +210,14 @@ class UDFTest : ShouldSpec({
                     }
                 }
 
+                //#if scala.compat.version <= 2.12
+                //$should("succeed when using a WrappedArray") {
+                //$    udf.register("shouldSucceed") { array: scala.collection.mutable.WrappedArray<String> ->
+                //$        array.asKotlinIterable().joinToString(" ")
+                //$    }
+                //$}
+                //#endif
+
                 should("succeed when using a Seq") {
                     udf.register("shouldSucceed") { array: Seq<String> ->
                         array.asKotlinIterable().joinToString(" ")
@@ -241,25 +249,28 @@ class UDFTest : ShouldSpec({
 
         context("calling the UDF-Wrapper") {
             withSpark(logLevel = SparkLogLevel.DEBUG) {
-                should("succeed in withColumn") {
 
-                    val stringArrayMerger = udf { it: WrappedArray<String> ->
-                        it.asKotlinIterable().joinToString(" ")
-                    }
-
-                    val testData = dsOf(arrayOf("a", "b"))
-                    val newData = testData.withColumn(
-                        "text",
-                        stringArrayMerger(
-                            testData.singleCol().asSeq()
-                        ),
-                    )
-
-                    (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
-                        .forEach { (text, textArray) ->
-                            assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
-                        }
-                }
+                //#if scala.compat.version <= 2.12
+                //$should("succeed in withColumn with WrappedArray") {
+                //$
+                //$    val stringArrayMerger = udf { it: scala.collection.mutable.WrappedArray<String> ->
+                //$        it.asKotlinIterable().joinToString(" ")
+                //$    }
+                //$
+                //$    val testData = dsOf(arrayOf("a", "b"))
+                //$    val newData = testData.withColumn(
+                //$        "text",
+                //$        stringArrayMerger(
+                //$            testData.singleCol().typed()
+                //$        ),
+                //$    )
+                //$
+                //$    (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
+                //$        .forEach { (text, textArray) ->
+                //$            assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
+                //$        }
+                //$}
+                //#endif
 
                 should("succeed in withColumn using Seq") {
 
