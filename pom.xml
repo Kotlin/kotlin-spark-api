@@ -2,10 +2,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Kotlin Spark API: Parent for Spark 3.3+</name>
+    <name>Kotlin Spark API: Main parent for Spark</name>
     <description>Parent project for Kotlin for Apache Spark</description>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
-    <artifactId>kotlin-spark-api-parent-3.3</artifactId>
+    <artifactId>kotlin-spark-api-main_scalaAndSparkVersion</artifactId><!--TODO-->
     <version>1.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -19,9 +19,17 @@
         <kotlin-jupyter-api.version>0.11.0-95</kotlin-jupyter-api.version>
         <kotlin.version>1.7.0</kotlin.version>
         <kotlinx.html.version>0.7.5</kotlinx.html.version>
+
+
+        <scala.version>2.13.8</scala.version>
+        <scala.compat.version>2.13</scala.compat.version>
+        <!--    <scala.version>2.12.15</scala.version>-->
+        <!--    <scala.compat.version>2.12</scala.compat.version>-->
         <spark3.version>3.3.0</spark3.version>
+        <spark3.minor.version>3.3</spark3.minor.version>
 
         <!-- Plugin versions -->
+        <jcp.version>7.0.5</jcp.version>
         <jacoco-maven-plugin.version>0.8.7</jacoco-maven-plugin.version>
         <klaxon.version>5.5</klaxon.version>
         <kotlin.code.style>official</kotlin.code.style>
@@ -36,7 +44,7 @@
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M6</maven-surefire-plugin.version>
         <nexus-staging-plugin.version>1.6.8</nexus-staging-plugin.version>
-        <scala-maven-plugin.version>4.5.6</scala-maven-plugin.version>
+        <scala-maven-plugin.version>4.6.3</scala-maven-plugin.version>
     </properties>
 
     <modules>
@@ -154,6 +162,36 @@
             </plugins>
         </pluginManagement>
         <plugins>
+
+<!--            <plugin>-->
+<!--                <groupId>com.igormaznitsa</groupId>-->
+<!--                <artifactId>jcp</artifactId>-->
+<!--                <version>7.0.5</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>preprocessSources</id>-->
+<!--                        <phase>generate-sources</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>preprocess</goal>-->
+<!--                        </goals>-->
+<!--                        <configuration>-->
+<!--                            <vars>-->
+<!--                                <spark3.version>${spark3.version}</spark3.version>-->
+<!--&lt;!&ndash;                                <scala.version>${scala.version}</scala.version>&ndash;&gt;-->
+<!--&lt;!&ndash;                                <scala.compat.version>${scala.compat.version}</scala.compat.version>&ndash;&gt;-->
+<!--                            </vars>-->
+<!--                            <extensions>-->
+<!--                                <extension>scala</extension>-->
+<!--                                <extension>kt</extension>-->
+<!--                                <extension>java</extension>-->
+<!--                            </extensions>-->
+<!--                            <clearTarget>true</clearTarget>-->
+<!--                            <replaceSources>true</replaceSources>-->
+<!--                        </configuration>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -229,7 +267,7 @@
                     <localCheckout>true</localCheckout>
                     <pushChanges>false</pushChanges>
                     <mavenExecutorId>forked-path</mavenExecutorId>
-                    <releaseProfiles>scala-2.12,central-deploy</releaseProfiles>
+                    <releaseProfiles>scala-2,central-deploy</releaseProfiles>
                 </configuration>
             </plugin>
         </plugins>
@@ -285,12 +323,12 @@
 
     <profiles>
         <profile>
-            <id>scala-2.12</id>
+            <id>scala-2</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
-                <module>pom_2.12.xml</module>
+                <module>pom_parent.xml</module>
             </modules>
         </profile>
         <profile>

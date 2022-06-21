@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
-    <name>Kotlin Spark API: Jupyter integration (Scala TODO, Spark TODO)</name>
-    <artifactId>kotlin-spark-api-jupyter_scalaAndSparkVersion</artifactId>
-    <description>Jupyter integration</description>
+    <name>Kotlin Spark API: API for (Scala TODO, Spark TODO)</name>
+    <artifactId>kotlin-spark-api_scalaAndSparkVersion</artifactId>
+    <description>Kotlin API compatible with Spark ${spark3.version} Kotlin for Apache Spark</description>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
         <artifactId>kotlin-spark-api-parent_scalaAndSparkVersion</artifactId><!--TODO-->
@@ -15,62 +16,57 @@
     <packaging>jar</packaging>
 
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
-
-    <repositories>
-        <repository>
-            <id>kotlinx-html</id>
-            <name>kotlinx-html</name>
-            <url>https://maven.pkg.jetbrains.space/public/p/kotlinx-html/maven</url>
-        </repository>
-        <repository>
-            <id>kotlin</id>
-            <name>kotlin</name>
-            <url>https://maven.pkg.jetbrains.space/kotlin/p/kotlin/dev</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <dependency>
-            <groupId>org.jetbrains.kotlinx.spark</groupId>
-            <artifactId>kotlin-spark-api_scalaAndSparkVersion</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib-jdk8</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-html-jvm</artifactId>
-            <version>${kotlinx.html.version}</version>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx.spark</groupId>
+            <artifactId>core_scalaAndSparkVersion</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx.spark</groupId>
+            <artifactId>scala-tuples-in-kotlin_scalaAndSparkVersion</artifactId>
+        </dependency>
+
+        <!-- Provided dependencies -->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_${scala.compat.version}</artifactId>
             <version>${spark3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-repl_${scala.compat.version}</artifactId>
-            <version>${spark3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-streaming_${scala.compat.version}</artifactId>
             <version>${spark3.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>${hadoop.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlin-jupyter-api</artifactId>
-            <version>${kotlin-jupyter-api.version}</version>
+            <scope>provided</scope>
         </dependency>
 
-        <!-- Testing -->
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming-kafka-0-10_${scala.compat.version}</artifactId>
+            <version>${spark3.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_${scala.compat.version}</artifactId>
+            <version>${spark3.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-runner-junit5-jvm</artifactId>
@@ -78,9 +74,40 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlin-jupyter-test-kit</artifactId>
-            <version>${kotlin-jupyter-api.version}</version>
+            <groupId>io.kotest.extensions</groupId>
+            <artifactId>kotest-extensions-testcontainers</artifactId>
+            <version>${kotest-extensions-testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.embeddedkafka</groupId>
+            <artifactId>embedded-kafka_${scala.compat.version}</artifactId>
+            <version>${embedded-kafka.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>klaxon</artifactId>
+            <version>${klaxon.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.tutteli.atrium</groupId>
+            <artifactId>atrium-fluent-en_GB</artifactId>
+            <version>${atrium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-streaming_${scala.compat.version}</artifactId>
+            <version>${spark3.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams-test-utils</artifactId>
+            <version>3.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -104,9 +131,7 @@
                         </goals>
                         <configuration>
                             <vars>
-                                <kotlin.version>${kotlin.version}</kotlin.version>
                                 <spark3.minor.version>${spark3.minor.version}</spark3.minor.version>
-                                <spark3.version>${spark3.version}</spark3.version>
                                 <scala.version>${scala.version}</scala.version>
                                 <scala.compat.version>${scala.compat.version}</scala.compat.version>
                             </vars>
@@ -127,9 +152,7 @@
                         <configuration>
                             <useTestSources>true</useTestSources>
                             <vars>
-                                <kotlin.version>${kotlin.version}</kotlin.version>
                                 <spark3.minor.version>${spark3.minor.version}</spark3.minor.version>
-                                <spark3.version>${spark3.version}</spark3.version>
                                 <scala.version>${scala.version}</scala.version>
                                 <scala.compat.version>${scala.compat.version}</scala.compat.version>
                             </vars>
@@ -142,6 +165,30 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
             </plugin>
 
             <plugin>
@@ -168,69 +215,21 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
-                <groupId>org.jetbrains.kotlin</groupId>
-                <artifactId>kotlin-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compile</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>${maven-assembly-plugin.version}</version>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <archive>
-                        <manifest>
-                            <mainClass>org.jetbrains.spark.api.examples.WordCountKt</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>false</skip>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <configuration>
-                    <skipNexusStagingDeployMojo>false</skipNexusStagingDeployMojo>
-                </configuration>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>9</source>
-                    <target>9</target>
+                    <source>8</source>
+                    <target>8</target>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

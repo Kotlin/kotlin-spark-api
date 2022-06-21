@@ -24,14 +24,16 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.jetbrains.kotlinx.jupyter.api.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
+import org.jetbrains.kotlinx.spark.api.tuples.map
+import org.jetbrains.kotlinx.spark.api.tuples.t
 import kotlin.reflect.typeOf
 
 abstract class Integration : JupyterIntegration() {
 
-    private val kotlinVersion = "1.6.21"
-    private val scalaCompatVersion = "2.12"
-    private val scalaVersion = "2.12.15"
-    private val spark3Version = "3.2.1"
+    private val kotlinVersion = /*$"\""+kotlin.version+"\""$*/ /*-*/ "1.7.0"
+    private val scalaCompatVersion = /*$"\""+scala.compat.version+"\""$*/ /*-*/ "2.13"
+    private val scalaVersion = /*$"\""+scala.version+"\""$*/ /*-*/ "2.13.8"
+    private val spark3Version = /*$"\""+spark3.version+"\""$*/ /*-*/ "3.3.0"
 
     private val displayLimit = "DISPLAY_LIMIT"
     private val displayLimitDefault = 20
@@ -113,7 +115,10 @@ abstract class Integration : JupyterIntegration() {
         }
 
         beforeCellExecution {
-            execute("""scala.Console.setOut(System.out)""")
+            if (scalaCompatVersion.toDouble() >= 2.13)
+                execute("scala.`Console\$`.`MODULE\$`.setOutDirect(System.out)")
+            else
+                execute("""scala.Console.setOut(System.out)""")
 
             beforeCellExecution()
         }
