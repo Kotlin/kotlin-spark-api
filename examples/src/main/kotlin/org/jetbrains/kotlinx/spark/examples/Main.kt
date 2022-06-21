@@ -61,7 +61,7 @@ object Main {
         triples
             .leftJoin(
                 right = pairs,
-                col = triples("_1").multiply(2) eq pairs("_1"),
+                col = triples.col("_1").multiply(2) eq pairs.col("_1"),
             )
 //                .also { it.printSchema() }
             .map { (triple, pair) -> Five(triple._1, triple._2, triple._3, pair?._1, pair?._2) }

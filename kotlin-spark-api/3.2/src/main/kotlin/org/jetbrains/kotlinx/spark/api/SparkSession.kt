@@ -72,6 +72,9 @@ class KSparkSession(val spark: SparkSession) {
     /** Utility method to create dataset from vararg arguments. */
     inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)
 
+    /** Creates new empty dataset of type [T]. */
+    inline fun <reified T> emptyDataset(): Dataset<T> = spark.emptyDataset(encoder<T>())
+
     /** Utility method to create dataframe from *array or vararg arguments */
     inline fun <reified T> dfOf(vararg arg: T): Dataset<Row> = spark.dfOf(*arg)
 
@@ -109,6 +112,14 @@ class KSparkSession(val spark: SparkSession) {
      * it is present in the query.
      */
     val udf: UDFRegistration get() = spark.udf()
+
+    inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>>
+            NAMED_UDF.register(): NAMED_UDF =
+        this@KSparkSession.udf.register(namedUdf = this)
+
+    inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>>
+            UserDefinedFunction<RETURN, NAMED_UDF>.register(name: String): NAMED_UDF =
+        this@KSparkSession.udf.register(name = name, udf = this)
 }
 
 /**

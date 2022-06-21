@@ -15,9 +15,9 @@
         <embedded-kafka.version>3.1.0</embedded-kafka.version>
         <hadoop.version>3.3.1</hadoop.version>
         <kotest-extensions-testcontainers.version>1.3.1</kotest-extensions-testcontainers.version>
-        <kotest.version>5.2.3</kotest.version>
+        <kotest.version>5.3.1</kotest.version>
         <kotlin-jupyter-api.version>0.11.0-95</kotlin-jupyter-api.version>
-        <kotlin.version>1.6.21</kotlin.version>
+        <kotlin.version>1.7.0</kotlin.version>
         <kotlinx.html.version>0.7.5</kotlinx.html.version>
         <spark3.version>3.2.1</spark3.version>
 

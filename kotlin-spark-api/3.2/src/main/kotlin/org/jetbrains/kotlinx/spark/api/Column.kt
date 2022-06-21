@@ -32,11 +32,37 @@ import org.apache.spark.sql.functions
 import kotlin.reflect.KProperty1
 
 /**
- * Selects column based on the column name and returns it as a [Column].
+ * Selects column based on the column name and returns it as a [TypedColumn].
+ *
+ * For example:
+ * ```kotlin
+ * dataset.col<_, Int>("a")
+ * ```
  *
  * @note The column name can also reference to a nested column like `a.b`.
  */
-operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
+inline fun <T, reified R> Dataset<T>.col(colName: String): TypedColumn<T, R> =
+    org.jetbrains.kotlinx.spark.api.col<T, R>(colName)
+
+/**
+ * Selects column based on the column name and returns it as a [TypedColumn].
+ *
+ * For example:
+ * ```kotlin
+ * dataset<_, Int>("a")
+ * ```
+ * @note The column name can also reference to a nested column like `a.b`.
+ */
+inline operator fun <T, reified R> Dataset<T>.invoke(colName: String): TypedColumn<T, R> =
+    org.jetbrains.kotlinx.spark.api.col<T, R>(colName)
+
+/**
+ * Selects column based on the column name and returns it as a [Column].
+ *
+ * @note The column name can also reference to a nested column like `a.b`.
+ *
+ */
+operator fun Dataset<*>.invoke(colName: String): Column = apply(colName)
 
 /**
  * Helper function to quickly get a [TypedColumn] (or [Column]) from a dataset in a refactor-safe manner.
@@ -47,8 +73,8 @@ operator fun <T> Dataset<T>.invoke(colName: String): Column = col(colName)
  * @see invoke
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    col(column.name).`as`<U>() as TypedColumn<T, U>
+inline fun <T, reified U> Dataset<T>.col(column: KProperty1<T, U>): TypedColumn<T, U> =
+    col(column.name).`as`()
 
 
 /**
@@ -59,8 +85,17 @@ inline fun <reified T, reified U> Dataset<T>.col(column: KProperty1<T, U>): Type
  * ```
  * @see col
  */
-inline operator fun <reified T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
+inline operator fun <T, reified U> Dataset<T>.invoke(column: KProperty1<T, U>): TypedColumn<T, U> = col(column)
 
+
+/**
+ * Can be used to create a [TypedColumn] for a simple [Dataset]
+ * with just one single column called "value".
+ */
+inline fun <reified T> Dataset<T>.singleCol(colName: String = "value"): TypedColumn<T, T> {
+    require(schema().fields().size == 1) { "This Dataset<${T::class.simpleName}> contains more than 1 column" }
+    return org.jetbrains.kotlinx.spark.api.singleCol(colName)
+}
 
 @Suppress("FunctionName")
 @Deprecated(
@@ -402,11 +437,60 @@ operator fun Column.get(key: Any): Column = getItem(key)
  *
  * ```
  * val df: Dataset<Row> = ...
- * val typedColumn: Dataset<Int> = df.selectTyped( col("a").`as`<Int>() )
+ * val typedColumn: Dataset<Int> = df.select( col("a").`as`<_, Int>() )
  * ```
+ *
+ * @see typed
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
+inline fun <DsType, reified U> Column.`as`(): TypedColumn<DsType, U> = `as`(encoder<U>()) as TypedColumn<DsType, U>
+
+/**
+ * Provides a type hint about the expected return value of this column. This information can
+ * be used by operations such as `select` on a [Dataset] to automatically convert the
+ * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.select( col("a").`as`<_, Int>() )
+ * ```
+ *
+ * @see typed
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <DsType, reified U> TypedColumn<DsType, *>.`as`(): TypedColumn<DsType, U> = `as`(encoder<U>()) as TypedColumn<DsType, U>
+
+/**
+ * Provides a type hint about the expected return value of this column. This information can
+ * be used by operations such as `select` on a [Dataset] to automatically convert the
+ * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.select( col("a").typed<_, Int>() )
+ * ```
+ *
+ * @see as
+ */
+
+@Suppress("UNCHECKED_CAST")
+inline fun <DsType, reified T> Column.typed(): TypedColumn<DsType, T> = `as`()
+
+/**
+ * Provides a type hint about the expected return value of this column. This information can
+ * be used by operations such as `select` on a [Dataset] to automatically convert the
+ * results into the correct JVM types.
+ *
+ * ```
+ * val df: Dataset<Row> = ...
+ * val typedColumn: Dataset<Int> = df.select( col("a").typed<_, Int>() )
+ * ```
+ *
+ * @see as
+ */
+@Suppress("UNCHECKED_CAST")
+inline fun <DsType, reified T> TypedColumn<DsType, *>.typed(): TypedColumn<DsType, T> = `as`()
+
 
 /**
  * Creates a [Column] of literal value.
@@ -421,12 +505,48 @@ inline fun <reified T> Column.`as`(): TypedColumn<Any, T> = `as`(encoder<T>())
 fun lit(a: Any): Column = functions.lit(a)
 
 /**
+ * Creates a [Column] of literal value.
+ *
+ * The passed in object is returned directly if it is already a [Column].
+ * If the object is a Scala Symbol, it is converted into a [Column] also.
+ * Otherwise, a new [Column] is created to represent the literal value.
+ * The difference between this function and [lit] is that this function
+ * can handle types and parameterized scala types e.g.: List, Seq and Map.
+ *
+ */
+inline fun <DsType, reified U> typedLit(literal: U): TypedColumn<DsType, U> = functions.lit(literal).typed()
+
+/**
+ * Returns a [TypedColumn] based on the given column name and type [DsType].
+ *
+ * This is just a shortcut to the function from [org.apache.spark.sql.functions] combined with an [as] call.
+ * For all the functions, simply add `import org.apache.spark.sql.functions.*` to your file.
+ *
+ * @see col
+ * @see as
+ */
+inline fun <DsType, reified U> col(colName: String): TypedColumn<DsType, U> = functions.col(colName).`as`()
+
+/**
+ * Can be used to create a [TypedColumn] for a simple [Dataset]
+ * with just one single column called "value".
+ */
+inline fun <reified DsType> singleCol(colName: String = "value"): TypedColumn<DsType, DsType> = functions.col(colName).`as`()
+
+/**
+ * Returns a [Column] based on the given column name.
+ *
+ */
+fun col(colName: String): Column = functions.col(colName)
+
+/**
  * Returns a [Column] based on the given class attribute, not connected to a dataset.
  * ```kotlin
  *    val dataset: Dataset<YourClass> = ...
- *    val new: Dataset<Pair<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
+ *    val new: Dataset<Tuple2<TypeOfA, TypeOfB>> = dataset.select( col(YourClass::a), col(YourClass::b) )
  * ```
+ * @see col
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <reified T, reified U> col(column: KProperty1<T, U>): TypedColumn<T, U> =
-    functions.col(column.name).`as`<U>() as TypedColumn<T, U>
+inline fun <DsType, reified U> col(column: KProperty1<DsType, U>): TypedColumn<DsType, U> =
+    functions.col(column.name).`as`()
