@@ -227,7 +227,7 @@ private fun strongTypingInDatasets() = withSpark {
         toJson(
             col<_, Int>("age"),
             col<_, String>("name"),
-            col<Row, List<String>>("pets").asWrappedArray(),
+            col<Row, List<String>>("pets").asSeq(),
 //      or `col<_, WrappedArray<String>>("pets")` if you want to be less strict
         )
     ).showDS(truncate = false)

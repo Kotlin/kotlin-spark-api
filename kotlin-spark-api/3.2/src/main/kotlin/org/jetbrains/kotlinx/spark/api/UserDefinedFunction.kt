@@ -23,6 +23,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.*
 import org.apache.spark.sql.types.DataType
+import scala.collection.Seq
 import scala.collection.mutable.WrappedArray
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
@@ -42,8 +43,8 @@ fun DataType.unWrap(): DataType =
  */
 @PublishedApi
 internal fun KClass<*>.checkForValidType(parameterName: String) {
-    if (this == String::class || isSubclassOf(WrappedArray::class))
-        return // Most of the time we need strings or WrappedArrays
+    if (this == String::class || isSubclassOf(WrappedArray::class) || isSubclassOf(Seq::class))
+        return // Most of the time we need strings or WrappedArrays/Seqs
 
     if (isSubclassOf(Iterable::class)
         || java.isArray
@@ -65,29 +66,29 @@ internal fun KClass<*>.checkForValidType(parameterName: String) {
  * An exception thrown when the UDF is generated with illegal types for the parameters
  */
 class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: String) : IllegalArgumentException(
-    "Parameter $parameterName is subclass of ${kClass.qualifiedName}. If you need to process an array use ${WrappedArray::class.qualifiedName}. You can convert any typed array/list-like column using [asWrappedArray()]."
+    "Parameter $parameterName is subclass of ${kClass.qualifiedName}. If you need to process an array use ${Seq::class.qualifiedName}. You can convert any typed array/list-like column using [asSeq()]."
 )
 
-@JvmName("arrayColumnAsWrappedArray")
-fun <DsType, T> TypedColumn<DsType, Array<T>>.asWrappedArray(): TypedColumn<DsType, WrappedArray<T>> = typed()
-@JvmName("iterableColumnAsWrappedArray")
-fun <DsType, T, I : Iterable<T>> TypedColumn<DsType, I>.asWrappedArray(): TypedColumn<DsType, WrappedArray<T>> = typed()
-@JvmName("byteArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, ByteArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Byte>> = typed()
-@JvmName("charArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, CharArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Char>> = typed()
-@JvmName("shortArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, ShortArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Short>> = typed()
-@JvmName("intArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, IntArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Int>> = typed()
-@JvmName("longArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, LongArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Long>> = typed()
-@JvmName("floatArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, FloatArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Float>> = typed()
-@JvmName("doubleArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, DoubleArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Double>> = typed()
-@JvmName("booleanArrayColumnAsWrappedArray")
-fun <DsType> TypedColumn<DsType, BooleanArray>.asWrappedArray(): TypedColumn<DsType, WrappedArray<Boolean>> = typed()
+@JvmName("arrayColumnAsSeq")
+fun <DsType, T> TypedColumn<DsType, Array<T>>.asSeq(): TypedColumn<DsType, WrappedArray<T>> = typed()
+@JvmName("iterableColumnAsSeq")
+fun <DsType, T, I : Iterable<T>> TypedColumn<DsType, I>.asSeq(): TypedColumn<DsType, WrappedArray<T>> = typed()
+@JvmName("byteArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, ByteArray>.asSeq(): TypedColumn<DsType, WrappedArray<Byte>> = typed()
+@JvmName("charArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, CharArray>.asSeq(): TypedColumn<DsType, WrappedArray<Char>> = typed()
+@JvmName("shortArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, ShortArray>.asSeq(): TypedColumn<DsType, WrappedArray<Short>> = typed()
+@JvmName("intArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, IntArray>.asSeq(): TypedColumn<DsType, WrappedArray<Int>> = typed()
+@JvmName("longArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, LongArray>.asSeq(): TypedColumn<DsType, WrappedArray<Long>> = typed()
+@JvmName("floatArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, FloatArray>.asSeq(): TypedColumn<DsType, WrappedArray<Float>> = typed()
+@JvmName("doubleArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, DoubleArray>.asSeq(): TypedColumn<DsType, WrappedArray<Double>> = typed()
+@JvmName("booleanArrayColumnAsSeq")
+fun <DsType> TypedColumn<DsType, BooleanArray>.asSeq(): TypedColumn<DsType, WrappedArray<Boolean>> = typed()
 
 
 /**

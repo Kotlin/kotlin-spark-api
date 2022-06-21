@@ -23,7 +23,6 @@ package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.matchers.collections.shouldBeIn
 import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -35,6 +34,7 @@ import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.Aggregator
 import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.assertThrows
+import scala.collection.Seq
 import scala.collection.mutable.WrappedArray
 import java.io.Serializable
 import kotlin.random.Random
@@ -210,6 +210,12 @@ class UDFTest : ShouldSpec({
                     }
                 }
 
+                should("succeed when using a Seq") {
+                    udf.register("shouldSucceed") { array: Seq<String> ->
+                        array.asKotlinIterable().joinToString(" ")
+                    }
+                }
+
                 should("succeed when return a List") {
                     udf.register("StringToIntList") { a: String ->
                         a.asIterable().map { it.code }
@@ -245,7 +251,27 @@ class UDFTest : ShouldSpec({
                     val newData = testData.withColumn(
                         "text",
                         stringArrayMerger(
-                            testData.singleCol().asWrappedArray()
+                            testData.singleCol().asSeq()
+                        ),
+                    )
+
+                    (newData.select("text").collectAsList() zip newData.select("value").collectAsList())
+                        .forEach { (text, textArray) ->
+                            assert(text.getString(0) == textArray.getList<String>(0).joinToString(" "))
+                        }
+                }
+
+                should("succeed in withColumn using Seq") {
+
+                    val stringArrayMerger = udf { it: Seq<String> ->
+                        it.asKotlinIterable().joinToString(" ")
+                    }
+
+                    val testData = dsOf(arrayOf("a", "b"))
+                    val newData = testData.withColumn(
+                        "text",
+                        stringArrayMerger(
+                            testData.singleCol().asSeq()
                         ),
                     )
 
