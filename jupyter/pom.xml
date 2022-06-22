@@ -88,7 +88,7 @@
     <build>
         <sourceDirectory>src/main/kotlin</sourceDirectory>
         <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-        <directory>target/${scala.compat.version}</directory>
+        <directory>target</directory>
         <plugins>
 
             <plugin>

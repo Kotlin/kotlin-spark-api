@@ -36,9 +36,9 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>generated-target/generated-sources/main/scala</sourceDirectory>
+        <sourceDirectory>target/generated-sources/preprocessed</sourceDirectory>
         <testSourceDirectory>src/test/scala</testSourceDirectory>
-        <directory>target/${scala.compat.version}</directory>
+        <directory>target</directory>
         <plugins>
 
             <plugin>
@@ -56,7 +56,7 @@
                             <sources>
                                 <src>src/main/scala</src>
                             </sources>
-                            <target>generated-target/generated-sources/main/scala</target>
+                            <target>target/generated-sources/preprocessed</target>
                             <vars>
                                 <spark3.minor.version>${spark3.minor.version}</spark3.minor.version>
                                 <scala.version>${scala.version}</scala.version>

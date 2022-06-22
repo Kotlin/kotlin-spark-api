@@ -113,9 +113,9 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src/main/kotlin</sourceDirectory>
-        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
-        <directory>target/${scala.compat.version}</directory>
+        <sourceDirectory>target/generated-sources/preprocessed</sourceDirectory>
+        <testSourceDirectory>target/generated-test-sources/preprocessed</testSourceDirectory>
+        <directory>target</directory>
         <plugins>
 
             <plugin>
@@ -130,6 +130,10 @@
                             <goal>preprocess</goal>
                         </goals>
                         <configuration>
+                            <sources>
+                                <src>src/main/kotlin</src>
+                            </sources>
+                            <target>target/generated-sources/preprocessed</target>
                             <vars>
                                 <spark3.minor.version>${spark3.minor.version}</spark3.minor.version>
                                 <scala.version>${scala.version}</scala.version>
@@ -151,6 +155,10 @@
                         </goals>
                         <configuration>
                             <useTestSources>true</useTestSources>
+                            <sources>
+                                <src>src/test/kotlin</src>
+                            </sources>
+                            <target>target/generated-test-sources/preprocessed</target>
                             <vars>
                                 <spark3.minor.version>${spark3.minor.version}</spark3.minor.version>
                                 <scala.version>${scala.version}</scala.version>

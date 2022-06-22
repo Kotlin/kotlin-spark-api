@@ -1,5 +1,9 @@
 #!/usr/bin/env kotlin
 
+
+println(args.toList())
+
+
 import java.io.File
 
 data class Version(val spark: String, val scala: String) {
