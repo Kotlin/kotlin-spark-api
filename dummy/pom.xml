@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>kotlin-spark-api-parent_scalaAndSparkVersion</artifactId><!--TODO-->
+        <artifactId>kotlin-spark-api-parent_scalaAndSparkVersion</artifactId>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
         <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom_parent.xml</relativePath>
@@ -10,7 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
     <name>Kotlin API for Apache Spark: not-needed</name>
     <description>Module to workaround https://issues.sonatype.org/browse/NEXUS-9138</description>
-    <artifactId>dummy_scalaAndSparkVersion</artifactId><!--TODO-->
+    <artifactId>dummy_scalaAndSparkVersion</artifactId>
     <profiles>
         <profile>
             <id>scala-2</id>

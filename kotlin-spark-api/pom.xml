@@ -9,7 +9,7 @@
     <description>Kotlin API compatible with Spark ${spark3.version} Kotlin for Apache Spark</description>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-spark-api-parent_scalaAndSparkVersion</artifactId><!--TODO-->
+        <artifactId>kotlin-spark-api-parent_scalaAndSparkVersion</artifactId>
         <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom_parent.xml</relativePath>
     </parent>

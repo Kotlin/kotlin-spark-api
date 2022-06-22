@@ -8,7 +8,7 @@
     <artifactId>examples_scalaAndSparkVersion</artifactId>
     <parent>
         <groupId>org.jetbrains.kotlinx.spark</groupId>
-        <artifactId>kotlin-spark-api-parent_scalaAndSparkVersion</artifactId><!--TODO-->
+        <artifactId>kotlin-spark-api-parent_scalaAndSparkVersion</artifactId>
         <version>1.1.1-SNAPSHOT</version>
         <relativePath>../pom_parent.xml</relativePath>
     </parent>

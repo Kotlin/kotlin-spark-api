@@ -5,7 +5,7 @@
     <name>Kotlin Spark API: Main parent for Spark</name>
     <description>Parent project for Kotlin for Apache Spark</description>
     <groupId>org.jetbrains.kotlinx.spark</groupId>
-    <artifactId>kotlin-spark-api-main_scalaAndSparkVersion</artifactId><!--TODO-->
+    <artifactId>kotlin-spark-api-main_scalaAndSparkVersion</artifactId>
     <version>1.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -20,13 +20,12 @@
         <kotlin.version>1.7.0</kotlin.version>
         <kotlinx.html.version>0.7.5</kotlinx.html.version>
 
-
+        <!-- $Autogenerate start$ -->
         <scala.version>2.13.8</scala.version>
         <scala.compat.version>2.13</scala.compat.version>
-        <!--    <scala.version>2.12.15</scala.version>-->
-        <!--    <scala.compat.version>2.12</scala.compat.version>-->
         <spark3.version>3.3.0</spark3.version>
         <spark3.minor.version>3.3</spark3.minor.version>
+        <!-- $Autogenerate end$ -->
 
         <!-- Plugin versions -->
         <jcp.version>7.0.5</jcp.version>
