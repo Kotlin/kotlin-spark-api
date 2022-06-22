@@ -25,7 +25,7 @@ import org.apache.spark.sql.functions.*
 import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
-import scala.collection.mutable.WrappedArray
+import scala.collection.Seq
 
 
 fun main() {
@@ -203,7 +203,7 @@ private fun strongTypingInDatasets() = withSpark {
     // advantage of!
 
     // NOTE: In UDFs, iterables, lists, arrays and such need to be represented as WrappedArray
-    val toJson by udf { age: Int, name: String, pets: WrappedArray<String> ->
+    val toJson by udf { age: Int, name: String, pets: Seq<String> ->
         """{ "age" : $age, "name" : "$name", "pets" : [${pets.asKotlinIterable().joinToString { "\"$it\"" }}] }"""
     }
 
