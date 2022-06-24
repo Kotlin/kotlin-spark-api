@@ -1,8 +1,5 @@
 import org.gradle.api.plugins.PluginAware
-import org.gradle.kotlin.dsl.DependencyHandlerScope
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.kotlin
-import org.gradle.kotlin.dsl.version
+import org.gradle.kotlin.dsl.*
 import org.gradle.plugin.use.PluginDependenciesSpec
 
 inline val PluginDependenciesSpec.shadow
@@ -22,3 +19,12 @@ inline val PluginDependenciesSpec.jcp
 
 inline val DependencyHandlerScope.jcp
     get() = "com.igormaznitsa:jcp:${Versions.jcp}"
+
+inline val DependencyHandlerScope.mavenPublish
+    get() = "com.vanniktech:gradle-maven-publish-plugin:${Versions.mavenPublish}"
+
+inline val PluginDependenciesSpec.mavenPublish
+    get() = id("com.vanniktech.maven.publish")
+
+inline val PluginDependenciesSpec.mavenPublishBase
+    get() = id("com.vanniktech.maven.publish.base")

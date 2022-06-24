@@ -19,6 +19,7 @@ object Versions {
     const val kotestTestContainers = "1.3.1"
     const val dokka = "1.7.0"
     const val jcp = "7.0.5"
+    const val mavenPublish = "0.20.0"
     const val atrium = "0.17.0"
     const val kotestExtensionAllure = "1.1.0"
     const val licenseGradlePluginVersion = "0.15.0"
