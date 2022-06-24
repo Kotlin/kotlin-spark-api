@@ -9,7 +9,6 @@ buildscript {
 }
 
 plugins {
-    kotlin
     mavenPublish version Versions.mavenPublish
 }
 

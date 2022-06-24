@@ -2,7 +2,6 @@ import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 
 plugins {
-    scala
     kotlin
     dokka
 

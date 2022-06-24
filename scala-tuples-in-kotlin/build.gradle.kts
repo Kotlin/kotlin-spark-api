@@ -4,7 +4,6 @@ import com.vanniktech.maven.publish.KotlinJvm
 import java.net.URI
 
 plugins {
-    scala
     kotlin
     dokka
 
