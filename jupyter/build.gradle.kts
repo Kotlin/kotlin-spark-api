@@ -1,7 +1,7 @@
 plugins {
     scala
     kotlin
-    dokka
+//    dokka
 }
 
 group = Versions.groupID
@@ -18,9 +18,14 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
+    with(Projects) {
+        api(
+            kotlinSparkApi,
+        )
+    }
+
     with(Dependencies) {
         api(
-            project(":kotlin-spark-api"),
             kotlinxHtml,
             sparkSql,
             sparkRepl,
@@ -35,6 +40,9 @@ dependencies {
 
         testImplementation(
             kotest,
+        )
+
+        testApi(
             jupyterTest,
         )
     }

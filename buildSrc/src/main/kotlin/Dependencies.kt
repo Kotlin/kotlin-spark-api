@@ -6,9 +6,10 @@ import Versions.scalaCompat
 import Versions.spark
 
 object Versions {
-    const val project = "1.1.1-SNAPSHOT"
+    const val project = "1.1.1-SNAPSHOT-GRADLE"
     const val groupID = "org.jetbrains.kotlinx.spark"
     const val kotlin = "1.6.21"
+    const val shadow = "7.1.2"
 
     const val spark = "3.2.1"
     const val scala = "2.12.15"
@@ -16,7 +17,8 @@ object Versions {
     const val jupyter = "0.11.0-95"
     const val kotest = "5.2.3"
     const val kotestTestContainers = "1.3.1"
-    const val dokka = "1.6.10"
+    const val dokka = "1.7.0"
+    const val jcp = "7.0.5"
     const val atrium = "0.17.0"
     const val kotestExtensionAllure = "1.1.0"
     const val licenseGradlePluginVersion = "0.15.0"

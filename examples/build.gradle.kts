@@ -10,9 +10,12 @@ repositories {
 }
 
 dependencies {
-    implementation(
-        project(":kotlin-spark-api"),
-    )
+
+    with(Projects) {
+        implementation(
+            kotlinSparkApi,
+        )
+    }
 
     with(Dependencies) {
         implementation(

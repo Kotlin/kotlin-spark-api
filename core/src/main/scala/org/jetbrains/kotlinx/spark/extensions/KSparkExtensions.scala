@@ -26,6 +26,11 @@ import java.util
 import scala.collection.JavaConverters
 
 object KSparkExtensions {
+
+
+
+  val somethingElse = /*$"\""+spark+"\""$*/ /*-*/ ""
+
   def col(d: Dataset[_], name: String): Column = d.col(name)
 
   def col(name: String): Column = functions.col(name)
