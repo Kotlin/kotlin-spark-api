@@ -54,6 +54,8 @@ import java.io.Serializable
  */
 class KSparkSession(val spark: SparkSession) {
 
+    val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ "nope"
+
     /** Lazy instance of [JavaSparkContext] wrapper around [sparkContext]. */
     val sc: JavaSparkContext by lazy { JavaSparkContext(spark.sparkContext) }
 

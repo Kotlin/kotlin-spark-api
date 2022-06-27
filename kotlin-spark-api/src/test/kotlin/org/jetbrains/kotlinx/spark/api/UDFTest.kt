@@ -203,7 +203,7 @@ class UDFTest : ShouldSpec({
                     }
                 }
 
-                //#if scala.compat.version <= 2.12
+                //#if scalaCompat <= 2.12
                 //$should("succeed when using a WrappedArray") {
                 //$    udf.register("shouldSucceed") { array: scala.collection.mutable.WrappedArray<String> ->
                 //$        array.asKotlinIterable().joinToString(" ")
@@ -243,7 +243,7 @@ class UDFTest : ShouldSpec({
         context("calling the UDF-Wrapper") {
             withSpark(logLevel = SparkLogLevel.DEBUG) {
 
-                //#if scala.compat.version <= 2.12
+                //#if scalaCompat <= 2.12
                 //$should("succeed in withColumn with WrappedArray") {
                 //$
                 //$    val stringArrayMerger = udf { it: scala.collection.mutable.WrappedArray<String> ->

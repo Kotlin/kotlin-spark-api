@@ -36,6 +36,8 @@ import org.jetbrains.kotlinx.spark.api.tuples.X
 import org.jetbrains.kotlinx.spark.api.tuples.component1
 import org.jetbrains.kotlinx.spark.api.tuples.component2
 import org.jetbrains.kotlinx.spark.api.tuples.t
+import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
+import org.jetbrains.kotlinx.spark.extensions.`KSparkExtensions$`
 import scala.Tuple2
 import java.io.File
 import java.io.Serializable
@@ -199,13 +201,18 @@ class StreamingTest : ShouldSpec({
     }
 })
 
-private fun createTempDir() = Utils.createTempDir(System.getProperty("java.io.tmpdir"), "spark")
-    .apply { deleteOnExit() }
+
+private val scalaCompatVersion = `KSparkExtensions$`.`MODULE$`.scalaCompatVersion()
+private val sparkVersion = `KSparkExtensions$`.`MODULE$`.sparkVersion()
+private fun createTempDir() = Utils.createTempDir(
+    System.getProperty("java.io.tmpdir"),
+    "spark_${scalaCompatVersion}_${sparkVersion}"
+).apply { deleteOnExit() }
 
 private fun createCorruptedCheckpoint(): String {
     val checkpointDirectory = createTempDir().absolutePath
     val fakeCheckpointFile = Checkpoint.checkpointFile(checkpointDirectory, Time(1000))
-    FileUtils.write(File(fakeCheckpointFile.toString()), "blablabla", StandardCharsets.UTF_8)
+    FileUtils.write(File(fakeCheckpointFile.toString()), "spark_corrupt_${scalaCompatVersion}_${sparkVersion}", StandardCharsets.UTF_8)
     assert(Checkpoint.getCheckpointFiles(checkpointDirectory, (null as FileSystem?).toOption()).nonEmpty())
     return checkpointDirectory
 }

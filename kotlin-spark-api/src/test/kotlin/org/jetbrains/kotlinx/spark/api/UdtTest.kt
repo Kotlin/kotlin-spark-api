@@ -21,7 +21,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
-import org.apache.hadoop.shaded.com.google.common.base.MoreObjects
+import org.glassfish.jersey.internal.guava.MoreObjects
 import org.apache.spark.ml.linalg.*
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow

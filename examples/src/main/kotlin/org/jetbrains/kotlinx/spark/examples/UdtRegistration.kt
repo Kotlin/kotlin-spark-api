@@ -17,11 +17,12 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-import org.apache.hadoop.shaded.com.google.common.base.MoreObjects
+
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types.*
 import org.apache.spark.unsafe.types.UTF8String
+import org.glassfish.jersey.internal.guava.MoreObjects
 import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.tupleOf
 import java.io.Serializable

@@ -291,13 +291,25 @@ object KotlinReflection extends KotlinReflection {
                 createDeserializerForSqlTimestamp(path)
             }
             case t if isSubtype(t, localTypeOf[java.time.LocalDateTime]) => {
+                //#if sparkMinor >= 3.2
                 createDeserializerForLocalDateTime(path)
+                //#else
+                //$throw new IllegalArgumentException("TimestampNTZType is supported in spark 3.2+")
+                //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Duration]) => {
+                //#if sparkMinor >= 3.2
                 createDeserializerForDuration(path)
+                //#else
+                //$throw new IllegalArgumentException("java.time.Duration is supported in spark 3.2+")
+                //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Period]) => {
+                //#if sparkMinor >= 3.2
                 createDeserializerForPeriod(path)
+                //#else
+                //$throw new IllegalArgumentException("java.time.Period is supported in spark 3.2+")
+                //#endif
             }
             case t if isSubtype(t, localTypeOf[java.lang.String]) => {
                 createDeserializerForString(path, returnNullable = false)
@@ -829,7 +841,7 @@ object KotlinReflection extends KotlinReflection {
                 createSerializerForSqlTimestamp(inputObject)
             }
             case t if isSubtype(t, localTypeOf[java.time.LocalDateTime]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 createSerializerForLocalDateTime(inputObject)
                 //#else
                 //$throw new IllegalArgumentException("TimestampNTZType is supported in spark 3.2+")
@@ -842,14 +854,14 @@ object KotlinReflection extends KotlinReflection {
                 createSerializerForSqlDate(inputObject)
             }
             case t if isSubtype(t, localTypeOf[java.time.Duration]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 createSerializerForJavaDuration(inputObject)
                 //#else
                 //$throw new IllegalArgumentException("java.time.Duration is supported in spark 3.2+")
                 //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Period]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 createSerializerForJavaPeriod(inputObject)
                 //#else
                 //$throw new IllegalArgumentException("java.time.Period is supported in spark 3.2+")
@@ -1191,7 +1203,7 @@ object KotlinReflection extends KotlinReflection {
             }
             // SPARK-36227: Remove TimestampNTZ type support in Spark 3.2 with minimal code changes.
             case t if isSubtype(t, localTypeOf[java.time.LocalDateTime]) && Utils.isTesting => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 Schema(TimestampNTZType, nullable = true)
                 //#else
                 //$throw new IllegalArgumentException("java.time.LocalDateTime is supported in Spark 3.2+")
@@ -1207,14 +1219,14 @@ object KotlinReflection extends KotlinReflection {
                 Schema(CalendarIntervalType, nullable = true)
             }
             case t if isSubtype(t, localTypeOf[java.time.Duration]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 Schema(DayTimeIntervalType(), nullable = true)
                 //#else
                 //$throw new IllegalArgumentException("DayTimeIntervalType for java.time.Duration is supported in Spark 3.2+")
                 //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Period]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 Schema(YearMonthIntervalType(), nullable = true)
                 //#else
                 //$throw new IllegalArgumentException("YearMonthIntervalType for java.time.Period is supported in Spark 3.2+")
@@ -1327,8 +1339,10 @@ object KotlinReflection extends KotlinReflection {
     @scala.annotation.tailrec
     def javaBoxedType(dt: DataType): Class[_] = dt match {
         case _: DecimalType => classOf[Decimal]
+        //#if sparkMinor >= 3.2
         case _: DayTimeIntervalType => classOf[java.lang.Long]
         case _: YearMonthIntervalType => classOf[java.lang.Integer]
+        //#endif
         case BinaryType => classOf[Array[Byte]]
         case StringType => classOf[UTF8String]
         case CalendarIntervalType => classOf[CalendarInterval]

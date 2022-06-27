@@ -30,10 +30,10 @@ import kotlin.reflect.typeOf
 
 abstract class Integration : JupyterIntegration() {
 
-    private val kotlinVersion = /*$"\""+kotlin.version+"\""$*/ /*-*/ "1.7.0"
-    private val scalaCompatVersion = /*$"\""+scala.compat.version+"\""$*/ /*-*/ "2.13"
-    private val scalaVersion = /*$"\""+scala.version+"\""$*/ /*-*/ "2.13.8"
-    private val spark3Version = /*$"\""+spark3.version+"\""$*/ /*-*/ "3.3.0"
+    private val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
+    private val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
+    private val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
+    private val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
 
     private val displayLimit = "DISPLAY_LIMIT"
     private val displayLimitDefault = 20
@@ -56,18 +56,18 @@ abstract class Integration : JupyterIntegration() {
     open fun Builder.onLoadedAlsoDo() = Unit
 
     open val dependencies: Array<String> = arrayOf(
-        "org.apache.spark:spark-repl_$scalaCompatVersion:$spark3Version",
+        "org.apache.spark:spark-repl_$scalaCompatVersion:$sparkVersion",
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
         "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
-        "org.apache.spark:spark-sql_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-streaming_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-mllib_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-sql_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-graphx_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-launcher_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-catalyst_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-streaming_$scalaCompatVersion:$spark3Version",
-        "org.apache.spark:spark-core_$scalaCompatVersion:$spark3Version",
+        "org.apache.spark:spark-sql_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-streaming_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-mllib_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-sql_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-graphx_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-launcher_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-catalyst_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-streaming_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-core_$scalaCompatVersion:$sparkVersion",
         "org.scala-lang:scala-library:$scalaVersion",
         "org.scala-lang.modules:scala-xml_$scalaCompatVersion:2.0.1",
         "org.scala-lang:scala-reflect:$scalaVersion",

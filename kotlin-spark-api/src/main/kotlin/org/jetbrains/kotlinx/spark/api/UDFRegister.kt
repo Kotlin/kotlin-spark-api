@@ -22,7 +22,7 @@
  * This file contains functions to register UDFs easily from Kotlin.
  */
 
-@file:Suppress("DuplicatedCode")
+@file:Suppress("DuplicatedCode", "DEPRECATION")
 
 package org.jetbrains.kotlinx.spark.api
 

@@ -64,11 +64,14 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe timeStamps
             }
 
+            //#if sparkMinor >= 3.2
             should("handle Duration Datasets") {
                 val dataset = dsOf(Duration.ZERO)
                 dataset.collectAsList() shouldBe listOf(Duration.ZERO)
             }
+            //#endif
 
+            //#if sparkMinor >= 3.2
             should("handle Period Datasets") {
                 val periods = listOf(Period.ZERO, Period.ofDays(2))
                 val dataset = periods.toDS()
@@ -82,6 +85,7 @@ class EncodingTest : ShouldSpec({
                     it[1] shouldBe Period.ofDays(0)
                 }
             }
+            //#endif
 
             should("handle binary datasets") {
                 val byteArray = "Hello there".encodeToByteArray()

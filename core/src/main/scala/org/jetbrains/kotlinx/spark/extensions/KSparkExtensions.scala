@@ -27,7 +27,11 @@ import scala.collection.JavaConverters
 
 object KSparkExtensions {
 
-  val spark3MinorVersion = /*$"\""+spark3.minor.version+"\""$*/ /*-*/ ""
+  val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
+  val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
+  val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
+  val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
+  val sparkMinorVersion = /*$"\""+sparkMinor+"\""$*/ /*-*/ ""
 
   def col(d: Dataset[_], name: String): Column = d.col(name)
 

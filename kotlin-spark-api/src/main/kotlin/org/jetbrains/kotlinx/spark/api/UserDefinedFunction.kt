@@ -43,7 +43,7 @@ fun DataType.unWrap(): DataType =
 @PublishedApi
 internal fun KClass<*>.checkForValidType(parameterName: String) {
     if (this == String::class || isSubclassOf(Seq::class)
-    //#if scala.compat.version < 2.13
+    //#if scalaCompat < 2.13
     //$|| isSubclassOf(scala.collection.mutable.WrappedArray::class)
     //#endif
     )

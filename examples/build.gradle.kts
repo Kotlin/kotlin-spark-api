@@ -1,5 +1,6 @@
 plugins {
     kotlin
+    idea
 }
 
 group = Versions.groupID
@@ -10,15 +11,20 @@ repositories {
 }
 
 dependencies {
-    implementation(
-        project(":kotlin-spark-api"),
-    )
+
+    with(Projects) {
+        implementation(
+            kotlinSparkApi,
+        )
+    }
 
     with(Dependencies) {
         implementation(
             sparkSql,
+            sparkMl,
             sparkStreaming,
             sparkStreamingKafka,
         )
+
     }
 }

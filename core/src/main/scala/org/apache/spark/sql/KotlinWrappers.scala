@@ -77,7 +77,7 @@ class KDataTypeWrapper(
 
     override private[ sql ] def getFieldIndex(name: String) = dt.getFieldIndex(name)
 
-    //#if spark3.minor.version < 3.2
+    //#if sparkMinor < 3.2
     //$override
     //#endif
     private[ sql ] def findNestedField(fieldNames: Seq[ String ], includeCollections: Boolean, resolver: Resolver) =
