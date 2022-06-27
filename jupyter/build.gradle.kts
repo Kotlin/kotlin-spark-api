@@ -7,6 +7,7 @@ plugins {
     kotlin
 //    dokka
     mavenPublishBase
+    jupyter
 }
 
 group = Versions.groupID
@@ -20,6 +21,13 @@ repositories {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+}
+
+tasks.processJupyterApiResources {
+    libraryProducers = listOf(
+        "org.jetbrains.kotlinx.spark.api.jupyter.SparkIntegration",
+        "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration",
+    )
 }
 
 dependencies {
@@ -36,7 +44,6 @@ dependencies {
             sparkRepl,
             sparkStreaming,
             hadoopClient,
-            jupyter,
         )
 
         implementation(
@@ -45,11 +52,10 @@ dependencies {
 
         testImplementation(
             kotest,
+            kotlinScriptingCommon,
+            kotlinScriptingJvm,
         )
 
-        testApi(
-            jupyterTest,
-        )
     }
 }
 

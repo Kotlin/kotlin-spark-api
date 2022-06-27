@@ -28,3 +28,6 @@ inline val PluginDependenciesSpec.mavenPublish
 
 inline val PluginDependenciesSpec.mavenPublishBase
     get() = id("com.vanniktech.maven.publish.base")
+
+inline val PluginDependenciesSpec.jupyter
+    get() =  kotlin("jupyter.api") version Versions.jupyter

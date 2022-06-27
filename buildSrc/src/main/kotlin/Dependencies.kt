@@ -15,7 +15,7 @@ object Versions {
     const val scala = "2.12.15"
     const val scalaCompat = "2.12"
     const val jupyter = "0.11.0-95"
-    const val kotest = "5.2.3"
+    const val kotest = "5.3.2"
     const val kotestTestContainers = "1.3.1"
     const val dokka = "1.7.0"
     const val jcp = "7.0.5"
@@ -48,6 +48,8 @@ object Dependencies {
     const val kafkaStreamsTestUtils = "org.apache.kafka:kafka-streams-test-utils:${Versions.kafkaStreamsTestUtils}"
     const val jupyterTest = "org.jetbrains.kotlinx:kotlin-jupyter-test-kit:${Versions.jupyter}"
     const val kotlinTest = "org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}"
+    const val kotlinScriptingCommon = "org.jetbrains.kotlin:kotlin-scripting-common"
+    const val kotlinScriptingJvm = "org.jetbrains.kotlin:kotlin-scripting-jvm"
 }
 
 

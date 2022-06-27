@@ -9,6 +9,7 @@ buildscript {
 }
 
 plugins {
+//    kotlin
     mavenPublish version Versions.mavenPublish
 }
 
@@ -23,6 +24,17 @@ repositories {
     mavenCentral()
 }
 
+
+//dependencies {
+//    with(Projects) {
+//        api(
+//            jupyter,
+//            kotlinSparkApi,
+//            core,
+//            scalaTuplesInKotlin,
+//        )
+//    }
+//}
 
 //artifacts {
 //    archives(tasks.jar)
