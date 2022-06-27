@@ -92,7 +92,7 @@ val ENCODERS: Map<KClass<*>, Encoder<*>> = mapOf(
     Timestamp::class to TIMESTAMP(),
     Instant::class to INSTANT(),
     ByteArray::class to BINARY(),
-    //#if spark3.minor.version >= 3.2
+    //#if sparkMinor >= 3.2
     Duration::class to DURATION(),
     Period::class to PERIOD(),
     //#endif
@@ -100,7 +100,7 @@ val ENCODERS: Map<KClass<*>, Encoder<*>> = mapOf(
 
 private fun checkIfEncoderRequiresNewerVersion(kClass: KClass<*>) {
     when (kClass) {
-        //#if spark3.minor.version < 3.2
+        //#if sparkMinor < 3.2
         //$Duration::class, Period::class -> throw IllegalArgumentException("$klass is supported in Spark 3.2")
         //#endif
     }

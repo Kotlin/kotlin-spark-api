@@ -8,15 +8,22 @@ import Versions.spark
 object Versions {
     const val project = "1.1.1-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
-    const val kotlin = "1.6.21"
+    const val kotlin = "1.7.0"
 
-    const val spark = "3.2.1"
-    const val scala = "2.12.15"
-    const val scalaCompat = "2.12"
+    // $Autogenerate start$
+    const val spark = "3.3.0"
+    const val sparkMinor = "3.3"
+    const val scala = "2.13.8"
+    const val scalaCompat = "2.13"
+    // $Autogenerate end$
+
+
     const val jupyter = "0.11.0-95"
-    const val kotest = "5.2.3"
-    const val kotestTestContainers = "1.3.1"
-    const val dokka = "1.6.10"
+    const val kotest = "5.3.2"
+    const val kotestTestContainers = "1.3.3"
+    const val dokka = "1.7.0"
+    const val jcp = "7.0.5"
+    const val mavenPublish = "0.20.0"
     const val atrium = "0.17.0"
     const val kotestExtensionAllure = "1.1.0"
     const val licenseGradlePluginVersion = "0.15.0"
@@ -32,6 +39,7 @@ object Dependencies {
     const val scalaLibrary = "org.scala-lang:scala-library:$scala"
     const val kotlinxHtml = "org.jetbrains.kotlinx:kotlinx-html-jvm:${Versions.kotlinxHtml}"
     const val sparkSql = "org.apache.spark:spark-sql_$scalaCompat:$spark"
+    const val sparkMl = "org.apache.spark:spark-mllib_$scalaCompat:$spark"
     const val sparkStreaming = "org.apache.spark:spark-streaming_$scalaCompat:$spark"
     const val hadoopClient = "org.apache.hadoop:hadoop-client:$hadoop"
     const val sparkRepl = "org.apache.spark:spark-repl_$scalaCompat:$spark"
@@ -45,6 +53,8 @@ object Dependencies {
     const val kafkaStreamsTestUtils = "org.apache.kafka:kafka-streams-test-utils:${Versions.kafkaStreamsTestUtils}"
     const val jupyterTest = "org.jetbrains.kotlinx:kotlin-jupyter-test-kit:${Versions.jupyter}"
     const val kotlinTest = "org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}"
+    const val kotlinScriptingCommon = "org.jetbrains.kotlin:kotlin-scripting-common"
+    const val kotlinScriptingJvm = "org.jetbrains.kotlin:kotlin-scripting-jvm"
 }
 
 

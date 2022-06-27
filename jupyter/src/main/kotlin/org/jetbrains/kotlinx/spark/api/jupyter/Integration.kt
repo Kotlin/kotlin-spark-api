@@ -30,10 +30,10 @@ import kotlin.reflect.typeOf
 
 abstract class Integration : JupyterIntegration() {
 
-    private val kotlinVersion = /*$"\""+kotlin.version+"\""$*/ /*-*/ "1.7.0"
-    private val scalaCompatVersion = /*$"\""+scala.compat.version+"\""$*/ /*-*/ "2.13"
-    private val scalaVersion = /*$"\""+scala.version+"\""$*/ /*-*/ "2.13.8"
-    private val spark3Version = /*$"\""+spark3.version+"\""$*/ /*-*/ "3.3.0"
+    private val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
+    private val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
+    private val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
+    private val spark3Version = /*$"\""+spark+"\""$*/ /*-*/ ""
 
     private val displayLimit = "DISPLAY_LIMIT"
     private val displayLimitDefault = 20

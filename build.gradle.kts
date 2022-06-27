@@ -1,64 +1,61 @@
-import java.net.URI
+@file:Suppress("UnstableApiUsage")
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath(jcp)
+        classpath(mavenPublish)
+    }
+}
 
 plugins {
-    kotlin
-    license
-    `maven-publish`
-    signing
+//    kotlin
+    mavenPublish version Versions.mavenPublish
 }
 
 group = Versions.groupID
 version = Versions.project
 
-repositories {
-    mavenCentral()
-}
-
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
-val javadocJar by tasks.registering(Jar::class) {
-    dependsOn("kotlin-spark-api:dokkaJavadoc")
-    archiveClassifier.set("javadoc")
-    from("kotlin-spark-api/build/dokka/javadoc")
+repositories {
+    mavenCentral()
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
-    dependsOn("classes")
-    archiveClassifier.set("sources")
-    from(sourceSets["main"].allSource)
-}
 
-artifacts {
-    archives(tasks["jar"])
-    archives(javadocJar)
-    archives(sourcesJar)
-}
+//dependencies {
+//    with(Projects) {
+//        api(
+//            jupyter,
+//            kotlinSparkApi,
+//            core,
+//            scalaTuplesInKotlin,
+//        )
+//    }
+//}
 
-publishing {
-    publications {
-        register<MavenPublication>("gpr") {
-            from(components["java"])
-        }
-        create<MavenPublication>("mavenJava") {
-            artifact(sourcesJar) {
-                classifier = "sources"
-            }
+//artifacts {
+//    archives(tasks.jar)
+////    archives(javadocJar)
+//    archives(sourcesJar)
+//}
 
-            artifact(javadocJar) {
-                classifier = "javadoc"
-            }
+allprojects {
+    plugins.withId("com.vanniktech.maven.publish.base") {
+        group = Versions.groupID
+        version = Versions.project
 
+        mavenPublishing {
+            publishToMavenCentral()
+
+            signAllPublications()
             pom {
-                groupId = Versions.groupID
-                artifactId = "kotlin-spark-api-parent"
-                version = Versions.project
-
-                from(components["kotlin"])
-
-                name.set("Kotlin Spark API: Parent")
-                description.set("Parent project for Kotlin for Apache Spark")
+                name.set("Kotlin Spark API")
+                description.set("Kotlin for Apache Spark")
                 packaging = "pom"
 
                 url.set("https://maven.apache.org")
@@ -103,45 +100,64 @@ publishing {
                     tag.set("HEAD")
                 }
             }
-        }
-    }
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://github.com/Kotlin/kotlin-spark-api")
-            credentials {
-                username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
-                password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
-            }
-        }
 
-        maven {
-            name = "MavenCentral"
-            val snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
-            val releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
-            url = URI(if (Versions.project.endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
-            credentials {
-                val mavenCentralUsername: String by project
-                val mavenCentralPassword: String by project
-                username = mavenCentralUsername
-                password = mavenCentralPassword
-            }
         }
     }
 }
 
-val isReleaseVersion = !Versions.project.endsWith("SNAPSHOT")
-
-tasks.withType<Sign> {
-    onlyIf {
-        isReleaseVersion && gradle.taskGraph.hasTask("publish")
-    }
-}
-
-signing {
-    setRequired { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
-    useGpgCmd()
-    sign(publishing.publications["mavenJava"])
-}
+//publishing {
+//    publications {
+//        register<MavenPublication>("gpr") {
+//            from(components["java"])
+//        }
+//        create<MavenPublication>("mavenJava") {
+//            artifact(sourcesJar) {
+//                classifier = "sources"
+//            }
+//
+////            artifact(javadocJar) {
+////                classifier = "javadoc"
+////            }
+//
+//        }
+//        repositories {
+//            maven {
+//                name = "GitHubPackages"
+//                url = uri("https://github.com/Kotlin/kotlin-spark-api")
+//                credentials {
+//                    username = project.findProperty("gpr.user") as String? ?: System.getenv("USERNAME")
+//                    password = project.findProperty("gpr.key") as String? ?: System.getenv("TOKEN")
+//                }
+//            }
+//
+//            maven {
+//                name = "MavenCentral"
+//                val snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots"
+//                val releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+//                url = URI(if (Versions.project.endsWith("SNAPSHOT")) snapshotsRepoUrl else releasesRepoUrl)
+//                credentials {
+//                    val mavenCentralUsername: String by project
+//                    val mavenCentralPassword: String by project
+//                    username = mavenCentralUsername
+//                    password = mavenCentralPassword
+//                }
+//            }
+//        }
+//    }
+//}
+//
+//val isReleaseVersion = !Versions.project.endsWith("SNAPSHOT")
+//
+//tasks.withType<Sign> {
+//    onlyIf {
+//        isReleaseVersion && gradle.taskGraph.hasTask("publish")
+//    }
+//}
+//
+//signing {
+//    setRequired { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
+//    useGpgCmd()
+//    sign(publishing.publications["mavenJava"])
+//}
 
 

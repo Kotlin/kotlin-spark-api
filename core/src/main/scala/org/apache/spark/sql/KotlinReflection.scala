@@ -829,7 +829,7 @@ object KotlinReflection extends KotlinReflection {
                 createSerializerForSqlTimestamp(inputObject)
             }
             case t if isSubtype(t, localTypeOf[java.time.LocalDateTime]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 createSerializerForLocalDateTime(inputObject)
                 //#else
                 //$throw new IllegalArgumentException("TimestampNTZType is supported in spark 3.2+")
@@ -842,14 +842,14 @@ object KotlinReflection extends KotlinReflection {
                 createSerializerForSqlDate(inputObject)
             }
             case t if isSubtype(t, localTypeOf[java.time.Duration]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 createSerializerForJavaDuration(inputObject)
                 //#else
                 //$throw new IllegalArgumentException("java.time.Duration is supported in spark 3.2+")
                 //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Period]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 createSerializerForJavaPeriod(inputObject)
                 //#else
                 //$throw new IllegalArgumentException("java.time.Period is supported in spark 3.2+")
@@ -1191,7 +1191,7 @@ object KotlinReflection extends KotlinReflection {
             }
             // SPARK-36227: Remove TimestampNTZ type support in Spark 3.2 with minimal code changes.
             case t if isSubtype(t, localTypeOf[java.time.LocalDateTime]) && Utils.isTesting => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 Schema(TimestampNTZType, nullable = true)
                 //#else
                 //$throw new IllegalArgumentException("java.time.LocalDateTime is supported in Spark 3.2+")
@@ -1207,14 +1207,14 @@ object KotlinReflection extends KotlinReflection {
                 Schema(CalendarIntervalType, nullable = true)
             }
             case t if isSubtype(t, localTypeOf[java.time.Duration]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 Schema(DayTimeIntervalType(), nullable = true)
                 //#else
                 //$throw new IllegalArgumentException("DayTimeIntervalType for java.time.Duration is supported in Spark 3.2+")
                 //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Period]) => {
-                //#if spark3.minor.version >= 3.2
+                //#if sparkMinor >= 3.2
                 Schema(YearMonthIntervalType(), nullable = true)
                 //#else
                 //$throw new IllegalArgumentException("YearMonthIntervalType for java.time.Period is supported in Spark 3.2+")

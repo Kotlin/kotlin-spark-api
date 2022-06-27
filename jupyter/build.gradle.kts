@@ -1,7 +1,16 @@
+@file:Suppress("UnstableApiUsage")
+
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.vanniktech.maven.publish.KotlinJvm
+
 plugins {
     scala
     kotlin
-    dokka
+//    dokka
+    mavenPublishBase
+    jupyter
+    jcp
 }
 
 group = Versions.groupID
@@ -17,16 +26,27 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
+tasks.processJupyterApiResources {
+    libraryProducers = listOf(
+        "org.jetbrains.kotlinx.spark.api.jupyter.SparkIntegration",
+        "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration",
+    )
+}
+
 dependencies {
+    with(Projects) {
+        api(
+            kotlinSparkApi,
+        )
+    }
+
     with(Dependencies) {
         api(
-            project(":kotlin-spark-api"),
             kotlinxHtml,
             sparkSql,
             sparkRepl,
             sparkStreaming,
             hadoopClient,
-            jupyter,
         )
 
         implementation(
@@ -35,7 +55,46 @@ dependencies {
 
         testImplementation(
             kotest,
-            jupyterTest,
+            kotlinScriptingCommon,
+            kotlinScriptingJvm,
         )
+
     }
+}
+
+tasks.preprocess {
+    sources.set(
+        listOf(File("./src/main/kotlin"))
+            .also { println("srcDirs set to preprocess: $it") }
+    )
+    clearTarget.set(true)
+    target.set(File("./build-preprocessed"))
+    fileExtensions.set(listOf("java", "kt"))
+    vars.set(
+        mapOf(
+            "kotlin" to Versions.kotlin,
+            "scala" to Versions.scala,
+            "scalaCompat" to Versions.scalaCompat,
+            "spark" to Versions.spark,
+            "sparkMinor" to Versions.sparkMinor,
+        )
+    )
+}
+
+//val changeSourceFolder = task("changeSourceFolder") {
+//    sourceSets.main.get().allSource
+//        .setSrcDirs(
+//            listOf(tasks.preprocess.get().target.get())
+//                .also { println("srcDirs set to kotlin: $it") }
+//        )
+//}.dependsOn(tasks.preprocess)
+
+// TODO for tests
+
+tasks.compileKotlin
+    .get()
+    .dependsOn(tasks.preprocess)
+
+mavenPublishing {
+    configure(KotlinJvm(/*TODO Dokka("dokkaHtml")*/))
 }
