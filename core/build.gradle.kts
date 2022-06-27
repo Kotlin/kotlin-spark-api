@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import com.vanniktech.maven.publish.JavaLibrary
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.JavadocJar.Javadoc
@@ -29,12 +31,15 @@ dependencies {
             sparkSql,
         )
     }
-
 }
 
-
 tasks.preprocess {
-    sources.set(sourceSets.main.get().scala.srcDirs)
+    sources.set(
+        listOf(File("./src/main/scala"))
+            .also { println("srcDirs set to preprocess: $it") }
+    )
+    clearTarget.set(true)
+    target.set(File("./build-preprocessed"))
     fileExtensions.set(listOf("java", "scala"))
     vars.set(
         mapOf(
@@ -44,19 +49,20 @@ tasks.preprocess {
     )
 }
 
-task("changeSourceFolder") {
+val changeSourceFolder = task("changeSourceFolder") {
     sourceSets.main
         .get()
         .scala
         .setSrcDirs(
-            listOf(tasks.preprocess.get().target)
+            listOf(tasks.preprocess.get().target.get())
+                .also { println("srcDirs set to scala: $it") }
         )
 }.dependsOn(tasks.preprocess)
 
 
 tasks.compileScala
     .get()
-    .dependsOn(tasks.preprocess)
+    .dependsOn(changeSourceFolder)
 
 mavenPublishing {
     configure(JavaLibrary(Javadoc()))
