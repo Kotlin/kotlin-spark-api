@@ -31,6 +31,14 @@ object Versions {
     const val hadoop = "3.3.1"
     const val kotlinxHtml = "0.7.5"
     const val klaxon = "5.5"
+
+    val versionMap = mapOf(
+        "kotlin" to Versions.kotlin,
+        "scala" to Versions.scala,
+        "scalaCompat" to Versions.scalaCompat,
+        "spark" to Versions.spark,
+        "sparkMinor" to Versions.sparkMinor,
+    )
 }
 
 object Dependencies {

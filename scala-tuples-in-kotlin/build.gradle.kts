@@ -8,7 +8,6 @@ plugins {
     scala
     kotlin
     dokka
-    
     mavenPublishBase
 }
 

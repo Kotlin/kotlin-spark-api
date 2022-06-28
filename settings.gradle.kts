@@ -5,6 +5,3 @@ include("scala-tuples-in-kotlin")
 include("kotlin-spark-api")
 include("jupyter")
 include("examples")
-
-
-

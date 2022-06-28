@@ -1,8 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
-import com.vanniktech.maven.publish.JavadocJar.Dokka
+import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.KotlinJvm
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSet
 
 plugins {
     kotlin
@@ -55,44 +54,42 @@ dependencies {
     }
 }
 
-
-
-tasks.preprocess {
-    sources.set(
-        listOf(File("./src/main/kotlin"))
-            .also { println("srcDirs set to preprocess: $it") }
-    )
+val preprocessMain by tasks.creating(JcpTask::class) {
+    sources.set(listOf(File("./src/main/kotlin")))
     clearTarget.set(true)
-//    verbose.set(true)
-    target.set(File("./build-preprocessed"))
     fileExtensions.set(listOf("java", "kt"))
-    vars.set(
-        mapOf(
-            "kotlin" to Versions.kotlin,
-            "scala" to Versions.scala,
-            "scalaCompat" to Versions.scalaCompat,
-            "spark" to Versions.spark,
-            "sparkMinor" to Versions.sparkMinor,
-        )
-    )
+    vars.set(Versions.versionMap)
+    outputs.upToDateWhen { false }
+}
+
+tasks.compileKotlin {
+    dependsOn(preprocessMain)
+}
+
+val preprocessTest by tasks.creating(JcpTask::class) {
+    sources.set(listOf(File("./src/test/kotlin")))
+    clearTarget.set(true)
+    fileExtensions.set(listOf("java", "kt"))
+    vars.set(Versions.versionMap)
+    outputs.upToDateWhen { false }
+}
+
+tasks.compileTestKotlin {
+    dependsOn(preprocessTest)
+}
+
+kotlin {
+    sourceSets {
+        main {
+            kotlin.setSrcDirs(listOf(preprocessMain.target.get()))
+        }
+        test {
+            kotlin.setSrcDirs(listOf(preprocessTest.target.get()))
+        }
+    }
 }
 
 
-val changeSourceFolder = task("changeSourceFolder") {
-    sourceSets.main {
-        java.srcDirs(
-            tasks.preprocess.get()
-                .target.get()
-                .also { println("srcDirs set to kotlin: $it") }
-        )
-    }
-}.dependsOn(tasks.preprocess)
-
-// TODO for tests
-
-tasks.compileKotlin
-    .get()
-    .dependsOn(changeSourceFolder)
 
 mavenPublishing {
     configure(KotlinJvm(/* TODO Dokka("dokkaHtml") */))

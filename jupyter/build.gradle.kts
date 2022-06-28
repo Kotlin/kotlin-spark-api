@@ -1,5 +1,6 @@
 @file:Suppress("UnstableApiUsage")
 
+import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
@@ -62,38 +63,40 @@ dependencies {
     }
 }
 
-tasks.preprocess {
-    sources.set(
-        listOf(File("./src/main/kotlin"))
-            .also { println("srcDirs set to preprocess: $it") }
-    )
+val preprocessMain by tasks.creating(JcpTask::class) {
+    sources.set(listOf(File("./src/main/kotlin")))
     clearTarget.set(true)
-    target.set(File("./build-preprocessed"))
     fileExtensions.set(listOf("java", "kt"))
-    vars.set(
-        mapOf(
-            "kotlin" to Versions.kotlin,
-            "scala" to Versions.scala,
-            "scalaCompat" to Versions.scalaCompat,
-            "spark" to Versions.spark,
-            "sparkMinor" to Versions.sparkMinor,
-        )
-    )
+    vars.set(Versions.versionMap)
+    outputs.upToDateWhen { false }
 }
 
-//val changeSourceFolder = task("changeSourceFolder") {
-//    sourceSets.main.get().allSource
-//        .setSrcDirs(
-//            listOf(tasks.preprocess.get().target.get())
-//                .also { println("srcDirs set to kotlin: $it") }
-//        )
-//}.dependsOn(tasks.preprocess)
+tasks.compileKotlin {
+    dependsOn(preprocessMain)
+}
 
-// TODO for tests
+val preprocessTest by tasks.creating(JcpTask::class) {
+    sources.set(listOf(File("./src/test/kotlin")))
+    clearTarget.set(true)
+    fileExtensions.set(listOf("java", "kt"))
+    vars.set(Versions.versionMap)
+    outputs.upToDateWhen { false }
+}
 
-tasks.compileKotlin
-    .get()
-    .dependsOn(tasks.preprocess)
+tasks.compileTestKotlin {
+    dependsOn(preprocessTest)
+}
+
+kotlin {
+    sourceSets {
+        main {
+            kotlin.setSrcDirs(listOf(preprocessMain.target.get()))
+        }
+        test {
+            kotlin.setSrcDirs(listOf(preprocessTest.target.get()))
+        }
+    }
+}
 
 mavenPublishing {
     configure(KotlinJvm(/*TODO Dokka("dokkaHtml")*/))

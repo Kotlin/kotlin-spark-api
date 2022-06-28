@@ -39,7 +39,6 @@ tasks.preprocess {
             .also { println("srcDirs set to preprocess: $it") }
     )
     clearTarget.set(true)
-    target.set(File("./build-preprocessed"))
     fileExtensions.set(listOf("java", "scala"))
     vars.set(
         mapOf(
@@ -49,22 +48,22 @@ tasks.preprocess {
             "sparkMinor" to Versions.sparkMinor,
         )
     )
+    outputs.upToDateWhen { false }
 }
 
-val changeSourceFolder = task("changeSourceFolder") {
-    sourceSets.main
-        .get()
-        .scala
-        .setSrcDirs(
-            listOf(tasks.preprocess.get().target.get())
+scala {
+    sourceSets.main {
+        scala.setSrcDirs(listOf(
+            tasks.preprocess.get()
+                .target.get()
                 .also { println("srcDirs set to scala: $it") }
-        )
-}.dependsOn(tasks.preprocess)
-
+        ))
+    }
+}
 
 tasks.compileScala
     .get()
-    .dependsOn(changeSourceFolder)
+    .dependsOn(tasks.preprocess)
 
 mavenPublishing {
     configure(JavaLibrary(Javadoc()))
