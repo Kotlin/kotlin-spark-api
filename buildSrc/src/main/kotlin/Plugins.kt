@@ -1,6 +1,7 @@
-import org.gradle.api.plugins.PluginAware
+import org.gradle.api.Project
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugin.use.PluginDependenciesSpec
+
 
 inline val PluginDependenciesSpec.kotlin
     get() = kotlin("jvm") version Versions.kotlin
@@ -27,4 +28,5 @@ inline val PluginDependenciesSpec.mavenPublishBase
     get() = id("com.vanniktech.maven.publish.base")
 
 inline val PluginDependenciesSpec.jupyter
-    get() =  kotlin("jupyter.api") version Versions.jupyter
+    get() = kotlin("jupyter.api") version Versions.jupyter
+

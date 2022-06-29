@@ -7,8 +7,3 @@ plugins {
 repositories {
     mavenCentral()
 }
-
-dependencies {
-//    val kotlinVersion: String by System.getProperties()
-//    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-}

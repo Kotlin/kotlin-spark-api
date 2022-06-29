@@ -71,9 +71,7 @@ val preprocessMain by tasks.creating(JcpTask::class) {
     outputs.upToDateWhen { false }
 }
 
-tasks.compileKotlin {
-    dependsOn(preprocessMain)
-}
+tasks.compileKotlin { dependsOn(preprocessMain) }
 
 val preprocessTest by tasks.creating(JcpTask::class) {
     sources.set(listOf(File("./src/test/kotlin")))
@@ -83,9 +81,7 @@ val preprocessTest by tasks.creating(JcpTask::class) {
     outputs.upToDateWhen { false }
 }
 
-tasks.compileTestKotlin {
-    dependsOn(preprocessTest)
-}
+tasks.compileTestKotlin { dependsOn(preprocessTest) }
 
 kotlin {
     sourceSets {
@@ -98,6 +94,8 @@ kotlin {
     }
 }
 
+
 mavenPublishing {
     configure(KotlinJvm(/*TODO Dokka("dokkaHtml")*/))
+
 }

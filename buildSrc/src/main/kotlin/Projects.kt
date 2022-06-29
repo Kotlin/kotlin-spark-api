@@ -1,20 +1,29 @@
-import Versions.project
+import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.kotlin.dsl.support.delegates.ProjectDelegate
 
 object Projects {
 
-    val DependencyHandler.kotlinSparkApi
-        get() = project(":kotlin-spark-api")
+    inline fun Project.searchProject(name: String): Project =
+        rootProject
+            .childProjects
+            .filterKeys { name in it }
+            .entries
+            .singleOrNull()
+            ?.value ?: error("Project $name not found")
 
-    val DependencyHandler.core
-        get() = project(":core")
+    inline val Project.kotlinSparkApi
+        get() = searchProject("kotlin-spark-api")
 
-    val DependencyHandler.examples
-        get() = project(":examples")
+    inline val Project.core
+        get() = searchProject("core")
 
-    val DependencyHandler.jupyter
-        get() = project(":jupyter")
+    inline val Project.examples
+        get() = searchProject("examples")
 
-    val DependencyHandler.scalaTuplesInKotlin
-        get() = project(":scala-tuples-in-kotlin")
+    inline val Project.jupyter
+        get() = searchProject("jupyter")
+
+    inline val Project.scalaTuplesInKotlin
+        get() = searchProject("scala-tuples-in-kotlin")
 }

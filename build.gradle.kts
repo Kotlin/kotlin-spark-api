@@ -10,8 +10,8 @@ buildscript {
     }
 }
 
+
 plugins {
-//    kotlin
     mavenPublish version Versions.mavenPublish
 }
 
@@ -21,6 +21,7 @@ version = Versions.project
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
+
 
 repositories {
     mavenCentral()
@@ -50,7 +51,9 @@ allprojects {
         version = Versions.project
 
         mavenPublishing {
+            pomFromGradleProperties()
             publishToMavenCentral()
+
 
             signAllPublications()
             pom {
