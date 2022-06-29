@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Run like you would `./gradlew arguments`
 # but now like `./gradlew_all_versions arguments`.
