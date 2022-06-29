@@ -34,10 +34,10 @@ jobs:
       #            ${{ runner.os }}-gradle-
 
       - name: Make gradlew executable
-        run: chmod +x ./gradlew
+        run: chmod +x ./gradlew_all_versions
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew_all_versions clean build
 #  qodana:
 #    runs-on: ubuntu-latest
 #    steps:
