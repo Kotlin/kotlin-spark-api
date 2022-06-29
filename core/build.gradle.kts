@@ -34,10 +34,7 @@ dependencies {
 }
 
 tasks.preprocess {
-    sources.set(
-        listOf(File("./src/main/scala"))
-            .also { println("srcDirs set to preprocess: $it") }
-    )
+    sources.set(listOf(File("./src/main/scala")))
     clearTarget.set(true)
     fileExtensions.set(listOf("java", "scala"))
     vars.set(
@@ -56,7 +53,6 @@ scala {
         scala.setSrcDirs(listOf(
             tasks.preprocess.get()
                 .target.get()
-                .also { println("srcDirs set to scala: $it") }
         ))
     }
 }
