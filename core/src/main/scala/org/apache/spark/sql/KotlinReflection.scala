@@ -1339,8 +1339,10 @@ object KotlinReflection extends KotlinReflection {
     @scala.annotation.tailrec
     def javaBoxedType(dt: DataType): Class[_] = dt match {
         case _: DecimalType => classOf[Decimal]
+        //#if sparkMinor >= 3.2
         case _: DayTimeIntervalType => classOf[java.lang.Long]
         case _: YearMonthIntervalType => classOf[java.lang.Integer]
+        //#endif
         case BinaryType => classOf[Array[Byte]]
         case StringType => classOf[UTF8String]
         case CalendarIntervalType => classOf[CalendarInterval]
