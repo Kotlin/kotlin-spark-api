@@ -40,7 +40,8 @@ jobs:
 #        run: chmod +x ./gradlew
 
       - name: Build with Gradle
-        run: ./gradlew_all_versions_parallel build
+#        run: ./gradlew_all_versions_parallel build
+        run: ./gradlew_all_versions clean build
 #  qodana:
 #    runs-on: ubuntu-latest
 #    steps:
