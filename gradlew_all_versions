@@ -23,9 +23,9 @@ execute_for_both_scala_versions() {
     execute
   done
 }
-SCALA="$SCALA2_12VERSION"
-execute_for_both_scala_versions
 SCALA="$SCALA2_13VERSION"
+execute_for_both_scala_versions
+SCALA="$SCALA2_12VERSION"
 execute_for_both_scala_versions
 
 SCALA="$SCALA2_12VERSION"

@@ -50,10 +50,12 @@ tasks.preprocess {
 
 scala {
     sourceSets.main {
-        scala.setSrcDirs(listOf(
-            tasks.preprocess.get()
-                .target.get()
-        ))
+        scala.setSrcDirs(
+            listOf(
+                tasks.preprocess.get()
+                    .target.get()
+            )
+        )
     }
 }
 
