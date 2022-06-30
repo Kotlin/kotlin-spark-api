@@ -41,10 +41,7 @@ import java.beans.PropertyDescriptor
 import java.math.BigDecimal
 import java.sql.Date
 import java.sql.Timestamp
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDate
-import java.time.Period
+import java.time.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.Any
@@ -101,7 +98,7 @@ val ENCODERS: Map<KClass<*>, Encoder<*>> = mapOf(
 private fun checkIfEncoderRequiresNewerVersion(kClass: KClass<*>) {
     when (kClass) {
         //#if sparkMinor < 3.2
-        //$Duration::class, Period::class -> throw IllegalArgumentException("$klass is supported in Spark 3.2")
+        //$Duration::class, Period::class -> throw IllegalArgumentException("$kClass is supported in Spark 3.2+")
         //#endif
     }
 }
