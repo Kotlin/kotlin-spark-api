@@ -39,3 +39,8 @@ dependencies {
 mavenPublishing {
     configure(KotlinJvm(/* TODO Dokka("dokkaHtml") */))
 }
+
+val skipScalaTuplesInKotlin = System.getProperty("skipScalaTuplesInKotlin").toBoolean()
+tasks.filter { "publish" in it.name }.forEach {
+    it.onlyIf { !skipScalaTuplesInKotlin }
+}

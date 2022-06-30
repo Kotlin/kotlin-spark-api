@@ -13,26 +13,32 @@ echo Running for "$(expr ${#SparkVersionsForBothScalaVersions[@]} \* 2 + ${#Spar
 
 ARGS=("$@")
 execute() {
-  echo "running ./gradlew -Pspark=$SPARK -Pscala=$SCALA ${ARGS[*]}"
-  ./gradlew -Pspark="$SPARK" -Pscala="$SCALA" "${ARGS[@]}"
+  echo "running ./gradlew -Pspark=$SPARK -Pscala=$SCALA -PskipScalaTuplesInKotlin=$SKIP_SCALA_TUPLES ${ARGS[*]}"
+  ./gradlew -Pspark="$SPARK" -Pscala="$SCALA" -PskipScalaTuplesInKotlin="$SKIP_SCALA_TUPLES" "${ARGS[@]}"
 }
+
+SCALA="$SCALA2_12VERSION"
+SKIP_SCALA_TUPLES=false
+for spark in "${SparkVersionsForScala2_12[@]}"; do
+  SPARK="$spark"
+  execute
+  SKIP_SCALA_TUPLES=true
+done
+
 
 execute_for_both_scala_versions() {
   for spark in "${SparkVersionsForBothScalaVersions[@]}"; do
     SPARK="$spark"
     execute
+    SKIP_SCALA_TUPLES=true
   done
 }
-SCALA="$SCALA2_13VERSION"
-execute_for_both_scala_versions
 SCALA="$SCALA2_12VERSION"
 execute_for_both_scala_versions
 
-SCALA="$SCALA2_12VERSION"
-for spark in "${SparkVersionsForScala2_12[@]}"; do
-  SPARK="$spark"
-  execute
-done
+SCALA="$SCALA2_13VERSION"
+SKIP_SCALA_TUPLES=false
+execute_for_both_scala_versions
 
 
 

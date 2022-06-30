@@ -1,7 +1,9 @@
 val spark: String by settings
 val scala: String by settings
+val skipScalaTuplesInKotlin: String by settings
 System.setProperty("spark", spark)
 System.setProperty("scala", scala)
+System.setProperty("skipScalaTuplesInKotlin", skipScalaTuplesInKotlin)
 
 
 val scalaCompat
