@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+
+# Run like you would `./gradlew arguments`
+# but now like `./gradlew_all_versions_parallel arguments`.
+
+
+SCALA2_12VERSION="2.12.15"
+SCALA2_13VERSION="2.13.8"
+SparkVersionsForBothScalaVersions=("3.3.0" "3.2.1" "3.2.0")
+SparkVersionsForScala2_12=("3.1.3" "3.1.2" "3.1.1" "3.1.0" "3.0.3" "3.0.2" "3.0.1" "3.0.0")
+
+echo Running for "$(expr ${#SparkVersionsForBothScalaVersions[@]} \* 2 + ${#SparkVersionsForScala2_12[@]})" versions of the library.
+
+ARGS=("$@")
+
+ARGS_SCALA_2_12_TUPLES=()
+for (( i = 0; i < ${#ARGS[@]}; i++ )); do
+    ARGS_SCALA_2_12_TUPLES[i]="scala-tuples-in-kotlin_${SCALA2_12VERSION%.*}:${ARGS[i]}"
+done
+
+ARGS_SCALA_2_13_TUPLES=()
+for (( i = 0; i < ${#ARGS[@]}; i++ )); do
+    ARGS_SCALA_2_13_TUPLES[i]="scala-tuples-in-kotlin_${SCALA2_13VERSION%.*}:${ARGS[i]}"
+done
+
+echo Cleaning the project first.
+./gradlew clean
+
+mkdirs_scala_tuples() {
+  mkdir ./generated-"$SCALA"
+  rm -rf ./generated-"$SCALA"/*
+  cp -r `ls -A | grep -v "generated-"` ./generated-"$SCALA" &
+}
+SCALA="$SCALA2_12VERSION"
+mkdirs_scala_tuples
+SCALA="$SCALA2_13VERSION"
+mkdirs_scala_tuples
+
+mkdirs() {
+  mkdir ./generated-"$SCALA"-"$SPARK"
+  rm -rf ./generated-"$SCALA"-"$SPARK"/*
+  cp -r `ls -A | grep -v "generated-"` ./generated-"$SCALA"-"$SPARK" &
+}
+
+SCALA="$SCALA2_12VERSION"
+for spark in "${SparkVersionsForScala2_12[@]}"; do
+  SPARK="$spark"
+  mkdirs
+done
+
+mkdirs_for_both_scala_versions() {
+  for spark in "${SparkVersionsForBothScalaVersions[@]}"; do
+    SPARK="$spark"
+    mkdirs
+  done
+}
+
+SCALA="$SCALA2_12VERSION"
+mkdirs_for_both_scala_versions
+
+SCALA="$SCALA2_13VERSION"
+mkdirs_for_both_scala_versions
+
+
+wait
+
+echo Done copying folders, now the actual arguments are executed.
+
+
+execute_scala_tuples() {
+  echo "running ./generated-$SCALA/gradlew -Pscala=$SCALA ${ARGS_SCALA_TUPLES[*]} &"
+  ./generated-"$SCALA"/gradlew -Pscala="$SCALA" "${ARGS_SCALA_TUPLES[@]}" &
+}
+
+ARGS_SCALA_TUPLES=${ARGS_SCALA_2_12_TUPLES[*]}
+SCALA="$SCALA2_12VERSION"
+execute_scala_tuples
+
+ARGS_SCALA_TUPLES=${ARGS_SCALA_2_13_TUPLES[*]}
+SCALA="$SCALA2_13VERSION"
+execute_scala_tuples
+
+
+execute() {
+  echo "running ./generated-$SCALA-$SPARK -Pspark=$SPARK -Pscala=$SCALA -PskipScalaTuplesInKotlin=true ${ARGS[*]} &"
+  ./generated-"$SCALA"-"$SPARK"/gradlew -Pspark="$SPARK" -Pscala="$SCALA" -PskipScalaTuplesInKotlin=true "${ARGS[@]}" &
+}
+
+SCALA="$SCALA2_12VERSION"
+for spark in "${SparkVersionsForScala2_12[@]}"; do
+  SPARK="$spark"
+  execute
+done
+
+
+execute_for_both_scala_versions() {
+  for spark in "${SparkVersionsForBothScalaVersions[@]}"; do
+    SPARK="$spark"
+    execute
+  done
+}
+SCALA="$SCALA2_12VERSION"
+execute_for_both_scala_versions
+
+SCALA="$SCALA2_13VERSION"
+execute_for_both_scala_versions
+
+wait
+
