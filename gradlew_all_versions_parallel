@@ -3,7 +3,7 @@
 # Run like you would `./gradlew arguments`
 # but now like `./gradlew_all_versions_parallel arguments`.
 
-
+DRY_RUN=false
 SCALA2_12VERSION="2.12.15"
 SCALA2_13VERSION="2.13.8"
 SparkVersionsForBothScalaVersions=("3.3.0" "3.2.1" "3.2.0")
@@ -24,12 +24,18 @@ for (( i = 0; i < ${#ARGS[@]}; i++ )); do
 done
 
 echo Cleaning the project first.
-./gradlew clean
+if [ "$DRY_RUN" = false ]; then
+    ./gradlew clean
+fi
 
 mkdirs_scala_tuples() {
-  mkdir ./generated-"$SCALA"
-  rm -rf ./generated-"$SCALA"/*
-  cp -r `ls -A | grep -v "generated-"` ./generated-"$SCALA" &
+  if [ "$DRY_RUN" = false ]; then
+    mkdir ./generated-"$SCALA"
+    rm -rf ./generated-"$SCALA"/*
+    cp -r `ls -A | grep -v "generated-"` ./generated-"$SCALA" &
+  fi
+
+  echo Making dir ./generated-"$SCALA" and copying...
 }
 SCALA="$SCALA2_12VERSION"
 mkdirs_scala_tuples
@@ -37,9 +43,13 @@ SCALA="$SCALA2_13VERSION"
 mkdirs_scala_tuples
 
 mkdirs() {
-  mkdir ./generated-"$SCALA"-"$SPARK"
-  rm -rf ./generated-"$SCALA"-"$SPARK"/*
-  cp -r `ls -A | grep -v "generated-"` ./generated-"$SCALA"-"$SPARK" &
+  if [ "$DRY_RUN" = false ]; then
+    mkdir ./generated-"$SCALA"-"$SPARK"
+    rm -rf ./generated-"$SCALA"-"$SPARK"/*
+    cp -r `ls -A | grep -v "generated-"` ./generated-"$SCALA"-"$SPARK" &
+  fi
+
+  echo Making dir ./generated-"$SCALA"-"$SPARK" and copying...
 }
 
 SCALA="$SCALA2_12VERSION"
@@ -69,7 +79,9 @@ echo Done copying folders, now the actual arguments are executed.
 
 execute_scala_tuples() {
   echo "running ./generated-$SCALA/gradlew -Pscala=$SCALA ${ARGS_SCALA_TUPLES[*]} &"
-  ./generated-"$SCALA"/gradlew -Pscala="$SCALA" "${ARGS_SCALA_TUPLES[@]}" &
+  if [ "$DRY_RUN" = false ]; then
+    ./generated-"$SCALA"/gradlew -Pscala=$SCALA "${ARGS_SCALA_TUPLES[@]}" &
+  fi
 }
 
 ARGS_SCALA_TUPLES=${ARGS_SCALA_2_12_TUPLES[*]}
@@ -83,7 +95,10 @@ execute_scala_tuples
 
 execute() {
   echo "running ./generated-$SCALA-$SPARK -Pspark=$SPARK -Pscala=$SCALA -PskipScalaTuplesInKotlin=true ${ARGS[*]} &"
-  ./generated-"$SCALA"-"$SPARK"/gradlew -Pspark="$SPARK" -Pscala="$SCALA" -PskipScalaTuplesInKotlin=true "${ARGS[@]}" &
+
+  if [ "$DRY_RUN" = false ]; then
+    ./generated-"$SCALA"-"$SPARK"/gradlew -Pspark="$SPARK" -Pscala="$SCALA" -PskipScalaTuplesInKotlin=true "${ARGS[@]}" &
+  fi
 }
 
 SCALA="$SCALA2_12VERSION"
