@@ -291,13 +291,25 @@ object KotlinReflection extends KotlinReflection {
                 createDeserializerForSqlTimestamp(path)
             }
             case t if isSubtype(t, localTypeOf[java.time.LocalDateTime]) => {
+                //#if sparkMinor >= 3.2
                 createDeserializerForLocalDateTime(path)
+                //#else
+                //$throw new IllegalArgumentException("TimestampNTZType is supported in spark 3.2+")
+                //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Duration]) => {
+                //#if sparkMinor >= 3.2
                 createDeserializerForDuration(path)
+                //#else
+                //$throw new IllegalArgumentException("java.time.Duration is supported in spark 3.2+")
+                //#endif
             }
             case t if isSubtype(t, localTypeOf[java.time.Period]) => {
+                //#if sparkMinor >= 3.2
                 createDeserializerForPeriod(path)
+                //#else
+                //$throw new IllegalArgumentException("java.time.Period is supported in spark 3.2+")
+                //#endif
             }
             case t if isSubtype(t, localTypeOf[java.lang.String]) => {
                 createDeserializerForString(path, returnNullable = false)
