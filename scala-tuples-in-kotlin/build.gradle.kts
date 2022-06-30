@@ -1,8 +1,10 @@
 @file:Suppress("UnstableApiUsage")
 
-import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
+import org.jetbrains.dokka.gradle.AbstractDokkaLeafTask
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.DokkaTaskPartial
 
 plugins {
     scala
@@ -36,8 +38,22 @@ dependencies {
     }
 }
 
+tasks.withType<AbstractDokkaLeafTask> {
+    dokkaSourceSets {
+        create("main") {
+            sourceRoot(
+                kotlin.sourceSets
+                    .main.get()
+                    .kotlin
+                    .srcDirs
+                    .first { it.path.endsWith("kotlin") }
+            )
+        }
+    }
+}
+
 mavenPublishing {
-    configure(KotlinJvm(/* TODO Dokka("dokkaHtml") */))
+    configure(KotlinJvm(Dokka("dokkaHtml")))
 }
 
 val skipScalaTuplesInKotlin = System.getProperty("skipScalaTuplesInKotlin").toBoolean()

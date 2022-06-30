@@ -1,7 +1,9 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
+import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
+import org.jetbrains.dokka.gradle.AbstractDokkaLeafTask
 
 plugins {
     kotlin
@@ -89,8 +91,15 @@ kotlin {
     }
 }
 
+tasks.withType<AbstractDokkaLeafTask> {
+    dokkaSourceSets {
+        create("main") {
+            sourceRoot(preprocessMain.target.get())
 
+        }
+    }
+}
 
 mavenPublishing {
-    configure(KotlinJvm(/* TODO Dokka("dokkaHtml") */))
+    configure(KotlinJvm(Dokka("dokkaHtml")))
 }

@@ -371,11 +371,13 @@ fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByKey(): Dataset<Tuple2<T1, T2>> = sort
 fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByValue(): Dataset<Tuple2<T1, T2>> = sort("_2")
 
 /** Returns a dataset sorted by the first (`_1`) value of each [Arity2] inside. */
+@Suppress("DEPRECATION")
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 @JvmName("sortByArity2Key")
 fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByKey(): Dataset<Arity2<T1, T2>> = sort("_1")
 
 /** Returns a dataset sorted by the second (`_2`) value of each [Arity2] inside. */
+@Suppress("DEPRECATION")
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 @JvmName("sortByArity2Value")
 fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByValue(): Dataset<Arity2<T1, T2>> = sort("_2")

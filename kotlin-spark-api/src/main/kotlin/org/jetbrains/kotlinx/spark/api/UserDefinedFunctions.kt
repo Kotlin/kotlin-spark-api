@@ -17,7 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
-@file:Suppress("DEPRECATION", "unchecked", "unused")
+@file:Suppress("DEPRECATION", "UNCHECKED_CAST", "unused")
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.*

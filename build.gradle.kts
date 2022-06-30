@@ -13,6 +13,7 @@ buildscript {
 
 plugins {
     mavenPublish version Versions.mavenPublish
+    dokka
 }
 
 group = Versions.groupID
@@ -22,28 +23,9 @@ tasks.withType<Test>().configureEach {
     useJUnitPlatform()
 }
 
-
 repositories {
     mavenCentral()
 }
-
-
-//dependencies {
-//    with(Projects) {
-//        api(
-//            jupyter,
-//            kotlinSparkApi,
-//            core,
-//            scalaTuplesInKotlin,
-//        )
-//    }
-//}
-
-//artifacts {
-//    archives(tasks.jar)
-////    archives(javadocJar)
-//    archives(sourcesJar)
-//}
 
 allprojects {
     plugins.withId("com.vanniktech.maven.publish.base") {
