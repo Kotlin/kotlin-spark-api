@@ -37,14 +37,7 @@ tasks.preprocess {
     sources.set(listOf(File("./src/main/scala")))
     clearTarget.set(true)
     fileExtensions.set(listOf("java", "scala"))
-    vars.set(
-        mapOf(
-            "scala" to Versions.scala,
-            "scalaCompat" to Versions.scalaCompat,
-            "spark" to Versions.spark,
-            "sparkMinor" to Versions.sparkMinor,
-        )
-    )
+    vars.set(Versions.versionMap)
     outputs.upToDateWhen { false }
 }
 

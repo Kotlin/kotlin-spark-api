@@ -8,6 +8,7 @@ import org.jetbrains.dokka.gradle.AbstractDokkaLeafTask
 plugins {
     kotlin
     dokka
+    idea
 
     mavenPublishBase
     jcp
@@ -95,7 +96,6 @@ tasks.withType<AbstractDokkaLeafTask> {
     dokkaSourceSets {
         create("main") {
             sourceRoot(preprocessMain.target.get())
-
         }
     }
 }
@@ -103,3 +103,17 @@ tasks.withType<AbstractDokkaLeafTask> {
 mavenPublishing {
     configure(KotlinJvm(Dokka("dokkaHtml")))
 }
+
+// TODO
+val restoreFolders by tasks.creating {
+    doLast {
+        idea.module {
+            sourceDirs = mutableSetOf(File("./src/main/kotlin"))
+            testSourceDirs = mutableSetOf(File("./src/test/kotlin"))
+            println("set sources of intellij idea")
+        }
+    }
+}
+restoreFolders.dependsOn(tasks.build)
+
+
