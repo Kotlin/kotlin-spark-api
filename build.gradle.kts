@@ -1,5 +1,8 @@
 @file:Suppress("UnstableApiUsage")
 
+import Versions.sparkVersionsFor2_12
+import Versions.sparkVersionsForBoth
+
 buildscript {
     repositories {
         mavenCentral()
@@ -14,6 +17,9 @@ buildscript {
 plugins {
     mavenPublish version Versions.mavenPublish
     dokka
+    idea
+
+    id("com.github.prokod.gradle-crossbuild") version "0.13.1"
 }
 
 group = Versions.groupID
@@ -25,6 +31,35 @@ tasks.withType<Test>().configureEach {
 
 repositories {
     mavenCentral()
+}
+
+dependencies {
+    with(Dependencies) {
+        implementation(scalaLibrary)
+    }
+}
+
+subprojects {
+    apply(plugin = "com.github.prokod.gradle-crossbuild-scala")
+
+    crossBuild {
+        scalaVersionsCatalog = mapOf(
+            "2.13" to "2.13.8",
+            "2.12" to "2.12.15",
+        )
+
+        builds {
+            for (spark in sparkVersionsForBoth)
+                create(spark) {
+                    scalaVersions = mutableSetOf("2.12", "2.13")
+                }
+
+            for (spark in sparkVersionsFor2_12)
+                create(spark) {
+                    scalaVersions = mutableSetOf("2.12")
+                }
+        }
+    }
 }
 
 allprojects {

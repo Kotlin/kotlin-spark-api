@@ -9,7 +9,6 @@ plugins {
     kotlin
     dokka
     idea
-
     mavenPublishBase
     jcp
 }
@@ -35,12 +34,33 @@ dependencies {
         )
     }
 
+    fun implementation(spark: String, scalaCompat: String) {
+        val sparkNoPeriods = spark.replace(".", "")
+        val scalaCompatNoPeriods = scalaCompat.replace(".", "")
+        add(
+            "crossBuild${sparkNoPeriods}_${scalaCompatNoPeriods}Implementation",
+            "org.apache.spark:spark-sql_${scalaCompatNoPeriods}:$spark"
+        )
+        add(
+            "crossBuild${sparkNoPeriods}_${scalaCompatNoPeriods}Implementation",
+            "org.apache.spark:spark-streaming_${scalaCompatNoPeriods}:$spark"
+        )
+    }
+
+    for (spark in Versions.sparkVersionsForBoth) {
+        implementation(spark, "2.12")
+        implementation(spark, "2.13")
+    }
+    for (spark in Versions.sparkVersionsFor2_12) {
+        implementation(spark, "2.12")
+    }
+
     with(Dependencies) {
         implementation(
             kotlinStdLib,
             reflect,
-            sparkSql,
-            sparkStreaming,
+//            sparkSql,
+//            sparkStreaming,
             hadoopClient,
         )
 
@@ -57,7 +77,10 @@ dependencies {
     }
 }
 
+val sparkV: String =
+    ((project.extensions.getByName("ext") as ExtraPropertiesExtension).properties["sparkV"] as String?).toString()
 val preprocessMain by tasks.creating(JcpTask::class) {
+    println("read spark as $sparkV")
     sources.set(listOf(File("./src/main/kotlin")))
     clearTarget.set(true)
     fileExtensions.set(listOf("java", "kt"))
@@ -80,6 +103,8 @@ val preprocessTest by tasks.creating(JcpTask::class) {
 tasks.compileTestKotlin {
     dependsOn(preprocessTest)
 }
+
+
 
 kotlin {
     sourceSets {
