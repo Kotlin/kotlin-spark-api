@@ -30,20 +30,34 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
     - [Streaming](#streaming)
     - [User Defined Functions](#user-defined-functions)
 - [Examples](#examples)
-- [Reporting issues/Support](#reporting-issuessupport)
+- [Reporting issues/Support](#reporting-issues--support)
 - [Code of Conduct](#code-of-conduct)
 - [License](#license)
 
 ## Supported versions of Apache Spark
 
+| Apache Spark | Scala |       Kotlin for Apache Spark       |
+|:------------:|:-----:|:-----------------------------------:|
+|    3.3.0     | 2.13  | kotlin-spark-api_3.3.0_2.13:VERSION |
+|              | 2.12  | kotlin-spark-api_3.3.0_2.12:VERSION |
+|    3.2.1     | 2.13  | kotlin-spark-api_3.2.1_2.13:VERSION |
+|              | 2.12  | kotlin-spark-api_3.2.1_2.12:VERSION |
+|    3.2.0     | 2.13  | kotlin-spark-api_3.2.0_2.13:VERSION |
+|              | 2.12  | kotlin-spark-api_3.2.0_2.12:VERSION |
+|    3.1.3     | 2.12  | kotlin-spark-api_3.1.3_2.12:VERSION |
+|    3.1.2     | 2.12  | kotlin-spark-api_3.1.2_2.12:VERSION |
+|    3.1.1     | 2.12  | kotlin-spark-api_3.1.1_2.12:VERSION |
+|    3.1.0     | 2.12  | kotlin-spark-api_3.1.0_2.12:VERSION |
+|    3.0.3     | 2.12  | kotlin-spark-api_3.0.3_2.12:VERSION |
+|    3.0.2     | 2.12  | kotlin-spark-api_3.0.2_2.12:VERSION |
+|    3.0.1     | 2.12  | kotlin-spark-api_3.0.1_2.12:VERSION |
+|    3.0.0     | 2.12  | kotlin-spark-api_3.0.0_2.12:VERSION |
+
+## Deprecated versions
 | Apache Spark | Scala |     Kotlin for Apache Spark     |
 |:------------:|:-----:|:-------------------------------:|
-|    3.2.1+    | 2.12  |   kotlin-spark-api-3.2:1.1.0    |
-|    3.1.3+    | 2.12  |   kotlin-spark-api-3.1:1.1.0    |
-|    3.0.3+    | 2.12  |   kotlin-spark-api-3.0:1.1.0    |
 |    2.4.1+    | 2.12  | kotlin-spark-api-2.4_2.12:1.0.2 |
 |    2.4.1+    | 2.11  | kotlin-spark-api-2.4_2.11:1.0.2 |
-
 ## Releases
 
 The list of Kotlin for Apache Spark releases is available [here](https://github.com/JetBrains/kotlin-spark-api/releases/).
@@ -61,18 +75,22 @@ Here's an example `pom.xml`:
 ```xml
 <dependency>
   <groupId>org.jetbrains.kotlinx.spark</groupId>
-  <artifactId>kotlin-spark-api-3.2</artifactId>
+  <artifactId>kotlin-spark-api_3.3.0_2.13</artifactId>
   <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
     <groupId>org.apache.spark</groupId>
-    <artifactId>spark-sql_2.12</artifactId>
+    <artifactId>spark-sql_2.13</artifactId>
     <version>${spark.version}</version>
 </dependency>
 ```
 
-Note that `core` is being compiled against Scala version `2.12`.  
+Note that you must match the version of the Kotlin for Apache Spark API to the Spark- and Scala version of your project.
 You can find a complete example with `pom.xml` and `build.gradle` in the [Quick Start Guide](https://github.com/JetBrains/kotlin-spark-api/wiki/Quick-Start-Guide).
+
+If you want to try a development version. You can use the versions published to [GH Packages](https://github.com/orgs/Kotlin/packages?tab=packages&q=kotlin-spark-api_3.3.0_2.13).
+They typically have the same version as the release version, but with a `-SNAPSHOT` suffix. See the [GitHub Docs](https://docs.github.com/en/packages/learn-github-packages/installing-a-package)
+for more information.
 
 Once you have configured the dependency, you only need to add the following import to your Kotlin file: 
 ```kotlin
@@ -90,7 +108,7 @@ To it, simply add
 to the top of your notebook. This will get the latest version of the API, together with the latest version of Spark.
 To define a certain version of Spark or the API itself, simply add it like this:
 ```jupyterpython
-%use spark(spark=3.2, v=1.1.0)
+%use spark(spark=3.3.0, scala=2.13, v=1.2.0)
 ```
 
 Inside the notebook a Spark session will be initiated automatically. This can be accessed via the `spark` value.
@@ -331,13 +349,18 @@ You are also welcome to join [kotlin-spark channel](https://kotlinlang.slack.com
 Contributions are more than welcome! Pull requests can be created for the [main](https://github.com/Kotlin/kotlin-spark-api/tree/main) branch
 and will be considered as soon as possible. Be sure to add the necessary tests for any new feature you add. The [main](https://github.com/Kotlin/kotlin-spark-api/tree/main)
 branch always aims to target the latest available [Apache Spark version](https://spark.apache.org/downloads.html).
+Note that we use [Java Comment Preprocessor](https://github.com/raydac/java-comment-preprocessor) to build the library
+for all different supported versions of Apache Spark and Scala. 
+The current values of these versions can be edited in `gradle.properties` and should always be the latest versions for commits.
+For testing, all versions need a pass for the request to be accepted.
+We use GitHub Actions to test and deploy the library for all versions, but locally you can also use the `gradlew_all_versions` file.
+
 
 Of the [main](https://github.com/Kotlin/kotlin-spark-api/tree/main) branch, development versions of the library are published to 
-[Github Packages](https://github.com/orgs/Kotlin/packages?tab=packages&q=kotlin-spark-api). This way, new features can be
+[GitHub Packages](https://github.com/orgs/Kotlin/packages?tab=packages&q=kotlin-spark-api). This way, new features can be
 tested quickly without having to wait for a full release. 
 
-For full releases, all `spark-X.x` branches are updated. At the moment, this includes Spark 3.0, 3.1, and 3.2. For this we also
-follow the [supported versions of Apache](https://spark.apache.org/downloads.html).
+For full releases, the `release` branch is updated.
 
 ## Code of Conduct
 This project and the corresponding community is governed by the [JetBrains Open Source and Community Code of Conduct](https://confluence.jetbrains.com/display/ALL/JetBrains+Open+Source+and+Community+Code+of+Conduct). Please make sure you read it. 

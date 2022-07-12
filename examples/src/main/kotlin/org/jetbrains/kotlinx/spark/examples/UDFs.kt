@@ -202,7 +202,8 @@ private fun strongTypingInDatasets() = withSpark {
     // We can thus provide TypedColumns instead of normal ones which the select function takes
     // advantage of!
 
-    // NOTE: In UDFs, iterables, lists, arrays and such need to be represented as WrappedArray
+
+    // NOTE: In UDFs, iterables, lists, arrays and such need to be represented as Seq
     val toJson by udf { age: Int, name: String, pets: Seq<String> ->
         """{ "age" : $age, "name" : "$name", "pets" : [${pets.asKotlinIterable().joinToString { "\"$it\"" }}] }"""
     }
@@ -228,7 +229,7 @@ private fun strongTypingInDatasets() = withSpark {
             col<_, Int>("age"),
             col<_, String>("name"),
             col<Row, List<String>>("pets").asSeq(),
-//      or `col<_, WrappedArray<String>>("pets")` if you want to be less strict
+//      or `col<_, Seq<String>>("pets")` if you want to be less strict
         )
     ).showDS(truncate = false)
 //    +-------------------------------------------------------+
@@ -437,7 +438,7 @@ private fun varargUDFs() = withSpark {
 
 
     // As you can see, it just works :), up to 22 parameters!
-    // In fact, since UDFs don't support arrays (only scala's WrappedArray), any udf that contains just an array
+    // In fact, since UDFs don't support arrays (only scala's Seq), any udf that contains just an array
     // as parameter will become a vararg udf:
     udf.register("joinToString") { strings: Array<String> -> strings.joinToString(separator = "-") }
     spark.sql("""SELECT joinToString("a", "hi there", "test"), joinToString(), joinToString("b", "c")""")

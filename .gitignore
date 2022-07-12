@@ -376,3 +376,4 @@ orcpath/
 .env
 **/.allure/
 **/allure-results/
+/generated_*

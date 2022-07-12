@@ -1,6 +1,6 @@
 /*-
  * =LICENSE=
- * Kotlin Spark API: Examples for Spark 3.2+ (Scala 2.12)
+ * Kotlin Spark API: API for Spark 3.2+ (Scala 2.12)
  * ----------
  * Copyright (C) 2019 - 2022 JetBrains
  * ----------
@@ -17,16 +17,66 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+package org.jetbrains.kotlinx.spark.api
 
+import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.shouldBe
+import org.glassfish.jersey.internal.guava.MoreObjects
+import org.apache.spark.ml.linalg.*
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types.*
 import org.apache.spark.unsafe.types.UTF8String
-import org.glassfish.jersey.internal.guava.MoreObjects
-import org.jetbrains.kotlinx.spark.api.*
-import org.jetbrains.kotlinx.spark.api.tuples.tupleOf
+import org.jetbrains.kotlinx.spark.api.tuples.t
 import java.io.Serializable
 import kotlin.reflect.jvm.jvmName
+
+class UdtTest : ShouldSpec({
+    context("udt") {
+        withSpark {
+            should("Recognize UDTs from libraries like MlLib") {
+                val input = t(
+                    Vectors.dense(doubleArrayOf(1.0, 2.0, 3.0)),
+                    DenseVector(doubleArrayOf(1.0, 2.0, 3.0)),
+                    SparseVector(3, intArrayOf(0, 1, 2), doubleArrayOf(1.0, 2.0, 3.0)),
+                    Matrices.eye(1),
+                    DenseMatrix.eye(2),
+                    SparseMatrix.speye(2),
+                )
+
+                val ds = dsOf(input)
+
+                ds.collectAsList().single() shouldBe input
+            }
+
+            should("Recognize locally registered UDTs with annotation") {
+                val input = t(
+                    City("Amsterdam", 1),
+                    City("Breda", 2),
+                    City("Oosterhout", 3),
+                )
+
+                val ds = dsOf(input)
+
+                ds.collectAsList().single() shouldBe input
+            }
+
+            should("Recognize locally registered UDTs with register function") {
+                UDTRegistration.register(City::class.jvmName, CityUserDefinedType::class.jvmName)
+
+                val input = t(
+                    City("Amsterdam", 1),
+                    City("Breda", 2),
+                    City("Oosterhout", 3),
+                )
+
+                val ds = dsOf(input)
+
+                ds.collectAsList().single() shouldBe input
+            }
+        }
+    }
+})
 
 class CityUserDefinedType : UserDefinedType<City>() {
 
@@ -73,18 +123,22 @@ class City(val name: String, val departmentNumber: Int) : Serializable {
             .add("name", name)
             .add("departmentNumber", departmentNumber)
             .toString()
-}
 
-fun main() = withSpark {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-//    UDTRegistration.register(City::class.jvmName, CityUserDefinedType::class.jvmName)
+        other as City
 
-    val items = listOf(
-        City("Amsterdam", 1),
-        City("Breda", 2),
-        City("Oosterhout", 3),
-    ).map(::tupleOf)
+        if (name != other.name) return false
+        if (departmentNumber != other.departmentNumber) return false
 
-    val ds = items.toDS()
-    ds.showDS()
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + departmentNumber
+        return result
+    }
 }

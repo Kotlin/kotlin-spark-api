@@ -3,28 +3,45 @@ name: Generate and publish docs
 on:
   push:
     branches:
-      - "spark-3.2"
+      - "release" # todo make release branch
 
 jobs:
   generate-and-publish-docs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
       - name: Set up JDK 11
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v3
         with:
-          distributions: adopt
+          distribution: adopt
           java-version: 11
           check-latest: true
-      - name: Generate docs
-        run: ./mvnw clean package site -Dmaven.test.skip=true
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.gradle/jdks
+          key: ${{ runner.os }}-gradle-spark-${{ matrix.spark }}-${{ matrix.scala }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Generate docs with Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          arguments: |
+            dokkaHtmlMultiModule
+
       - name: Copy docs to "docs" branch
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: docs
-          publish_dir: ./kotlin-spark-api/3.2/target/dokka
+          publish_dir: ./build/dokka/htmlMultiModule
           force_orphan: true
 
 
