@@ -36,6 +36,7 @@ import org.apache.spark.util.Utils
 
 import java.beans.{Introspector, PropertyDescriptor}
 import java.lang.Exception
+import java.lang.reflect.Method
 
 
 /**
@@ -212,11 +213,11 @@ object KotlinReflection extends KotlinReflection {
      * @param walkedTypePath The paths from top to bottom to access current field when deserializing.
      */
     private def deserializerFor(
-        tpe: `Type`,
-        path: Expression,
-        walkedTypePath: WalkedTypePath,
-        predefinedDt: Option[DataTypeWithClass] = None
-    ): Expression = cleanUpReflectionObjects {
+                                   tpe: `Type`,
+                                   path: Expression,
+                                   walkedTypePath: WalkedTypePath,
+                                   predefinedDt: Option[DataTypeWithClass] = None
+                               ): Expression = cleanUpReflectionObjects {
         baseType(tpe) match {
 
             //<editor-fold desc="Description">
@@ -685,18 +686,18 @@ object KotlinReflection extends KotlinReflection {
      * internal representation.
      */
     private def serializerFor(
-        inputObject: Expression,
-        tpe: `Type`,
-        walkedTypePath: WalkedTypePath,
-        seenTypeSet: Set[`Type`] = Set.empty,
-        predefinedDt: Option[DataTypeWithClass] = None,
-    ): Expression = cleanUpReflectionObjects {
+                                 inputObject: Expression,
+                                 tpe: `Type`,
+                                 walkedTypePath: WalkedTypePath,
+                                 seenTypeSet: Set[`Type`] = Set.empty,
+                                 predefinedDt: Option[DataTypeWithClass] = None,
+                             ): Expression = cleanUpReflectionObjects {
 
         def toCatalystArray(
-            input: Expression,
-            elementType: `Type`,
-            predefinedDt: Option[DataTypeWithClass] = None,
-        ): Expression = {
+                               input: Expression,
+                               elementType: `Type`,
+                               predefinedDt: Option[DataTypeWithClass] = None,
+                           ): Expression = {
             val dataType = predefinedDt
                 .map(_.dt)
                 .getOrElse {
@@ -705,7 +706,7 @@ object KotlinReflection extends KotlinReflection {
 
             dataType match {
 
-                case dt @ (MapType(_, _, _) | ArrayType(_, _) | StructType(_)) => {
+                case dt@(MapType(_, _, _) | ArrayType(_, _) | StructType(_)) => {
                     val clsName = getClassNameFromType(elementType)
                     val newPath = walkedTypePath.recordArray(clsName)
                     createSerializerForMapObjects(
@@ -726,7 +727,7 @@ object KotlinReflection extends KotlinReflection {
                 //                case dt: ByteType =>
                 //                    createSerializerForPrimitiveArray(input, dt)
 
-                case dt @ (BooleanType | ByteType | ShortType | IntegerType | LongType | FloatType | DoubleType) => {
+                case dt@(BooleanType | ByteType | ShortType | IntegerType | LongType | FloatType | DoubleType) => {
                     val cls = input.dataType.asInstanceOf[ObjectType].cls
                     if (cls.isArray && cls.getComponentType.isPrimitive) {
                         createSerializerForPrimitiveArray(input, dt)
@@ -945,11 +946,11 @@ object KotlinReflection extends KotlinReflection {
             // Kotlin specific cases
             case t if predefinedDt.isDefined => {
 
-//                if (seenTypeSet.contains(t)) {
-//                    throw new UnsupportedOperationException(
-//                        s"cannot have circular references in class, but got the circular reference of class $t"
-//                    )
-//                }
+                //                if (seenTypeSet.contains(t)) {
+                //                    throw new UnsupportedOperationException(
+                //                        s"cannot have circular references in class, but got the circular reference of class $t"
+                //                    )
+                //                }
 
                 predefinedDt.get match {
 
@@ -959,18 +960,20 @@ object KotlinReflection extends KotlinReflection {
                         val properties = getJavaBeanReadableProperties(cls)
                         val structFields = dataType.dt.fields.map(_.asInstanceOf[KStructField])
                         val fields: Array[(String, Expression)] = structFields.map { structField =>
-                            val maybeProp = properties.find(it => it.getReadMethod.getName == structField.getterName)
-                            if (maybeProp.isEmpty) throw new IllegalArgumentException(s"Field ${
-                                structField.name
-                            } is not found among available props, which are: ${properties.map(_.getName).mkString(", ")}"
-                            )
+                            val maybeProp = properties.find {
+                                _.getName == structField.getterName
+                            }
+                            if (maybeProp.isEmpty)
+                                throw new IllegalArgumentException(
+                                    s"Field ${structField.name} is not found among available props, which are: ${properties.map(_.getName).mkString(", ")}"
+                                )
                             val fieldName = structField.name
                             val propClass = structField.dataType.asInstanceOf[DataTypeWithClass].cls
                             val propDt = structField.dataType.asInstanceOf[DataTypeWithClass]
 
                             val fieldValue = Invoke(
                                 inputObject,
-                                maybeProp.get.getReadMethod.getName,
+                                maybeProp.get.getName,
                                 inferExternalType(propClass),
                                 returnNullable = structField.nullable
                             )
@@ -1124,11 +1127,14 @@ object KotlinReflection extends KotlinReflection {
         )
     }
 
-    def getJavaBeanReadableProperties(beanClass: Class[_]): Array[PropertyDescriptor] = {
+    def getJavaBeanReadableProperties(beanClass: Class[_]): Array[Method] = {
         val beanInfo = Introspector.getBeanInfo(beanClass)
-        beanInfo.getPropertyDescriptors.filterNot(_.getName == "class")
-            .filterNot(_.getName == "declaringClass")
-            .filter(_.getReadMethod != null)
+        beanInfo
+            .getMethodDescriptors
+            .filter { it => it.getName.startsWith("is") || it.getName.startsWith("get") }
+            .filterNot { _.getName == "getClass" }
+            .filterNot { _.getName == "getDeclaringClass" }
+            .map { _.getMethod }
     }
 
     /*
@@ -1296,7 +1302,7 @@ object KotlinReflection extends KotlinReflection {
                     val params = method.typeSignature.paramLists.head
                     // Check that the needed params are the same length and of matching types
                     params.size == paramTypes.tail.size &&
-                        params.zip(paramTypes.tail).forall { case(ps, pc) =>
+                        params.zip(paramTypes.tail).forall { case (ps, pc) =>
                             ps.typeSignature.typeSymbol == mirror.classSymbol(pc)
                         }
                 }.map { applyMethodSymbol =>

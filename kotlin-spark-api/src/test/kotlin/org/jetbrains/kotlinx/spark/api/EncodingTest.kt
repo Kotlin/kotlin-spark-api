@@ -107,6 +107,15 @@ class EncodingTest : ShouldSpec({
                 val dataset = ints.toDS()
                 dataset.collectAsList() shouldBe ints
             }
+
+            should("handle data classes with isSomething") {
+                val dataClasses = listOf(
+                    IsSomethingClass(true, false, true, 1.0, 2.0, 0.0),
+                    IsSomethingClass(false, true, true, 1.0, 2.0, 0.0),
+                )
+                val dataset = dataClasses.toDS().showDS()
+                dataset.collectAsList() shouldBe dataClasses
+            }
         }
     }
     context("known dataTypes") {
@@ -172,6 +181,16 @@ class EncodingTest : ShouldSpec({
                 dataset.show()
                 val asList = dataset.takeAsList(2)
                 asList.first() shouldBe t("a", t("a", 1, LonLat(1.0, 1.0)))
+            }
+
+            should("Be able to serialize Scala Tuples including isSomething data classes") {
+                val dataset = dsOf(
+                    t("a", t("a", 1, IsSomethingClass(true, false, true, 1.0, 2.0, 0.0))),
+                    t("b", t("b", 2, IsSomethingClass(false, true, true, 1.0, 2.0, 0.0))),
+                )
+                dataset.show()
+                val asList = dataset.takeAsList(2)
+                asList.first() shouldBe t("a", t("a", 1, IsSomethingClass(true, false, true, 1.0, 2.0, 0.0)))
             }
 
             should("Be able to serialize data classes with tuples") {
@@ -494,6 +513,15 @@ class EncodingTest : ShouldSpec({
         }
     }
 })
+
+data class IsSomethingClass(
+    val enabled: Boolean,
+    val isEnabled: Boolean,
+    val getEnabled: Boolean,
+    val double: Double,
+    val isDouble: Double,
+    val getDouble: Double
+)
 
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
