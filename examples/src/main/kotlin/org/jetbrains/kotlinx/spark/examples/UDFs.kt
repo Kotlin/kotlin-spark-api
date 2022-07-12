@@ -202,6 +202,7 @@ private fun strongTypingInDatasets() = withSpark {
     // We can thus provide TypedColumns instead of normal ones which the select function takes
     // advantage of!
 
+
     // NOTE: In UDFs, iterables, lists, arrays and such need to be represented as Seq
     val toJson by udf { age: Int, name: String, pets: Seq<String> ->
         """{ "age" : $age, "name" : "$name", "pets" : [${pets.asKotlinIterable().joinToString { "\"$it\"" }}] }"""
