@@ -44,6 +44,8 @@ import scala.collection.mutable.Map as ScalaMutableMap
 import scala.collection.mutable.Seq as ScalaMutableSeq
 import scala.collection.mutable.Set as ScalaMutableSet
 import org.apache.spark.streaming.State
+import scala.collection.`Seq$`
+
 
 /** Returns state value if it exists, else `null`. */
 fun <T> State<T>.getOrNull(): T? = if (exists()) get() else null
