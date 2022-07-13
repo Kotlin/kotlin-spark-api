@@ -59,7 +59,7 @@ dependencies {
 
 // Setup preprocessing with JCP
 
-fun JcpTask.setup(kotlinSources: FileCollection) {
+inline fun JcpTask.setup(kotlinSources: FileCollection) {
     sources.set(kotlinSources)
     clearTarget.set(true)
     fileExtensions.set(listOf("kt"))
@@ -67,7 +67,7 @@ fun JcpTask.setup(kotlinSources: FileCollection) {
     outputs.upToDateWhen { target.get().exists() }
 }
 
-fun KotlinCompile.setupWithJcp(preprocess: JcpTask, kotlinSources: FileCollection) {
+inline fun KotlinCompile.setupWithJcp(preprocess: JcpTask, kotlinSources: FileCollection) {
     dependsOn(preprocess)
     outputs.upToDateWhen {
         preprocess.outcomingFiles.files.isEmpty()

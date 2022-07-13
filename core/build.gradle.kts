@@ -34,7 +34,7 @@ dependencies {
 
 // Setup preprocessing with JCP
 
-fun JcpTask.setup(scalaSources: FileCollection) {
+inline fun JcpTask.setup(scalaSources: FileCollection) {
     sources.set(scalaSources)
     clearTarget.set(true)
     fileExtensions.set(listOf("scala"))
@@ -42,7 +42,7 @@ fun JcpTask.setup(scalaSources: FileCollection) {
     outputs.upToDateWhen { target.get().exists() }
 }
 
-fun ScalaCompile.setupWithJcp(preprocess: JcpTask, scalaSources: FileCollection) {
+inline fun ScalaCompile.setupWithJcp(preprocess: JcpTask, scalaSources: FileCollection) {
     dependsOn(preprocess)
     outputs.upToDateWhen {
         preprocess.outcomingFiles.files.isEmpty()
