@@ -78,6 +78,7 @@ val preprocessMain by tasks.creating(JcpTask::class) {
 tasks.compileKotlin {
     dependsOn(preprocessMain)
     outputs.upToDateWhen { preprocessMain.outcomingFiles.files.isEmpty() }
+
     doFirst {
         kotlin {
             sourceSets {
@@ -97,6 +98,10 @@ tasks.compileKotlin {
             }
         }
     }
+
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
+    }
 }
 
 // Setup preprocessing with JCP for test sources
@@ -114,6 +119,7 @@ val preprocessTest by tasks.creating(JcpTask::class) {
 tasks.compileTestKotlin {
     dependsOn(preprocessTest)
     outputs.upToDateWhen { preprocessTest.outcomingFiles.files.isEmpty() }
+
     doFirst {
         kotlin {
             sourceSets {
@@ -132,6 +138,10 @@ tasks.compileTestKotlin {
                 }
             }
         }
+    }
+
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
     }
 }
 

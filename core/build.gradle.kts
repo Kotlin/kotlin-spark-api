@@ -67,6 +67,8 @@ tasks.compileScala {
             }
         }
     }
+
+    scala
 }
 
 mavenPublishing {

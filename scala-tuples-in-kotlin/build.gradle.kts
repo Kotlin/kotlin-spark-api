@@ -38,6 +38,17 @@ dependencies {
     }
 }
 
+tasks.compileKotlin {
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
+    }
+}
+tasks.compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
+    }
+}
+
 tasks.withType<AbstractDokkaLeafTask> {
     dokkaSourceSets {
         create("scala-tuples-in-kotlin") {

@@ -93,6 +93,10 @@ tasks.compileKotlin {
             }
         }
     }
+
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
+    }
 }
 
 // Setup preprocessing with JCP for test sources
@@ -131,6 +135,10 @@ tasks.compileTestKotlin {
                 }
             }
         }
+    }
+
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
     }
 }
 

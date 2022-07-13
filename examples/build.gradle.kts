@@ -28,3 +28,14 @@ dependencies {
 
     }
 }
+
+tasks.compileKotlin {
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
+    }
+}
+tasks.compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
+    }
+}
