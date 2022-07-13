@@ -5,7 +5,9 @@ import org.apache.hadoop.io.compress.CompressionCodec
 import org.apache.hadoop.mapred.JobConf
 import org.apache.hadoop.mapred.OutputFormat
 import org.apache.spark.Partitioner
+import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.api.java.JavaRDD
+import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.Optional
 import org.apache.spark.partial.BoundedDouble
 import org.apache.spark.partial.PartialResult
@@ -15,6 +17,12 @@ import scala.Tuple3
 import scala.Tuple4
 import kotlin.random.Random
 import org.apache.hadoop.mapreduce.OutputFormat as NewOutputFormat
+
+fun <K, V> JavaRDD<Tuple2<K, V>>.toPairRDD(): JavaPairRDD<K, V> =
+    JavaPairRDD.fromJavaRDD(this)
+
+fun <K, V> JavaPairRDD<K, V>.toTupleRDD(): JavaRDD<Tuple2<K, V>> =
+    JavaPairRDD.toRDD(this).toJavaRDD()
 
 /**
  * Generic function to combine the elements for each key using a custom set of aggregation
@@ -745,7 +753,7 @@ fun <K, V, F : NewOutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsNewAPIHadoopFi
  * (e.g. a table name to write to) in the same way as it would be configured for a Hadoop
  * MapReduce job.
  */
-fun <K, V> JavaRDD<Tuple2<K, V>>.saveAsHadoopDataset(conf: JobConf): Unit = 
+fun <K, V> JavaRDD<Tuple2<K, V>>.saveAsHadoopDataset(conf: JobConf): Unit =
     toPairRDD().saveAsHadoopDataset(conf)
 
 /**
