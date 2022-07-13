@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage")
+@file:Suppress("UnstableApiUsage", "NOTHING_TO_INLINE")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavadocJar.Dokka
