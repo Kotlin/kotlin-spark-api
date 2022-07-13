@@ -15,6 +15,7 @@ plugins {
     mavenPublish version Versions.mavenPublish
     dokka version Versions.dokka
     idea
+    kotlin version Versions.kotlin apply false
 }
 
 group = Versions.groupID
