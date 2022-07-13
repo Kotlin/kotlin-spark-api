@@ -250,6 +250,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
         }
 
         klass.isData -> {
+
             val structType = StructType(
                 klass
                     .primaryConstructor!!
@@ -257,13 +258,16 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
                     .filter { it.findAnnotation<Transient>() == null }
                     .map {
                         val projectedType = types[it.type.toString()] ?: it.type
+
+                        val readMethodName = when {
+                            it.name!!.startsWith("is") -> it.name!!
+                            else -> "get${it.name!!.replaceFirstChar { it.uppercase() }}"
+                        }
+
                         val propertyDescriptor = PropertyDescriptor(
                             /* propertyName = */ it.name,
                             /* beanClass = */ klass.java,
-                            /* readMethodName = */ "is" + it.name?.replaceFirstChar {
-                                if (it.isLowerCase()) it.titlecase(Locale.getDefault())
-                                else it.toString()
-                            },
+                            /* readMethodName = */ readMethodName,
                             /* writeMethodName = */ null
                         )
 
