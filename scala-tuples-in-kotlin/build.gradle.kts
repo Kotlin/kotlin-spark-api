@@ -5,6 +5,7 @@ import com.vanniktech.maven.publish.KotlinJvm
 import org.jetbrains.dokka.gradle.AbstractDokkaLeafTask
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.dokka.gradle.DokkaTaskPartial
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     scala
@@ -38,14 +39,10 @@ dependencies {
     }
 }
 
-tasks.compileKotlin {
+
+tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = Versions.jvmTarget
-    }
-}
-tasks.compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = Versions.jvmTarget
+        jvmTarget = "11"
     }
 }
 

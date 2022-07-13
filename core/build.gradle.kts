@@ -2,7 +2,6 @@
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavaLibrary
-import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.JavadocJar.Javadoc
 
 plugins {
@@ -33,26 +32,27 @@ dependencies {
     }
 }
 
-val scalaMainSources = sourceSets.main.get().scala.sourceDirectories
+// Setup preprocessing with JCP
 
-val preprocessMain by tasks.creating(JcpTask::class)  {
-    sources.set(scalaMainSources)
+fun JcpTask.setup(scalaSources: FileCollection) {
+    sources.set(scalaSources)
     clearTarget.set(true)
     fileExtensions.set(listOf("scala"))
     vars.set(Versions.versionMap)
     outputs.upToDateWhen { target.get().exists() }
 }
 
-tasks.compileScala {
-    dependsOn(preprocessMain)
+fun ScalaCompile.setupWithJcp(preprocess: JcpTask, scalaSources: FileCollection) {
+    dependsOn(preprocess)
     outputs.upToDateWhen {
-        preprocessMain.outcomingFiles.files.isEmpty()
+        preprocess.outcomingFiles.files.isEmpty()
     }
+
     doFirst {
         scala {
             sourceSets {
                 main {
-                    scala.setSrcDirs(listOf(preprocessMain.target.get()))
+                    scala.setSrcDirs(listOf(preprocess.target.get()))
                 }
             }
         }
@@ -62,13 +62,21 @@ tasks.compileScala {
         scala {
             sourceSets {
                 main {
-                    scala.setSrcDirs(scalaMainSources)
+                    scala.setSrcDirs(scalaSources)
                 }
             }
         }
     }
+}
 
-    scala
+val scalaMainSources = sourceSets.main.get().scala.sourceDirectories
+
+val preprocessMain by tasks.creating(JcpTask::class) {
+    setup(scalaMainSources)
+}
+
+tasks.compileScala {
+    setupWithJcp(preprocessMain, scalaMainSources)
 }
 
 mavenPublishing {

@@ -107,7 +107,6 @@ allprojects {
                     tag.set("HEAD")
                 }
             }
-
         }
     }
 }

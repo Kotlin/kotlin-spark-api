@@ -4,6 +4,7 @@ import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 import org.jetbrains.dokka.gradle.AbstractDokkaLeafTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin
@@ -56,29 +57,27 @@ dependencies {
     }
 }
 
-// Setup preprocessing with JCP for main sources
+// Setup preprocessing with JCP
 
-val kotlinMainSources = kotlin.sourceSets.main.get().kotlin.sourceDirectories
-
-val preprocessMain by tasks.creating(JcpTask::class) {
-    sources.set(kotlinMainSources)
+fun JcpTask.setup(kotlinSources: FileCollection) {
+    sources.set(kotlinSources)
     clearTarget.set(true)
     fileExtensions.set(listOf("kt"))
     vars.set(Versions.versionMap)
     outputs.upToDateWhen { target.get().exists() }
 }
 
-tasks.compileKotlin {
-    dependsOn(preprocessMain)
+fun KotlinCompile.setupWithJcp(preprocess: JcpTask, kotlinSources: FileCollection) {
+    dependsOn(preprocess)
     outputs.upToDateWhen {
-        preprocessMain.outcomingFiles.files.isEmpty()
+        preprocess.outcomingFiles.files.isEmpty()
     }
 
     doFirst {
         kotlin {
             sourceSets {
                 main {
-                    kotlin.setSrcDirs(listOf(preprocessMain.target.get()))
+                    kotlin.setSrcDirs(listOf(preprocess.target.get()))
                 }
             }
         }
@@ -88,57 +87,37 @@ tasks.compileKotlin {
         kotlin {
             sourceSets {
                 main {
-                    kotlin.setSrcDirs(kotlinMainSources)
+                    kotlin.setSrcDirs(kotlinSources)
                 }
             }
         }
     }
-
-    kotlinOptions {
-        jvmTarget = Versions.jvmTarget
-    }
 }
 
-// Setup preprocessing with JCP for test sources
 
+val kotlinMainSources = kotlin.sourceSets.main.get().kotlin.sourceDirectories
 val kotlinTestSources = kotlin.sourceSets.test.get().kotlin.sourceDirectories
 
+val preprocessMain by tasks.creating(JcpTask::class) {
+    setup(kotlinMainSources)
+}
+
 val preprocessTest by tasks.creating(JcpTask::class) {
-    sources.set(kotlinTestSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("kt"))
-    vars.set(Versions.versionMap)
-    outputs.upToDateWhen { target.get().exists() }
+    setup(kotlinTestSources)
+}
+
+
+tasks.compileKotlin {
+    setupWithJcp(preprocessMain, kotlinMainSources)
 }
 
 tasks.compileTestKotlin {
-    dependsOn(preprocessTest)
-    outputs.upToDateWhen {
-        preprocessTest.outcomingFiles.files.isEmpty()
-    }
+    setupWithJcp(preprocessTest, kotlinTestSources)
+}
 
-    doFirst {
-        kotlin {
-            sourceSets {
-                test {
-                    kotlin.setSrcDirs(listOf(preprocessTest.target.get()))
-                }
-            }
-        }
-    }
-
-    doLast {
-        kotlin {
-            sourceSets {
-                test {
-                    kotlin.setSrcDirs(kotlinTestSources)
-                }
-            }
-        }
-    }
-
+tasks.withType<KotlinCompile> {
     kotlinOptions {
-        jvmTarget = Versions.jvmTarget
+        jvmTarget = "11"
     }
 }
 
