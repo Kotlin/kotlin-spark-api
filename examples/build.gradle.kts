@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin
     idea
@@ -29,12 +31,7 @@ dependencies {
     }
 }
 
-tasks.compileKotlin {
-    kotlinOptions {
-        jvmTarget = Versions.jvmTarget
-    }
-}
-tasks.compileTestKotlin {
+tasks.withType<KotlinCompile> {
     kotlinOptions {
         jvmTarget = Versions.jvmTarget
     }

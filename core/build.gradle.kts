@@ -32,27 +32,27 @@ dependencies {
     }
 }
 
-// Setup preprocessing with JCP
+val scalaMainSources = sourceSets.main.get().scala.sourceDirectories
 
-inline fun JcpTask.setup(scalaSources: FileCollection) {
-    sources.set(scalaSources)
+val preprocessMain by tasks.creating(JcpTask::class)  {
+    sources.set(scalaMainSources)
     clearTarget.set(true)
     fileExtensions.set(listOf("scala"))
     vars.set(Versions.versionMap)
     outputs.upToDateWhen { target.get().exists() }
 }
 
-inline fun ScalaCompile.setupWithJcp(preprocess: JcpTask, scalaSources: FileCollection) {
-    dependsOn(preprocess)
+tasks.compileScala {
+    dependsOn(preprocessMain)
     outputs.upToDateWhen {
-        preprocess.outcomingFiles.files.isEmpty()
+        preprocessMain.outcomingFiles.files.isEmpty()
     }
 
     doFirst {
         scala {
             sourceSets {
                 main {
-                    scala.setSrcDirs(listOf(preprocess.target.get()))
+                    scala.setSrcDirs(listOf(preprocessMain.target.get()))
                 }
             }
         }
@@ -62,21 +62,11 @@ inline fun ScalaCompile.setupWithJcp(preprocess: JcpTask, scalaSources: FileColl
         scala {
             sourceSets {
                 main {
-                    scala.setSrcDirs(scalaSources)
+                    scala.setSrcDirs(scalaMainSources)
                 }
             }
         }
     }
-}
-
-val scalaMainSources = sourceSets.main.get().scala.sourceDirectories
-
-val preprocessMain by tasks.creating(JcpTask::class) {
-    setup(scalaMainSources)
-}
-
-tasks.compileScala {
-    setupWithJcp(preprocessMain, scalaMainSources)
 }
 
 mavenPublishing {

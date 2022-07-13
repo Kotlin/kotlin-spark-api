@@ -57,27 +57,29 @@ dependencies {
     }
 }
 
-// Setup preprocessing with JCP
+// Setup preprocessing with JCP for main sources
 
-inline fun JcpTask.setup(kotlinSources: FileCollection) {
-    sources.set(kotlinSources)
+val kotlinMainSources = kotlin.sourceSets.main.get().kotlin.sourceDirectories
+
+val preprocessMain by tasks.creating(JcpTask::class) {
+    sources.set(kotlinMainSources)
     clearTarget.set(true)
     fileExtensions.set(listOf("kt"))
     vars.set(Versions.versionMap)
     outputs.upToDateWhen { target.get().exists() }
 }
 
-inline fun KotlinCompile.setupWithJcp(preprocess: JcpTask, kotlinSources: FileCollection) {
-    dependsOn(preprocess)
+tasks.compileKotlin {
+    dependsOn(preprocessMain)
     outputs.upToDateWhen {
-        preprocess.outcomingFiles.files.isEmpty()
+        preprocessMain.outcomingFiles.files.isEmpty()
     }
 
     doFirst {
         kotlin {
             sourceSets {
                 main {
-                    kotlin.setSrcDirs(listOf(preprocess.target.get()))
+                    kotlin.setSrcDirs(listOf(preprocessMain.target.get()))
                 }
             }
         }
@@ -87,32 +89,50 @@ inline fun KotlinCompile.setupWithJcp(preprocess: JcpTask, kotlinSources: FileCo
         kotlin {
             sourceSets {
                 main {
-                    kotlin.setSrcDirs(kotlinSources)
+                    kotlin.setSrcDirs(kotlinMainSources)
                 }
             }
         }
     }
 }
 
+// Setup preprocessing with JCP for test sources
 
-val kotlinMainSources = kotlin.sourceSets.main.get().kotlin.sourceDirectories
 val kotlinTestSources = kotlin.sourceSets.test.get().kotlin.sourceDirectories
 
-val preprocessMain by tasks.creating(JcpTask::class) {
-    setup(kotlinMainSources)
-}
-
 val preprocessTest by tasks.creating(JcpTask::class) {
-    setup(kotlinTestSources)
-}
-
-
-tasks.compileKotlin {
-    setupWithJcp(preprocessMain, kotlinMainSources)
+    sources.set(kotlinTestSources)
+    clearTarget.set(true)
+    fileExtensions.set(listOf("kt"))
+    vars.set(Versions.versionMap)
+    outputs.upToDateWhen { target.get().exists() }
 }
 
 tasks.compileTestKotlin {
-    setupWithJcp(preprocessTest, kotlinTestSources)
+    dependsOn(preprocessTest)
+    outputs.upToDateWhen {
+        preprocessTest.outcomingFiles.files.isEmpty()
+    }
+
+    doFirst {
+        kotlin {
+            sourceSets {
+                test {
+                    kotlin.setSrcDirs(listOf(preprocessTest.target.get()))
+                }
+            }
+        }
+    }
+
+    doLast {
+        kotlin {
+            sourceSets {
+                test {
+                    kotlin.setSrcDirs(kotlinTestSources)
+                }
+            }
+        }
+    }
 }
 
 tasks.withType<KotlinCompile> {
