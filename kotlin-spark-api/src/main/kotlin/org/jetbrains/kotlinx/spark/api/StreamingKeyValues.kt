@@ -23,7 +23,6 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.HashPartitioner
 import org.apache.spark.Partitioner
-import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.Optional
 import org.apache.spark.streaming.Duration

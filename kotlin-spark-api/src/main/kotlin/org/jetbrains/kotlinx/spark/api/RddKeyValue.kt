@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.hadoop.conf.Configuration
@@ -5,9 +7,9 @@ import org.apache.hadoop.io.compress.CompressionCodec
 import org.apache.hadoop.mapred.JobConf
 import org.apache.hadoop.mapred.OutputFormat
 import org.apache.spark.Partitioner
+import org.apache.spark.RangePartitioner
 import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.api.java.JavaRDD
-import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.api.java.Optional
 import org.apache.spark.partial.BoundedDouble
 import org.apache.spark.partial.PartialResult
@@ -28,8 +30,6 @@ fun <K, V> JavaPairRDD<K, V>.toTupleRDD(): JavaRDD<Tuple2<K, V>> =
  * Generic function to combine the elements for each key using a custom set of aggregation
  * functions. This method is here for backward compatibility. It does not provide combiner
  * classtag information to the shuffle.
- *
- * @see `combineByKeyWithClassTag`
  */
 fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
     createCombiner: (V) -> C,
@@ -46,8 +46,6 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
  * Simplified version of combineByKeyWithClassTag that hash-partitions the output RDD.
  * This method is here for backward compatibility. It does not provide combiner
  * classtag information to the shuffle.
- *
- * @see `combineByKeyWithClassTag`
  */
 fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
     createCombiner: (V) -> C,
@@ -61,12 +59,12 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
 
 /**
  * Aggregate the values of each key, using given combine functions and a neutral "zero value".
- * This function can return a different result type, U, than the type of the values in this RDD,
- * V. Thus, we need one operation for merging a V into a U and one operation for merging two U's,
+ * This function can return a different result type, [U], than the type of the values in this RDD,
+ * [V]. Thus, we need one operation for merging a [V] into a [U] and one operation for merging two [U]'s,
  * as in scala.TraversableOnce. The former operation is used for merging values within a
  * partition, and the latter is used for merging values between partitions. To avoid memory
  * allocation, both of these functions are allowed to modify and return their first argument
- * instead of creating a new U.
+ * instead of creating a new [U].
  */
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
     zeroValue: U,
@@ -79,12 +77,12 @@ fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
 
 /**
  * Aggregate the values of each key, using given combine functions and a neutral "zero value".
- * This function can return a different result type, U, than the type of the values in this RDD,
- * V. Thus, we need one operation for merging a V into a U and one operation for merging two U's,
+ * This function can return a different result type, [U], than the type of the values in this RDD,
+ * [V]. Thus, we need one operation for merging a [V] into a [U] and one operation for merging two [U]'s,
  * as in scala.TraversableOnce. The former operation is used for merging values within a
  * partition, and the latter is used for merging values between partitions. To avoid memory
  * allocation, both of these functions are allowed to modify and return their first argument
- * instead of creating a new U.
+ * instead of creating a new [U].
  */
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
     zeroValue: U,
@@ -97,12 +95,12 @@ fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
 
 /**
  * Aggregate the values of each key, using given combine functions and a neutral "zero value".
- * This function can return a different result type, U, than the type of the values in this RDD,
- * V. Thus, we need one operation for merging a V into a U and one operation for merging two U's,
+ * This function can return a different result type, [U], than the type of the values in this RDD,
+ * [V]. Thus, we need one operation for merging a [V] into a [U] and one operation for merging two [U]'s,
  * as in scala.TraversableOnce. The former operation is used for merging values within a
  * partition, and the latter is used for merging values between partitions. To avoid memory
  * allocation, both of these functions are allowed to modify and return their first argument
- * instead of creating a new U.
+ * instead of creating a new [U].
  */
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
     zeroValue: U,
@@ -115,7 +113,7 @@ fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
 /**
  * Merge the values for each key using an associative function and a neutral "zero value" which
  * may be added to the result an arbitrary number of times, and must not change the result
- * (e.g., Nil for list concatenation, 0 for addition, or 1 for multiplication.).
+ * (e.g., [emptyList] for list concatenation, 0 for addition, or 1 for multiplication.).
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
     zeroValue: V,
@@ -128,7 +126,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
 /**
  * Merge the values for each key using an associative function and a neutral "zero value" which
  * may be added to the result an arbitrary number of times, and must not change the result
- * (e.g., Nil for list concatenation, 0 for addition, or 1 for multiplication.).
+ * (e.g., [emptyList] for list concatenation, 0 for addition, or 1 for multiplication.).
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
     zeroValue: V,
@@ -141,7 +139,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
 /**
  * Merge the values for each key using an associative function and a neutral "zero value" which
  * may be added to the result an arbitrary number of times, and must not change the result
- * (e.g., Nil for list concatenation, 0 for addition, or 1 for multiplication.).
+ * (e.g., [emptyList] for list concatenation, 0 for addition, or 1 for multiplication.).
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
     zeroValue: V,
@@ -154,7 +152,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
  * Return a subset of this RDD sampled by key (via stratified sampling).
  *
  * Create a sample of this RDD using variable sampling rates for different keys as specified by
- * `fractions`, a key to sampling rate map, via simple random sampling with one pass over the
+ * [fractions], a key to sampling rate map, via simple random sampling with one pass over the
  * RDD, to produce a sample of size that's approximately equal to the sum of
  * math.ceil(numItems * samplingRate) over all key values.
  *
@@ -175,7 +173,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sampleByKey(
  * Return a subset of this RDD sampled by key (via stratified sampling) containing exactly
  * math.ceil(numItems * samplingRate) for each stratum (group of pairs with the same key).
  *
- * This method differs from <[sampleByKey>] in that we make additional passes over the RDD to
+ * This method differs from [sampleByKey] in that we make additional passes over the RDD to
  * create a sample size that's exactly equal to the sum of math.ceil(numItems * samplingRate)
  * over all key values with a 99.99% confidence. When sampling without replacement, we need one
  * additional pass over the RDD to guarantee sample size; when sampling with replacement, we need
@@ -243,10 +241,10 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKeyLocally(
 /**
  * Count the number of elements for each key, collecting the results to a local Map.
  *
- * @note This method should only be used if the resulting map is expected to be small, as
+ * This method should only be used if the resulting map is expected to be small, as
  * the whole thing is loaded into the driver's memory.
- * To handle very large results, consider using rdd.mapValues(_ -> 1L).reduceByKey(_ + _), which
- * returns an RDD<T, Long> instead of a map.
+ * To handle very large results, consider using `rdd.mapValues { 1L }.reduceByKey(Long::plus)`, which
+ * returns an [RDD<T, Long>] instead of a map.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.countByKey(): Map<K, Long> =
     toPairRDD()
@@ -278,12 +276,12 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.countByKeyApprox(
  * The ordering of elements within each group is not guaranteed, and may even differ
  * each time the resulting RDD is evaluated.
  *
- * @note This operation may be very expensive. If you are grouping in order to perform an
- * aggregation (such as a sum or average) over each key, using `PairRDDFunctions.aggregateByKey`
- * or `PairRDDFunctions.reduceByKey` will provide much better performance.
+ * Note: This operation may be very expensive. If you are grouping in order to perform an
+ * aggregation (such as a sum or average) over each key, using [aggregateByKey]
+ * or [reduceByKey] will provide much better performance.
  *
- * @note As currently implemented, groupByKey must be able to hold all the key-value pairs for any
- * key in memory. If a key has too many values, it can result in an `OutOfMemoryError`.
+ * Note: As currently implemented, groupByKey must be able to hold all the key-value pairs for any
+ * key in memory. If a key has too many values, it can result in an [OutOfMemoryError].
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(
     partitioner: Partitioner,
@@ -293,15 +291,15 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(
 
 /**
  * Group the values for each key in the RDD into a single sequence. Hash-partitions the
- * resulting RDD with into `numPartitions` partitions. The ordering of elements within
+ * resulting RDD with into [numPartitions] partitions. The ordering of elements within
  * each group is not guaranteed, and may even differ each time the resulting RDD is evaluated.
  *
- * @note This operation may be very expensive. If you are grouping in order to perform an
- * aggregation (such as a sum or average) over each key, using `PairRDDFunctions.aggregateByKey`
- * or `PairRDDFunctions.reduceByKey` will provide much better performance.
+ * Note: This operation may be very expensive. If you are grouping in order to perform an
+ * aggregation (such as a sum or average) over each key, using [aggregateByKey]
+ * or [reduceByKey] will provide much better performance.
  *
- * @note As currently implemented, groupByKey must be able to hold all the key-value pairs for any
- * key in memory. If a key has too many values, it can result in an `OutOfMemoryError`.
+ * Note: As currently implemented, groupByKey must be able to hold all the key-value pairs for any
+ * key in memory. If a key has too many values, it can result in an [OutOfMemoryError].
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(
     numPartitions: Int,
@@ -319,9 +317,9 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.partitionBy(
     .toTupleRDD()
 
 /**
- * Return an RDD containing all pairs of elements with matching keys in `this` and `other`. Each
- * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
- * (k, v2) is in `other`. Uses the given Partitioner to partition the output RDD.
+ * Return an RDD containing all pairs of elements with matching keys in [this] and [other]. Each
+ * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in [this] and
+ * (k, v2) is in [other]. Uses the given Partitioner to partition the output RDD.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
     other: JavaRDD<Tuple2<K, W>>,
@@ -331,9 +329,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
     .toTupleRDD()
 
 /**
- * Perform a left outer join of `this` and `other`. For each element (k, v) in `this`, the
- * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in `other`, or the
- * pair (k, (v, None)) if no elements in `other` have key k. Uses the given Partitioner to
+ * Perform a left outer join of [this] and [other]. For each element (k, v) in [this], the
+ * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in [other], or the
+ * pair (k, (v, None)) if no elements in [other] have key k. Uses the given Partitioner to
  * partition the output RDD.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
@@ -344,9 +342,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     .toTupleRDD()
 
 /**
- * Perform a right outer join of `this` and `other`. For each element (k, w) in `other`, the
- * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in `this`, or the
- * pair (k, (None, w)) if no elements in `this` have key k. Uses the given Partitioner to
+ * Perform a right outer join of [this] and [other]. For each element (k, w) in [other], the
+ * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in [this], or the
+ * pair (k, (None, w)) if no elements in [this] have key k. Uses the given Partitioner to
  * partition the output RDD.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
@@ -357,12 +355,12 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
     .toTupleRDD()
 
 /**
- * Perform a full outer join of `this` and `other`. For each element (k, v) in `this`, the
- * resulting RDD will either contain all pairs (k, (Some(v), Some(w))) for w in `other`, or
- * the pair (k, (Some(v), None)) if no elements in `other` have key k. Similarly, for each
- * element (k, w) in `other`, the resulting RDD will either contain all pairs
- * (k, (Some(v), Some(w))) for v in `this`, or the pair (k, (None, Some(w))) if no elements
- * in `this` have key k. Uses the given Partitioner to partition the output RDD.
+ * Perform a full outer join of [this] and [other]. For each element (k, v) in [this], the
+ * resulting RDD will either contain all pairs (k, (Some(v), Some(w))) for w in [other], or
+ * the pair (k, (Some(v), None)) if no elements in [other] have key k. Similarly, for each
+ * element (k, w) in [other], the resulting RDD will either contain all pairs
+ * (k, (Some(v), Some(w))) for v in [this], or the pair (k, (None, Some(w))) if no elements
+ * in [this] have key k. Uses the given Partitioner to partition the output RDD.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
@@ -375,8 +373,6 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
  * Simplified version of combineByKeyWithClassTag that hash-partitions the resulting RDD using the
  * existing partitioner/parallelism level. This method is here for backward compatibility. It
  * does not provide combiner classtag information to the shuffle.
- *
- * @see `combineByKeyWithClassTag`
  */
 fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
     createCombiner: (V) -> C,
@@ -393,9 +389,9 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
  * within each group is not guaranteed, and may even differ each time the resulting RDD is
  * evaluated.
  *
- * @note This operation may be very expensive. If you are grouping in order to perform an
- * aggregation (such as a sum or average) over each key, using `PairRDDFunctions.aggregateByKey`
- * or `PairRDDFunctions.reduceByKey` will provide much better performance.
+ * Note: This operation may be very expensive. If you are grouping in order to perform an
+ * aggregation (such as a sum or average) over each key, using [aggregateByKey]
+ * or [reduceByKey] will provide much better performance.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(): JavaRDD<Tuple2<K, Iterable<V>>> =
     toPairRDD()
@@ -403,9 +399,9 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(): JavaRDD<Tuple2<K, Iterable<V>>> =
         .toTupleRDD()
 
 /**
- * Return an RDD containing all pairs of elements with matching keys in `this` and `other`. Each
- * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
- * (k, v2) is in `other`. Performs a hash join across the cluster.
+ * Return an RDD containing all pairs of elements with matching keys in [this] and [other]. Each
+ * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in [this] and
+ * (k, v2) is in [other]. Performs a hash join across the cluster.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, Tuple2<V, W>>> =
     toPairRDD()
@@ -413,9 +409,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(other: JavaRDD<Tuple2<K, W>>): JavaRDD<
         .toTupleRDD()
 
 /**
- * Return an RDD containing all pairs of elements with matching keys in `this` and `other`. Each
- * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in `this` and
- * (k, v2) is in `other`. Performs a hash join across the cluster.
+ * Return an RDD containing all pairs of elements with matching keys in [this] and [other]. Each
+ * pair of elements will be returned as a (k, (v1, v2)) tuple, where (k, v1) is in [this] and
+ * (k, v2) is in [other]. Performs a hash join across the cluster.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
     other: JavaRDD<Tuple2<K, W>>,
@@ -426,9 +422,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
         .toTupleRDD()
 
 /**
- * Perform a left outer join of `this` and `other`. For each element (k, v) in `this`, the
- * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in `other`, or the
- * pair (k, (v, None)) if no elements in `other` have key k. Hash-partitions the output
+ * Perform a left outer join of [this] and [other]. For each element (k, v) in [this], the
+ * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in [other], or the
+ * pair (k, (v, None)) if no elements in [other] have key k. Hash-partitions the output
  * using the existing partitioner/parallelism level.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> =
@@ -437,10 +433,10 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(other: JavaRDD<Tuple2<K, W>>):
         .toTupleRDD()
 
 /**
- * Perform a left outer join of `this` and `other`. For each element (k, v) in `this`, the
- * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in `other`, or the
- * pair (k, (v, None)) if no elements in `other` have key k. Hash-partitions the output
- * into `numPartitions` partitions.
+ * Perform a left outer join of [this] and [other]. For each element (k, v) in [this], the
+ * resulting RDD will either contain all pairs (k, (v, Some(w))) for w in [other], or the
+ * pair (k, (v, None)) if no elements in [other] have key k. Hash-partitions the output
+ * into [numPartitions] partitions.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
@@ -450,9 +446,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     .toTupleRDD()
 
 /**
- * Perform a right outer join of `this` and `other`. For each element (k, w) in `other`, the
- * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in `this`, or the
- * pair (k, (None, w)) if no elements in `this` have key k. Hash-partitions the resulting
+ * Perform a right outer join of [this] and [other]. For each element (k, w) in [other], the
+ * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in [this], or the
+ * pair (k, (None, w)) if no elements in [this] have key k. Hash-partitions the resulting
  * RDD using the existing partitioner/parallelism level.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> =
@@ -461,9 +457,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(other: JavaRDD<Tuple2<K, W>>)
         .toTupleRDD()
 
 /**
- * Perform a right outer join of `this` and `other`. For each element (k, w) in `other`, the
- * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in `this`, or the
- * pair (k, (None, w)) if no elements in `this` have key k. Hash-partitions the resulting
+ * Perform a right outer join of [this] and [other]. For each element (k, w) in [other], the
+ * resulting RDD will either contain all pairs (k, (Some(v), w)) for v in [this], or the
+ * pair (k, (None, w)) if no elements in [this] have key k. Hash-partitions the resulting
  * RDD into the given number of partitions.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
@@ -474,12 +470,12 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
     .toTupleRDD()
 
 /**
- * Perform a full outer join of `this` and `other`. For each element (k, v) in `this`, the
- * resulting RDD will either contain all pairs (k, (Some(v), Some(w))) for w in `other`, or
- * the pair (k, (Some(v), None)) if no elements in `other` have key k. Similarly, for each
- * element (k, w) in `other`, the resulting RDD will either contain all pairs
- * (k, (Some(v), Some(w))) for v in `this`, or the pair (k, (None, Some(w))) if no elements
- * in `this` have key k. Hash-partitions the resulting RDD using the existing partitioner/
+ * Perform a full outer join of [this] and [other]. For each element (k, v) in [this], the
+ * resulting RDD will either contain all pairs (k, (Some(v), Some(w))) for w in [other], or
+ * the pair (k, (Some(v), None)) if no elements in [other] have key k. Similarly, for each
+ * element (k, w) in [other], the resulting RDD will either contain all pairs
+ * (k, (Some(v), Some(w))) for v in [this], or the pair (k, (None, Some(w))) if no elements
+ * in [this] have key k. Hash-partitions the resulting RDD using the existing partitioner/
  * parallelism level.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
@@ -490,12 +486,12 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
         .toTupleRDD()
 
 /**
- * Perform a full outer join of `this` and `other`. For each element (k, v) in `this`, the
- * resulting RDD will either contain all pairs (k, (Some(v), Some(w))) for w in `other`, or
- * the pair (k, (Some(v), None)) if no elements in `other` have key k. Similarly, for each
- * element (k, w) in `other`, the resulting RDD will either contain all pairs
- * (k, (Some(v), Some(w))) for v in `this`, or the pair (k, (None, Some(w))) if no elements
- * in `this` have key k. Hash-partitions the resulting RDD into the given number of partitions.
+ * Perform a full outer join of [this] and [other]. For each element (k, v) in [this], the
+ * resulting RDD will either contain all pairs (k, (Some(v), Some(w))) for w in [other], or
+ * the pair (k, (Some(v), None)) if no elements in [other] have key k. Similarly, for each
+ * element (k, w) in [other], the resulting RDD will either contain all pairs
+ * (k, (Some(v), Some(w))) for v in [this], or the pair (k, (None, Some(w))) if no elements
+ * in [this] have key k. Hash-partitions the resulting RDD into the given number of partitions.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
@@ -511,7 +507,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
  * Warning: this doesn't return a multimap (so if you have multiple values to the same key, only
  *          one value per key is preserved in the map returned)
  *
- * @note this method should only be used if the resulting data is expected to be small, as
+ * Note: this method should only be used if the resulting data is expected to be small, as
  * all the data is loaded into the driver's memory.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.collectAsMap(): Map<K, V> = toPairRDD().collectAsMap()
@@ -531,9 +527,9 @@ fun <K, V, U> JavaRDD<Tuple2<K, V>>.flatMapValues(f: (V) -> Iterator<U>): JavaRD
     toPairRDD().flatMapValues(f).toTupleRDD()
 
 /**
- * For each key k in `this` or `other1` or `other2` or `other3`,
+ * For each key k in [this] or [other1] or [other2] or [other3],
  * return a resulting RDD that contains a tuple with the list of values
- * for that key in `this`, `other1`, `other2` and `other3`.
+ * for that key in [this], [other1], [other2] and [other3].
  */
 fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     other1: JavaRDD<Tuple2<K, W1>>,
@@ -544,8 +540,8 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     toPairRDD().cogroup(other1.toPairRDD(), other2.toPairRDD(), other3.toPairRDD(), partitioner).toTupleRDD()
 
 /**
- * For each key k in `this` or `other`, return a resulting RDD that contains a tuple with the
- * list of values for that key in `this` as well as `other`.
+ * For each key k in [this] or [other], return a resulting RDD that contains a tuple with the
+ * list of values for that key in [this] as well as [other].
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     other: JavaRDD<Tuple2<K, W>>,
@@ -555,8 +551,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     .toTupleRDD()
 
 /**
- * For each key k in `this` or `other1` or `other2`, return a resulting RDD that contains a
- * tuple with the list of values for that key in `this`, `other1` and `other2`.
+ * For each key k in [this] or [other1] or [other2], return a resulting RDD that contains a
+ * tuple with the list of values for that key in [this], [other1] and [other2].
  */
 fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
     other1: JavaRDD<Tuple2<K, W1>>,
@@ -568,9 +564,9 @@ fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
         .toTupleRDD()
 
 /**
- * For each key k in `this` or `other1` or `other2` or `other3`,
+ * For each key k in [this] or [other1] or [other2] or [other3],
  * return a resulting RDD that contains a tuple with the list of values
- * for that key in `this`, `other1`, `other2` and `other3`.
+ * for that key in [this], [other1], [other2] and [other3].
  */
 fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     other1: JavaRDD<Tuple2<K, W1>>,
@@ -582,8 +578,8 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
         .toTupleRDD()
 
 /**
- * For each key k in `this` or `other`, return a resulting RDD that contains a tuple with the
- * list of values for that key in `this` as well as `other`.
+ * For each key k in [this] or [other], return a resulting RDD that contains a tuple with the
+ * list of values for that key in [this] as well as [other].
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     other: JavaRDD<Tuple2<K, W>>,
@@ -591,8 +587,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     toPairRDD().cogroup(other.toPairRDD()).toTupleRDD()
 
 /**
- * For each key k in `this` or `other1` or `other2`, return a resulting RDD that contains a
- * tuple with the list of values for that key in `this`, `other1` and `other2`.
+ * For each key k in [this] or [other1] or [other2], return a resulting RDD that contains a
+ * tuple with the list of values for that key in [this], [other1] and [other2].
  */
 fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
     other1: JavaRDD<Tuple2<K, W1>>,
@@ -603,8 +599,8 @@ fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
         .toTupleRDD()
 
 /**
- * For each key k in `this` or `other`, return a resulting RDD that contains a tuple with the
- * list of values for that key in `this` as well as `other`.
+ * For each key k in [this] or [other], return a resulting RDD that contains a tuple with the
+ * list of values for that key in [this] as well as [other].
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     other: JavaRDD<Tuple2<K, W>>,
@@ -613,8 +609,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     toPairRDD().cogroup(other.toPairRDD(), numPartitions).toTupleRDD()
 
 /**
- * For each key k in `this` or `other1` or `other2`, return a resulting RDD that contains a
- * tuple with the list of values for that key in `this`, `other1` and `other2`.
+ * For each key k in [this] or [other1] or [other2], return a resulting RDD that contains a
+ * tuple with the list of values for that key in [this], [other1] and [other2].
  */
 fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
     other1: JavaRDD<Tuple2<K, W1>>,
@@ -626,9 +622,9 @@ fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
         .toTupleRDD()
 
 /**
- * For each key k in `this` or `other1` or `other2` or `other3`,
+ * For each key k in [this] or [other1] or [other2] or [other3],
  * return a resulting RDD that contains a tuple with the list of values
- * for that key in `this`, `other1`, `other2` and `other3`.
+ * for that key in [this], [other1], [other2] and [other3].
  */
 fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     other1: JavaRDD<Tuple2<K, W1>>,
@@ -641,20 +637,20 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
         .toTupleRDD()
 
 
-/** Alias for cogroup. */
+/** Alias for [cogroup]. */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.groupWith(
     other: JavaRDD<Tuple2<K, W>>,
 ): JavaRDD<Tuple2<K, Tuple2<Iterable<V>, Iterable<W>>>> =
     toPairRDD().groupWith(other.toPairRDD()).toTupleRDD()
 
-/** Alias for cogroup. */
+/** Alias for [cogroup]. */
 fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.groupWith(
     other1: JavaRDD<Tuple2<K, W1>>,
     other2: JavaRDD<Tuple2<K, W2>>,
 ): JavaRDD<Tuple2<K, Tuple3<Iterable<V>, Iterable<W1>, Iterable<W2>>>> =
     toPairRDD().groupWith(other1.toPairRDD(), other2.toPairRDD()).toTupleRDD()
 
-/** Alias for cogroup. */
+/** Alias for [cogroup]. */
 fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.groupWith(
     other1: JavaRDD<Tuple2<K, W1>>,
     other2: JavaRDD<Tuple2<K, W2>>,
@@ -663,16 +659,16 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.groupWith(
     toPairRDD().groupWith(other1.toPairRDD(), other2.toPairRDD(), other3.toPairRDD()).toTupleRDD()
 
 /**
- * Return an RDD with the pairs from `this` whose keys are not in `other`.
+ * Return an RDD with the pairs from [this] whose keys are not in [other].
  *
- * Uses `this` partitioner/partition size, because even if `other` is huge, the resulting
+ * Uses [this] partitioner/partition size, because even if [other] is huge, the resulting
  * RDD will be less than or equal to us.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, V>> =
     toPairRDD().subtractByKey(other.toPairRDD()).toTupleRDD()
 
 /**
- * Return an RDD with the pairs from `this` whose keys are not in `other`.
+ * Return an RDD with the pairs from [this] whose keys are not in [other].
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(
     other: JavaRDD<Tuple2<K, W>>,
@@ -682,7 +678,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(
     .toTupleRDD()
 
 /**
- * Return an RDD with the pairs from `this` whose keys are not in `other`.
+ * Return an RDD with the pairs from [this] whose keys are not in [other].
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(
     other: JavaRDD<Tuple2<K, W>>,
@@ -692,7 +688,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(
     .toTupleRDD()
 
 /**
- * Return the list of values in the RDD for key `key`. This operation is done efficiently if the
+ * Return the list of values in the RDD for key [key]. This operation is done efficiently if the
  * RDD has a known partitioner by only searching the partition that the key maps to.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.lookup(key: K): List<V> = toPairRDD().lookup(key)
@@ -760,7 +756,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.saveAsHadoopDataset(conf: JobConf): Unit =
  * Repartition the RDD according to the given partitioner and, within each resulting partition,
  * sort records by their keys.
  *
- * This is more efficient than calling `repartition` and then sorting within each partition
+ * This is more efficient than calling [JavaRDD.repartition] and then sorting within each partition
  * because it can push the sorting down into the shuffle machinery.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(partitioner: Partitioner): JavaRDD<Tuple2<K, V>> =
@@ -770,7 +766,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(partitioner:
  * Repartition the RDD according to the given partitioner and, within each resulting partition,
  * sort records by their keys.
  *
- * This is more efficient than calling `repartition` and then sorting within each partition
+ * This is more efficient than calling [JavaRDD.repartition] and then sorting within each partition
  * because it can push the sorting down into the shuffle machinery.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(
@@ -780,7 +776,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
- * `collect` or `save` on the resulting RDD will return or output an ordered list of records
+ * [JavaRDD.collect] or `save` on the resulting RDD will return or output an ordered list of records
  * (in the `save` case, they will be written to multiple `part-X` files in the filesystem, in
  * order of the keys).
  */
@@ -789,7 +785,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(ascending: Boolean = true): JavaRDD<T
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
- * `collect` or `save` on the resulting RDD will return or output an ordered list of records
+ * [JavaRDD.collect] or `save` on the resulting RDD will return or output an ordered list of records
  * (in the `save` case, they will be written to multiple `part-X` files in the filesystem, in
  * order of the keys).
  */
@@ -798,7 +794,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(ascending: Boolean, numPartitions: In
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
- * `collect` or `save` on the resulting RDD will return or output an ordered list of records
+ * [JavaRDD.collect] or `save` on the resulting RDD will return or output an ordered list of records
  * (in the `save` case, they will be written to multiple `part-X` files in the filesystem, in
  * order of the keys).
  */
@@ -807,7 +803,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(comp: Comparator<K>, ascending: Boole
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
- * `collect` or `save` on the resulting RDD will return or output an ordered list of records
+ * [JavaRDD.collect] or `save` on the resulting RDD will return or output an ordered list of records
  * (in the `save` case, they will be written to multiple `part-X` files in the filesystem, in
  * order of the keys).
  */
@@ -819,10 +815,10 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(
 
 //#if sparkMinor >= 3.1
 /**
- * Return a RDD containing only the elements in the inclusive range `lower` to `upper`.
- * If the RDD has been partitioned using a `RangePartitioner`, then this operation can be
+ * Return a RDD containing only the elements in the inclusive range [lower] to [upper].
+ * If the RDD has been partitioned using a [RangePartitioner], then this operation can be
  * performed efficiently by only scanning the partitions that might contain matching elements.
- * Otherwise, a standard `filter` is applied to all partitions.
+ * Otherwise, a standard [filter] is applied to all partitions.
  *
  * @since 3.1.0
  */
@@ -830,10 +826,10 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.filterByRange(lower: K, upper: K): JavaRDD<Tupl
     toPairRDD().filterByRange(lower, upper).toTupleRDD()
 
 /**
- * Return a RDD containing only the elements in the inclusive range `lower` to `upper`.
- * If the RDD has been partitioned using a `RangePartitioner`, then this operation can be
+ * Return a RDD containing only the elements in the inclusive range [lower] to [upper].
+ * If the RDD has been partitioned using a [RangePartitioner], then this operation can be
  * performed efficiently by only scanning the partitions that might contain matching elements.
- * Otherwise, a standard `filter` is applied to all partitions.
+ * Otherwise, a standard [filter] is applied to all partitions.
  *
  * @since 3.1.0
  */
@@ -877,7 +873,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.countApproxDistinctByKey(
  *
  * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
  * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
- * <a href="https://doi.org/10.1145/2452376.2452456">here</a>.
+ * [here](https://doi.org/10.1145/2452376.2452456).
  *
  * @param relativeSD Relative accuracy. Smaller values create counters that require more space.
  *                   It must be greater than 0.000017.
@@ -893,7 +889,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.countApproxDistinctByKey(
  *
  * The algorithm used is based on streamlib's implementation of "HyperLogLog in Practice:
  * Algorithmic Engineering of a State of The Art Cardinality Estimation Algorithm", available
- * <a href="https://doi.org/10.1145/2452376.2452456">here</a>.
+ * [here](https://doi.org/10.1145/2452376.2452456).
  *
  * @param relativeSD Relative accuracy. Smaller values create counters that require more space.
  *                   It must be greater than 0.000017.

@@ -20,7 +20,7 @@ fun JavaDoubleRDD.toDoubleRDD(): JavaRDD<Double> =
 fun JavaRDD<Double>.sum(): Double = toJavaDoubleRDD().sum()
 
 /**
- * Return a [[org.apache.spark.util.StatCounter]] object that captures the mean, variance and
+ * Return a [org.apache.spark.util.StatCounter] object that captures the mean, variance and
  * count of the RDD's elements in one operation.
  */
 fun JavaRDD<Double>.stats(): StatCounter = toJavaDoubleRDD().stats()
@@ -76,7 +76,7 @@ fun JavaRDD<Double>.sumApprox(
  * Compute a histogram of the data using bucketCount number of buckets evenly
  *  spaced between the minimum and maximum of the RDD. For example if the min
  *  value is 0 and the max is 100 and there are two buckets the resulting
- *  buckets will be [0, 50) [50, 100]. bucketCount must be at least 1
+ *  buckets will be `[0, 50)` `[50, 100]`. bucketCount must be at least 1
  * If the RDD contains infinity, NaN throws an exception
  * If the elements in RDD do not vary (max == min) always returns a single bucket.
  */
@@ -87,11 +87,11 @@ fun JavaRDD<Double>.histogram(bucketCount: Int): Tuple2<DoubleArray, LongArray> 
  * Compute a histogram using the provided buckets. The buckets are all open
  * to the right except for the last which is closed.
  *  e.g. for the array
- *  [1, 10, 20, 50] the buckets are [1, 10) [10, 20) [20, 50]
- *  e.g {@code <=x<10, 10<=x<20, 20<=x<=50}
+ *  `[1, 10, 20, 50]` the buckets are `[1, 10) [10, 20) [20, 50]`
+ *  e.g. ` <=x<10, 10<=x<20, 20<=x<=50`
  *  And on the input of 1 and 50 we would have a histogram of 1, 0, 1
  *
- * @note If your histogram is evenly spaced (e.g. [0, 10, 20, 30]) this can be switched
+ * Note: If your histogram is evenly spaced (e.g. `[0, 10, 20, 30]`) this can be switched
  * from an O(log n) insertion to O(1) per element. (where n = # buckets) if you set evenBuckets
  * to true.
  * buckets must be sorted and not contain any duplicates.
