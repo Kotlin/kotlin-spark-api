@@ -3,7 +3,7 @@ name: Generate and publish docs
 on:
   push:
     branches:
-      - "release" # todo make release branch
+      - "release"
 
 jobs:
   generate-and-publish-docs:
@@ -34,7 +34,10 @@ jobs:
         uses: gradle/gradle-build-action@v2
         with:
           arguments: |
+            clean
+            build
             dokkaHtmlMultiModule
+            --scan
 
       - name: Copy docs to "docs" branch
         uses: peaceiris/actions-gh-pages@v3

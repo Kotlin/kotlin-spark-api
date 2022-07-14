@@ -60,6 +60,7 @@ jobs:
             -Pscala=${{ matrix.scala }}
             clean
             build
+            --scan
 
   #  qodana:
   #    runs-on: ubuntu-latest
