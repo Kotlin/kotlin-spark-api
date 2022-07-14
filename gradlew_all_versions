@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 # Run like you would `./gradlew arguments`
 # but now like `./gradlew_all_versions arguments`.
 
-DRY_RUN=false
+DRY_RUN=${DRY_RUN:-false}
 SCALA2_12VERSION="2.12.15"
 SCALA2_13VERSION="2.13.8"
 SparkVersionsForBothScalaVersions=("3.3.0" "3.2.1" "3.2.0")
