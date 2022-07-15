@@ -1,6 +1,9 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import org.jetbrains.kotlinx.spark.api.tuples.*
 
@@ -17,7 +20,7 @@ class RddTest : ShouldSpec({
                     val pairs = rdd.map { it X 1 }
                     val counts = pairs.reduceByKey { a, b -> a + b }
                     val list = counts.collect().toList()
-                    list shouldBe listOf("1" X 2, "2" X 3, "3" X 1)
+                    list.shouldContainAll("1" X 2, "2" X 3, "3" X 1)
                 }
             }
 
