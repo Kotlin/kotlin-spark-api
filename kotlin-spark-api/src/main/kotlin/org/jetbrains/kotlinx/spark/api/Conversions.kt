@@ -28,8 +28,7 @@
 package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.api.java.Optional
-import scala.*
-import scala.jdk.javaapi.CollectionConverters
+import scala.* 
 import java.util.*
 import java.util.Enumeration
 import java.util.concurrent.ConcurrentMap
@@ -77,128 +76,292 @@ fun <T> T?.toOptional(): Optional<T> = Optional.ofNullable(this)
 /** Converts Java [Optional] to Scala [Option]. */
 fun <T> Optional<T>.toOption(): Option<T> = Option.apply(getOrNull())
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A> Iterator<A>.asScalaIterator(): ScalaIterator<A> = CollectionConverters.asScala<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asScalaIterator for more information. */
+//# endif
+fun <A> Iterator<A>.asScalaIterator(): ScalaIterator<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asScalaIterator<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A> Enumeration<A>.asScalaIterator(): ScalaIterator<A> = CollectionConverters.asScala<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.enumerationAsScalaIterator for more information. */
+//# endif
+fun <A> Enumeration<A>.asScalaIterator(): ScalaIterator<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.enumerationAsScalaIterator<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A> Iterable<A>.asScalaIterable(): ScalaIterable<A> = CollectionConverters.asScala<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.iterableAsScalaIterable for more information. */
+fun <A> Iterable<A>.asScalaIterable(): ScalaIterable<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.iterableAsScalaIterable<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A> Collection<A>.asScalaIterable(): ScalaIterable<A> = CollectionConverters.asScala<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.collectionAsScalaIterable for more information. */
+//# endif
+fun <A> Collection<A>.asScalaIterable(): ScalaIterable<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.collectionAsScalaIterable<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A> MutableList<A>.asScalaMutableBuffer(): ScalaMutableBuffer<A> = CollectionConverters.asScala<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asScalaBuffer for more information. */
+//# endif
+fun <A> MutableList<A>.asScalaMutableBuffer(): ScalaMutableBuffer<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asScalaBuffer<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A> MutableSet<A>.asScalaMutableSet(): ScalaMutableSet<A> = CollectionConverters.asScala<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asScalaSet for more information. */
+//# endif
+fun <A> MutableSet<A>.asScalaMutableSet(): ScalaMutableSet<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asScalaSet<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A, B> MutableMap<A, B>.asScalaMutableMap(): ScalaMutableMap<A, B> = CollectionConverters.asScala<A, B>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mapAsScalaMap for more information. */
+//# endif
+fun <A, B> MutableMap<A, B>.asScalaMutableMap(): ScalaMutableMap<A, B> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mapAsScalaMap<A, B>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A, B> Map<A, B>.asScalaMap(): ScalaMap<A, B> = CollectionConverters.asScala<A, B>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mapAsScalaMap for more information. */
+//# endif
+fun <A, B> Map<A, B>.asScalaMap(): ScalaMap<A, B> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mapAsScalaMap<A, B>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mapAsScalaConcurrentMap for more information. */
+//# endif
 fun <A, B> ConcurrentMap<A, B>.asScalaConcurrentMap(): ScalaConcurrentMap<A, B> =
-    CollectionConverters.asScala<A, B>(this)
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mapAsScalaConcurrentMap<A, B>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A, B> Dictionary<A, B>.asScalaMap(): ScalaMutableMap<A, B> = CollectionConverters.asScala<A, B>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.dictionaryAsScalaMap for more information. */
+//# endif
+fun <A, B> Dictionary<A, B>.asScalaMap(): ScalaMutableMap<A, B> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.dictionaryAsScalaMap<A, B>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun Properties.asScalaMap(): ScalaMutableMap<String, String> = CollectionConverters.asScala(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.propertiesAsScalaMap for more information. */
+//# endif
+fun Properties.asScalaMap(): ScalaMutableMap<String, String> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asScala(this)
+    //# else
+    //$ scala.collection.JavaConverters.propertiesAsScalaMap(this)
+    //# endif
 
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asJavaIterator for more information. */
+//# endif
+fun <A> ScalaIterator<A>.asKotlinIterator(): Iterator<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asJavaIterator<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asScala for more information.
- */
-fun <A> ScalaIterator<A>.asKotlinIterator(): Iterator<A> = CollectionConverters.asJava<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJavaEnumeration for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asJavaEnumeration for more information. */
+//# endif
+fun <A> ScalaIterator<A>.asKotlinEnumeration(): Enumeration<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJavaEnumeration<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asJavaEnumeration<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJavaEnumeration for more information.
- */
-fun <A> ScalaIterator<A>.asKotlinEnumeration(): Enumeration<A> = CollectionConverters.asJavaEnumeration<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asJavaIterable for more information. */
+//# endif
+fun <A> ScalaIterable<A>.asKotlinIterable(): Iterable<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asJavaIterable<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A> ScalaIterable<A>.asKotlinIterable(): Iterable<A> = CollectionConverters.asJava<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJavaCollection for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asJavaCollection for more information. */
+//# endif
+fun <A> ScalaIterable<A>.asKotlinCollection(): Collection<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJavaCollection<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asJavaCollection<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJavaCollection for more information.
- */
-fun <A> ScalaIterable<A>.asKotlinCollection(): Collection<A> = CollectionConverters.asJavaCollection<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.bufferAsJavaList for more information. */
+//# endif
+fun <A> ScalaMutableBuffer<A>.asKotlinMutableList(): MutableList<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.bufferAsJavaList<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A> ScalaMutableBuffer<A>.asKotlinMutableList(): MutableList<A> = CollectionConverters.asJava<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mutableSeqAsJavaList for more information. */
+//# endif
+fun <A> ScalaMutableSeq<A>.asKotlinMutableList(): MutableList<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mutableSeqAsJavaList<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A> ScalaMutableSeq<A>.asKotlinMutableList(): MutableList<A> = CollectionConverters.asJava<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.seqAsJavaList for more information. */
+//# endif
+fun <A> ScalaSeq<A>.asKotlinList(): List<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.seqAsJavaList<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A> ScalaSeq<A>.asKotlinList(): List<A> = CollectionConverters.asJava<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mutableSetAsJavaSet for more information. */
+//# endif
+fun <A> ScalaMutableSet<A>.asKotlinMutableSet(): MutableSet<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mutableSetAsJavaSet<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A> ScalaMutableSet<A>.asKotlinMutableSet(): MutableSet<A> = CollectionConverters.asJava<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.setAsJavaSet for more information. */
+//# endif
+fun <A> ScalaSet<A>.asKotlinSet(): Set<A> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A>(this)
+    //# else
+    //$ scala.collection.JavaConverters.setAsJavaSet<A>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A> ScalaSet<A>.asKotlinSet(): Set<A> = CollectionConverters.asJava<A>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mutableMapAsJavaMap for more information. */
+//# endif
+fun <A, B> ScalaMutableMap<A, B>.asKotlinMutableMap(): MutableMap<A, B> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mutableMapAsJavaMap<A, B>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A, B> ScalaMutableMap<A, B>.asKotlinMutableMap(): MutableMap<A, B> = CollectionConverters.asJava<A, B>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJavaDictionary for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.asJavaDictionary for more information. */
+//# endif
+fun <A, B> ScalaMutableMap<A, B>.asKotlinDictionary(): Dictionary<A, B> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJavaDictionary<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.asJavaDictionary<A, B>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJavaDictionary for more information.
- */
-fun <A, B> ScalaMutableMap<A, B>.asKotlinDictionary(): Dictionary<A, B> = CollectionConverters.asJavaDictionary<A, B>(this)
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mapAsJavaMap for more information. */
+//# endif
+fun <A, B> ScalaMap<A, B>.asKotlinMap(): Map<A, B> =
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mapAsJavaMap<A, B>(this)
+    //# endif
 
-/**
- * @see CollectionConverters.asJava for more information.
- */
-fun <A, B> ScalaMap<A, B>.asKotlinMap(): Map<A, B> = CollectionConverters.asJava<A, B>(this)
-
-/**
- * @see CollectionConverters.asJava for more information.
- */
+//# if scalaCompat >= 2.13
+/** @see scala.jdk.javaapi.CollectionConverters.asJava for more information. */
+//# else
+//$ /** @see scala.collection.JavaConverters.mapAsJavaConcurrentMap for more information. */
+//# endif
 fun <A, B> ScalaConcurrentMap<A, B>.asKotlinConcurrentMap(): ConcurrentMap<A, B> =
-    CollectionConverters.asJava<A, B>(this)
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava<A, B>(this)
+    //# else
+    //$ scala.collection.JavaConverters.mapAsJavaConcurrentMap<A, B>(this)
+    //# endif
 
 
 /**

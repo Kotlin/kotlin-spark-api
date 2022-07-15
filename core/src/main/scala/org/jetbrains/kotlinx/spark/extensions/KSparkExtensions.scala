@@ -23,7 +23,6 @@ import org.apache.spark.SparkContext
 import org.apache.spark.sql._
 
 import java.util
-import scala.collection.JavaConverters
 
 object KSparkExtensions {
 
@@ -39,7 +38,13 @@ object KSparkExtensions {
 
   def lit(literal: Any): Column = functions.lit(literal)
 
-  def collectAsList[T](ds: Dataset[T]): util.List[T] = JavaConverters.seqAsJavaList(ds.collect())
+  def collectAsList[T](ds: Dataset[T]): util.List[T] = {
+    //# if scalaCompat >= 2.13
+    scala.jdk.javaapi.CollectionConverters.asJava(ds.collect())
+    //# else
+    //$ scala.collection.JavaConverters.seqAsJavaList(ds.collect())
+    //# endif
+  }
 
 
   def debugCodegen(df: Dataset[_]): Unit = {
