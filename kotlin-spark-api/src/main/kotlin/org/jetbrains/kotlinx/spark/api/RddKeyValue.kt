@@ -187,7 +187,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sampleByKey(
 fun <K, V> JavaRDD<Tuple2<K, V>>.sampleByKeyExact(
     withReplacement: Boolean,
     fractions: Map<K, Double>,
-    seed: Long = Random.nextLong()
+    seed: Long = Random.nextLong(),
 ): JavaRDD<Tuple2<K, V>> = toPairRDD()
     .sampleByKeyExact(withReplacement, fractions, seed)
     .toTupleRDD()
@@ -210,8 +210,8 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
  * to a "combiner" in MapReduce. Output will be hash-partitioned with numPartitions partitions.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
-    func: (V, V) -> V,
     numPartitions: Int,
+    func: (V, V) -> V,
 ): JavaRDD<Tuple2<K, V>> = toPairRDD()
     .reduceByKey(func, numPartitions)
     .toTupleRDD()
@@ -336,7 +336,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
-    partitioner: Partitioner
+    partitioner: Partitioner,
 ): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> = toPairRDD()
     .leftOuterJoin(other.toPairRDD(), partitioner)
     .toTupleRDD()
@@ -377,7 +377,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
 fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
     createCombiner: (V) -> C,
     mergeValue: (C, V) -> C,
-    mergeCombiners: (C, C) -> C
+    mergeCombiners: (C, C) -> C,
 ): JavaRDD<Tuple2<K, C>> = toPairRDD()
     .combineByKey(createCombiner, mergeValue, mergeCombiners)
     .toTupleRDD()
@@ -415,7 +415,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(other: JavaRDD<Tuple2<K, W>>): JavaRDD<
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
     other: JavaRDD<Tuple2<K, W>>,
-    numPartitions: Int
+    numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple2<V, W>>> =
     toPairRDD()
         .join(other.toPairRDD(), numPartitions)
@@ -427,7 +427,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
  * pair (k, (v, None)) if no elements in [other] have key k. Hash-partitions the output
  * using the existing partitioner/parallelism level.
  */
-fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> =
+fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
+    other: JavaRDD<Tuple2<K, W>>,
+): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> =
     toPairRDD()
         .leftOuterJoin(other.toPairRDD())
         .toTupleRDD()
@@ -440,7 +442,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(other: JavaRDD<Tuple2<K, W>>):
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
-    numPartitions: Int
+    numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> = toPairRDD()
     .leftOuterJoin(other.toPairRDD(), numPartitions)
     .toTupleRDD()
@@ -451,7 +453,9 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
  * pair (k, (None, w)) if no elements in [this] have key k. Hash-partitions the resulting
  * RDD using the existing partitioner/parallelism level.
  */
-fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> =
+fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
+    other: JavaRDD<Tuple2<K, W>>,
+): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> =
     toPairRDD()
         .rightOuterJoin(other.toPairRDD())
         .toTupleRDD()
@@ -604,7 +608,7 @@ fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     other: JavaRDD<Tuple2<K, W>>,
-    numPartitions: Int
+    numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple2<Iterable<V>, Iterable<W>>>> =
     toPairRDD().cogroup(other.toPairRDD(), numPartitions).toTupleRDD()
 
