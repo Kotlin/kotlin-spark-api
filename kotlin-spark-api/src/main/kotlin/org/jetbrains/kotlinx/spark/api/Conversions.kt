@@ -104,6 +104,7 @@ fun <A> Enumeration<A>.asScalaIterator(): ScalaIterator<A> =
 /** @see scala.jdk.javaapi.CollectionConverters.asScala for more information. */
 //#else
 //$/** @see scala.collection.JavaConverters.iterableAsScalaIterable for more information. */
+//#endif
 fun <A> Iterable<A>.asScalaIterable(): ScalaIterable<A> =
     //#if scalaCompat >= 2.13
     scala.jdk.javaapi.CollectionConverters.asScala<A>(this)

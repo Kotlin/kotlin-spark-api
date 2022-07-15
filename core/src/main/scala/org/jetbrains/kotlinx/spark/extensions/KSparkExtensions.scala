@@ -39,11 +39,11 @@ object KSparkExtensions {
   def lit(literal: Any): Column = functions.lit(literal)
 
   def collectAsList[T](ds: Dataset[T]): util.List[T] = {
-    //# if scalaCompat >= 2.13
+    //#if scalaCompat >= 2.13
     scala.jdk.javaapi.CollectionConverters.asJava(ds.collect())
-    //# else
-    //$ scala.collection.JavaConverters.seqAsJavaList(ds.collect())
-    //# endif
+    //#else
+    //$scala.collection.JavaConverters.seqAsJavaList(ds.collect())
+    //#endif
   }
 
 
