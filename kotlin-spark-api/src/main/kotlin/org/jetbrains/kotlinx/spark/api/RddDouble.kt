@@ -9,57 +9,62 @@ import org.apache.spark.util.StatCounter
 import scala.Tuple2
 
 @Suppress("UNCHECKED_CAST")
-fun JavaRDD<Double>.toJavaDoubleRDD(): JavaDoubleRDD =
-    JavaDoubleRDD.fromRDD(rdd() as RDD<Any>)
+inline fun <reified T : Number> JavaRDD<T>.toJavaDoubleRDD(): JavaDoubleRDD =
+    JavaDoubleRDD.fromRDD(
+        when (T::class) {
+            Double::class -> this
+            else -> map(Number::toDouble)
+        }.rdd() as RDD<Any>
+    )
 
 @Suppress("UNCHECKED_CAST")
 fun JavaDoubleRDD.toDoubleRDD(): JavaRDD<Double> =
     JavaDoubleRDD.toRDD(this).toJavaRDD() as JavaRDD<Double>
 
 /** Add up the elements in this RDD. */
-fun JavaRDD<Double>.sum(): Double = toJavaDoubleRDD().sum()
+inline fun <reified T : Number> JavaRDD<T>.sum(): Double = toJavaDoubleRDD().sum()
 
 /**
  * Return a [org.apache.spark.util.StatCounter] object that captures the mean, variance and
  * count of the RDD's elements in one operation.
  */
-fun JavaRDD<Double>.stats(): StatCounter = toJavaDoubleRDD().stats()
+inline fun <reified T : Number> JavaRDD<T>.stats(): StatCounter = toJavaDoubleRDD().stats()
 
 /** Compute the mean of this RDD's elements. */
-fun JavaRDD<Double>.mean(): Double = toJavaDoubleRDD().mean()
+inline fun <reified T : Number> JavaRDD<T>.mean(): Double = toJavaDoubleRDD().mean()
 
 /** Compute the population variance of this RDD's elements. */
-fun JavaRDD<Double>.variance(): Double = toJavaDoubleRDD().variance()
+inline fun <reified T : Number> JavaRDD<T>.variance(): Double = toJavaDoubleRDD().variance()
 
 /** Compute the population standard deviation of this RDD's elements. */
-fun JavaRDD<Double>.stdev(): Double = toJavaDoubleRDD().stdev()
+inline fun <reified T : Number> JavaRDD<T>.stdev(): Double = toJavaDoubleRDD().stdev()
 
 /**
  * Compute the sample standard deviation of this RDD's elements (which corrects for bias in
  * estimating the standard deviation by dividing by N-1 instead of N).
  */
-fun JavaRDD<Double>.sampleStdev(): Double = toJavaDoubleRDD().sampleStdev()
+inline fun <reified T : Number> JavaRDD<T>.sampleStdev(): Double = toJavaDoubleRDD().sampleStdev()
 
 /**
  * Compute the sample variance of this RDD's elements (which corrects for bias in
  * estimating the variance by dividing by N-1 instead of N).
  */
-fun JavaRDD<Double>.sampleVariance(): Double = toJavaDoubleRDD().sampleVariance()
+inline fun <reified T : Number> JavaRDD<T>.sampleVariance(): Double = toJavaDoubleRDD().sampleVariance()
 
 /**
  * Compute the population standard deviation of this RDD's elements.
  */
-fun JavaRDD<Double>.popStdev(): Double = toJavaDoubleRDD().popStdev()
+inline fun <reified T : Number> JavaRDD<T>.popStdev(): Double = toJavaDoubleRDD().popStdev()
 
 /**
  * Compute the population variance of this RDD's elements.
  */
-fun JavaRDD<Double>.popVariance(): Double = toJavaDoubleRDD().popVariance()
+inline fun <reified T : Number> JavaRDD<T>.popVariance(): Double = toJavaDoubleRDD().popVariance()
 
 /**
  * Approximate operation to return the mean within a timeout.
  */
-fun JavaRDD<Double>.meanApprox(
+inline fun <reified T : Number> JavaRDD<T>.meanApprox(
     timeout: Long,
     confidence: Double = 0.95,
 ): PartialResult<BoundedDouble> = toJavaDoubleRDD().meanApprox(timeout, confidence)
@@ -67,7 +72,7 @@ fun JavaRDD<Double>.meanApprox(
 /**
  * Approximate operation to return the sum within a timeout.
  */
-fun JavaRDD<Double>.sumApprox(
+inline fun <reified T : Number> JavaRDD<T>.sumApprox(
     timeout: Long,
     confidence: Double = 0.95,
 ): PartialResult<BoundedDouble> = toJavaDoubleRDD().sumApprox(timeout, confidence)
@@ -80,7 +85,7 @@ fun JavaRDD<Double>.sumApprox(
  * If the RDD contains infinity, NaN throws an exception
  * If the elements in RDD do not vary (max == min) always returns a single bucket.
  */
-fun JavaRDD<Double>.histogram(bucketCount: Int): Tuple2<DoubleArray, LongArray> =
+inline fun <reified T : Number> JavaRDD<T>.histogram(bucketCount: Int): Tuple2<DoubleArray, LongArray> =
     toJavaDoubleRDD().histogram(bucketCount)
 
 /**
@@ -100,7 +105,7 @@ fun JavaRDD<Double>.histogram(bucketCount: Int): Tuple2<DoubleArray, LongArray> 
  * the maximum value of the last position and all NaN entries will be counted
  * in that bucket.
  */
-fun JavaRDD<Double>.histogram(
+inline fun <reified T : Number> JavaRDD<T>.histogram(
     buckets: Array<Double>,
     evenBuckets: Boolean = false,
 ): LongArray = toJavaDoubleRDD().histogram(buckets, evenBuckets)

@@ -106,14 +106,14 @@ class KSparkSession(val spark: SparkSession) {
      * Utility method to create an RDD from a list.
      * NOTE: [T] must be [Serializable].
      */
-    inline fun <reified T> List<T>.toRDD(numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
+    fun <T> List<T>.toRDD(numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
         sc.toRDD(this, numSlices)
 
     /**
      * Utility method to create an RDD from a list.
      * NOTE: [T] must be [Serializable].
      */
-    inline fun <reified T> rddOf(vararg elements: T, numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
+    fun <T> rddOf(vararg elements: T, numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
         sc.toRDD(elements.toList(), numSlices)
 
     /**

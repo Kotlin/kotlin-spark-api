@@ -45,7 +45,6 @@ import scala.collection.mutable.Seq as ScalaMutableSeq
 import scala.collection.mutable.Set as ScalaMutableSet
 import org.apache.spark.streaming.State
 
-
 /** Returns state value if it exists, else `null`. */
 fun <T> State<T>.getOrNull(): T? = if (exists()) get() else null
 
@@ -249,115 +248,375 @@ fun <T1, T2, T3> Tuple3<T1, T2, T3>.toArity(): Arity3<T1, T2, T3> = Arity3<T1, T
  * Returns a new Arity4 based on this Tuple4.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4>.toArity(): Arity4<T1, T2, T3, T4> = Arity4<T1, T2, T3, T4>(this._1(), this._2(), this._3(), this._4())
+fun <T1, T2, T3, T4> Tuple4<T1, T2, T3, T4>.toArity(): Arity4<T1, T2, T3, T4> =
+    Arity4<T1, T2, T3, T4>(this._1(), this._2(), this._3(), this._4())
 
 /**
  * Returns a new Arity5 based on this Tuple5.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5>.toArity(): Arity5<T1, T2, T3, T4, T5> = Arity5<T1, T2, T3, T4, T5>(this._1(), this._2(), this._3(), this._4(), this._5())
+fun <T1, T2, T3, T4, T5> Tuple5<T1, T2, T3, T4, T5>.toArity(): Arity5<T1, T2, T3, T4, T5> =
+    Arity5<T1, T2, T3, T4, T5>(this._1(), this._2(), this._3(), this._4(), this._5())
 
 /**
  * Returns a new Arity6 based on this Tuple6.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6> Tuple6<T1, T2, T3, T4, T5, T6>.toArity(): Arity6<T1, T2, T3, T4, T5, T6> = Arity6<T1, T2, T3, T4, T5, T6>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6())
+fun <T1, T2, T3, T4, T5, T6> Tuple6<T1, T2, T3, T4, T5, T6>.toArity(): Arity6<T1, T2, T3, T4, T5, T6> =
+    Arity6<T1, T2, T3, T4, T5, T6>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6())
 
 /**
  * Returns a new Arity7 based on this Tuple7.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7> Tuple7<T1, T2, T3, T4, T5, T6, T7>.toArity(): Arity7<T1, T2, T3, T4, T5, T6, T7> = Arity7<T1, T2, T3, T4, T5, T6, T7>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7())
+fun <T1, T2, T3, T4, T5, T6, T7> Tuple7<T1, T2, T3, T4, T5, T6, T7>.toArity(): Arity7<T1, T2, T3, T4, T5, T6, T7> =
+    Arity7<T1, T2, T3, T4, T5, T6, T7>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7())
 
 /**
  * Returns a new Arity8 based on this Tuple8.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>.toArity(): Arity8<T1, T2, T3, T4, T5, T6, T7, T8> = Arity8<T1, T2, T3, T4, T5, T6, T7, T8>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8())
+fun <T1, T2, T3, T4, T5, T6, T7, T8> Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>.toArity(): Arity8<T1, T2, T3, T4, T5, T6, T7, T8> =
+    Arity8<T1, T2, T3, T4, T5, T6, T7, T8>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8()
+    )
 
 /**
  * Returns a new Arity9 based on this Tuple9.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>.toArity(): Arity9<T1, T2, T3, T4, T5, T6, T7, T8, T9> = Arity9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>.toArity(): Arity9<T1, T2, T3, T4, T5, T6, T7, T8, T9> =
+    Arity9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9()
+    )
 
 /**
  * Returns a new Arity10 based on this Tuple10.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.toArity(): Arity10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> = Arity10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.toArity(): Arity10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> =
+    Arity10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10()
+    )
 
 /**
  * Returns a new Arity11 based on this Tuple11.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Tuple11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.toArity(): Arity11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> = Arity11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Tuple11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.toArity(): Arity11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> =
+    Arity11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11()
+    )
 
 /**
  * Returns a new Arity12 based on this Tuple12.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>.toArity(): Arity12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> = Arity12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>.toArity(): Arity12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> =
+    Arity12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12()
+    )
 
 /**
  * Returns a new Arity13 based on this Tuple13.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Tuple13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>.toArity(): Arity13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> = Arity13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Tuple13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>.toArity(): Arity13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> =
+    Arity13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13()
+    )
 
 /**
  * Returns a new Arity14 based on this Tuple14.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>.toArity(): Arity14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> = Arity14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>.toArity(): Arity14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> =
+    Arity14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14()
+    )
 
 /**
  * Returns a new Arity15 based on this Tuple15.
- **/@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
+ **/
+@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
 
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Tuple15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>.toArity(): Arity15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> = Arity15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Tuple15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>.toArity(): Arity15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> =
+    Arity15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15()
+    )
 
 /**
  * Returns a new Arity16 based on this Tuple16.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Tuple16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>.toArity(): Arity16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> = Arity16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15(), this._16())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Tuple16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>.toArity(): Arity16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> =
+    Arity16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15(),
+        this._16()
+    )
 
 /**
  * Returns a new Arity17 based on this Tuple17.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>.toArity(): Arity17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> = Arity17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15(), this._16(), this._17())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>.toArity(): Arity17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> =
+    Arity17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15(),
+        this._16(),
+        this._17()
+    )
 
 /**
  * Returns a new Arity18 based on this Tuple18.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> Tuple18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>.toArity(): Arity18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> = Arity18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15(), this._16(), this._17(), this._18())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> Tuple18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>.toArity(): Arity18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> =
+    Arity18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15(),
+        this._16(),
+        this._17(),
+        this._18()
+    )
 
 /**
  * Returns a new Arity19 based on this Tuple19.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> Tuple19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>.toArity(): Arity19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> = Arity19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15(), this._16(), this._17(), this._18(), this._19())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> Tuple19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>.toArity(): Arity19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> =
+    Arity19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15(),
+        this._16(),
+        this._17(),
+        this._18(),
+        this._19()
+    )
 
 /**
  * Returns a new Arity20 based on this Tuple20.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> Tuple20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>.toArity(): Arity20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> = Arity20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15(), this._16(), this._17(), this._18(), this._19(), this._20())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> Tuple20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>.toArity(): Arity20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> =
+    Arity20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15(),
+        this._16(),
+        this._17(),
+        this._18(),
+        this._19(),
+        this._20()
+    )
 
 /**
  * Returns a new Arity21 based on this Tuple21.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> Tuple21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>.toArity(): Arity21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> = Arity21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15(), this._16(), this._17(), this._18(), this._19(), this._20(), this._21())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> Tuple21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>.toArity(): Arity21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> =
+    Arity21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15(),
+        this._16(),
+        this._17(),
+        this._18(),
+        this._19(),
+        this._20(),
+        this._21()
+    )
 
 /**
  * Returns a new Arity22 based on this Tuple22.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> Tuple22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>.toArity(): Arity22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> = Arity22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>(this._1(), this._2(), this._3(), this._4(), this._5(), this._6(), this._7(), this._8(), this._9(), this._10(), this._11(), this._12(), this._13(), this._14(), this._15(), this._16(), this._17(), this._18(), this._19(), this._20(), this._21(), this._22())
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> Tuple22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>.toArity(): Arity22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> =
+    Arity22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>(
+        this._1(),
+        this._2(),
+        this._3(),
+        this._4(),
+        this._5(),
+        this._6(),
+        this._7(),
+        this._8(),
+        this._9(),
+        this._10(),
+        this._11(),
+        this._12(),
+        this._13(),
+        this._14(),
+        this._15(),
+        this._16(),
+        this._17(),
+        this._18(),
+        this._19(),
+        this._20(),
+        this._21(),
+        this._22()
+    )
 
 /**
  * Returns a new Tuple1 based on this Arity1.
@@ -381,112 +640,362 @@ fun <T1, T2, T3> Arity3<T1, T2, T3>.toTuple(): Tuple3<T1, T2, T3> = Tuple3<T1, T
  * Returns a new Tuple4 based on this Arity4.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4> Arity4<T1, T2, T3, T4>.toTuple(): Tuple4<T1, T2, T3, T4> = Tuple4<T1, T2, T3, T4>(this._1, this._2, this._3, this._4)
+fun <T1, T2, T3, T4> Arity4<T1, T2, T3, T4>.toTuple(): Tuple4<T1, T2, T3, T4> =
+    Tuple4<T1, T2, T3, T4>(this._1, this._2, this._3, this._4)
 
 /**
  * Returns a new Tuple5 based on this Arity5.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5> Arity5<T1, T2, T3, T4, T5>.toTuple(): Tuple5<T1, T2, T3, T4, T5> = Tuple5<T1, T2, T3, T4, T5>(this._1, this._2, this._3, this._4, this._5)
+fun <T1, T2, T3, T4, T5> Arity5<T1, T2, T3, T4, T5>.toTuple(): Tuple5<T1, T2, T3, T4, T5> =
+    Tuple5<T1, T2, T3, T4, T5>(this._1, this._2, this._3, this._4, this._5)
 
 /**
  * Returns a new Tuple6 based on this Arity6.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6> Arity6<T1, T2, T3, T4, T5, T6>.toTuple(): Tuple6<T1, T2, T3, T4, T5, T6> = Tuple6<T1, T2, T3, T4, T5, T6>(this._1, this._2, this._3, this._4, this._5, this._6)
+fun <T1, T2, T3, T4, T5, T6> Arity6<T1, T2, T3, T4, T5, T6>.toTuple(): Tuple6<T1, T2, T3, T4, T5, T6> =
+    Tuple6<T1, T2, T3, T4, T5, T6>(this._1, this._2, this._3, this._4, this._5, this._6)
 
 /**
  * Returns a new Tuple7 based on this Arity7.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7> Arity7<T1, T2, T3, T4, T5, T6, T7>.toTuple(): Tuple7<T1, T2, T3, T4, T5, T6, T7> = Tuple7<T1, T2, T3, T4, T5, T6, T7>(this._1, this._2, this._3, this._4, this._5, this._6, this._7)
+fun <T1, T2, T3, T4, T5, T6, T7> Arity7<T1, T2, T3, T4, T5, T6, T7>.toTuple(): Tuple7<T1, T2, T3, T4, T5, T6, T7> =
+    Tuple7<T1, T2, T3, T4, T5, T6, T7>(this._1, this._2, this._3, this._4, this._5, this._6, this._7)
 
 /**
  * Returns a new Tuple8 based on this Arity8.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8> Arity8<T1, T2, T3, T4, T5, T6, T7, T8>.toTuple(): Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> = Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8)
+fun <T1, T2, T3, T4, T5, T6, T7, T8> Arity8<T1, T2, T3, T4, T5, T6, T7, T8>.toTuple(): Tuple8<T1, T2, T3, T4, T5, T6, T7, T8> =
+    Tuple8<T1, T2, T3, T4, T5, T6, T7, T8>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8)
 
 /**
  * Returns a new Tuple9 based on this Arity9.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> Arity9<T1, T2, T3, T4, T5, T6, T7, T8, T9>.toTuple(): Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> = Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9> Arity9<T1, T2, T3, T4, T5, T6, T7, T8, T9>.toTuple(): Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9> =
+    Tuple9<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9
+    )
 
 /**
  * Returns a new Tuple10 based on this Arity10.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Arity10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.toTuple(): Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> = Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Arity10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>.toTuple(): Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> =
+    Tuple10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10
+    )
 
 /**
  * Returns a new Tuple11 based on this Arity11.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Arity11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.toTuple(): Tuple11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> = Tuple11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Arity11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>.toTuple(): Tuple11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> =
+    Tuple11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11
+    )
 
 /**
  * Returns a new Tuple12 based on this Arity12.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Arity12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>.toTuple(): Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> = Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Arity12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>.toTuple(): Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> =
+    Tuple12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12
+    )
 
 /**
  * Returns a new Tuple13 based on this Arity13.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Arity13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>.toTuple(): Tuple13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> = Tuple13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> Arity13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>.toTuple(): Tuple13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> =
+    Tuple13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13
+    )
 
 /**
  * Returns a new Tuple14 based on this Arity14.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Arity14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>.toTuple(): Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> = Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> Arity14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>.toTuple(): Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> =
+    Tuple14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14
+    )
 
 /**
  * Returns a new Tuple15 based on this Arity15.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Arity15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>.toTuple(): Tuple15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> = Tuple15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> Arity15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>.toTuple(): Tuple15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> =
+    Tuple15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15
+    )
 
 /**
  * Returns a new Tuple16 based on this Arity16.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Arity16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>.toTuple(): Tuple16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> = Tuple16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15, this._16)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> Arity16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>.toTuple(): Tuple16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> =
+    Tuple16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15,
+        this._16
+    )
 
 /**
  * Returns a new Tuple17 based on this Arity17.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> Arity17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>.toTuple(): Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> = Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15, this._16, this._17)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> Arity17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>.toTuple(): Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17> =
+    Tuple17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15,
+        this._16,
+        this._17
+    )
 
 /**
  * Returns a new Tuple18 based on this Arity18.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> Arity18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>.toTuple(): Tuple18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> = Tuple18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15, this._16, this._17, this._18)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> Arity18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>.toTuple(): Tuple18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18> =
+    Tuple18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15,
+        this._16,
+        this._17,
+        this._18
+    )
 
 /**
  * Returns a new Tuple19 based on this Arity19.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> Arity19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>.toTuple(): Tuple19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> = Tuple19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15, this._16, this._17, this._18, this._19)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> Arity19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>.toTuple(): Tuple19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19> =
+    Tuple19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15,
+        this._16,
+        this._17,
+        this._18,
+        this._19
+    )
 
 /**
  * Returns a new Tuple20 based on this Arity20.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> Arity20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>.toTuple(): Tuple20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> = Tuple20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15, this._16, this._17, this._18, this._19, this._20)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> Arity20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>.toTuple(): Tuple20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20> =
+    Tuple20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15,
+        this._16,
+        this._17,
+        this._18,
+        this._19,
+        this._20
+    )
 
 /**
  * Returns a new Tuple21 based on this Arity21.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> Arity21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>.toTuple(): Tuple21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> = Tuple21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15, this._16, this._17, this._18, this._19, this._20, this._21)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> Arity21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>.toTuple(): Tuple21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21> =
+    Tuple21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15,
+        this._16,
+        this._17,
+        this._18,
+        this._19,
+        this._20,
+        this._21
+    )
 
 /**
  * Returns a new Tuple22 based on this Arity22.
  **/
 @Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> Arity22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>.toTuple(): Tuple22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> = Tuple22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>(this._1, this._2, this._3, this._4, this._5, this._6, this._7, this._8, this._9, this._10, this._11, this._12, this._13, this._14, this._15, this._16, this._17, this._18, this._19, this._20, this._21, this._22)
+fun <T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> Arity22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>.toTuple(): Tuple22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22> =
+    Tuple22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22>(
+        this._1,
+        this._2,
+        this._3,
+        this._4,
+        this._5,
+        this._6,
+        this._7,
+        this._8,
+        this._9,
+        this._10,
+        this._11,
+        this._12,
+        this._13,
+        this._14,
+        this._15,
+        this._16,
+        this._17,
+        this._18,
+        this._19,
+        this._20,
+        this._21,
+        this._22
+    )

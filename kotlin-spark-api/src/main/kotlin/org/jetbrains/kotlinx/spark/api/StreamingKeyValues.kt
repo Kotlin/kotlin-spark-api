@@ -440,7 +440,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
                 updateFunc(list, s.getOrNull()).toOptional()
             },
             partitioner,
-            initialRDD.toPairRDD(),
+            initialRDD.toJavaPairRDD(),
         )
         .toTupleDStream()
 
@@ -465,7 +465,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
         .updateStateByKey(
             updateFunc,
             partitioner,
-            initialRDD.toPairRDD(),
+            initialRDD.toJavaPairRDD(),
         )
         .toTupleDStream()
 

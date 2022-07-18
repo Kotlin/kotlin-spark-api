@@ -20,7 +20,7 @@ import scala.Tuple4
 import kotlin.random.Random
 import org.apache.hadoop.mapreduce.OutputFormat as NewOutputFormat
 
-fun <K, V> JavaRDD<Tuple2<K, V>>.toPairRDD(): JavaPairRDD<K, V> =
+fun <K, V> JavaRDD<Tuple2<K, V>>.toJavaPairRDD(): JavaPairRDD<K, V> =
     JavaPairRDD.fromJavaRDD(this)
 
 fun <K, V> JavaPairRDD<K, V>.toTupleRDD(): JavaRDD<Tuple2<K, V>> =
@@ -38,7 +38,7 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
     partitioner: Partitioner,
     mapSideCombine: Boolean = true,
     serializer: Serializer? = null,
-): JavaRDD<Tuple2<K, C>> = toPairRDD()
+): JavaRDD<Tuple2<K, C>> = toJavaPairRDD()
     .combineByKey(createCombiner, mergeValue, mergeCombiners, partitioner, mapSideCombine, serializer)
     .toTupleRDD()
 
@@ -52,7 +52,7 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
     mergeValue: (C, V) -> C,
     mergeCombiners: (C, C) -> C,
     numPartitions: Int,
-): JavaRDD<Tuple2<K, C>> = toPairRDD()
+): JavaRDD<Tuple2<K, C>> = toJavaPairRDD()
     .combineByKey(createCombiner, mergeValue, mergeCombiners, numPartitions)
     .toTupleRDD()
 
@@ -69,10 +69,10 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
     zeroValue: U,
     partitioner: Partitioner,
-    seqOp: (U, V) -> U,
-    combOp: (U, U) -> U,
-): JavaRDD<Tuple2<K, U>> = toPairRDD()
-    .aggregateByKey(zeroValue, partitioner, seqOp, combOp)
+    seqFunc: (U, V) -> U,
+    combFunc: (U, U) -> U,
+): JavaRDD<Tuple2<K, U>> = toJavaPairRDD()
+    .aggregateByKey(zeroValue, partitioner, seqFunc, combFunc)
     .toTupleRDD()
 
 /**
@@ -87,10 +87,10 @@ fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
     zeroValue: U,
     numPartitions: Int,
-    seqOp: (U, V) -> U,
-    combOp: (U, U) -> U,
-): JavaRDD<Tuple2<K, U>> = toPairRDD()
-    .aggregateByKey(zeroValue, numPartitions, seqOp, combOp)
+    seqFunc: (U, V) -> U,
+    combFunc: (U, U) -> U,
+): JavaRDD<Tuple2<K, U>> = toJavaPairRDD()
+    .aggregateByKey(zeroValue, numPartitions, seqFunc, combFunc)
     .toTupleRDD()
 
 /**
@@ -104,10 +104,10 @@ fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
  */
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.aggregateByKey(
     zeroValue: U,
-    seqOp: (U, V) -> U,
-    combOp: (U, U) -> U,
-): JavaRDD<Tuple2<K, U>> = toPairRDD()
-    .aggregateByKey(zeroValue, seqOp, combOp)
+    seqFunc: (U, V) -> U,
+    combFunc: (U, U) -> U,
+): JavaRDD<Tuple2<K, U>> = toJavaPairRDD()
+    .aggregateByKey(zeroValue, seqFunc, combFunc)
     .toTupleRDD()
 
 /**
@@ -119,7 +119,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
     zeroValue: V,
     partitioner: Partitioner,
     func: (V, V) -> V,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .foldByKey(zeroValue, partitioner, func)
     .toTupleRDD()
 
@@ -132,7 +132,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
     zeroValue: V,
     numPartitions: Int,
     func: (V, V) -> V,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .foldByKey(zeroValue, numPartitions, func)
     .toTupleRDD()
 
@@ -144,7 +144,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
 fun <K, V> JavaRDD<Tuple2<K, V>>.foldByKey(
     zeroValue: V,
     func: (V, V) -> V,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .foldByKey(zeroValue, func)
     .toTupleRDD()
 
@@ -165,7 +165,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sampleByKey(
     withReplacement: Boolean,
     fractions: Map<K, Double>,
     seed: Long = Random.nextLong(),
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .sampleByKey(withReplacement, fractions, seed)
     .toTupleRDD()
 
@@ -188,7 +188,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sampleByKeyExact(
     withReplacement: Boolean,
     fractions: Map<K, Double>,
     seed: Long = Random.nextLong(),
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .sampleByKeyExact(withReplacement, fractions, seed)
     .toTupleRDD()
 
@@ -200,7 +200,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sampleByKeyExact(
 fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
     partitioner: Partitioner,
     func: (V, V) -> V,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .reduceByKey(partitioner, func)
     .toTupleRDD()
 
@@ -212,7 +212,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
 fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
     numPartitions: Int,
     func: (V, V) -> V,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .reduceByKey(func, numPartitions)
     .toTupleRDD()
 
@@ -224,7 +224,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
     func: (V, V) -> V,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .reduceByKey(func)
     .toTupleRDD()
 
@@ -235,7 +235,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKey(
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKeyLocally(
     func: (V, V) -> V,
-): Map<K, V> = toPairRDD()
+): Map<K, V> = toJavaPairRDD()
     .reduceByKeyLocally(func)
 
 /**
@@ -247,7 +247,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.reduceByKeyLocally(
  * returns an [RDD<T, Long>] instead of a map.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.countByKey(): Map<K, Long> =
-    toPairRDD()
+    toJavaPairRDD()
         .countByKey()
 
 /**
@@ -267,7 +267,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.countByKey(): Map<K, Long> =
 fun <K, V> JavaRDD<Tuple2<K, V>>.countByKeyApprox(
     timeout: Long,
     confidence: Double = 0.95,
-): PartialResult<Map<K, BoundedDouble>> = toPairRDD()
+): PartialResult<Map<K, BoundedDouble>> = toJavaPairRDD()
     .countByKeyApprox(timeout, confidence)
 
 /**
@@ -285,7 +285,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.countByKeyApprox(
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, Iterable<V>>> = toPairRDD()
+): JavaRDD<Tuple2<K, Iterable<V>>> = toJavaPairRDD()
     .groupByKey(partitioner)
     .toTupleRDD()
 
@@ -303,7 +303,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(
     numPartitions: Int,
-): JavaRDD<Tuple2<K, Iterable<V>>> = toPairRDD()
+): JavaRDD<Tuple2<K, Iterable<V>>> = toJavaPairRDD()
     .groupByKey(numPartitions)
     .toTupleRDD()
 
@@ -312,7 +312,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.partitionBy(
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .partitionBy(partitioner)
     .toTupleRDD()
 
@@ -324,8 +324,8 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.partitionBy(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
     other: JavaRDD<Tuple2<K, W>>,
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, Tuple2<V, W>>> = toPairRDD()
-    .join(other.toPairRDD(), partitioner)
+): JavaRDD<Tuple2<K, Tuple2<V, W>>> = toJavaPairRDD()
+    .join(other.toJavaPairRDD(), partitioner)
     .toTupleRDD()
 
 /**
@@ -337,8 +337,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> = toPairRDD()
-    .leftOuterJoin(other.toPairRDD(), partitioner)
+): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> = toJavaPairRDD()
+    .leftOuterJoin(other.toJavaPairRDD(), partitioner)
     .toTupleRDD()
 
 /**
@@ -350,8 +350,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> = toPairRDD()
-    .rightOuterJoin(other.toPairRDD(), partitioner)
+): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> = toJavaPairRDD()
+    .rightOuterJoin(other.toJavaPairRDD(), partitioner)
     .toTupleRDD()
 
 /**
@@ -365,8 +365,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, Tuple2<Optional<V>, Optional<W>>>> = toPairRDD()
-    .fullOuterJoin(other.toPairRDD(), partitioner)
+): JavaRDD<Tuple2<K, Tuple2<Optional<V>, Optional<W>>>> = toJavaPairRDD()
+    .fullOuterJoin(other.toJavaPairRDD(), partitioner)
     .toTupleRDD()
 
 /**
@@ -378,7 +378,7 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
     createCombiner: (V) -> C,
     mergeValue: (C, V) -> C,
     mergeCombiners: (C, C) -> C,
-): JavaRDD<Tuple2<K, C>> = toPairRDD()
+): JavaRDD<Tuple2<K, C>> = toJavaPairRDD()
     .combineByKey(createCombiner, mergeValue, mergeCombiners)
     .toTupleRDD()
 
@@ -394,7 +394,7 @@ fun <K, V, C> JavaRDD<Tuple2<K, V>>.combineByKey(
  * or [reduceByKey] will provide much better performance.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(): JavaRDD<Tuple2<K, Iterable<V>>> =
-    toPairRDD()
+    toJavaPairRDD()
         .groupByKey()
         .toTupleRDD()
 
@@ -404,8 +404,8 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.groupByKey(): JavaRDD<Tuple2<K, Iterable<V>>> =
  * (k, v2) is in [other]. Performs a hash join across the cluster.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, Tuple2<V, W>>> =
-    toPairRDD()
-        .join(other.toPairRDD())
+    toJavaPairRDD()
+        .join(other.toJavaPairRDD())
         .toTupleRDD()
 
 /**
@@ -417,8 +417,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
     other: JavaRDD<Tuple2<K, W>>,
     numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple2<V, W>>> =
-    toPairRDD()
-        .join(other.toPairRDD(), numPartitions)
+    toJavaPairRDD()
+        .join(other.toJavaPairRDD(), numPartitions)
         .toTupleRDD()
 
 /**
@@ -430,8 +430,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.join(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
 ): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> =
-    toPairRDD()
-        .leftOuterJoin(other.toPairRDD())
+    toJavaPairRDD()
+        .leftOuterJoin(other.toJavaPairRDD())
         .toTupleRDD()
 
 /**
@@ -443,8 +443,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
     numPartitions: Int,
-): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> = toPairRDD()
-    .leftOuterJoin(other.toPairRDD(), numPartitions)
+): JavaRDD<Tuple2<K, Tuple2<V, Optional<W>>>> = toJavaPairRDD()
+    .leftOuterJoin(other.toJavaPairRDD(), numPartitions)
     .toTupleRDD()
 
 /**
@@ -456,8 +456,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.leftOuterJoin(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
 ): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> =
-    toPairRDD()
-        .rightOuterJoin(other.toPairRDD())
+    toJavaPairRDD()
+        .rightOuterJoin(other.toJavaPairRDD())
         .toTupleRDD()
 
 /**
@@ -469,8 +469,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
     numPartitions: Int,
-): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> = toPairRDD()
-    .rightOuterJoin(other.toPairRDD(), numPartitions)
+): JavaRDD<Tuple2<K, Tuple2<Optional<V>, W>>> = toJavaPairRDD()
+    .rightOuterJoin(other.toJavaPairRDD(), numPartitions)
     .toTupleRDD()
 
 /**
@@ -485,8 +485,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.rightOuterJoin(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
 ): JavaRDD<Tuple2<K, Tuple2<Optional<V>, Optional<W>>>> =
-    toPairRDD()
-        .fullOuterJoin(other.toPairRDD())
+    toJavaPairRDD()
+        .fullOuterJoin(other.toJavaPairRDD())
         .toTupleRDD()
 
 /**
@@ -501,8 +501,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
     other: JavaRDD<Tuple2<K, W>>,
     numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple2<Optional<V>, Optional<W>>>> =
-    toPairRDD()
-        .fullOuterJoin(other.toPairRDD(), numPartitions)
+    toJavaPairRDD()
+        .fullOuterJoin(other.toJavaPairRDD(), numPartitions)
         .toTupleRDD()
 
 /**
@@ -514,21 +514,21 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
  * Note: this method should only be used if the resulting data is expected to be small, as
  * all the data is loaded into the driver's memory.
  */
-fun <K, V> JavaRDD<Tuple2<K, V>>.collectAsMap(): Map<K, V> = toPairRDD().collectAsMap()
+fun <K, V> JavaRDD<Tuple2<K, V>>.collectAsMap(): Map<K, V> = toJavaPairRDD().collectAsMap()
 
 /**
  * Pass each value in the key-value pair RDD through a map function without changing the keys;
  * this also retains the original RDD's partitioning.
  */
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.mapValues(f: (V) -> U): JavaRDD<Tuple2<K, U>> =
-    toPairRDD().mapValues(f).toTupleRDD()
+    toJavaPairRDD().mapValues(f).toTupleRDD()
 
 /**
  * Pass each value in the key-value pair RDD through a flatMap function without changing the
  * keys; this also retains the original RDD's partitioning.
  */
 fun <K, V, U> JavaRDD<Tuple2<K, V>>.flatMapValues(f: (V) -> Iterator<U>): JavaRDD<Tuple2<K, U>> =
-    toPairRDD().flatMapValues(f).toTupleRDD()
+    toJavaPairRDD().flatMapValues(f).toTupleRDD()
 
 /**
  * For each key k in [this] or [other1] or [other2] or [other3],
@@ -541,7 +541,7 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     other3: JavaRDD<Tuple2<K, W3>>,
     partitioner: Partitioner,
 ): JavaRDD<Tuple2<K, Tuple4<Iterable<V>, Iterable<W1>, Iterable<W2>, Iterable<W3>>>> =
-    toPairRDD().cogroup(other1.toPairRDD(), other2.toPairRDD(), other3.toPairRDD(), partitioner).toTupleRDD()
+    toJavaPairRDD().cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD(), other3.toJavaPairRDD(), partitioner).toTupleRDD()
 
 /**
  * For each key k in [this] or [other], return a resulting RDD that contains a tuple with the
@@ -550,8 +550,8 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     other: JavaRDD<Tuple2<K, W>>,
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, Tuple2<Iterable<V>, Iterable<W>>>> = toPairRDD()
-    .cogroup(other.toPairRDD(), partitioner)
+): JavaRDD<Tuple2<K, Tuple2<Iterable<V>, Iterable<W>>>> = toJavaPairRDD()
+    .cogroup(other.toJavaPairRDD(), partitioner)
     .toTupleRDD()
 
 /**
@@ -563,8 +563,8 @@ fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
     other2: JavaRDD<Tuple2<K, W2>>,
     partitioner: Partitioner,
 ): JavaRDD<Tuple2<K, Tuple3<Iterable<V>, Iterable<W1>, Iterable<W2>>>> =
-    toPairRDD()
-        .cogroup(other1.toPairRDD(), other2.toPairRDD(), partitioner)
+    toJavaPairRDD()
+        .cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD(), partitioner)
         .toTupleRDD()
 
 /**
@@ -577,8 +577,8 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     other2: JavaRDD<Tuple2<K, W2>>,
     other3: JavaRDD<Tuple2<K, W3>>,
 ): JavaRDD<Tuple2<K, Tuple4<Iterable<V>, Iterable<W1>, Iterable<W2>, Iterable<W3>>>> =
-    toPairRDD()
-        .cogroup(other1.toPairRDD(), other2.toPairRDD(), other3.toPairRDD())
+    toJavaPairRDD()
+        .cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD(), other3.toJavaPairRDD())
         .toTupleRDD()
 
 /**
@@ -588,7 +588,7 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     other: JavaRDD<Tuple2<K, W>>,
 ): JavaRDD<Tuple2<K, Tuple2<Iterable<V>, Iterable<W>>>> =
-    toPairRDD().cogroup(other.toPairRDD()).toTupleRDD()
+    toJavaPairRDD().cogroup(other.toJavaPairRDD()).toTupleRDD()
 
 /**
  * For each key k in [this] or [other1] or [other2], return a resulting RDD that contains a
@@ -598,8 +598,8 @@ fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
     other1: JavaRDD<Tuple2<K, W1>>,
     other2: JavaRDD<Tuple2<K, W2>>,
 ): JavaRDD<Tuple2<K, Tuple3<Iterable<V>, Iterable<W1>, Iterable<W2>>>> =
-    toPairRDD()
-        .cogroup(other1.toPairRDD(), other2.toPairRDD())
+    toJavaPairRDD()
+        .cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD())
         .toTupleRDD()
 
 /**
@@ -610,7 +610,7 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.cogroup(
     other: JavaRDD<Tuple2<K, W>>,
     numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple2<Iterable<V>, Iterable<W>>>> =
-    toPairRDD().cogroup(other.toPairRDD(), numPartitions).toTupleRDD()
+    toJavaPairRDD().cogroup(other.toJavaPairRDD(), numPartitions).toTupleRDD()
 
 /**
  * For each key k in [this] or [other1] or [other2], return a resulting RDD that contains a
@@ -621,8 +621,8 @@ fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.cogroup(
     other2: JavaRDD<Tuple2<K, W2>>,
     numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple3<Iterable<V>, Iterable<W1>, Iterable<W2>>>> =
-    toPairRDD()
-        .cogroup(other1.toPairRDD(), other2.toPairRDD(), numPartitions)
+    toJavaPairRDD()
+        .cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD(), numPartitions)
         .toTupleRDD()
 
 /**
@@ -636,8 +636,8 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     other3: JavaRDD<Tuple2<K, W3>>,
     numPartitions: Int,
 ): JavaRDD<Tuple2<K, Tuple4<Iterable<V>, Iterable<W1>, Iterable<W2>, Iterable<W3>>>> =
-    toPairRDD()
-        .cogroup(other1.toPairRDD(), other2.toPairRDD(), other3.toPairRDD(), numPartitions)
+    toJavaPairRDD()
+        .cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD(), other3.toJavaPairRDD(), numPartitions)
         .toTupleRDD()
 
 
@@ -645,14 +645,14 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.groupWith(
     other: JavaRDD<Tuple2<K, W>>,
 ): JavaRDD<Tuple2<K, Tuple2<Iterable<V>, Iterable<W>>>> =
-    toPairRDD().groupWith(other.toPairRDD()).toTupleRDD()
+    toJavaPairRDD().groupWith(other.toJavaPairRDD()).toTupleRDD()
 
 /** Alias for [cogroup]. */
 fun <K, V, W1, W2> JavaRDD<Tuple2<K, V>>.groupWith(
     other1: JavaRDD<Tuple2<K, W1>>,
     other2: JavaRDD<Tuple2<K, W2>>,
 ): JavaRDD<Tuple2<K, Tuple3<Iterable<V>, Iterable<W1>, Iterable<W2>>>> =
-    toPairRDD().groupWith(other1.toPairRDD(), other2.toPairRDD()).toTupleRDD()
+    toJavaPairRDD().groupWith(other1.toJavaPairRDD(), other2.toJavaPairRDD()).toTupleRDD()
 
 /** Alias for [cogroup]. */
 fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.groupWith(
@@ -660,7 +660,7 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.groupWith(
     other2: JavaRDD<Tuple2<K, W2>>,
     other3: JavaRDD<Tuple2<K, W3>>,
 ): JavaRDD<Tuple2<K, Tuple4<Iterable<V>, Iterable<W1>, Iterable<W2>, Iterable<W3>>>> =
-    toPairRDD().groupWith(other1.toPairRDD(), other2.toPairRDD(), other3.toPairRDD()).toTupleRDD()
+    toJavaPairRDD().groupWith(other1.toJavaPairRDD(), other2.toJavaPairRDD(), other3.toJavaPairRDD()).toTupleRDD()
 
 /**
  * Return an RDD with the pairs from [this] whose keys are not in [other].
@@ -669,7 +669,7 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.groupWith(
  * RDD will be less than or equal to us.
  */
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(other: JavaRDD<Tuple2<K, W>>): JavaRDD<Tuple2<K, V>> =
-    toPairRDD().subtractByKey(other.toPairRDD()).toTupleRDD()
+    toJavaPairRDD().subtractByKey(other.toJavaPairRDD()).toTupleRDD()
 
 /**
  * Return an RDD with the pairs from [this] whose keys are not in [other].
@@ -677,8 +677,8 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(other: JavaRDD<Tuple2<K, W>>):
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(
     other: JavaRDD<Tuple2<K, W>>,
     numPartitions: Int,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
-    .subtractByKey(other.toPairRDD(), numPartitions)
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
+    .subtractByKey(other.toJavaPairRDD(), numPartitions)
     .toTupleRDD()
 
 /**
@@ -687,15 +687,15 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(
 fun <K, V, W> JavaRDD<Tuple2<K, V>>.subtractByKey(
     other: JavaRDD<Tuple2<K, W>>,
     p: Partitioner,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
-    .subtractByKey(other.toPairRDD(), p)
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
+    .subtractByKey(other.toJavaPairRDD(), p)
     .toTupleRDD()
 
 /**
  * Return the list of values in the RDD for key [key]. This operation is done efficiently if the
  * RDD has a known partitioner by only searching the partition that the key maps to.
  */
-fun <K, V> JavaRDD<Tuple2<K, V>>.lookup(key: K): List<V> = toPairRDD().lookup(key)
+fun <K, V> JavaRDD<Tuple2<K, V>>.lookup(key: K): List<V> = toJavaPairRDD().lookup(key)
 
 /** Output the RDD to any Hadoop-supported file system. */
 fun <K, V, F : OutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsHadoopFile(
@@ -704,7 +704,7 @@ fun <K, V, F : OutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsHadoopFile(
     valueClass: Class<*>,
     outputFormatClass: Class<F>,
     conf: JobConf,
-): Unit = toPairRDD().saveAsHadoopFile(path, keyClass, valueClass, outputFormatClass, conf)
+): Unit = toJavaPairRDD().saveAsHadoopFile(path, keyClass, valueClass, outputFormatClass, conf)
 
 /** Output the RDD to any Hadoop-supported file system. */
 fun <K, V, F : OutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsHadoopFile(
@@ -712,7 +712,7 @@ fun <K, V, F : OutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsHadoopFile(
     keyClass: Class<*>,
     valueClass: Class<*>,
     outputFormatClass: Class<F>,
-): Unit = toPairRDD().saveAsHadoopFile(path, keyClass, valueClass, outputFormatClass)
+): Unit = toJavaPairRDD().saveAsHadoopFile(path, keyClass, valueClass, outputFormatClass)
 
 /** Output the RDD to any Hadoop-supported file system, compressing with the supplied codec. */
 fun <K, V, F : OutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsHadoopFile(
@@ -721,7 +721,7 @@ fun <K, V, F : OutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsHadoopFile(
     valueClass: Class<*>,
     outputFormatClass: Class<F>,
     codec: Class<CompressionCodec>,
-): Unit = toPairRDD().saveAsHadoopFile(path, keyClass, valueClass, outputFormatClass, codec)
+): Unit = toJavaPairRDD().saveAsHadoopFile(path, keyClass, valueClass, outputFormatClass, codec)
 
 /** Output the RDD to any Hadoop-supported file system. */
 fun <K, V, F : NewOutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsNewAPIHadoopFile(
@@ -730,14 +730,14 @@ fun <K, V, F : NewOutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsNewAPIHadoopFi
     valueClass: Class<*>,
     outputFormatClass: Class<F>,
     conf: Configuration,
-): Unit = toPairRDD().saveAsNewAPIHadoopFile(path, keyClass, valueClass, outputFormatClass, conf)
+): Unit = toJavaPairRDD().saveAsNewAPIHadoopFile(path, keyClass, valueClass, outputFormatClass, conf)
 
 /**
  * Output the RDD to any Hadoop-supported storage system, using
  * a Configuration object for that storage system.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.saveAsNewAPIHadoopDataset(conf: Configuration): Unit =
-    toPairRDD().saveAsNewAPIHadoopDataset(conf)
+    toJavaPairRDD().saveAsNewAPIHadoopDataset(conf)
 
 /** Output the RDD to any Hadoop-supported file system. */
 fun <K, V, F : NewOutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsNewAPIHadoopFile(
@@ -745,7 +745,7 @@ fun <K, V, F : NewOutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsNewAPIHadoopFi
     keyClass: Class<*>,
     valueClass: Class<*>,
     outputFormatClass: Class<F>,
-): Unit = toPairRDD().saveAsNewAPIHadoopFile(path, keyClass, valueClass, outputFormatClass)
+): Unit = toJavaPairRDD().saveAsNewAPIHadoopFile(path, keyClass, valueClass, outputFormatClass)
 
 /**
  * Output the RDD to any Hadoop-supported storage system, using a Hadoop JobConf object for
@@ -754,7 +754,7 @@ fun <K, V, F : NewOutputFormat<*, *>> JavaRDD<Tuple2<K, V>>.saveAsNewAPIHadoopFi
  * MapReduce job.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.saveAsHadoopDataset(conf: JobConf): Unit =
-    toPairRDD().saveAsHadoopDataset(conf)
+    toJavaPairRDD().saveAsHadoopDataset(conf)
 
 /**
  * Repartition the RDD according to the given partitioner and, within each resulting partition,
@@ -764,7 +764,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.saveAsHadoopDataset(conf: JobConf): Unit =
  * because it can push the sorting down into the shuffle machinery.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(partitioner: Partitioner): JavaRDD<Tuple2<K, V>> =
-    toPairRDD().repartitionAndSortWithinPartitions(partitioner).toTupleRDD()
+    toJavaPairRDD().repartitionAndSortWithinPartitions(partitioner).toTupleRDD()
 
 /**
  * Repartition the RDD according to the given partitioner and, within each resulting partition,
@@ -776,7 +776,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(partitioner:
 fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(
     partitioner: Partitioner,
     comp: Comparator<K>,
-): JavaRDD<Tuple2<K, V>> = toPairRDD().repartitionAndSortWithinPartitions(partitioner, comp).toTupleRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD().repartitionAndSortWithinPartitions(partitioner, comp).toTupleRDD()
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
@@ -785,7 +785,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.repartitionAndSortWithinPartitions(
  * order of the keys).
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(ascending: Boolean = true): JavaRDD<Tuple2<K, V>> =
-    toPairRDD().sortByKey(ascending).toTupleRDD()
+    toJavaPairRDD().sortByKey(ascending).toTupleRDD()
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
@@ -794,7 +794,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(ascending: Boolean = true): JavaRDD<T
  * order of the keys).
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(ascending: Boolean, numPartitions: Int): JavaRDD<Tuple2<K, V>> =
-    toPairRDD().sortByKey(ascending, numPartitions).toTupleRDD()
+    toJavaPairRDD().sortByKey(ascending, numPartitions).toTupleRDD()
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
@@ -803,7 +803,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(ascending: Boolean, numPartitions: In
  * order of the keys).
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(comp: Comparator<K>, ascending: Boolean = true): JavaRDD<Tuple2<K, V>> =
-    toPairRDD().sortByKey(comp, ascending).toTupleRDD()
+    toJavaPairRDD().sortByKey(comp, ascending).toTupleRDD()
 
 /**
  * Sort the RDD by key, so that each partition contains a sorted range of the elements. Calling
@@ -815,7 +815,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(
     comp: Comparator<K>,
     ascending: Boolean,
     numPartitions: Int,
-): JavaRDD<Tuple2<K, V>> = toPairRDD().sortByKey(comp, ascending, numPartitions).toTupleRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD().sortByKey(comp, ascending, numPartitions).toTupleRDD()
 
 //#if sparkMinor >= 3.1
 /**
@@ -827,7 +827,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.sortByKey(
  * @since 3.1.0
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.filterByRange(lower: K, upper: K): JavaRDD<Tuple2<K, V>> =
-    toPairRDD().filterByRange(lower, upper).toTupleRDD()
+    toJavaPairRDD().filterByRange(lower, upper).toTupleRDD()
 
 /**
  * Return a RDD containing only the elements in the inclusive range [lower] to [upper].
@@ -841,7 +841,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.filterByRange(
     comp: Comparator<K>,
     lower: K,
     upper: K,
-): JavaRDD<Tuple2<K, V>> = toPairRDD()
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .filterByRange(comp, lower, upper)
     .toTupleRDD()
 //#endif
@@ -849,12 +849,12 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.filterByRange(
 /**
  * Return an RDD with the keys of each tuple.
  */
-fun <K, V> JavaRDD<Tuple2<K, V>>.keys(): JavaRDD<K> = toPairRDD().keys()
+fun <K, V> JavaRDD<Tuple2<K, V>>.keys(): JavaRDD<K> = toJavaPairRDD().keys()
 
 /**
  * Return an RDD with the values of each tuple.
  */
-fun <K, V> JavaRDD<Tuple2<K, V>>.values(): JavaRDD<V> = toPairRDD().values()
+fun <K, V> JavaRDD<Tuple2<K, V>>.values(): JavaRDD<V> = toJavaPairRDD().values()
 
 /**
  * Return approximate number of distinct values for each key in this RDD.
@@ -870,7 +870,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.values(): JavaRDD<V> = toPairRDD().values()
 fun <K, V> JavaRDD<Tuple2<K, V>>.countApproxDistinctByKey(
     relativeSD: Double,
     partitioner: Partitioner,
-): JavaRDD<Tuple2<K, Long>> = toPairRDD().countApproxDistinctByKey(relativeSD, partitioner).toTupleRDD()
+): JavaRDD<Tuple2<K, Long>> = toJavaPairRDD().countApproxDistinctByKey(relativeSD, partitioner).toTupleRDD()
 
 /**
  * Return approximate number of distinct values for each key in this RDD.
@@ -886,7 +886,7 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.countApproxDistinctByKey(
 fun <K, V> JavaRDD<Tuple2<K, V>>.countApproxDistinctByKey(
     relativeSD: Double,
     numPartitions: Int,
-): JavaRDD<Tuple2<K, Long>> = toPairRDD().countApproxDistinctByKey(relativeSD, numPartitions).toTupleRDD()
+): JavaRDD<Tuple2<K, Long>> = toJavaPairRDD().countApproxDistinctByKey(relativeSD, numPartitions).toTupleRDD()
 
 /**
  * Return approximate number of distinct values for each key in this RDD.
@@ -899,4 +899,5 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.countApproxDistinctByKey(
  *                   It must be greater than 0.000017.
  */
 fun <K, V> JavaRDD<Tuple2<K, V>>.countApproxDistinctByKey(relativeSD: Double): JavaRDD<Tuple2<K, Long>> =
-    toPairRDD().countApproxDistinctByKey(relativeSD).toTupleRDD()
+    toJavaPairRDD().countApproxDistinctByKey(relativeSD).toTupleRDD()
+

@@ -1,9 +1,7 @@
 package org.jetbrains.kotlinx.spark.api
 
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainAll
-import io.kotest.matchers.should
 import io.kotest.matchers.shouldBe
 import org.jetbrains.kotlinx.spark.api.tuples.*
 
@@ -14,8 +12,7 @@ class RddTest : ShouldSpec({
 
             context("Key/value") {
                 should("work with spark example") {
-                    val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toString)
-                    val rdd = sc.parallelize(data)
+                    val rdd = rddOf(1, 1, 2, 2, 2, 3).map(Int::toString)
 
                     val pairs = rdd.map { it X 1 }
                     val counts = pairs.reduceByKey { a, b -> a + b }
@@ -24,12 +21,51 @@ class RddTest : ShouldSpec({
                 }
             }
 
-            context("Double") {
+            context("Double functions") {
                 should("get max/min") {
-                    val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toDouble)
-                    val rdd = sc.parallelize(data)
+                    val rdd = rddOf(1, 1, 2, 2, 2, 3)
+
                     rdd.max() shouldBe 3.0
                     rdd.min() shouldBe 1.0
+                }
+
+                context("Work with any number") {
+
+                    should("Work with Bytes") {
+                        val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toByte)
+                        val rdd = data.toRDD()
+                        rdd.sum() shouldBe data.sum().toDouble()
+                    }
+
+                    should("Work with Shorts") {
+                        val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toShort)
+                        val rdd = data.toRDD()
+                        rdd.sum() shouldBe data.sum().toDouble()
+                    }
+
+                    should("Work with Ints") {
+                        val data = listOf(1, 1, 2, 2, 2, 3)
+                        val rdd = data.toRDD()
+                        rdd.sum() shouldBe data.sum().toDouble()
+                    }
+
+                    should("Work with Longs") {
+                        val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toLong)
+                        val rdd = data.toRDD()
+                        rdd.sum() shouldBe data.sum().toDouble()
+                    }
+
+                    should("Work with Floats") {
+                        val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toFloat)
+                        val rdd = data.toRDD()
+                        rdd.sum() shouldBe data.sum().toDouble()
+                    }
+
+                    should("Work with Doubles") {
+                        val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toDouble)
+                        val rdd = data.toRDD().toJavaDoubleRDD()
+                        rdd.sum() shouldBe data.sum().toDouble()
+                    }
                 }
             }
         }
