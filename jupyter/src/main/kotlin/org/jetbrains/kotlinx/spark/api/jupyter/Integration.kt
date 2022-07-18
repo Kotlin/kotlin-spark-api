@@ -30,15 +30,16 @@ import kotlin.reflect.typeOf
 
 abstract class Integration : JupyterIntegration() {
 
-    private val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
-    private val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
-    private val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
-    private val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
+    protected val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
+    protected val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
+    protected val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
+    protected val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
+    protected val version = /*$"\""+version+"\""$*/ /*-*/ ""
 
-    private val displayLimit = "DISPLAY_LIMIT"
-    private val displayLimitDefault = 20
-    private val displayTruncate = "DISPLAY_TRUNCATE"
-    private val displayTruncateDefault = 30
+    protected val displayLimit = "DISPLAY_LIMIT"
+    protected val displayLimitDefault = 20
+    protected val displayTruncate = "DISPLAY_TRUNCATE"
+    protected val displayTruncateDefault = 30
 
     /**
      * Will be run after importing all dependencies
@@ -96,6 +97,8 @@ abstract class Integration : JupyterIntegration() {
         import(*imports)
 
         onLoaded {
+
+
             declare(
                 VariableDeclaration(
                     name = displayLimit,

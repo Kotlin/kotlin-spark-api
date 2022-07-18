@@ -29,6 +29,7 @@ object Versions {
             "scalaCompat" to scalaCompat,
             "spark" to spark,
             "sparkMinor" to sparkMinor,
+            "version" to project,
         )
 
 }

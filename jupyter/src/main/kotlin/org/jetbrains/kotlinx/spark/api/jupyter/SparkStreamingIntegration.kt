@@ -110,7 +110,7 @@ internal class SparkStreamingIntegration : Integration() {
                 }
             """.trimIndent(),
             """
-                println("To start a spark streaming session, simply use `withSparkStreaming { }` inside a cell. To use Spark normally, use `withSpark { }` in a cell, or use `%use spark` to start a Spark session for the whole notebook.")""".trimIndent(),
+                println("To start a Spark (Spark: $sparkVersion, Scala: $scalaCompatVersion, v: $version) Streaming session, simply use `withSparkStreaming { }` inside a cell. To use Spark normally, use `withSpark { }` in a cell, or use `%use spark` to start a Spark session for the whole notebook.")""".trimIndent(),
         ).map(::execute)
     }
 

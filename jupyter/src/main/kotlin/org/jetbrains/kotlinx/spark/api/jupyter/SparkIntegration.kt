@@ -52,7 +52,7 @@ internal class SparkIntegration : Integration() {
                     org.apache.spark.api.java.JavaSparkContext(spark.sparkContext) 
                 }""".trimIndent(),
             """
-                println("Spark session has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use spark-streaming` instead.")""".trimIndent(),
+                println("Spark session (Spark: $sparkVersion, Scala: $scalaCompatVersion, v: $version)  has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use spark-streaming` instead.")""".trimIndent(),
             """
                 inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
             """
