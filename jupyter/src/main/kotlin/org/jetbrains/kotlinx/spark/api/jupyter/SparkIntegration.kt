@@ -20,9 +20,12 @@
 package org.jetbrains.kotlinx.spark.api.jupyter
 
 
+import org.apache.spark.SparkConf
 import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlinx.jupyter.api.FieldValue
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
+import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
+import org.jetbrains.kotlinx.jupyter.api.declare
+import kotlin.reflect.typeOf
 
 /**
  * %use spark
@@ -30,6 +33,17 @@ import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
 internal class SparkIntegration : Integration() {
+
+    private lateinit var sparkConf: Map<String, Any?>
+    private val sparkProps = "SPARK_PROPS"
+
+    @Suppress("UNCHECKED_CAST")
+    override fun Builder.onLoadedAlsoDo() {
+        sparkConf = notebook
+            .variablesState[sparkProps]
+            ?.value
+            ?.getOrNull() as? Map<String, Any?>? ?: emptyMap()
+    }
 
     override fun KotlinKernelHost.onLoaded() {
         val _0 = execute("""%dumpClassesForSpark""")
@@ -44,6 +58,17 @@ internal class SparkIntegration : Integration() {
                     .config("spark.sql.codegen.wholeStage", false)
                     .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
                     .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
+                    .apply {
+                        ${buildString {
+                            sparkConf.forEach {
+                                when (val value = it.value) {
+                                    is String -> appendLine("config(\"${it.key}\", \"$value\")")
+                                    is Boolean, Long, Double -> appendLine("config(\"${it.key}\", $value)")
+                                    else -> throw IllegalArgumentException("Cannot set property ${it.key} because value $value of unsupported type ${value?.javaClass}")
+                                }
+                            }
+                        }}
+                     }
                     .getOrCreate()""".trimIndent(),
             """
                 spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)""".trimIndent(),

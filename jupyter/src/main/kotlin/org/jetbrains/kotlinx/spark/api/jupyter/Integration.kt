@@ -41,6 +41,8 @@ abstract class Integration : JupyterIntegration() {
     protected val displayTruncate = "DISPLAY_TRUNCATE"
     protected val displayTruncateDefault = 30
 
+
+
     /**
      * Will be run after importing all dependencies
      */
