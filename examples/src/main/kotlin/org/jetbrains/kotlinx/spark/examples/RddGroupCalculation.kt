@@ -5,7 +5,6 @@ import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.X
 import org.jetbrains.kotlinx.spark.examples.GroupCalculation.getAllPossibleGroups
 import scala.Tuple2
-import java.util.*
 import kotlin.math.pow
 
 /**
@@ -15,8 +14,9 @@ import kotlin.math.pow
  */
 
 fun main() = withSpark {
-    val groupIndices = getAllPossibleGroups(listSize = 10, groupSize = 3)
+    val groupIndices = getAllPossibleGroups(listSize = 10, groupSize = 4)
         .sort("value")
+
     groupIndices.showDS(numRows = groupIndices.count().toInt())
 }
 
@@ -37,7 +37,7 @@ object GroupCalculation {
         listSize: Int,
         groupSize: Int,
     ): Dataset<IntArray> {
-        val indices = (0 until listSize).toList().toRDD()
+        val indices = (0 until listSize).toList().toRDD() // Easy RDD creation!
 
         // for a groupSize of 1, no pairing up is needed, so just return the indices converted to IntArrays
         if (groupSize == 1) {
@@ -46,61 +46,57 @@ object GroupCalculation {
                     it.map { intArrayOf(it) }
                 }
                 .toDS()
-
         }
-        
-        val keys = indices
-            .mapPartitions { // this converts all indices to (number in table, index)
 
-                // key is key (item in table), value is index in list
-                val keyValues = ArrayList<Tuple2<Int, Int>>()
-                while (it.hasNext()) {
-                    val listIndex = it.next()
+        // this converts all indices to (number in table, index)
+        val keys = indices.mapPartitions {
+
+            // _1 is key (item in table), _2 is index in list
+            it.transformAsSequence {
+                flatMap { listIndex ->
 
                     // for each dimension loop over the other dimensions using addTuples
-                    for (dimension in 0 until groupSize) {
+                    (0 until groupSize).asSequence().flatMap { dimension ->
                         addTuples(
                             groupSize = groupSize,
-                            keyValues = keyValues,
                             value = listIndex,
                             listSize = listSize,
-                            currentDimension = 0,
-                            indexTuple = IntArray(groupSize),
                             skipDimension = dimension,
                         )
                     }
                 }
-                keyValues.iterator()
             }
+        }
 
-        // each number in table occurs for each dimension as key.
+        // Since we have a JavaRDD<Tuple2> we can aggregateByKey!
+        // Each number in table occurs for each dimension as key.
         // The values of those two will be a tuple of (key, indices as list)
         val allPossibleGroups = keys.aggregateByKey(
-                zeroValue = IntArray(groupSize) { -1 },
-                seqFunc = { base: IntArray, listIndex: Int ->
-                    // put listIndex in the first empty spot in base
-                    base[base.indexOfFirst { it < 0 }] = listIndex
+            zeroValue = IntArray(groupSize) { -1 },
+            seqFunc = { base: IntArray, listIndex: Int ->
+                // put listIndex in the first empty spot in base
+                base[base.indexOfFirst { it < 0 }] = listIndex
 
-                    base
-                },
+                base
+            },
 
-                // how to merge partially filled up int arrays
-                combFunc = { a: IntArray, b: IntArray ->
-                    // merge a and b
-                    var j = 0
-                    for (i in a.indices) {
-                        if (a[i] < 0) {
-                            while (b[j] < 0) {
-                                j++
-                                if (j == b.size) return@aggregateByKey a
-                            }
-                            a[i] = b[j]
+            // how to merge partially filled up int arrays
+            combFunc = { a: IntArray, b: IntArray ->
+                // merge a and b
+                var j = 0
+                for (i in a.indices) {
+                    if (a[i] < 0) {
+                        while (b[j] < 0) {
                             j++
+                            if (j == b.size) return@aggregateByKey a
                         }
+                        a[i] = b[j]
+                        j++
                     }
-                    a
-                },
-            )
+                }
+                a
+            },
+        )
             .values() // finally just take the values
 
         return allPossibleGroups.toDS()
@@ -113,7 +109,7 @@ object GroupCalculation {
      * @param listSize   The size of the list, aka the max width, height etc. of the table
      * @return the unique number for this [indexTuple]
      */
-    private fun getTupleValue(indexTuple: IntArray, listSize: Int): Int =
+    private fun getTupleValue(indexTuple: List<Int>, listSize: Int): Int =
         indexTuple.indices.sumOf {
             indexTuple[it] * listSize.toDouble().pow(it).toInt()
         }
@@ -140,7 +136,7 @@ object GroupCalculation {
      * @param indexTuple a tuple of indices in the form of an IntArray
      * @return true if this tuple is in the right corner and should be included
      */
-    private fun isValidIndexTuple(indexTuple: IntArray): Boolean {
+    private fun isValidIndexTuple(indexTuple: List<Int>): Boolean {
         // x - y > 0; 2d
         // (x - y) > 0 && (x - z) > 0 && (y - z) > 0; 3d
         // (x - y) > 0 && (x - z) > 0 && (x - a) > 0 && (y - z) > 0  && (y - a) > 0 && (z - a) > 0; 4d
@@ -154,9 +150,9 @@ object GroupCalculation {
     }
 
     /**
-     * Recursive method that for [skipDimension] loops over all the other dimensions and stores
-     * in [keyValues] all results from [getTupleValue] as key and [value] as value.
-     * In the end, [keyValues] will have, for each key in the table below, a value for the key's column, row etc.
+     * Recursive method that for [skipDimension] loops over all the other dimensions and returns all results from
+     * [getTupleValue] as key and [value] as value.
+     * In the end, the return value will have, for each key in the table below, a value for the key's column, row etc.
      *
      *
      * This is an example for 2D. The letters will be int indices as well (a = 0, b = 1, ..., [listSize]), but help for clarification.
@@ -181,52 +177,47 @@ object GroupCalculation {
      *
      *
      * @param groupSize        the size of index tuples to form
-     * @param keyValues        the MutableList in which to store the key-value results
      * @param value            the current index to work from (can be seen as a letter in the table above)
      * @param listSize         the size of the list to make
-     * @param currentDimension the indicator for which dimension we're currently calculating for (and how deep in the recursion we are)
-     * @param indexTuple       the array (or tuple) in which to store the current indices
      * @param skipDimension    the current dimension that will have a set value [value] while looping over the other dimensions
      */
     private fun addTuples(
         groupSize: Int,
-        keyValues: MutableList<Tuple2<Int, Int>>,
         value: Int,
         listSize: Int,
-        currentDimension: Int,
-        indexTuple: IntArray,
         skipDimension: Int,
-    ) {
-        if (currentDimension >= groupSize) {  // base case
-            if (isValidIndexTuple(indexTuple)) {
-                keyValues += getTupleValue(indexTuple, listSize) X value
-            }
-            return
-        }
-        if (currentDimension == skipDimension) {
-            indexTuple[currentDimension] = value
-            addTuples(
-                groupSize = groupSize,
-                keyValues = keyValues,
-                value = value,
-                listSize = listSize,
-                currentDimension = currentDimension + 1,
-                indexTuple = indexTuple,
-                skipDimension = skipDimension,
-            )
-        } else {
-            for (i in 0 until listSize) {
-                indexTuple[currentDimension] = i
-                addTuples(
-                    groupSize = groupSize,
-                    keyValues = keyValues,
-                    value = value,
-                    listSize = listSize,
+    ): List<Tuple2<Int, Int>> {
+
+        /**
+         * @param currentDimension the indicator for which dimension we're currently calculating for (and how deep in the recursion we are)
+         * @param indexTuple       the list (or tuple) in which to store the current indices
+         */
+        fun recursiveCall(
+            currentDimension: Int = 0,
+            indexTuple: List<Int> = emptyList(),
+        ): List<Tuple2<Int, Int>> = when {
+            // base case
+            currentDimension >= groupSize ->
+                if (isValidIndexTuple(indexTuple))
+                    listOf(getTupleValue(indexTuple, listSize) X value)
+                else
+                    emptyList()
+
+            currentDimension == skipDimension ->
+                recursiveCall(
                     currentDimension = currentDimension + 1,
-                    indexTuple = indexTuple,
-                    skipDimension = skipDimension,
+                    indexTuple = indexTuple + value,
                 )
-            }
+
+            else ->
+                (0 until listSize).flatMap { i ->
+                    recursiveCall(
+                        currentDimension = currentDimension + 1,
+                        indexTuple = indexTuple + i,
+                    )
+                }
         }
+
+        return recursiveCall()
     }
 }
