@@ -14,6 +14,7 @@ import org.apache.spark.api.java.Optional
 import org.apache.spark.partial.BoundedDouble
 import org.apache.spark.partial.PartialResult
 import org.apache.spark.serializer.Serializer
+import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
 import scala.Tuple3
 import scala.Tuple4
@@ -517,6 +518,17 @@ fun <K, V, W> JavaRDD<Tuple2<K, V>>.fullOuterJoin(
 fun <K, V> JavaRDD<Tuple2<K, V>>.collectAsMap(): Map<K, V> = toJavaPairRDD().collectAsMap()
 
 /**
+ * Pass each key in the key-value pair RDD through a map function without changing the values;
+ * this also retains the original RDD's partitioning.
+ */
+fun <K, V, U> JavaRDD<Tuple2<K, V>>.mapKeys(f: (K) -> U): JavaRDD<Tuple2<U, V>> =
+    mapPartitions({
+        it.map { (_1, _2) ->
+            tupleOf(f(_1), _2)
+        }
+    }, true)
+
+/**
  * Pass each value in the key-value pair RDD through a map function without changing the keys;
  * this also retains the original RDD's partitioning.
  */
@@ -541,7 +553,8 @@ fun <K, V, W1, W2, W3> JavaRDD<Tuple2<K, V>>.cogroup(
     other3: JavaRDD<Tuple2<K, W3>>,
     partitioner: Partitioner,
 ): JavaRDD<Tuple2<K, Tuple4<Iterable<V>, Iterable<W1>, Iterable<W2>, Iterable<W3>>>> =
-    toJavaPairRDD().cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD(), other3.toJavaPairRDD(), partitioner).toTupleRDD()
+    toJavaPairRDD().cogroup(other1.toJavaPairRDD(), other2.toJavaPairRDD(), other3.toJavaPairRDD(), partitioner)
+        .toTupleRDD()
 
 /**
  * For each key k in [this] or [other], return a resulting RDD that contains a tuple with the
@@ -830,6 +843,17 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.filterByRange(lower: K, upper: K): JavaRDD<Tupl
     toJavaPairRDD().filterByRange(lower, upper).toTupleRDD()
 
 /**
+ * Return a RDD containing only the elements in the range [range].
+ * If the RDD has been partitioned using a [RangePartitioner], then this operation can be
+ * performed efficiently by only scanning the partitions that might contain matching elements.
+ * Otherwise, a standard [filter] is applied to all partitions.
+ *
+ * @since 3.1.0
+ */
+fun <K : Comparable<K>, V> JavaRDD<Tuple2<K, V>>.filterByRange(range: ClosedRange<K>): JavaRDD<Tuple2<K, V>> =
+    filterByRange(range.start, range.endInclusive)
+
+/**
  * Return a RDD containing only the elements in the inclusive range [lower] to [upper].
  * If the RDD has been partitioned using a [RangePartitioner], then this operation can be
  * performed efficiently by only scanning the partitions that might contain matching elements.
@@ -843,6 +867,21 @@ fun <K, V> JavaRDD<Tuple2<K, V>>.filterByRange(
     upper: K,
 ): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
     .filterByRange(comp, lower, upper)
+    .toTupleRDD()
+
+/**
+ * Return a RDD containing only the elements in the inclusive range [range].
+ * If the RDD has been partitioned using a [RangePartitioner], then this operation can be
+ * performed efficiently by only scanning the partitions that might contain matching elements.
+ * Otherwise, a standard [filter] is applied to all partitions.
+ *
+ * @since 3.1.0
+ */
+fun <K : Comparable<K>, V> JavaRDD<Tuple2<K, V>>.filterByRange(
+    comp: Comparator<K>,
+    range: ClosedRange<K>,
+): JavaRDD<Tuple2<K, V>> = toJavaPairRDD()
+    .filterByRange(comp, range.start, range.endInclusive)
     .toTupleRDD()
 //#endif
 
