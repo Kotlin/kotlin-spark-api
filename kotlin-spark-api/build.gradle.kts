@@ -1,9 +1,10 @@
-@file:Suppress("UnstableApiUsage")
+@file:Suppress("UnstableApiUsage", "NOTHING_TO_INLINE")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 import org.jetbrains.dokka.gradle.AbstractDokkaLeafTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin
@@ -131,6 +132,12 @@ tasks.compileTestKotlin {
                 }
             }
         }
+    }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 
