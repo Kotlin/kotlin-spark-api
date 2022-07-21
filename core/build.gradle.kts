@@ -1,8 +1,7 @@
-@file:Suppress("UnstableApiUsage")
+@file:Suppress("UnstableApiUsage", "NOTHING_TO_INLINE")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavaLibrary
-import com.vanniktech.maven.publish.JavadocJar
 import com.vanniktech.maven.publish.JavadocJar.Javadoc
 
 plugins {
@@ -48,6 +47,7 @@ tasks.compileScala {
     outputs.upToDateWhen {
         preprocessMain.outcomingFiles.files.isEmpty()
     }
+
     doFirst {
         scala {
             sourceSets {

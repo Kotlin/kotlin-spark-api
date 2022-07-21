@@ -33,6 +33,18 @@ class ApiTest : ShouldSpec({
     context("miscellaneous integration tests") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
+            should("Create Seqs") {
+                spark.createDataset(seqOf(1, 2, 3), encoder())
+                    .collectAsList() shouldBe listOf(1, 2, 3)
+
+
+                seqOf(1, 2, 3) shouldBe seqOf(1, 2, 3)
+                mutableSeqOf(1, 2, 3) shouldBe mutableSeqOf(1, 2, 3)
+
+                seqOf<Int>() shouldBe emptySeq<Int>()
+                mutableSeqOf<Int>() shouldBe emptyMutableSeq<Int>()
+            }
+
             @OptIn(ExperimentalStdlibApi::class)
             should("broadcast variables") {
                 val largeList = (1..15).map { SomeClass(a = (it..15).toList().toIntArray(), b = it) }

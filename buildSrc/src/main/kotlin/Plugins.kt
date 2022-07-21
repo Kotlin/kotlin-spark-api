@@ -4,7 +4,7 @@ import org.gradle.plugin.use.PluginDependenciesSpec
 
 
 inline val PluginDependenciesSpec.kotlin
-    get() = kotlin("jvm") version Versions.kotlin
+    get() = kotlin("jvm")
 
 inline val PluginDependenciesSpec.dokka
     get() = id("org.jetbrains.dokka")
