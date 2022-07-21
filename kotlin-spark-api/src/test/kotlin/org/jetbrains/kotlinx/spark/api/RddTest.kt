@@ -54,11 +54,11 @@ class RddTest : ShouldSpec({
                         .map { it.swap() } // ("1234a",1) etc.
                         .mapKeys { it.take(4) } // ("1234",1) etc.
                         .groupByKey()
-                        .mapValues { it.toList() } // ("1234",[1,2,3,4, 5, 6])
+                        .mapValues { it.toList() } // ("1234",[1,2,3,4,5,6])
                         .collect()
                         .single()
 
-                    (result == t("1234", listOf(1, 2, 3, 4, 5, 6))) shouldBe true
+                    result shouldBe t("1234", listOf(1, 2, 3, 4, 5, 6))
                 }
             }
 
