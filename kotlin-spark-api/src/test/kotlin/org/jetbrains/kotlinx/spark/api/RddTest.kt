@@ -58,7 +58,7 @@ class RddTest : ShouldSpec({
                         .collect()
                         .single()
 
-                    result shouldBe t("1234", listOf(1, 2, 3, 4, 5, 6))
+                    (result == t("1234", listOf(1, 2, 3, 4, 5, 6))) shouldBe true
                 }
             }
 
