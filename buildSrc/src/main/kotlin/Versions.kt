@@ -22,6 +22,7 @@ object Versions {
     const val hadoop = "3.3.1"
     const val kotlinxHtml = "0.7.5"
     const val klaxon = "5.5"
+    const val serialization = "1.3.2"
 
     inline val versionMap
         get() = mapOf(

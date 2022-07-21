@@ -20,6 +20,7 @@ object Dependencies {
     inline val kotlinTest get() = "org.jetbrains.kotlin:kotlin-test:${Versions.kotlin}"
     inline val kotlinScriptingCommon get() = "org.jetbrains.kotlin:kotlin-scripting-common"
     inline val kotlinScriptingJvm get() = "org.jetbrains.kotlin:kotlin-scripting-jvm"
+    inline val serialization get() = "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.serialization}"
 }
 
 

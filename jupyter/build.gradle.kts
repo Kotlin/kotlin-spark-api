@@ -13,6 +13,7 @@ plugins {
     mavenPublishBase
     jupyter
     jcp
+    serialization
 }
 
 group = Versions.groupID
@@ -53,6 +54,7 @@ dependencies {
 
         implementation(
             kotlinStdLib,
+            serialization,
         )
 
         testImplementation(

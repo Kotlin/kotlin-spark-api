@@ -19,16 +19,17 @@
  */
 package org.jetbrains.kotlinx.spark.api.jupyter
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.*
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.jetbrains.kotlinx.jupyter.api.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
-import org.jetbrains.kotlinx.spark.api.tuples.map
-import org.jetbrains.kotlinx.spark.api.tuples.t
+import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 
-abstract class Integration : JupyterIntegration() {
+abstract class Integration(val notebook: Notebook, val options: Map<String, String?>) : JupyterIntegration() {
 
     protected val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
     protected val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
@@ -36,12 +37,36 @@ abstract class Integration : JupyterIntegration() {
     protected val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
     protected val version = /*$"\""+version+"\""$*/ /*-*/ ""
 
-    protected val displayLimit = "DISPLAY_LIMIT"
-    protected val displayLimitDefault = 20
-    protected val displayTruncate = "DISPLAY_TRUNCATE"
-    protected val displayTruncateDefault = 30
+    protected val displayLimitOld = "DISPLAY_LIMIT"
+    protected val displayTruncateOld = "DISPLAY_TRUNCATE"
 
+    interface Properties {
+        val options: Map<String, String?>
+    }
 
+    val properties = object : Properties {
+        override val options = this@Integration.options
+    }
+
+    private val sparkName = "spark"
+    private val scalaName = "scala"
+    private val versionName = "v"
+
+    private val displayLimitName = "display.limit"
+    private val Properties.displayLimit: Int
+        get() = options[displayLimitName]?.toIntOrNull() ?: 20
+
+    private val displayTruncateName = "display.truncate"
+    private val Properties.displayTruncate: Int
+        get() = options[displayTruncateName]?.toIntOrNull() ?: 30
+
+    protected open val usingProperties = arrayOf(
+        displayLimitName,
+        displayTruncateName,
+        sparkName,
+        scalaName,
+        versionName,
+    )
 
     /**
      * Will be run after importing all dependencies
@@ -100,20 +125,14 @@ abstract class Integration : JupyterIntegration() {
 
         onLoaded {
 
-
-            declare(
-                VariableDeclaration(
-                    name = displayLimit,
-                    value = displayLimitDefault,
-                    type = typeOf<Int>(),
-                    isMutable = true,
-                ),
-                VariableDeclaration(
-                    name = displayTruncate,
-                    value = displayTruncateDefault,
-                    type = typeOf<Int>(),
-                    isMutable = true,
-                ),
+            execute(
+                """
+                @Deprecated("Use ${displayLimitName}=${properties.displayLimit} in %use magic instead")
+                var $displayLimitOld = ${properties.displayLimit}
+                
+                @Deprecated("Use ${displayTruncateName}=${properties.displayTruncate} in %use magic instead")
+                var $displayTruncateOld = ${properties.displayTruncate}
+            """.trimIndent()
             )
 
             onLoaded()
@@ -142,15 +161,15 @@ abstract class Integration : JupyterIntegration() {
 
         fun getLimitAndTruncate() = Pair(
             notebook
-                .variablesState[displayLimit]
+                .variablesState[displayLimitOld]
                 ?.value
                 ?.getOrNull() as? Int
-                ?: displayLimitDefault,
+                ?: properties.displayLimit,
             notebook
-                .variablesState[displayTruncate]
+                .variablesState[displayTruncateOld]
                 ?.value
                 ?.getOrNull() as? Int
-                ?: displayTruncateDefault
+                ?: properties.displayTruncate
         )
 
 

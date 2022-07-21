@@ -38,28 +38,35 @@ import org.jetbrains.kotlinx.jupyter.api.Code
 import org.jetbrains.kotlinx.jupyter.api.MimeTypedResult
 import org.jetbrains.kotlinx.jupyter.libraries.EmptyResolutionInfoProvider
 import org.jetbrains.kotlinx.jupyter.repl.EvalResultEx
+import org.jetbrains.kotlinx.jupyter.repl.creating.createRepl
+import org.jetbrains.kotlinx.jupyter.testkit.JupyterReplTestCase
 import org.jetbrains.kotlinx.jupyter.testkit.ReplProvider
 import org.jetbrains.kotlinx.jupyter.util.PatternNameAcceptanceRule
 import org.jetbrains.kotlinx.spark.api.SparkSession
 import java.io.Serializable
 import kotlin.script.experimental.jvm.util.classpathFromClassloader
 
+
 class JupyterTests : ShouldSpec({
+
     val replProvider = ReplProvider { classpath ->
-        ReplForJupyterImpl(
-            resolutionInfoProvider = EmptyResolutionInfoProvider,
+        createRepl(
             scriptClasspath = classpath,
             isEmbedded = true,
-            librariesScanner = TODO(),
-            notebook = TODO(),
         ).apply {
             eval {
                 librariesScanner.addLibrariesFromClassLoader(
                     classLoader = currentClassLoader,
                     host = this,
                     integrationTypeNameRules = listOf(
-                        PatternNameAcceptanceRule(false, "org.jetbrains.kotlinx.spark.api.jupyter.**"),
-                        PatternNameAcceptanceRule(true, "org.jetbrains.kotlinx.spark.api.jupyter.SparkIntegration"),
+                        PatternNameAcceptanceRule(
+                            acceptsFlag = false,
+                            pattern = "org.jetbrains.kotlinx.spark.api.jupyter.**",
+                        ),
+                        PatternNameAcceptanceRule(
+                            acceptsFlag = true,
+                            pattern = "org.jetbrains.kotlinx.spark.api.jupyter.SparkIntegration",
+                        ),
                     ),
                 )
             }
@@ -237,22 +244,22 @@ class JupyterTests : ShouldSpec({
 
 class JupyterStreamingTests : ShouldSpec({
     val replProvider = ReplProvider { classpath ->
-        ReplForJupyterImpl(
-            resolutionInfoProvider = EmptyResolutionInfoProvider,
+        createRepl(
             scriptClasspath = classpath,
             isEmbedded = true,
-            librariesScanner = TODO(),
-            notebook = TODO(),
         ).apply {
             eval {
                 librariesScanner.addLibrariesFromClassLoader(
                     classLoader = currentClassLoader,
                     host = this,
                     integrationTypeNameRules = listOf(
-                        PatternNameAcceptanceRule(false, "org.jetbrains.kotlinx.spark.api.jupyter.**"),
                         PatternNameAcceptanceRule(
-                            true,
-                            "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration"
+                            acceptsFlag = false,
+                            pattern = "org.jetbrains.kotlinx.spark.api.jupyter.**",
+                        ),
+                        PatternNameAcceptanceRule(
+                            acceptsFlag = true,
+                            pattern = "org.jetbrains.kotlinx.spark.api.jupyter.SparkStreamingIntegration",
                         ),
                     ),
                 )

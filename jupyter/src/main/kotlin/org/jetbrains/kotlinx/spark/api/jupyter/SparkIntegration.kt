@@ -30,6 +30,7 @@ import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 import org.jetbrains.kotlinx.jupyter.api.Notebook
 import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
 import org.jetbrains.kotlinx.jupyter.api.declare
+import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 
 
@@ -38,9 +39,30 @@ import kotlin.reflect.typeOf
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
-class SparkIntegration(private val notebook: Notebook, private val options: Map<String, String>) : Integration() {
+class SparkIntegration(notebook: Notebook, options: Map<String, String?>) : Integration(notebook, options) {
+
+    val TEMP = org.jetbrains.kotlinx.spark.api.SparkSession
+        .builder()
+        .master(SparkConf().get("spark.master", "local[*]"))
+        .appName("Jupyter")
+        .config("spark.sql.codegen.wholeStage", false)
+        .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
+        .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
 
 
+    private val sparkMasterName = "spark.master"
+    private val Properties.sparkMaster: String
+        get() = options[sparkMasterName] ?: "local[*]"
+
+    private val appNameName = "spark.app.name"
+    private val Properties.appName: String
+        get() = options[appNameName] ?: "Jupyter"
+
+
+    override val usingProperties = super.usingProperties + arrayOf(
+        sparkMasterName,
+        appNameName,
+    )
 
     override fun KotlinKernelHost.onLoaded() {
         val _0 = execute("""%dumpClassesForSpark""")
@@ -50,15 +72,15 @@ class SparkIntegration(private val notebook: Notebook, private val options: Map<
             """
                 val spark = org.jetbrains.kotlinx.spark.api.SparkSession
                     .builder()
-                    .master(SparkConf().get("spark.master", "local[*]"))
-                    .appName("Jupyter")
+                    .master(SparkConf().get("${sparkMasterName}", "${properties.sparkMaster}"))
+                    .appName("${properties.appName}")
                     .config("spark.sql.codegen.wholeStage", false)
                     .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
                     .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
                     .apply {
                         ${
                 buildString {
-                    println("received options $options")
+                    println("received options $options, filtered: ${options.filterKeys { it !in usingProperties }}")
 //                    sparkConf.forEach {
 //                        when (val value = it.value) {
 //                            is String -> appendLine("config(\"${it.key}\", \"$value\")")
@@ -111,3 +133,4 @@ class SparkIntegration(private val notebook: Notebook, private val options: Map<
         execute("""spark.stop()""")
     }
 }
+

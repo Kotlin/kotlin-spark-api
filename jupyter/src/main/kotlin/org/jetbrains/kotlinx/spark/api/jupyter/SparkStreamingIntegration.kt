@@ -24,6 +24,7 @@ import org.apache.spark.streaming.StreamingContextState
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
+import org.jetbrains.kotlinx.jupyter.api.Notebook
 import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
 import org.jetbrains.kotlinx.jupyter.api.declare
 import kotlin.reflect.typeOf
@@ -32,7 +33,7 @@ import kotlin.reflect.typeOf
  * %use spark-streaming
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
-internal class SparkStreamingIntegration : Integration() {
+class SparkStreamingIntegration(notebook: Notebook, options: Map<String, String?>) : Integration(notebook, options) {
 
     override val imports: Array<String> = super.imports + arrayOf(
         "org.apache.spark.deploy.SparkHadoopUtil",
