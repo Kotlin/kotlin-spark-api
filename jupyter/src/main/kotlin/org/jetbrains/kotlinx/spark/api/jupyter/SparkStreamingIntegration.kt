@@ -33,7 +33,7 @@ import kotlin.reflect.typeOf
  * %use spark-streaming
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
-class SparkStreamingIntegration(notebook: Notebook, options: Map<String, String?>) : Integration(notebook, options) {
+class SparkStreamingIntegration(notebook: Notebook, options: MutableMap<String, String?>) : Integration(notebook, options) {
 
     override val imports: Array<String> = super.imports + arrayOf(
         "org.apache.spark.deploy.SparkHadoopUtil",

@@ -30,6 +30,8 @@ import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 import org.jetbrains.kotlinx.jupyter.api.Notebook
 import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
 import org.jetbrains.kotlinx.jupyter.api.declare
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.appNameName
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkMasterName
 import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 
@@ -39,55 +41,31 @@ import kotlin.reflect.typeOf
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
-class SparkIntegration(notebook: Notebook, options: Map<String, String?>) : Integration(notebook, options) {
-
-    val TEMP = org.jetbrains.kotlinx.spark.api.SparkSession
-        .builder()
-        .master(SparkConf().get("spark.master", "local[*]"))
-        .appName("Jupyter")
-        .config("spark.sql.codegen.wholeStage", false)
-        .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
-        .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
-
-
-    private val sparkMasterName = "spark.master"
-    private val Properties.sparkMaster: String
-        get() = options[sparkMasterName] ?: "local[*]"
-
-    private val appNameName = "spark.app.name"
-    private val Properties.appName: String
-        get() = options[appNameName] ?: "Jupyter"
-
-
-    override val usingProperties = super.usingProperties + arrayOf(
-        sparkMasterName,
-        appNameName,
-    )
+class SparkIntegration(notebook: Notebook, options: MutableMap<String, String?>) : Integration(notebook, options) {
 
     override fun KotlinKernelHost.onLoaded() {
         val _0 = execute("""%dumpClassesForSpark""")
+
+        properties {
+            getOrPut("spark.sql.codegen.wholeStage") { "false" }
+            getOrPut("fs.hdfs.impl") { org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name }
+            getOrPut("fs.file.impl") { org.apache.hadoop.fs.LocalFileSystem::class.java.name }
+        }
 
         @Language("kts")
         val _1 = listOf(
             """
                 val spark = org.jetbrains.kotlinx.spark.api.SparkSession
                     .builder()
-                    .master(SparkConf().get("${sparkMasterName}", "${properties.sparkMaster}"))
-                    .appName("${properties.appName}")
-                    .config("spark.sql.codegen.wholeStage", false)
-                    .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
-                    .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
                     .apply {
                         ${
                 buildString {
-                    println("received options $options, filtered: ${options.filterKeys { it !in usingProperties }}")
-//                    sparkConf.forEach {
-//                        when (val value = it.value) {
-//                            is String -> appendLine("config(\"${it.key}\", \"$value\")")
-//                            is Boolean, Long, Double -> appendLine("config(\"${it.key}\", $value)")
-//                            else -> throw IllegalArgumentException("Cannot set property ${it.key} because value $value of unsupported type ${value?.javaClass}")
-//                        }
-//                    }
+                    val sparkProps = properties.filterKeys { it !in usingProperties }
+                    println("received properties: $properties, providing Spark with: $sparkProps")
+
+                    sparkProps.forEach { (key, value) ->
+                        appendLine("config(\"${key}\", \"$value\")")
+                    }
                 }
             }
                      }
