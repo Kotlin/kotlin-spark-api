@@ -17,33 +17,30 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+@file:Suppress("UsePropertyAccessSyntax")
+
 package org.jetbrains.kotlinx.spark.api.jupyter
 
 
+import kotlinx.serialization.json.*
 import org.apache.spark.SparkConf
+import org.apache.spark.sql.SparkSession
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
+import org.jetbrains.kotlinx.jupyter.api.Notebook
 import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
 import org.jetbrains.kotlinx.jupyter.api.declare
 import kotlin.reflect.typeOf
+
 
 /**
  * %use spark
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
-internal class SparkIntegration : Integration() {
+class SparkIntegration(private val notebook: Notebook, private val options: Map<String, String>) : Integration() {
 
-    private lateinit var sparkConf: Map<String, Any?>
-    private val sparkProps = "SPARK_PROPS"
 
-    @Suppress("UNCHECKED_CAST")
-    override fun Builder.onLoadedAlsoDo() {
-        sparkConf = notebook
-            .variablesState[sparkProps]
-            ?.value
-            ?.getOrNull() as? Map<String, Any?>? ?: emptyMap()
-    }
 
     override fun KotlinKernelHost.onLoaded() {
         val _0 = execute("""%dumpClassesForSpark""")
@@ -59,22 +56,25 @@ internal class SparkIntegration : Integration() {
                     .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
                     .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
                     .apply {
-                        ${buildString {
-                            sparkConf.forEach {
-                                when (val value = it.value) {
-                                    is String -> appendLine("config(\"${it.key}\", \"$value\")")
-                                    is Boolean, Long, Double -> appendLine("config(\"${it.key}\", $value)")
-                                    else -> throw IllegalArgumentException("Cannot set property ${it.key} because value $value of unsupported type ${value?.javaClass}")
-                                }
-                            }
-                        }}
+                        ${
+                buildString {
+                    println("received options $options")
+//                    sparkConf.forEach {
+//                        when (val value = it.value) {
+//                            is String -> appendLine("config(\"${it.key}\", \"$value\")")
+//                            is Boolean, Long, Double -> appendLine("config(\"${it.key}\", $value)")
+//                            else -> throw IllegalArgumentException("Cannot set property ${it.key} because value $value of unsupported type ${value?.javaClass}")
+//                        }
+//                    }
+                }
+            }
                      }
                     .getOrCreate()""".trimIndent(),
             """
                 spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)""".trimIndent(),
             """
-                val sc by lazy { 
-                    org.apache.spark.api.java.JavaSparkContext(spark.sparkContext) 
+                val sc by lazy {
+                    org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)
                 }""".trimIndent(),
             """
                 println("Spark session (Spark: $sparkVersion, Scala: $scalaCompatVersion, v: $version)  has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use spark-streaming` instead.")""".trimIndent(),

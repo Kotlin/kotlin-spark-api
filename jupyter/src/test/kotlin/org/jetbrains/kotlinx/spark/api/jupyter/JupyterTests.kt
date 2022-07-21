@@ -31,6 +31,7 @@ import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.EvalRequestData
+import org.jetbrains.kotlinx.jupyter.MutableNotebook
 import org.jetbrains.kotlinx.jupyter.ReplForJupyter
 import org.jetbrains.kotlinx.jupyter.ReplForJupyterImpl
 import org.jetbrains.kotlinx.jupyter.api.Code
@@ -49,6 +50,8 @@ class JupyterTests : ShouldSpec({
             resolutionInfoProvider = EmptyResolutionInfoProvider,
             scriptClasspath = classpath,
             isEmbedded = true,
+            librariesScanner = TODO(),
+            notebook = TODO(),
         ).apply {
             eval {
                 librariesScanner.addLibrariesFromClassLoader(
@@ -238,6 +241,8 @@ class JupyterStreamingTests : ShouldSpec({
             resolutionInfoProvider = EmptyResolutionInfoProvider,
             scriptClasspath = classpath,
             isEmbedded = true,
+            librariesScanner = TODO(),
+            notebook = TODO(),
         ).apply {
             eval {
                 librariesScanner.addLibrariesFromClassLoader(
