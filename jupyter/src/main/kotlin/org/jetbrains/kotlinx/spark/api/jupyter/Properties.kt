@@ -16,8 +16,8 @@ interface Properties : MutableMap<String, String?> {
         internal const val sparkName = "spark"
         internal const val scalaName = "scala"
         internal const val versionName = "v"
-        internal const val displayLimitName = "display.limit"
-        internal const val displayTruncateName = "display.truncate"
+        internal const val displayLimitName = "displayLimit"
+        internal const val displayTruncateName = "displayTruncate"
     }
 
 //    val sparkMaster: String
