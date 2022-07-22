@@ -20,16 +20,17 @@ interface Properties : MutableMap<String, String?> {
         internal const val displayTruncateName = "displayTruncate"
     }
 
-//    val sparkMaster: String
-//        get() = this[sparkMasterName] ?: "local[*]"
-//
-//    val appName: String
-//        get() = this[appNameName] ?: "Jupyter"
-
+    /** The value which limits the number of rows while displaying an RDD or Dataset.
+     * Default: 20
+     */
     var displayLimit: Int
         set(value) { this[displayLimitName] = value.toString() }
-        get() = this[displayLimitName]!!.toIntOrNull() ?: 20
+        get() = this[displayLimitName]?.toIntOrNull() ?: 20
 
+    /** The value which limits the number characters per cell while displaying an RDD or Dataset.
+     * `-1` for no limit.
+     * Default: 30
+     */
     var displayTruncate: Int
         set(value) { this[displayTruncateName] = value.toString() }
         get() = this[displayTruncateName]?.toIntOrNull() ?: 30

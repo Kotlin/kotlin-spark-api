@@ -22,18 +22,11 @@
 package org.jetbrains.kotlinx.spark.api.jupyter
 
 
-import kotlinx.serialization.json.*
-import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 import org.jetbrains.kotlinx.jupyter.api.Notebook
-import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
-import org.jetbrains.kotlinx.jupyter.api.declare
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.appNameName
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkMasterName
-import kotlin.reflect.KProperty1
-import kotlin.reflect.typeOf
 
 
 /**
@@ -47,6 +40,8 @@ class SparkIntegration(notebook: Notebook, options: MutableMap<String, String?>)
         val _0 = execute("""%dumpClassesForSpark""")
 
         properties {
+            getOrPut(sparkMasterName) { "local[*]" }
+            getOrPut(appNameName) { "Kotlin Spark API - Jupyter" }
             getOrPut("spark.sql.codegen.wholeStage") { "false" }
             getOrPut("fs.hdfs.impl") { org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name }
             getOrPut("fs.file.impl") { org.apache.hadoop.fs.LocalFileSystem::class.java.name }

@@ -16,7 +16,6 @@ plugins {
     dokka version Versions.dokka
     idea
     kotlin version Versions.kotlin apply false
-    serialization version Versions.kotlin apply false
 }
 
 group = Versions.groupID

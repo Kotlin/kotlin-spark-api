@@ -16,13 +16,11 @@ object Versions {
     const val jcp = "7.0.5"
     const val mavenPublish = "0.20.0"
     const val atrium = "0.17.0"
-    const val kotestExtensionAllure = "1.1.0"
     const val licenseGradlePluginVersion = "0.15.0"
     const val kafkaStreamsTestUtils = "3.1.0"
     const val hadoop = "3.3.1"
     const val kotlinxHtml = "0.7.5"
     const val klaxon = "5.5"
-    const val serialization = "1.3.2"
 
     inline val versionMap
         get() = mapOf(

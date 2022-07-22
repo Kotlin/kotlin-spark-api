@@ -127,7 +127,7 @@ abstract class Integration(private val notebook: Notebook, private val options: 
                 VariableDeclaration(
                     name = sparkPropertiesName,
                     value = object : Properties, MutableMap<String, String?> by mutableOptions {
-                        override fun toString(): String = mutableOptions.toString()
+                        override fun toString(): String = "Properties: $mutableOptions"
                     },
                     type = typeOf<Properties>(),
                     isMutable = true,
@@ -137,11 +137,21 @@ abstract class Integration(private val notebook: Notebook, private val options: 
             @Language("kts")
             val _0 = execute(
                 """
-                @Deprecated("Use ${displayLimitName}=${properties.displayLimit} in %use magic or ${sparkPropertiesName}.${Properties::displayLimit.name} = ${properties.displayLimit} instead", ReplaceWith("${sparkPropertiesName}.${Properties::displayLimit.name}"))
-                var $displayLimitOld = ${properties.displayLimit}
+                @Deprecated("Use ${displayLimitName}=${properties.displayLimit} in %use magic or ${sparkPropertiesName}.${displayLimitName} = ${properties.displayLimit} instead", ReplaceWith("${sparkPropertiesName}.${displayLimitName}"))
+                var $displayLimitOld: Int
+                    get() = ${sparkPropertiesName}.${displayLimitName}
+                    set(value) {
+                        println("$displayLimitOld is deprecated: Use ${sparkPropertiesName}.${displayLimitName} instead")
+                        ${sparkPropertiesName}.${displayLimitName} = value
+                    }
                 
-                @Deprecated("Use ${displayTruncateName}=${properties.displayTruncate} in %use magic or ${sparkPropertiesName}.${Properties::displayTruncate.name} = ${properties.displayTruncate} instead", ReplaceWith("${sparkPropertiesName}.${Properties::displayTruncate.name}"))
-                var $displayTruncateOld = ${properties.displayTruncate}
+                @Deprecated("Use ${displayTruncateName}=${properties.displayTruncate} in %use magic or ${sparkPropertiesName}.${displayTruncateName} = ${properties.displayTruncate} instead", ReplaceWith("${sparkPropertiesName}.${displayTruncateName}"))
+                var $displayTruncateOld: Int
+                    get() = ${sparkPropertiesName}.${displayTruncateName}
+                    set(value) {
+                        println("$displayTruncateOld is deprecated: Use ${sparkPropertiesName}.${displayTruncateName} instead")
+                        ${sparkPropertiesName}.${displayTruncateName} = value
+                    }
             """.trimIndent()
             )
 
