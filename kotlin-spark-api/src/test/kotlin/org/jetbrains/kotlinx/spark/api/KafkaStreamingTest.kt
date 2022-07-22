@@ -48,13 +48,6 @@ object Kafka : Tag()
 
 class KafkaStreamingTest : FunSpec() {
 
-    private fun getKafkaContainer(): KafkaContainer = install(
-        TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1")))
-    ) {
-        withEmbeddedZookeeper()
-        withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
-    }
-
     init {
 
         tags(Kafka)
@@ -63,7 +56,14 @@ class KafkaStreamingTest : FunSpec() {
             var attempts = 0
             while (true) {
                 try {
-                    return@run getKafkaContainer()
+                    return@run install(
+                        TestContainerExtension(
+                            KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1"))
+                        )
+                    ) {
+                        withEmbeddedZookeeper()
+                        withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+                    }
                 } catch (e: ContainerLaunchException) {
                     attempts++
                     if (attempts > 10) throw e
