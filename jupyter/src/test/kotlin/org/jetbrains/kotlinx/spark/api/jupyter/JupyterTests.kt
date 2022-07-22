@@ -25,6 +25,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import jupyter.kotlin.DependsOn
 import org.apache.spark.api.java.JavaSparkContext
@@ -234,6 +235,94 @@ class JupyterTests : ShouldSpec({
 
                 html shouldContain "1, 2, 3"
                 html shouldContain "4, 5, 6"
+            }
+
+            should("truncate dataset cells using properties") {
+
+                @Language("kts")
+                val oldTruncation = exec("""sparkProperties.displayTruncate""") as Int
+
+                @Language("kts")
+                val html = execHtml(
+                    """
+                        data class Test(val a: String)
+                        sparkProperties.displayTruncate = 3
+                        dsOf(Test("aaaaaaaaaa"))
+                    """.trimIndent()
+                )
+
+                @Language("kts")
+                val restoreTruncation = exec("""sparkProperties.displayTruncate = $oldTruncation""")
+
+                html shouldContain "<td>aaa</td>"
+                html shouldNotContain "<td>aaaaaaaaaa</td>"
+            }
+
+            should("limit dataset rows using properties") {
+
+                @Language("kts")
+                val oldLimit = exec("""sparkProperties.displayLimit""") as Int
+
+                @Language("kts")
+                val html = execHtml(
+                    """
+                        data class Test(val a: String)
+                        sparkProperties.displayLimit = 3
+                        dsOf(Test("a"), Test("b"), Test("c"), Test("d"), Test("e"))
+                    """.trimIndent()
+                )
+
+                @Language("kts")
+                val restoreLimit = exec("""sparkProperties.displayLimit = $oldLimit""")
+
+                html shouldContain "<td>a</td>"
+                html shouldContain "<td>b</td>"
+                html shouldContain "<td>c</td>"
+                html shouldNotContain "<td>d</td>"
+                html shouldNotContain "<td>e</td>"
+            }
+
+            should("truncate rdd cells using properties") {
+
+                @Language("kts")
+                val oldTruncation = exec("""sparkProperties.displayTruncate""") as Int
+
+                @Language("kts")
+                val html = execHtml(
+                    """
+                        sparkProperties.displayTruncate = 3
+                        sc.parallelize(listOf("aaaaaaaaaa"))
+                    """.trimIndent()
+                )
+
+                @Language("kts")
+                val restoreTruncation = exec("""sparkProperties.displayTruncate = $oldTruncation""")
+
+                html shouldContain "<td>aaa</td>"
+                html shouldNotContain "<td>aaaaaaaaaa</td>"
+            }
+
+            should("limit rdd rows using properties") {
+
+                @Language("kts")
+                val oldLimit = exec("""sparkProperties.displayLimit""") as Int
+
+                @Language("kts")
+                val html = execHtml(
+                    """
+                        sparkProperties.displayLimit = 3
+                        sc.parallelize(listOf("a", "b", "c", "d", "e"))
+                    """.trimIndent()
+                )
+
+                @Language("kts")
+                val restoreLimit = exec("""sparkProperties.displayLimit = $oldLimit""")
+
+                html shouldContain "<td>a</td>"
+                html shouldContain "<td>b</td>"
+                html shouldContain "<td>c</td>"
+                html shouldNotContain "<td>d</td>"
+                html shouldNotContain "<td>e</td>"
             }
 
             @Language("kts")
