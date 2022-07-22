@@ -21,9 +21,11 @@ import scala.Tuple4
 import kotlin.random.Random
 import org.apache.hadoop.mapreduce.OutputFormat as NewOutputFormat
 
+/** Utility method to convert [JavaRDD]<[Tuple2]> to [JavaPairRDD]. */
 fun <K, V> JavaRDD<Tuple2<K, V>>.toJavaPairRDD(): JavaPairRDD<K, V> =
     JavaPairRDD.fromJavaRDD(this)
 
+/** Utility method to convert [JavaPairRDD] to [JavaRDD]<[Tuple2]>. */
 fun <K, V> JavaPairRDD<K, V>.toTupleRDD(): JavaRDD<Tuple2<K, V>> =
     JavaPairRDD.toRDD(this).toJavaRDD()
 

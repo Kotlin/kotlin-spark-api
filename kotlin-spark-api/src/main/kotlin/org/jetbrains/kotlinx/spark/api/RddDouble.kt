@@ -8,6 +8,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.util.StatCounter
 import scala.Tuple2
 
+/** Utility method to convert [JavaRDD]<[Number]> to [JavaDoubleRDD]. */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Number> JavaRDD<T>.toJavaDoubleRDD(): JavaDoubleRDD =
     JavaDoubleRDD.fromRDD(
@@ -17,6 +18,7 @@ inline fun <reified T : Number> JavaRDD<T>.toJavaDoubleRDD(): JavaDoubleRDD =
         }.rdd() as RDD<Any>
     )
 
+/** Utility method to convert [JavaDoubleRDD] to [JavaRDD]<[Double]>. */
 @Suppress("UNCHECKED_CAST")
 fun JavaDoubleRDD.toDoubleRDD(): JavaRDD<Double> =
     JavaDoubleRDD.toRDD(this).toJavaRDD() as JavaRDD<Double>
@@ -51,27 +53,19 @@ inline fun <reified T : Number> JavaRDD<T>.sampleStdev(): Double = toJavaDoubleR
  */
 inline fun <reified T : Number> JavaRDD<T>.sampleVariance(): Double = toJavaDoubleRDD().sampleVariance()
 
-/**
- * Compute the population standard deviation of this RDD's elements.
- */
+/** Compute the population standard deviation of this RDD's elements. */
 inline fun <reified T : Number> JavaRDD<T>.popStdev(): Double = toJavaDoubleRDD().popStdev()
 
-/**
- * Compute the population variance of this RDD's elements.
- */
+/** Compute the population variance of this RDD's elements. */
 inline fun <reified T : Number> JavaRDD<T>.popVariance(): Double = toJavaDoubleRDD().popVariance()
 
-/**
- * Approximate operation to return the mean within a timeout.
- */
+/** Approximate operation to return the mean within a timeout. */
 inline fun <reified T : Number> JavaRDD<T>.meanApprox(
     timeout: Long,
     confidence: Double = 0.95,
 ): PartialResult<BoundedDouble> = toJavaDoubleRDD().meanApprox(timeout, confidence)
 
-/**
- * Approximate operation to return the sum within a timeout.
- */
+/** Approximate operation to return the sum within a timeout. */
 inline fun <reified T : Number> JavaRDD<T>.sumApprox(
     timeout: Long,
     confidence: Double = 0.95,
