@@ -37,6 +37,7 @@ import org.apache.spark.streaming.kafka010.ConsumerStrategies
 import org.apache.spark.streaming.kafka010.KafkaUtils
 import org.apache.spark.streaming.kafka010.LocationStrategies
 import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.testcontainers.containers.ContainerLaunchException
 import org.testcontainers.containers.KafkaContainer
 import org.testcontainers.utility.DockerImageName
 import scala.Tuple3
@@ -46,16 +47,32 @@ import java.time.Duration
 object Kafka : Tag()
 
 class KafkaStreamingTest : FunSpec() {
+
+    private fun getKafkaContainer(): KafkaContainer = install(
+        TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1")))
+    ) {
+        withEmbeddedZookeeper()
+        withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+    }
+
     init {
 
         tags(Kafka)
 
-        val kafka = install(
-            TestContainerExtension(KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1")))
-        ) {
-            withEmbeddedZookeeper()
-            withEnv("KAFKA_AUTO_CREATE_TOPICS_ENABLE", "true")
+        val kafka = run {
+            var attempts = 0
+            while (true) {
+                try {
+                    return@run getKafkaContainer()
+                } catch (e: ContainerLaunchException) {
+                    attempts++
+                    if (attempts > 10) throw e
+                }
+            }
+            @Suppress("UNREACHABLE_CODE")
+            error("Unreachable")
         }
+
         println(kafka.bootstrapServers)
         test("Streaming should support kafka") {
             val topic1 = "test1"
