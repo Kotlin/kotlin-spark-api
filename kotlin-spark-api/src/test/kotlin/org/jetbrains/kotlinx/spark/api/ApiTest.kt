@@ -103,6 +103,62 @@ class ApiTest : ShouldSpec({
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
             }
+
+            should("Map iterators") {
+                val data = (1..50).toList()
+                val iterator = iterator { yieldAll(data) }
+                    .map { it.toString() }
+
+                iterator.asSequence().toList() shouldBe data.map { it.toString() }
+            }
+
+            should("Filter iterators") {
+                val data = (1..50).toList()
+                val iterator = iterator { yieldAll(data) }
+                    .filter { it % 2 == 0 }
+
+                iterator.asSequence().toList() shouldBe data.filter { it % 2 == 0 }
+            }
+
+            should("Partition iterators") {
+                val data = (1..50).toList()
+
+                val iterator1 = iterator { yieldAll(data) }
+                    .partition(8, cutIncomplete = false)
+                val result1 = iterator1.asSequence().toList()
+                result1.size shouldBe (50 / 8 + 1)
+                result1.map { it.size }.distinct().size shouldBe 2 // two difference sizes should exist, 8 and the rest
+
+                val iterator2 = iterator { yieldAll(data) }
+                    .partition(8, cutIncomplete = true)
+
+                val result2 = iterator2.asSequence().toList()
+                result2.size shouldBe (50 / 8)
+                result2.forEach { it.size shouldBe 8 }
+            }
+
+            should("Flatten iterators") {
+                val data = (1..50).toList()
+                val (data1, data2) = data.partition { it <= 25 }
+                val iterator = iterator {
+                    yield(data1.iterator())
+                    yield(data2.iterator())
+                }.flatten()
+
+                iterator.asSequence().toList() shouldBe data
+            }
+
+            should("Flatmap iterators using transformAsSequence") {
+                val data = (1..50).toList()
+                val iterator = data.iterator()
+                    .transformAsSequence {
+                        flatMap {
+                            listOf(it.toDouble(), it + 0.5)
+                        }
+                    }
+
+                iterator.asSequence().toList() shouldBe data.flatMap { listOf(it.toDouble(), it + 0.5) }
+            }
         }
     }
 })

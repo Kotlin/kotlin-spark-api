@@ -50,6 +50,7 @@ class PartitioningIterator<T>(
 }
 
 /** Maps the values of the iterator lazily using [func]. */
+@Deprecated("[Iterator.map] now uses the [Sequence.map] function")
 class MappingIterator<T, R>(
     private val source: Iterator<T>,
     private val func: (T) -> R,
@@ -63,6 +64,7 @@ class MappingIterator<T, R>(
 }
 
 /** Filters the values of the iterator lazily using [predicate]. */
+@Deprecated("[Iterator.filter] now uses the [Sequence.filter] function")
 class FilteringIterator<T>(
     private val source: Iterator<T>,
     private val predicate: (T) -> Boolean,
@@ -81,12 +83,20 @@ class FilteringIterator<T>(
 
 }
 
+/** Allows to transform an Iterator using the Sequence functions. */
+fun <T, R> Iterator<T>.transformAsSequence(func: Sequence<T>.() -> Sequence<R>): Iterator<R> =
+    func(this.asSequence()).iterator()
+
+/** Flattens iterator. */
+fun <T> Iterator<Iterator<T>>.flatten(): Iterator<T> = transformAsSequence { flatMap { it.asSequence() } }
+
 /** Maps the values of the iterator lazily using [func]. */
-fun <T, R> Iterator<T>.map(func: (T) -> R): Iterator<R> = MappingIterator(this, func)
+fun <T, R> Iterator<T>.map(func: (T) -> R): Iterator<R> = transformAsSequence { map(func) }
 
 /** Filters the values of the iterator lazily using [predicate]. */
-fun <T> Iterator<T>.filter(predicate: (T) -> Boolean): Iterator<T> = FilteringIterator(this, predicate)
+fun <T> Iterator<T>.filter(predicate: (T) -> Boolean): Iterator<T> = transformAsSequence { filter(predicate) }
 
 /** Partitions the values of the iterator lazily in groups of [size]. */
-fun <T> Iterator<T>.partition(size: Int): Iterator<List<T>> = PartitioningIterator(this, size)
+fun <T> Iterator<T>.partition(size: Int, cutIncomplete: Boolean = false): Iterator<List<T>> =
+    PartitioningIterator(this, size, cutIncomplete)
 
