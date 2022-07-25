@@ -62,9 +62,12 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 The list of Kotlin for Apache Spark releases is available [here](https://github.com/JetBrains/kotlin-spark-api/releases/).
 The Kotlin for Spark artifacts adhere to the following convention:
-`[Apache Spark version]_[Scala core version]:[Kotlin for Apache Spark API version]` 
+`[name]_[Apache Spark version]_[Scala core version]:[Kotlin for Apache Spark API version]` 
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api-parent-3.2.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:"org.jetbrains.kotlinx.spark"%20AND%20a:"kotlin-spark-api-3.2")
+The only exception to this is `scala-tuples-in-kotlin_[Scala core version]:[Kotlin for Apache Spark API version]`, which is 
+independent of Spark.
+
+[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api_3.3.0_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:"org.jetbrains.kotlinx.spark"%20AND%20a:"kotlin-spark-api_3.3.0_2.13")
 
 ## How to configure Kotlin for Apache Spark in your project
 
