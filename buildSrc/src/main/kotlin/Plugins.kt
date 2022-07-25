@@ -15,7 +15,6 @@ inline val PluginDependenciesSpec.license
 inline val PluginDependenciesSpec.jcp
     get() = id("com.igormaznitsa.jcp")
 
-
 inline val DependencyHandlerScope.jcp
     get() = "com.igormaznitsa:jcp:${Versions.jcp}"
 

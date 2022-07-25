@@ -17,42 +17,62 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+@file:Suppress("UsePropertyAccessSyntax")
+
 package org.jetbrains.kotlinx.spark.api.jupyter
 
 
 import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlinx.jupyter.api.FieldValue
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
+import org.jetbrains.kotlinx.jupyter.api.Notebook
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.appNameName
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkMasterName
+
 
 /**
  * %use spark
  */
 @Suppress("UNUSED_VARIABLE", "LocalVariableName")
 @OptIn(ExperimentalStdlibApi::class)
-internal class SparkIntegration : Integration() {
+class SparkIntegration(notebook: Notebook, options: MutableMap<String, String?>) : Integration(notebook, options) {
 
     override fun KotlinKernelHost.onLoaded() {
         val _0 = execute("""%dumpClassesForSpark""")
+
+        properties {
+            getOrPut(sparkMasterName) { "local[*]" }
+            getOrPut(appNameName) { "Kotlin Spark API - Jupyter" }
+            getOrPut("spark.sql.codegen.wholeStage") { "false" }
+            getOrPut("fs.hdfs.impl") { org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name }
+            getOrPut("fs.file.impl") { org.apache.hadoop.fs.LocalFileSystem::class.java.name }
+        }
 
         @Language("kts")
         val _1 = listOf(
             """
                 val spark = org.jetbrains.kotlinx.spark.api.SparkSession
                     .builder()
-                    .master(SparkConf().get("spark.master", "local[*]"))
-                    .appName("Jupyter")
-                    .config("spark.sql.codegen.wholeStage", false)
-                    .config("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem::class.java.name)
-                    .config("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem::class.java.name)
+                    .apply {
+                        ${
+                buildString {
+                    val sparkProps = properties.filterKeys { it !in usingProperties }
+                    println("received properties: $properties, providing Spark with: $sparkProps")
+
+                    sparkProps.forEach { (key, value) ->
+                        appendLine("config(\"${key}\", \"$value\")")
+                    }
+                }
+            }
+                     }
                     .getOrCreate()""".trimIndent(),
             """
                 spark.sparkContext.setLogLevel(org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR)""".trimIndent(),
             """
-                val sc by lazy { 
-                    org.apache.spark.api.java.JavaSparkContext(spark.sparkContext) 
+                val sc by lazy {
+                    org.apache.spark.api.java.JavaSparkContext(spark.sparkContext)
                 }""".trimIndent(),
             """
-                println("Spark session has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use spark-streaming` instead.")""".trimIndent(),
+                println("Spark session (Spark: $sparkVersion, Scala: $scalaCompatVersion, v: $version)  has been started and is running. No `withSpark { }` necessary, you can access `spark` and `sc` directly. To use Spark streaming, use `%use spark-streaming` instead.")""".trimIndent(),
             """
                 inline fun <reified T> List<T>.toDS(): Dataset<T> = toDS(spark)""".trimIndent(),
             """
@@ -90,3 +110,4 @@ internal class SparkIntegration : Integration() {
         execute("""spark.stop()""")
     }
 }
+
