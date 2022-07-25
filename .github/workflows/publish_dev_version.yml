@@ -54,8 +54,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@v1
+#      - name: Validate Gradle wrapper
+#        uses: gradle/wrapper-validation-action@v1
 
       - name: Deploy to GH Packages with Gradle
         uses: gradle/gradle-build-action@v2
