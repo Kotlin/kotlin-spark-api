@@ -59,7 +59,7 @@ jobs:
             -Pspark=${{ matrix.spark }}
             -Pscala=${{ matrix.scala }}
             clean
-            build
+            test
             --scan
 
   #  qodana:

@@ -98,6 +98,10 @@ class SparkIntegration(notebook: Notebook, options: MutableMap<String, String?>)
             """
                 inline fun <reified T> JavaRDDLike<T, *>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)""".trimIndent(),
             """
+                fun <T> List<T>.toRDD(numSlices: Int = sc.defaultParallelism()): JavaRDD<T> = sc.toRDD(this, numSlices)""".trimIndent(),
+            """
+                fun <T> rddOf(vararg elements: T, numSlices: Int = sc.defaultParallelism()): JavaRDD<T> = sc.toRDD(elements.toList(), numSlices)""".trimIndent(),
+            """
                 val udf: UDFRegistration get() = spark.udf()""".trimIndent(),
         ).map(::execute)
     }

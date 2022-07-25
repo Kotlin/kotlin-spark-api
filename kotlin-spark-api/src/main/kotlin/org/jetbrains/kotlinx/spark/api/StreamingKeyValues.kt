@@ -23,7 +23,6 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.HashPartitioner
 import org.apache.spark.Partitioner
-import org.apache.spark.api.java.JavaPairRDD
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.Optional
 import org.apache.spark.streaming.Duration
@@ -39,13 +38,6 @@ fun <K, V> JavaDStream<Tuple2<K, V>>.toPairDStream(): JavaPairDStream<K, V> =
 
 fun <K, V> JavaPairDStream<K, V>.toTupleDStream(): JavaDStream<Tuple2<K, V>> =
     toJavaDStream()
-
-fun <K, V> JavaRDD<Tuple2<K, V>>.toPairRDD(): JavaPairRDD<K, V> =
-    JavaPairRDD.fromJavaRDD(this)
-
-fun <K, V> JavaPairRDD<K, V>.toTupleRDD(): JavaRDD<Tuple2<K, V>> =
-    JavaPairRDD.toRDD(this).toJavaRDD()
-
 
 /**
  * Return a new DStream by applying `groupByKey` to each RDD. Hash partitioning is used to
@@ -448,7 +440,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
                 updateFunc(list, s.getOrNull()).toOptional()
             },
             partitioner,
-            initialRDD.toPairRDD(),
+            initialRDD.toJavaPairRDD(),
         )
         .toTupleDStream()
 
@@ -473,7 +465,7 @@ fun <K, V, S> JavaDStream<Tuple2<K, V>>.updateStateByKey(
         .updateStateByKey(
             updateFunc,
             partitioner,
-            initialRDD.toPairRDD(),
+            initialRDD.toJavaPairRDD(),
         )
         .toTupleDStream()
 

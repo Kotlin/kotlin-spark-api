@@ -24,11 +24,8 @@ import org.apache.spark.api.java.StorageLevels
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.State
 import org.apache.spark.streaming.StateSpec
-import org.jetbrains.kotlinx.spark.api.getOrElse
-import org.jetbrains.kotlinx.spark.api.mapWithState
-import org.jetbrains.kotlinx.spark.api.toPairRDD
+import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.X
-import org.jetbrains.kotlinx.spark.api.withSparkStreaming
 import java.util.regex.Pattern
 import kotlin.system.exitProcess
 
@@ -71,8 +68,8 @@ object KotlinStatefulNetworkCount {
         ) {
 
             // Initial state RDD input to mapWithState
-            val tuples = listOf("hello" X 1, "world" X 1)
-            val initialRDD = ssc.sparkContext().parallelize(tuples)
+            val tuples = arrayOf("hello" X 1, "world" X 1)
+            val initialRDD = ssc.sparkContext().rddOf(*tuples)
 
             val lines = ssc.socketTextStream(
                 args.getOrElse(0) { DEFAULT_HOSTNAME },
@@ -95,7 +92,7 @@ object KotlinStatefulNetworkCount {
             val stateDstream = wordsDstream.mapWithState(
                 StateSpec
                     .function(mappingFunc)
-                    .initialState(initialRDD.toPairRDD())
+                    .initialState(initialRDD.toJavaPairRDD())
             )
 
             stateDstream.print()

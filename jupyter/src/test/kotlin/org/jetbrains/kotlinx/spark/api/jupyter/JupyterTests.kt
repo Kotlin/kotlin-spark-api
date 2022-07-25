@@ -129,10 +129,10 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val html = execHtml(
                     """
-                    val rdd: JavaRDD<List<Int>> = sc.parallelize(listOf(
+                    val rdd: JavaRDD<List<Int>> = listOf(
                         listOf(1, 2, 3), 
                         listOf(4, 5, 6),
-                    ))
+                    ).toRDD()
                     rdd
                     """.trimIndent()
                 )
@@ -146,10 +146,10 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val html = execHtml(
                     """
-                    val rdd: JavaRDD<IntArray> = sc.parallelize(listOf(
+                    val rdd: JavaRDD<IntArray> = rddOf(
                         intArrayOf(1, 2, 3), 
                         intArrayOf(4, 5, 6),
-                    ))
+                    )
                     rdd
                     """.trimIndent()
                 )
@@ -175,12 +175,12 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val html = execHtml(
                     """
-                    val rdd = sc.parallelize(
+                    val rdd =
                         listOf(
                             Test("aaaaaaaaa", longArrayOf(1L, 100000L, 24L), mapOf(1 to "one", 2 to "two")),
                             Test("aaaaaaaaa", longArrayOf(1L, 100000L, 24L), mapOf(1 to "one", 2 to "two")),
-                        )
-                    )
+                        ).toRDD()
+                    
                     rdd
                     """.trimIndent()
                 )
@@ -191,10 +191,10 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val html = execHtml(
                     """
-                    val rdd: JavaPairRDD<Int, Int> = sc.parallelizePairs(listOf(
+                    val rdd: JavaPairRDD<Int, Int> = rddOf(
                         c(1, 2).toTuple(),
                         c(3, 4).toTuple(),
-                    ))
+                    ).toJavaPairRDD()
                     rdd
                     """.trimIndent()
                 )
@@ -208,7 +208,7 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val html = execHtml(
                     """
-                    val rdd: JavaDoubleRDD = sc.parallelizeDoubles(listOf(1.0, 2.0, 3.0, 4.0,))
+                    val rdd: JavaDoubleRDD = rddOf(1.0, 2.0, 3.0, 4.0,).toJavaDoubleRDD()
                     rdd
                     """.trimIndent()
                 )
@@ -224,10 +224,10 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val html = execHtml(
                     """
-                    val rdd: RDD<List<Int>> = sc.parallelize(listOf(
+                    val rdd: RDD<List<Int>> = rddOf(
                         listOf(1, 2, 3), 
                         listOf(4, 5, 6),
-                    )).rdd()
+                    ).rdd()
                     rdd
                     """.trimIndent()
                 )
