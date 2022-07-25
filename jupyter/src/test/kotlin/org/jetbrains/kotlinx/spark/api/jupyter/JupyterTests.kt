@@ -291,7 +291,7 @@ class JupyterTests : ShouldSpec({
                 val html = execHtml(
                     """
                         sparkProperties.displayTruncate = 3
-                        sc.parallelize(listOf("aaaaaaaaaa"))
+                        rddOf("aaaaaaaaaa")
                     """.trimIndent()
                 )
 
@@ -311,7 +311,7 @@ class JupyterTests : ShouldSpec({
                 val html = execHtml(
                     """
                         sparkProperties.displayLimit = 3
-                        sc.parallelize(listOf("a", "b", "c", "d", "e"))
+                        rddOf("a", "b", "c", "d", "e")
                     """.trimIndent()
                 )
 
