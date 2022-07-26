@@ -63,7 +63,7 @@ jobs:
       - name: Deploy to GH Packages with Gradle
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew -Pspark=${{ matrix.spark }} -Pscala=${{ matrix.scala }} -PskipScalaTuplesInKotlin=${{ !(matrix.spark == '3.0.0' || matrix.scala == '2.13.8' && matrix.spark == '3.2.0') }} clean publishMavenPublicationToGitHubPackagesRepository --debug --scan --no-daemon
+        run: ./gradlew -Pspark=${{ matrix.spark }} -Pscala=${{ matrix.scala }} -PskipScalaTuplesInKotlin=${{ !(matrix.spark == '3.0.0' || matrix.scala == '2.13.8' && matrix.spark == '3.2.0') }} clean publishMavenPublicationToGitHubPackagesRepository --debug --scan --no-daemon --stacktrace
         
 
 
