@@ -28,7 +28,6 @@ import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
 import org.apache.spark.sql.types.*
 import org.apache.spark.unsafe.types.UTF8String
 import org.jetbrains.kotlinx.spark.api.tuples.t
-import java.io.Serializable
 import kotlin.reflect.jvm.jvmName
 
 class UdtTest : ShouldSpec({
