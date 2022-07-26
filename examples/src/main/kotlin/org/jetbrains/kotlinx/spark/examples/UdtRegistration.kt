@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,7 @@
  * limitations under the License.
  * =LICENSEEND=
  */
+package org.jetbrains.kotlinx.spark.examples
 
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.GenericInternalRow
@@ -25,8 +26,6 @@ import org.apache.spark.unsafe.types.UTF8String
 import org.glassfish.jersey.internal.guava.MoreObjects
 import org.jetbrains.kotlinx.spark.api.*
 import org.jetbrains.kotlinx.spark.api.tuples.tupleOf
-import java.io.Serializable
-import kotlin.reflect.jvm.jvmName
 
 class CityUserDefinedType : UserDefinedType<City>() {
 
@@ -65,7 +64,7 @@ class CityUserDefinedType : UserDefinedType<City>() {
 }
 
 @SQLUserDefinedType(udt = CityUserDefinedType::class)
-class City(val name: String, val departmentNumber: Int) : Serializable {
+class City(val name: String, val departmentNumber: Int) {
 
     override fun toString(): String =
         MoreObjects
@@ -77,7 +76,8 @@ class City(val name: String, val departmentNumber: Int) : Serializable {
 
 fun main() = withSpark {
 
-//    UDTRegistration.register(City::class.jvmName, CityUserDefinedType::class.jvmName)
+//  Either use @SQLUserDefinedType or:
+//  UDTRegistration.register(org.jetbrains.kotlinx.spark.examples.City::class.jvmName, org.jetbrains.kotlinx.spark.examples.CityUserDefinedType::class.jvmName)
 
     val items = listOf(
         City("Amsterdam", 1),

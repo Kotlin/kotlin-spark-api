@@ -115,7 +115,7 @@ class CityUserDefinedType : UserDefinedType<City>() {
 }
 
 @SQLUserDefinedType(udt = CityUserDefinedType::class)
-class City(val name: String, val departmentNumber: Int) : Serializable {
+class City(val name: String, val departmentNumber: Int) {
 
     override fun toString(): String =
         MoreObjects
