@@ -12,7 +12,7 @@ object Versions {
     const val jupyter = "0.11.0-134"
     const val kotest = "5.3.2"
     const val kotestTestContainers = "1.3.3"
-    const val dokka = "1.7.0"
+    const val dokka = "1.7.10"
     const val jcp = "7.0.5"
     const val mavenPublish = "0.20.0"
     const val atrium = "0.17.0"
