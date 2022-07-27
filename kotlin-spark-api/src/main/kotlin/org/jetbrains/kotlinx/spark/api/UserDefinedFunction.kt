@@ -24,6 +24,7 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.spark.sql.*
 import org.apache.spark.sql.types.DataType
 import scala.collection.Seq
+import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.isSubclassOf
@@ -114,7 +115,7 @@ inline fun <Return, reified NamedUdf : NamedUserDefinedFunction<Return, *>> UDFR
  * @param Return the return type of the udf
  * @param NamedUdf a type reference to the named version of the [SparkUserDefinedFunction] implementing class
  */
-sealed interface UserDefinedFunction<Return, NamedUdf> {
+sealed interface UserDefinedFunction<Return, NamedUdf> : Serializable {
     val udf: SparkUserDefinedFunction
     val encoder: Encoder<Return>
 
