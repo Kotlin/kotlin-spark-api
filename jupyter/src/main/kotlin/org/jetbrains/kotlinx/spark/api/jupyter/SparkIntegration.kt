@@ -103,6 +103,10 @@ class SparkIntegration(notebook: Notebook, options: MutableMap<String, String?>)
                 fun <T> rddOf(vararg elements: T, numSlices: Int = sc.defaultParallelism()): JavaRDD<T> = sc.toRDD(elements.toList(), numSlices)""".trimIndent(),
             """
                 val udf: UDFRegistration get() = spark.udf()""".trimIndent(),
+            """
+                inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>> NAMED_UDF.register(): NAMED_UDF = spark.udf().register(namedUdf = this)""".trimIndent(),
+            """
+                inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>> UserDefinedFunction<RETURN, NAMED_UDF>.register(name: String): NAMED_UDF = spark.udf().register(name = name, udf = this)""".trimIndent(),
         ).map(::execute)
     }
 
