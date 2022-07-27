@@ -363,7 +363,7 @@ Of the [main](https://github.com/Kotlin/kotlin-spark-api/tree/main) branch, deve
 [GitHub Packages](https://github.com/orgs/Kotlin/packages?tab=packages&q=kotlin-spark-api). This way, new features can be
 tested quickly without having to wait for a full release. 
 
-For full releases, the `release` branch is updated.
+For full releases, the [release](https://github.com/Kotlin/kotlin-spark-api/tree/release) branch is updated.
 
 ## Code of Conduct
 This project and the corresponding community is governed by the [JetBrains Open Source and Community Code of Conduct](https://confluence.jetbrains.com/display/ALL/JetBrains+Open+Source+and+Community+Code+of+Conduct). Please make sure you read it. 
