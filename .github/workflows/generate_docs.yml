@@ -30,6 +30,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Set Swap Space
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 12
+
       - name: Generate docs with Gradle
         uses: gradle/gradle-build-action@v2
         with:
