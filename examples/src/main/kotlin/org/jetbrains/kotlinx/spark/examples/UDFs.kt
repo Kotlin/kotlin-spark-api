@@ -197,8 +197,10 @@ private fun strongTypingInDatasets() = withSpark {
 //    |   D|          14|
 //    +----+------------+
 
+
+
     // As you can see, the resulting dataset type is Tuple2<String, Int>
-    // This is possible since we know what types go in and our of the replaceMissingAge udf.
+    // This is possible since we know what types go in and out of the replaceMissingAge udf.
     // We can thus provide TypedColumns instead of normal ones which the select function takes
     // advantage of!
 

@@ -102,8 +102,8 @@ allprojects {
                 }
 
                 scm {
-                    connection.set("scm:git:https://github.com/JetBrains/kotlin-spark-api.git")
-                    url.set("https://github.com/JetBrains/kotlin-spark-api")
+                    connection.set("scm:git:https://github.com/Kotlin/kotlin-spark-api.git")
+                    url.set("https://github.com/Kotlin/kotlin-spark-api")
                     tag.set("HEAD")
                 }
             }
