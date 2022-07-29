@@ -1,12 +1,11 @@
-name: Deploy dev version to GH packages
+name: Deploy release version to Maven Central
 
 on:
-  push:
-    branches:
-      - "main"
+  release:
+    types: [created]
 
 jobs:
-  build-and-deploy:
+  build-and-deploy-mvn-central:
     strategy:
       matrix:
         scala: [ "2.12.15", "2.13.8" ]
@@ -42,6 +41,11 @@ jobs:
           distribution: adopt
           java-version: 11
           check-latest: true
+          server-id: ossrh
+          server-username: ORG_GRADLE_PROJECT_mavenCentralUsername
+          server-password: ORG_GRADLE_PROJECT_mavenCentralPassword
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ORG_GRADLE_PROJECT_signingInMemoryKeyPassword
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -65,16 +69,19 @@ jobs:
         with:
           swap-size-gb: 12
 
-      - name: Deploy to GH Packages with Gradle
+
+      - name: Deploy to Maven Central with Gradle
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_TOKEN }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: >
           ./gradlew 
           -Pspark=${{ matrix.spark }} 
           -Pscala=${{ matrix.scala }} 
           -PskipScalaTuplesInKotlin=${{ !(matrix.spark == '3.0.0' || matrix.scala == '2.13.8' && matrix.spark == '3.2.0') }} 
           clean 
-          publishMavenPublicationToGitHubPackagesRepository 
+          publishMavenPublicationToMavenCentralRepository
           --scan
         
 

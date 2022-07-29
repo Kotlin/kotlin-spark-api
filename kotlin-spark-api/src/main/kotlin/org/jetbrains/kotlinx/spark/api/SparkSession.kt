@@ -30,6 +30,7 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.hadoop.conf.Configuration
 import org.apache.spark.SparkConf
 import org.apache.spark.SparkContext
+import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.broadcast.Broadcast
@@ -100,6 +101,20 @@ class KSparkSession(val spark: SparkSession) {
      * NOTE: [T] must be [Serializable].
      */
     inline fun <reified T> JavaRDDLike<T, *>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)
+
+    /**
+     * Utility method to create an RDD from a list.
+     * NOTE: [T] must be [Serializable].
+     */
+    fun <T> List<T>.toRDD(numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
+        sc.toRDD(this, numSlices)
+
+    /**
+     * Utility method to create an RDD from a list.
+     * NOTE: [T] must be [Serializable].
+     */
+    fun <T> rddOf(vararg elements: T, numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
+        sc.toRDD(elements.toList(), numSlices)
 
     /**
      * A collection of methods for registering user-defined functions (UDF).

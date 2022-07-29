@@ -19,26 +19,50 @@
  */
 package org.jetbrains.kotlinx.spark.api.jupyter
 
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.*
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
+import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.*
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
-import org.jetbrains.kotlinx.spark.api.tuples.map
-import org.jetbrains.kotlinx.spark.api.tuples.t
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.displayLimitName
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.displayTruncateName
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.scalaName
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkName
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkPropertiesName
+import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.versionName
+import kotlin.reflect.KProperty1
 import kotlin.reflect.typeOf
 
-abstract class Integration : JupyterIntegration() {
 
-    private val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
-    private val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
-    private val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
-    private val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
+abstract class Integration(private val notebook: Notebook, private val options: MutableMap<String, String?>) :
+    JupyterIntegration() {
 
-    private val displayLimit = "DISPLAY_LIMIT"
-    private val displayLimitDefault = 20
-    private val displayTruncate = "DISPLAY_TRUNCATE"
-    private val displayTruncateDefault = 30
+    protected val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
+    protected val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
+    protected val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
+    protected val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
+    protected val version = /*$"\""+version+"\""$*/ /*-*/ ""
+
+    protected val displayLimitOld = "DISPLAY_LIMIT"
+    protected val displayTruncateOld = "DISPLAY_TRUNCATE"
+
+    protected val properties: Properties
+        get() = notebook
+            .variablesState[sparkPropertiesName]!!
+            .value
+            .getOrThrow() as Properties
+
+
+    protected open val usingProperties = arrayOf(
+        displayLimitName,
+        displayTruncateName,
+        sparkName,
+        scalaName,
+        versionName,
+    )
 
     /**
      * Will be run after importing all dependencies
@@ -96,19 +120,39 @@ abstract class Integration : JupyterIntegration() {
         import(*imports)
 
         onLoaded {
+
+            val mutableOptions = options.toMutableMap()
+
             declare(
                 VariableDeclaration(
-                    name = displayLimit,
-                    value = displayLimitDefault,
-                    type = typeOf<Int>(),
+                    name = sparkPropertiesName,
+                    value = object : Properties, MutableMap<String, String?> by mutableOptions {
+                        override fun toString(): String = "Properties: $mutableOptions"
+                    },
+                    type = typeOf<Properties>(),
                     isMutable = true,
-                ),
-                VariableDeclaration(
-                    name = displayTruncate,
-                    value = displayTruncateDefault,
-                    type = typeOf<Int>(),
-                    isMutable = true,
-                ),
+                )
+            )
+
+            @Language("kts")
+            val _0 = execute(
+                """
+                @Deprecated("Use ${displayLimitName}=${properties.displayLimit} in %use magic or ${sparkPropertiesName}.${displayLimitName} = ${properties.displayLimit} instead", ReplaceWith("${sparkPropertiesName}.${displayLimitName}"))
+                var $displayLimitOld: Int
+                    get() = ${sparkPropertiesName}.${displayLimitName}
+                    set(value) {
+                        println("$displayLimitOld is deprecated: Use ${sparkPropertiesName}.${displayLimitName} instead")
+                        ${sparkPropertiesName}.${displayLimitName} = value
+                    }
+                
+                @Deprecated("Use ${displayTruncateName}=${properties.displayTruncate} in %use magic or ${sparkPropertiesName}.${displayTruncateName} = ${properties.displayTruncate} instead", ReplaceWith("${sparkPropertiesName}.${displayTruncateName}"))
+                var $displayTruncateOld: Int
+                    get() = ${sparkPropertiesName}.${displayTruncateName}
+                    set(value) {
+                        println("$displayTruncateOld is deprecated: Use ${sparkPropertiesName}.${displayTruncateName} instead")
+                        ${sparkPropertiesName}.${displayTruncateName} = value
+                    }
+            """.trimIndent()
             )
 
             onLoaded()
@@ -135,37 +179,25 @@ abstract class Integration : JupyterIntegration() {
             onShutdown()
         }
 
-        fun getLimitAndTruncate() = Pair(
-            notebook
-                .variablesState[displayLimit]
-                ?.value
-                ?.getOrNull() as? Int
-                ?: displayLimitDefault,
-            notebook
-                .variablesState[displayTruncate]
-                ?.value
-                ?.getOrNull() as? Int
-                ?: displayTruncateDefault
-        )
-
 
         // Render Dataset
         render<Dataset<*>> {
-            val (limit, truncate) = getLimitAndTruncate()
-
-            HTML(it.toHtml(limit = limit, truncate = truncate))
+            with(properties) {
+                HTML(it.toHtml(limit = displayLimit, truncate = displayTruncate))
+            }
         }
 
         render<RDD<*>> {
-            val (limit, truncate) = getLimitAndTruncate()
-
-            HTML(it.toJavaRDD().toHtml(limit = limit, truncate = truncate))
+            with(properties) {
+                HTML(it.toJavaRDD().toHtml(limit = displayLimit, truncate = displayTruncate))
+            }
         }
 
         render<JavaRDDLike<*, *>> {
-            val (limit, truncate) = getLimitAndTruncate()
+            with(properties) {
+                HTML(it.toHtml(limit = displayLimit, truncate = displayTruncate))
+            }
 
-            HTML(it.toHtml(limit = limit, truncate = truncate))
         }
 
         onLoadedAlsoDo()

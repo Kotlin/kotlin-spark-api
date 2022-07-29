@@ -154,6 +154,8 @@ private fun isSupportedByKotlinClassEncoder(cls: KClass<*>): Boolean =
         cls.isSubclassOf(Iterable::class) -> true
         cls.isSubclassOf(Product::class) -> true
         cls.java.isArray -> true
+        cls.hasAnnotation<SQLUserDefinedType>() -> true
+        UDTRegistration.exists(cls.jvmName) -> true
         else -> false
     }
 

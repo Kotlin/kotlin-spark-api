@@ -15,6 +15,7 @@ plugins {
     mavenPublish version Versions.mavenPublish
     dokka version Versions.dokka
     idea
+    kotlin version Versions.kotlin apply false
 }
 
 group = Versions.groupID
@@ -57,6 +58,12 @@ allprojects {
             // You can also supply them as environment variables called
             // ORG_GRADLE_PROJECT_mavenCentralUsername and
             // ORG_GRADLE_PROJECT_mavenCentralPassword.
+
+            // also ORG_GRADLE_PROJECT_signingInMemoryKey=exported_ascii_armored_key
+            // # optional
+            // ORG_GRADLE_PROJECT_signingInMemoryKeyId=24875D73
+            // # if key was created with a password
+            // ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=secret
 
             signAllPublications()
             pom {
@@ -101,12 +108,11 @@ allprojects {
                 }
 
                 scm {
-                    connection.set("scm:git:https://github.com/JetBrains/kotlin-spark-api.git")
-                    url.set("https://github.com/JetBrains/kotlin-spark-api")
+                    connection.set("scm:git:https://github.com/Kotlin/kotlin-spark-api.git")
+                    url.set("https://github.com/Kotlin/kotlin-spark-api")
                     tag.set("HEAD")
                 }
             }
-
         }
     }
 }

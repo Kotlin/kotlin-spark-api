@@ -33,6 +33,18 @@ class ApiTest : ShouldSpec({
     context("miscellaneous integration tests") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
+            should("Create Seqs") {
+                spark.createDataset(seqOf(1, 2, 3), encoder())
+                    .collectAsList() shouldBe listOf(1, 2, 3)
+
+
+                seqOf(1, 2, 3) shouldBe seqOf(1, 2, 3)
+                mutableSeqOf(1, 2, 3) shouldBe mutableSeqOf(1, 2, 3)
+
+                seqOf<Int>() shouldBe emptySeq<Int>()
+                mutableSeqOf<Int>() shouldBe emptyMutableSeq<Int>()
+            }
+
             @OptIn(ExperimentalStdlibApi::class)
             should("broadcast variables") {
                 val largeList = (1..15).map { SomeClass(a = (it..15).toList().toIntArray(), b = it) }
@@ -90,6 +102,62 @@ class ApiTest : ShouldSpec({
                 val kotlinList: List<String> = scalaSeq.asKotlinList()
                 kotlinList.first() shouldBe "a"
                 kotlinList.last() shouldBe "b"
+            }
+
+            should("Map iterators") {
+                val data = (1..50).toList()
+                val iterator = iterator { yieldAll(data) }
+                    .map { it.toString() }
+
+                iterator.asSequence().toList() shouldBe data.map { it.toString() }
+            }
+
+            should("Filter iterators") {
+                val data = (1..50).toList()
+                val iterator = iterator { yieldAll(data) }
+                    .filter { it % 2 == 0 }
+
+                iterator.asSequence().toList() shouldBe data.filter { it % 2 == 0 }
+            }
+
+            should("Partition iterators") {
+                val data = (1..50).toList()
+
+                val iterator1 = iterator { yieldAll(data) }
+                    .partition(8, cutIncomplete = false)
+                val result1 = iterator1.asSequence().toList()
+                result1.size shouldBe (50 / 8 + 1)
+                result1.map { it.size }.distinct().size shouldBe 2 // two difference sizes should exist, 8 and the rest
+
+                val iterator2 = iterator { yieldAll(data) }
+                    .partition(8, cutIncomplete = true)
+
+                val result2 = iterator2.asSequence().toList()
+                result2.size shouldBe (50 / 8)
+                result2.forEach { it.size shouldBe 8 }
+            }
+
+            should("Flatten iterators") {
+                val data = (1..50).toList()
+                val (data1, data2) = data.partition { it <= 25 }
+                val iterator = iterator {
+                    yield(data1.iterator())
+                    yield(data2.iterator())
+                }.flatten()
+
+                iterator.asSequence().toList() shouldBe data
+            }
+
+            should("Flatmap iterators using transformAsSequence") {
+                val data = (1..50).toList()
+                val iterator = data.iterator()
+                    .transformAsSequence {
+                        flatMap {
+                            listOf(it.toDouble(), it + 0.5)
+                        }
+                    }
+
+                iterator.asSequence().toList() shouldBe data.flatMap { listOf(it.toDouble(), it + 0.5) }
             }
         }
     }

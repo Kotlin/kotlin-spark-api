@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     kotlin
     idea
@@ -26,5 +28,11 @@ dependencies {
             sparkStreamingKafka,
         )
 
+    }
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions {
+        jvmTarget = Versions.jvmTarget
     }
 }

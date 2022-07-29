@@ -1,3 +1,15 @@
+plugins {
+    id("com.gradle.enterprise") version "3.10.3"
+}
+
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+    }
+}
+
+
 val spark: String by settings
 val scala: String by settings
 val skipScalaTuplesInKotlin: String by settings

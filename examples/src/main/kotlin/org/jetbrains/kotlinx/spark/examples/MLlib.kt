@@ -61,7 +61,7 @@ private fun KSparkSession.correlation() {
         Vectors.dense(4.0, 5.0, 0.0, 3.0),
         Vectors.dense(6.0, 7.0, 0.0, 8.0),
         Vectors.sparse(4, intArrayOf(0, 3), doubleArrayOf(9.0, 1.0))
-    ).map(::tupleOf)
+    )
 
     val df = data.toDF("features")
 

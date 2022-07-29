@@ -4,7 +4,7 @@ import org.gradle.plugin.use.PluginDependenciesSpec
 
 
 inline val PluginDependenciesSpec.kotlin
-    get() = kotlin("jvm") version Versions.kotlin
+    get() = kotlin("jvm")
 
 inline val PluginDependenciesSpec.dokka
     get() = id("org.jetbrains.dokka")
@@ -14,7 +14,6 @@ inline val PluginDependenciesSpec.license
 
 inline val PluginDependenciesSpec.jcp
     get() = id("com.igormaznitsa.jcp")
-
 
 inline val DependencyHandlerScope.jcp
     get() = "com.igormaznitsa:jcp:${Versions.jcp}"
