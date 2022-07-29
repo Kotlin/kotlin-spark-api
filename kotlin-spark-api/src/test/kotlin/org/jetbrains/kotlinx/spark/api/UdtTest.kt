@@ -73,6 +73,19 @@ class UdtTest : ShouldSpec({
 
                 ds.collectAsList().single() shouldBe input
             }
+
+            should("Be able to create encoder from UDT too") {
+
+                val input = listOf(
+                    City("Amsterdam", 1),
+                    City("Breda", 2),
+                    City("Oosterhout", 3),
+                )
+
+                val ds = input.toDS()
+
+                ds.collectAsList() shouldBe input
+            }
         }
     }
 })

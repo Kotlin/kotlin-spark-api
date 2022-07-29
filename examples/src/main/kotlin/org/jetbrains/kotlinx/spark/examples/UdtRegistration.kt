@@ -83,8 +83,12 @@ fun main() = withSpark {
         City("Amsterdam", 1),
         City("Breda", 2),
         City("Oosterhout", 3),
-    ).map(::tupleOf)
+    )
 
-    val ds = items.toDS()
+    val ds = items.map(::tupleOf).toDS()
     ds.showDS()
+
+    // Unlike in Scala, you can also directly encode UDT registered types to a Dataset!
+    val ds2 = items.toDS()
+    ds2.showDS()
 }
