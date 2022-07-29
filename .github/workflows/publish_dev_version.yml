@@ -63,7 +63,7 @@ jobs:
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
-          swap-size-gb: 15
+          swap-size-gb: 12
 
       - name: Deploy to GH Packages with Gradle
         env:
