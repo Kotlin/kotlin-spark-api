@@ -62,7 +62,7 @@ jobs:
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
-          swap-size-gb: 10
+          swap-size-gb: 20
 
       - name: Deploy to Maven Central with Gradle
         env:
