@@ -59,6 +59,12 @@ allprojects {
             // ORG_GRADLE_PROJECT_mavenCentralUsername and
             // ORG_GRADLE_PROJECT_mavenCentralPassword.
 
+            // also ORG_GRADLE_PROJECT_signingInMemoryKey=exported_ascii_armored_key
+            // # optional
+            // ORG_GRADLE_PROJECT_signingInMemoryKeyId=24875D73
+            // # if key was created with a password
+            // ORG_GRADLE_PROJECT_signingInMemoryKeyPassword=secret
+
             signAllPublications()
             pom {
                 name.set("Kotlin Spark API")

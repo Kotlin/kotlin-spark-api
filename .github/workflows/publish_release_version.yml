@@ -41,6 +41,11 @@ jobs:
           distribution: adopt
           java-version: 11
           check-latest: true
+          server-id: ossrh
+          server-username: ORG_GRADLE_PROJECT_mavenCentralUsername
+          server-password: ORG_GRADLE_PROJECT_mavenCentralPassword
+          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+          gpg-passphrase: ORG_GRADLE_PROJECT_signingInMemoryKeyPassword
 
       - name: Cache Gradle packages
         uses: actions/cache@v3
@@ -64,10 +69,12 @@ jobs:
         with:
           swap-size-gb: 12
 
+
       - name: Deploy to Maven Central with Gradle
         env:
           ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.OSSRH_USERNAME }}
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.OSSRH_TOKEN }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
         run: >
           ./gradlew 
           -Pspark=${{ matrix.spark }} 
