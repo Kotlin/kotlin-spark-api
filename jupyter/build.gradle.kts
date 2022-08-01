@@ -144,7 +144,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<AbstractDokkaLeafTask> {
     dokkaSourceSets {
-        create("jupyter") {
+        all {
             sourceRoot(preprocessMain.target.get())
         }
     }
