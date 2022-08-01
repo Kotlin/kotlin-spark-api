@@ -1,7 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import org.jetbrains.dokka.gradle.DokkaTask
-
 buildscript {
     repositories {
         mavenCentral()
@@ -30,7 +28,6 @@ tasks.withType<Test>().configureEach {
 repositories {
     mavenCentral()
 }
-
 
 allprojects {
     plugins.withId(mavenPublishBase) {

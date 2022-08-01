@@ -32,9 +32,12 @@ dependencies {
     }
 }
 
-tasks.withType<ScalaCompile> {
-    sourceSets {
-        targetCompatibility = Versions.jvmTarget
+
+java {
+    toolchain {
+        languageVersion.set(
+            JavaLanguageVersion.of(Versions.jvmTarget)
+        )
     }
 }
 
