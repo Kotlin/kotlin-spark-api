@@ -41,6 +41,10 @@ java {
     }
 }
 
+tasks.withType<ScalaCompile> {
+    targetCompatibility = Versions.jvmTarget
+}
+
 val scalaMainSources = sourceSets.main.get().scala.sourceDirectories
 
 val preprocessMain by tasks.creating(JcpTask::class)  {
