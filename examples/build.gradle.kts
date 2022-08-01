@@ -31,8 +31,10 @@ dependencies {
     }
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        jvmTarget = Versions.jvmTarget
+kotlin {
+    jvmToolchain {
+        languageVersion.set(
+            JavaLanguageVersion.of(Versions.jvmTarget)
+        )
     }
 }
