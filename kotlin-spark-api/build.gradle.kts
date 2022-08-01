@@ -143,7 +143,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<AbstractDokkaLeafTask> {
     dokkaSourceSets {
-        create("kotlin-spark-api") {
+        all {
             sourceRoot(preprocessMain.target.get())
         }
     }

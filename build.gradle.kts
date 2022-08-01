@@ -1,5 +1,7 @@
 @file:Suppress("UnstableApiUsage")
 
+import org.jetbrains.dokka.gradle.DokkaTask
+
 buildscript {
     repositories {
         mavenCentral()

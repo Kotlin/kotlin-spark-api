@@ -48,7 +48,7 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<AbstractDokkaLeafTask> {
     dokkaSourceSets {
-        create("scala-tuples-in-kotlin") {
+        all {
             sourceRoot(
                 kotlin.sourceSets
                     .main.get()
