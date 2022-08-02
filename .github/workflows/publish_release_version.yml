@@ -1,7 +1,7 @@
 name: Deploy release version to Maven Central
 
 on:
-#  release: TODO temporary, to see if push to maven central works
+#  release: TODO temporary, revert to this after 1.2.1 release
 #    types: [created]
   push:
     branches:
