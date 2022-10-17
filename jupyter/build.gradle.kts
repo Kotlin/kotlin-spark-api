@@ -139,7 +139,7 @@ tasks.compileTestKotlin {
 kotlin {
     jvmToolchain {
         languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
+            JavaLanguageVersion.of(Versions.jupyterJvmTarget)
         )
     }
 }
