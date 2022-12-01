@@ -1,7 +1,7 @@
 object Versions {
     const val project = "1.2.2-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
-    const val kotlin = "1.7.10"
+    const val kotlin = "1.7.20"
     const val jvmTarget = "11"
 
     inline val spark get() = System.getProperty("spark") as String

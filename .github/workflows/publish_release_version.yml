@@ -1,11 +1,8 @@
 name: Deploy release version to Maven Central
 
 on:
-#  release: TODO temporary, revert to this after 1.2.1 release
-#    types: [created]
-  push:
-    branches:
-      - "release"
+  release:
+    types: [created]
 
 jobs:
   build-and-deploy-mvn-central:
