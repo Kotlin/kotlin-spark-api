@@ -38,6 +38,7 @@ dependencies {
         implementation(
             kotlinStdLib,
             reflect,
+            jacksonDatabind, // Spark 3.3.1 https://github.com/FasterXML/jackson-bom/issues/52
             sparkSql,
             sparkStreaming,
             hadoopClient,

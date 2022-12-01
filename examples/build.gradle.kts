@@ -23,6 +23,7 @@ dependencies {
     with(Dependencies) {
         implementation(
             sparkSql,
+            jacksonDatabind, // Spark 3.3.1 https://github.com/FasterXML/jackson-bom/issues/52
             sparkMl,
             sparkStreaming,
             sparkStreamingKafka,
