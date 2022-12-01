@@ -1,7 +1,7 @@
 object Versions {
-    const val project = "1.2.1"
+    const val project = "1.2.2-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
-    const val kotlin = "1.7.10"
+    const val kotlin = "1.7.20"
     const val jvmTarget = "11"
 
     inline val spark get() = System.getProperty("spark") as String
@@ -21,6 +21,7 @@ object Versions {
     const val hadoop = "3.3.1"
     const val kotlinxHtml = "0.7.5"
     const val klaxon = "5.5"
+    const val jacksonDatabind = "2.13.4.2"
 
     inline val versionMap
         get() = mapOf(

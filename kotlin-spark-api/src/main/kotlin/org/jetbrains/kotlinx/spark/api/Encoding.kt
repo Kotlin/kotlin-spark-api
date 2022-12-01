@@ -39,6 +39,7 @@ import scala.Product
 import scala.reflect.ClassTag
 import java.beans.PropertyDescriptor
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.sql.Date
 import java.sql.Timestamp
 import java.time.*
@@ -119,6 +120,7 @@ private val knownDataTypes: Map<KClass<out Any>, DataType> = mapOf(
     ByteArray::class to DataTypes.BinaryType,
     Decimal::class to DecimalType.SYSTEM_DEFAULT(),
     BigDecimal::class to DecimalType.SYSTEM_DEFAULT(),
+    BigInteger::class to DecimalType.SYSTEM_DEFAULT(),
     CalendarInterval::class to DataTypes.CalendarIntervalType,
 )
 
@@ -234,7 +236,7 @@ fun schema(type: KType, map: Map<String, KType> = mapOf()): DataType {
             )
         }
 
-        klass.isSubclassOf(Map::class) -> {
+        klass == Map::class -> {
             val mapKeyParam = types.getValue(klass.typeParameters[0].name)
             val mapValueParam = types.getValue(klass.typeParameters[1].name)
 

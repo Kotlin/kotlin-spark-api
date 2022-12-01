@@ -26,6 +26,9 @@ dependencies {
             reflect,
         )
 
+        // https://github.com/FasterXML/jackson-bom/issues/52
+        if (Versions.spark == "3.3.1") implementation(jacksonDatabind)
+
         implementation(
             sparkSql,
         )
@@ -35,14 +38,18 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
-        )
+        if (Versions.scalaCompat.toDouble() > 2.12) { // scala 2.12 will always target java 8
+            languageVersion.set(
+                JavaLanguageVersion.of(Versions.jvmTarget)
+            )
+        }
     }
 }
 
 tasks.withType<ScalaCompile> {
-    targetCompatibility = Versions.jvmTarget
+    if (Versions.scalaCompat.toDouble() > 2.12) { // scala 2.12 will always target java 8
+        targetCompatibility = Versions.jvmTarget
+    }
 }
 
 val scalaMainSources = sourceSets.main.get().scala.sourceDirectories
