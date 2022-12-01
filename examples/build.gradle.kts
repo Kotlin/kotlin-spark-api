@@ -21,6 +21,10 @@ dependencies {
     }
 
     with(Dependencies) {
+
+        // https://github.com/FasterXML/jackson-bom/issues/52
+        if (Versions.spark == "3.3.1") implementation(jacksonDatabind)
+
         implementation(
             sparkSql,
             sparkMl,
