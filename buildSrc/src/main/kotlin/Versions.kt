@@ -1,5 +1,5 @@
 object Versions {
-    const val project = "1.2.2-SNAPSHOT"
+    const val project = "1.2.3-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
     const val kotlin = "1.7.20"
     const val jvmTarget = "8"
@@ -10,10 +10,10 @@ object Versions {
     inline val sparkMinor get() = spark.substringBeforeLast('.')
     inline val scalaCompat get() = scala.substringBeforeLast('.')
 
-    const val jupyter = "0.11.0-171-1"
+    const val jupyter = "0.11.0-134"
     const val kotest = "5.3.2"
     const val kotestTestContainers = "1.3.3"
-    const val dokka = "1.7.20"
+    const val dokka = "1.7.10"
     const val jcp = "7.0.5"
     const val mavenPublish = "0.20.0"
     const val atrium = "0.17.0"
@@ -22,6 +22,7 @@ object Versions {
     const val hadoop = "3.3.1"
     const val kotlinxHtml = "0.7.5"
     const val klaxon = "5.5"
+    const val jacksonDatabind = "2.13.4.2"
 
     inline val versionMap
         get() = mapOf(
