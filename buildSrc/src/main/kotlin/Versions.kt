@@ -10,7 +10,7 @@ object Versions {
     inline val sparkMinor get() = spark.substringBeforeLast('.')
     inline val scalaCompat get() = scala.substringBeforeLast('.')
 
-    const val jupyter = "0.11.0-134"
+    const val jupyter = "0.11.0-210"
     const val kotest = "5.5.4"
     const val kotestTestContainers = "1.3.3"
     const val dokka = "1.7.10"
