@@ -23,6 +23,7 @@ repositories {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    maxHeapSize = "8g"
 }
 
 dependencies {
