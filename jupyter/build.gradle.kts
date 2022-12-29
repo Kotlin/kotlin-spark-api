@@ -26,7 +26,7 @@ repositories {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
-    maxHeapSize = "8g"
+    maxHeapSize = "4g"
 }
 
 tasks.processJupyterApiResources {
