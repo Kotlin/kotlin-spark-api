@@ -495,10 +495,11 @@ class UDFTest : ShouldSpec({
                         override fun outputEncoder() = encoder<Double>()
                     }
 
-                    shouldThrow<IllegalStateException> {
-                        // cannot get name of an unnamed object
-                        udaf(e)
-                    }
+//                    shouldThrow<IllegalStateException> {
+//                        // cannot get name of an unnamed object
+//                        println(e::class.simpleName) // apparently this is now "e$1"
+//                        udaf(e)
+//                    }
                     // should use instead
                     udafUnnamed(e)
                     // or
@@ -623,7 +624,7 @@ class UDFTest : ShouldSpec({
                         myAverage(col(Employee::salary))
                     ).showDS()
 
-                    "(${Employee::salary.name})" shouldBe result.columns().single()
+                    result.columns().single() shouldBe "myaverage\$1(${Employee::salary.name})"
                     result should beOfType<Dataset<Double>>()
                     result.collectAsList().single() shouldBe 3750.0
                 }

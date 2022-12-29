@@ -26,6 +26,7 @@ repositories {
 
 tasks.withType<Test>().configureEach {
     useJUnitPlatform()
+    maxHeapSize = "2g"
 }
 
 tasks.processJupyterApiResources {
@@ -143,7 +144,7 @@ tasks.compileTestKotlin {
 kotlin {
     jvmToolchain {
         languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
+            JavaLanguageVersion.of(Versions.jupyterJvmTarget)
         )
     }
 }

@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-all-versions:
+    timeout-minutes: 30
     strategy:
       matrix:
         scala: [ "2.12.17", "2.13.10" ]
