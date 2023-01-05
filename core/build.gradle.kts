@@ -42,6 +42,10 @@ java {
             languageVersion.set(
                 JavaLanguageVersion.of(Versions.jvmTarget)
             )
+        } else if (Versions.jvmTarget == "1.8" || Versions.jvmTarget == "8") {
+            languageVersion.set(
+                JavaLanguageVersion.of(8)
+            )
         }
     }
 }
@@ -49,6 +53,8 @@ java {
 tasks.withType<ScalaCompile> {
     if (Versions.scalaCompat.toDouble() > 2.12) { // scala 2.12 will always target java 8
         targetCompatibility = Versions.jvmTarget
+    } else if (Versions.jvmTarget == "1.8" || Versions.jvmTarget == "8") {
+        targetCompatibility = "1.8"
     }
 }
 
