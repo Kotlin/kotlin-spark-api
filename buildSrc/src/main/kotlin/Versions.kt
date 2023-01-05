@@ -1,5 +1,5 @@
 object Versions {
-    const val project = "1.2.3-SNAPSHOT"
+    const val project = "1.2.3"
     const val groupID = "org.jetbrains.kotlinx.spark"
     const val kotlin = "1.8.0"
     const val jvmTarget = "8"
