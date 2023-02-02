@@ -429,10 +429,11 @@ object CatalystTypeConverters {
       // a measurable performance impact. Note that this optimization will be unnecessary if we
       // use code generation to construct Scala Row -> Catalyst Row converters.
       def convert(maybeScalaValue: Any): Any = {
-        if (maybeScalaValue.isInstanceOf[Option[Any]]) {
-          maybeScalaValue.asInstanceOf[Option[Any]].orNull
-        } else {
-          maybeScalaValue
+        maybeScalaValue match {
+          case option: Option[Any] =>
+            option.orNull
+          case _ =>
+            maybeScalaValue
         }
       }
 
