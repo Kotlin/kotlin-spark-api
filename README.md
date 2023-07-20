@@ -38,6 +38,8 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 | Apache Spark | Scala |       Kotlin for Apache Spark       |
 |:------------:|:-----:|:-----------------------------------:|
+|    3.3.2     | 2.13  | kotlin-spark-api_3.3.2_2.13:VERSION |
+|              | 2.12  | kotlin-spark-api_3.3.2_2.12:VERSION |
 |    3.3.1     | 2.13  | kotlin-spark-api_3.3.1_2.13:VERSION |
 |              | 2.12  | kotlin-spark-api_3.3.1_2.12:VERSION |
 |    3.3.0     | 2.13  | kotlin-spark-api_3.3.0_2.13:VERSION |
