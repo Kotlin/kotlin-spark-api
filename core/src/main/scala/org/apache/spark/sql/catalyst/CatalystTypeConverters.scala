@@ -82,15 +82,15 @@ object CatalystTypeConverters {
     final def toCatalyst(@Nullable maybeScalaValue: Any): CatalystType = {
       if (maybeScalaValue == null) {
         null.asInstanceOf[CatalystType]
-      } else if (maybeScalaValue.isInstanceOf[Option[ScalaInputType]]) {
-        val opt = maybeScalaValue.asInstanceOf[Option[ScalaInputType]]
-        if (opt.isDefined) {
-          toCatalystImpl(opt.get)
-        } else {
-          null.asInstanceOf[CatalystType]
-        }
-      } else {
-        toCatalystImpl(maybeScalaValue.asInstanceOf[ScalaInputType])
+      } else maybeScalaValue match {
+        case opt: Option[ScalaInputType] =>
+          if (opt.isDefined) {
+            toCatalystImpl(opt.get)
+          } else {
+            null.asInstanceOf[CatalystType]
+          }
+        case _ =>
+          toCatalystImpl(maybeScalaValue.asInstanceOf[ScalaInputType])
       }
     }
 
@@ -429,10 +429,11 @@ object CatalystTypeConverters {
       // a measurable performance impact. Note that this optimization will be unnecessary if we
       // use code generation to construct Scala Row -> Catalyst Row converters.
       def convert(maybeScalaValue: Any): Any = {
-        if (maybeScalaValue.isInstanceOf[Option[Any]]) {
-          maybeScalaValue.asInstanceOf[Option[Any]].orNull
-        } else {
-          maybeScalaValue
+        maybeScalaValue match {
+          case option: Option[Any] =>
+            option.orNull
+          case _ =>
+            maybeScalaValue
         }
       }
 

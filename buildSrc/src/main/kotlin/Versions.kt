@@ -1,16 +1,16 @@
 object Versions {
-    const val project = "1.2.3"
+    const val project = "1.2.4-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
     const val kotlin = "1.8.0"
     const val jvmTarget = "8"
-    const val jupyterJvmTarget = "11"
+    const val jupyterJvmTarget = "8"
 
     inline val spark get() = System.getProperty("spark") as String
     inline val scala get() = System.getProperty("scala") as String
     inline val sparkMinor get() = spark.substringBeforeLast('.')
     inline val scalaCompat get() = scala.substringBeforeLast('.')
 
-    const val jupyter = "0.11.0-210"
+    const val jupyter = "0.12.0-32-1"
     const val kotest = "5.5.4"
     const val kotestTestContainers = "1.3.3"
     const val dokka = "1.7.10"
