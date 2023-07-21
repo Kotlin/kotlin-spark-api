@@ -72,13 +72,13 @@ Here's what the `pom.xml` looks like for this example:
         </dependency>
         <dependency> <!-- Kotlin Spark API dependency -->
             <groupId>org.jetbrains.kotlinx.spark</groupId>
-            <artifactId>kotlin-spark-api_3.3.1_2.13</artifactId>
+            <artifactId>kotlin-spark-api_3.3.2_2.13</artifactId>
             <version>1.2.3</version>
         </dependency>
         <dependency> <!-- Spark dependency -->
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_2.12</artifactId>
-            <version>3.3.1</version>
+            <version>3.3.2</version>
         </dependency>
     </dependencies>
 
@@ -163,8 +163,8 @@ dependencies {
   // Kotlin stdlib
   implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.0'
   // Kotlin Spark API
-  implementation 'org.jetbrains.kotlinx.spark:kotlin-spark-api_3.3.1_2.13:1.2.3'  // Apache Spark
-  compileOnly 'org.apache.spark:spark-sql_2.12:3.3.1'
+  implementation 'org.jetbrains.kotlinx.spark:kotlin-spark-api_3.3.2_2.13:1.2.3'  // Apache Spark
+  compileOnly 'org.apache.spark:spark-sql_2.12:3.3.2'
 }
 
 compileKotlin {
@@ -198,9 +198,9 @@ dependencies {
   // Kotlin stdlib
   implementation ("org.jetbrains.kotlin:kotlin-stdlib:1.4.0")
   // Kotlin Spark API
-  implementation ("org.jetbrains.kotlinx.spark:kotlin-spark-api_3.3.1_2.13:1.2.3")
+  implementation ("org.jetbrains.kotlinx.spark:kotlin-spark-api_3.3.2_2.13:1.2.3")
   // Apache Spark
-  compileOnly ("org.apache.spark:spark-sql_2.12:3.3.1")
+  compileOnly ("org.apache.spark:spark-sql_2.12:3.3.2")
 }
 
 compileKotlin.kotlinOptions.jvmTarget = "1.8"
