@@ -59,6 +59,7 @@ class JupyterTests : ShouldSpec({
                 librariesScanner.addLibrariesFromClassLoader(
                     classLoader = currentClassLoader,
                     host = this,
+                    notebook = notebook,
                     integrationTypeNameRules = listOf(
                         PatternNameAcceptanceRule(
                             acceptsFlag = false,
@@ -341,6 +342,7 @@ class JupyterStreamingTests : ShouldSpec({
                 librariesScanner.addLibrariesFromClassLoader(
                     classLoader = currentClassLoader,
                     host = this,
+                    notebook = notebook,
                     integrationTypeNameRules = listOf(
                         PatternNameAcceptanceRule(
                             acceptsFlag = false,
