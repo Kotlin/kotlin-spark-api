@@ -84,6 +84,7 @@ abstract class Integration(private val notebook: Notebook, private val options: 
         "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion",
         "org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion",
         "org.apache.spark:spark-sql_$scalaCompatVersion:$sparkVersion",
+        "org.apache.spark:spark-yarn_$scalaCompatVersion:$sparkVersion",
         "org.apache.spark:spark-streaming_$scalaCompatVersion:$sparkVersion",
         "org.apache.spark:spark-mllib_$scalaCompatVersion:$sparkVersion",
         "org.apache.spark:spark-sql_$scalaCompatVersion:$sparkVersion",
