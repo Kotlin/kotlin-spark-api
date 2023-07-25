@@ -1,7 +1,7 @@
 object Versions {
     const val project = "1.2.4-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
-    const val kotlin = "1.9.0"
+    const val kotlin = "1.8.20"
     const val jvmTarget = "8"
     const val jupyterJvmTarget = "8"
 
