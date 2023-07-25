@@ -19,7 +19,7 @@ object Versions {
     const val atrium = "0.17.0"
     const val licenseGradlePluginVersion = "0.15.0"
     const val kafkaStreamsTestUtils = "3.1.0"
-    const val hadoop = "3.3.2"
+    const val hadoop = "3.3.1"
     const val kotlinxHtml = "0.7.5"
     const val klaxon = "5.5"
     const val jacksonDatabind = "2.13.4.2"
