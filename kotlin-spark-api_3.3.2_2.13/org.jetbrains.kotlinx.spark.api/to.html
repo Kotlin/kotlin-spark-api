@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>to</title>
+<link href="../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../styles/style.css" rel="Stylesheet">
+<link href="../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../styles/main.css" rel="Stylesheet">
+<link href="../../styles/prism.css" rel="Stylesheet">
+<link href="../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../index.html">
+<span>kotlin-spark-api-parent_3.3.2_2.13</span>            </a>    </div>
+    <div>1.2.4
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="member" id="content" pageids="kotlin-spark-api_3.3.2_2.13::org.jetbrains.kotlinx.spark.api//to/org.apache.spark.sql.Dataset[*]#/PointingToDeclaration//-1716837352">
+  <div class="breadcrumbs"><a href="../index.html">kotlin-spark-api_3.3.2_2.13</a><span class="delimiter">/</span><a href="index.html">org.jetbrains.kotlinx.spark.api</a><span class="delimiter">/</span><span class="current">to</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span><span>to</span></span></h1>
+  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">inline </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="to.html">R</a><span class="token operator">&gt; </span><span data-unresolved-link="org.apache.spark.sql/Dataset///PointingToDeclaration/">Dataset</span><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="to.html"><span class="token function">to</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Dataset///PointingToDeclaration/">Dataset</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="to.html">R</a><span class="token operator">&gt;</span></div><p class="paragraph">(Kotlin-specific) Returns a new Dataset where each record has been mapped on to the specified type. The method used to map columns depend on the type of <a href="to.html">R</a>:</p><ul><li><p class="paragraph">When <a href="to.html">R</a> is a class, fields for the class will be mapped to columns of the same name (case sensitivity is determined by spark.sql.caseSensitive).</p></li><li><p class="paragraph">When <a href="to.html">R</a> is a tuple, the columns will be mapped by ordinal (i.e. the first column will be assigned to <code class="lang-kotlin">_1</code>).</p></li><li><p class="paragraph">When <a href="to.html">R</a> is a primitive type (i.e. <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a>, <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a>, etc.), then the first column of the <code class="lang-kotlin">DataFrame</code> will be used.</p></li></ul><p class="paragraph">If the schema of the Dataset does not match the desired <a href="to.html">R</a> type, you can use <span data-unresolved-link="org.apache.spark.sql/Dataset/select/#kotlin.Array[org.apache.spark.sql.Column]/PointingToDeclaration/">Dataset.select</span>/<a href="select-typed.html">selectTyped</a> along with <span data-unresolved-link="org.apache.spark.sql/Dataset/alias/#kotlin.String/PointingToDeclaration/">Dataset.alias</span> or <a href="as.html">as</a>/<a href="to.html">to</a> to rearrange or rename as required.</p><p class="paragraph">Note that <a href="as.html">as</a>/<a href="to.html">to</a> only changes the view of the data that is passed into typed operations, such as <a href="map.html">map</a>, and does not eagerly project away any columns that are not present in the specified class.</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="as.html"><span><span>as</span></span></a></div></span></div><div><div class="title"><p class="paragraph">as alias for <a href="to.html">to</a></p></div></div></div></div></div></div></div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

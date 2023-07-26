@@ -1,0 +1,229 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>PartitioningIterator</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>kotlin-spark-api-parent_3.3.2_2.13</span>            </a>    </div>
+    <div>1.2.4
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="kotlin-spark-api_3.3.2_2.13::org.jetbrains.kotlinx.spark.api/PartitioningIterator///PointingToDeclaration//-1716837352">
+  <div class="breadcrumbs"><a href="../../index.html">kotlin-spark-api_3.3.2_2.13</a><span class="delimiter">/</span><a href="../index.html">org.jetbrains.kotlinx.spark.api</a><span class="delimiter">/</span><span class="current">PartitioningIterator</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>Partitioning</span><wbr><span><span>Iterator</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">PartitioningIterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">source<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">size<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">cutIncomplete<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span> : <a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-abstract-iterator/index.html">AbstractIterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt; </span></div><p class="paragraph">Partitions the values of the iterator lazily in groups of <a href="../../../kotlin-spark-api_3.3.2_2.13/org.jetbrains.kotlinx.spark.api/-partitioning-iterator/size.html">size</a>.</p></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button><button class="section-tab" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION,EXTENSION_PROPERTY,EXTENSION_FUNCTION">Members &amp; Extensions</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-535257996%2FConstructors%2F-1716837352" anchor-label="PartitioningIterator" id="-535257996%2FConstructors%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-partitioning-iterator.html"><span>Partitioning</span><wbr><span><span>Iterator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-535257996%2FConstructors%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">source<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">size<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">cutIncomplete<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-71343093%2FFunctions%2F-1716837352" anchor-label="asScalaIterator" id="-71343093%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../as-scala-iterator.html"><span>as</span><wbr><span>Scala</span><wbr><span><span>Iterator</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-71343093%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../as-scala-iterator.html">A</a><span class="token operator">&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../as-scala-iterator.html">A</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../as-scala-iterator.html"><span class="token function">asScalaIterator</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="scala.collection/Iterator///PointingToDeclaration/">Iterator</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../as-scala-iterator.html">A</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-140345782%2FFunctions%2F-1716837352" anchor-label="filter" id="-140345782%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../filter.html"><span><span>filter</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-140345782%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../filter.html">T</a><span class="token operator">&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../filter.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../filter.html"><span class="token function">filter</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">predicate<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../filter.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../filter.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Filters the values of the iterator lazily using <a href="../filter.html">predicate</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1985715351%2FFunctions%2F-1716837352" anchor-label="flatten" id="-1985715351%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../flatten.html"><span><span>flatten</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1985715351%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../flatten.html">T</a><span class="token operator">&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../flatten.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../flatten.html"><span class="token function">flatten</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../flatten.html">T</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Flattens iterator.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-2109939059%2FFunctions%2F-1716837352" anchor-label="forEachRemaining" id="-2109939059%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="index.html#-2109939059%2FFunctions%2F-1716837352"><span>for</span><wbr><span>Each</span><wbr><span><span>Remaining</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2109939059%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">fun </span><a href="index.html#-2109939059%2FFunctions%2F-1716837352"><span class="token function">forEachRemaining</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">p0<span class="token operator">: </span><a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Consumer.html">Consumer</a><span class="token operator">&lt;</span><span class="token keyword">in </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1451785448%2FFunctions%2F-1716837352" anchor-label="hasNext" id="1451785448%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-filtering-iterator/index.html#1451785448%2FFunctions%2F-1716837352"><span>has</span><wbr><span><span>Next</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1451785448%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="../-filtering-iterator/index.html#1451785448%2FFunctions%2F-1716837352"><span class="token function">hasNext</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1666570975%2FFunctions%2F-1716837352" anchor-label="map" id="-1666570975%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../map.html"><span><span>map</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1666570975%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../map.html">T</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../map.html">R</a><span class="token operator">&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../map.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../map.html"><span class="token function">map</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">func<span class="token operator">: </span><span class="token punctuation">(</span><span class="token keyword"></span><a href="../map.html">T</a><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="../map.html">R</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../map.html">R</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Maps the values of the iterator lazily using <a href="../map.html">func</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1812638194%2FFunctions%2F-1716837352" anchor-label="next" id="1812638194%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-filtering-iterator/index.html#1812638194%2FFunctions%2F-1716837352"><span><span>next</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1812638194%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="../-filtering-iterator/index.html#1812638194%2FFunctions%2F-1716837352"><span class="token function">next</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="678714531%2FFunctions%2F-1716837352" anchor-label="partition" id="678714531%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../partition.html"><span><span>partition</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="678714531%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../partition.html">T</a><span class="token operator">&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../partition.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../partition.html"><span class="token function">partition</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">size<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token punctuation">, </span></span><span class="parameter ">cutIncomplete<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a><span class="token operator"> = </span><span class="token boolean">false</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-list/index.html">List</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../partition.html">T</a><span class="token operator">&gt;</span><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Partitions the values of the iterator lazily in groups of <a href="../partition.html">size</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-439967180%2FFunctions%2F-1716837352" anchor-label="transformAsSequence" id="-439967180%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="EXTENSION_FUNCTION" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../transform-as-sequence.html"><span>transform</span><wbr><span>As</span><wbr><span><span>Sequence</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-439967180%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../transform-as-sequence.html">T</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../transform-as-sequence.html">R</a><span class="token operator">&gt; </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../transform-as-sequence.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><a href="../transform-as-sequence.html"><span class="token function">transformAsSequence</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">func<span class="token operator">: </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.sequences/-sequence/index.html">Sequence</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../transform-as-sequence.html">T</a><span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator"> -&gt; </span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.sequences/-sequence/index.html">Sequence</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../transform-as-sequence.html">R</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-iterator/index.html">Iterator</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="../transform-as-sequence.html">R</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Allows to transform an Iterator using the Sequence functions.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,218 @@
+<!doctype html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+    <title>UserDefinedFunction5</title>
+<link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>    <script>const storage = localStorage.getItem("dokka-dark-mode")
+    if (storage == null) {
+        const osDarkSchemePreferred = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+        if (osDarkSchemePreferred === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    } else {
+        const savedDarkMode = JSON.parse(storage)
+        if(savedDarkMode === true) {
+            document.getElementsByTagName("html")[0].classList.add("theme-dark")
+        }
+    }
+    </script>
+<script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
+<link href="../../../styles/style.css" rel="Stylesheet">
+<link href="../../../styles/jetbrains-mono.css" rel="Stylesheet">
+<link href="../../../styles/main.css" rel="Stylesheet">
+<link href="../../../styles/prism.css" rel="Stylesheet">
+<link href="../../../styles/logo-styles.css" rel="Stylesheet">
+<script type="text/javascript" src="../../../scripts/clipboard.js" async></script>
+<script type="text/javascript" src="../../../scripts/navigation-loader.js" async></script>
+<script type="text/javascript" src="../../../scripts/platform-content-handler.js" async></script>
+<script type="text/javascript" src="../../../scripts/main.js" defer></script>
+<script type="text/javascript" src="../../../scripts/prism.js" async></script>
+<script type="text/javascript" src="../../../scripts/symbol-parameters-wrapper_deferred.js" defer></script></head>
+<body>
+<div class="navigation-wrapper" id="navigation-wrapper">
+    <div id="leftToggler"><span class="icon-toggler"></span></div>
+    <div class="library-name">
+<a href="../../../index.html">
+<span>kotlin-spark-api-parent_3.3.2_2.13</span>            </a>    </div>
+    <div>1.2.4
+    </div>
+    <div class="pull-right d-flex">
+        <div class="filter-section" id="filter-section">
+                <button class="platform-tag platform-selector jvm-like" data-active="" data-filter=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">jvm</button>
+        </div>
+        <button id="theme-toggle-button"><span id="theme-toggle"></span></button>
+        <div id="searchBar"></div>
+    </div>
+</div>
+<div id="container">
+    <div id="leftColumn">
+        <div id="sideMenu"></div>
+    </div>
+    <div id="main">
+<div class="main-content" data-page-type="classlike" id="content" pageids="kotlin-spark-api_3.3.2_2.13::org.jetbrains.kotlinx.spark.api/UserDefinedFunction5///PointingToDeclaration//-1716837352">
+  <div class="breadcrumbs"><a href="../../index.html">kotlin-spark-api_3.3.2_2.13</a><span class="delimiter">/</span><a href="../index.html">org.jetbrains.kotlinx.spark.api</a><span class="delimiter">/</span><span class="current">UserDefinedFunction5</span></div>
+  <div class="cover ">
+    <h1 class="cover"><span>User</span><wbr><span>Defined</span><wbr><span><span>Function5</span></span></h1>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="index.html">UserDefinedFunction5</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T1</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T2</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T3</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T4</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T5</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>udf<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql.expressions/UserDefinedFunction///PointingToDeclaration/">UserDefinedFunction</span><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>encoder<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Encoder///PointingToDeclaration/">Encoder</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="../-user-defined-function/index.html">UserDefinedFunction</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">R</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="../-named-user-defined-function5/index.html">NamedUserDefinedFunction5</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T1</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T2</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T3</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T4</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T5</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span><span class="token operator">&gt; </span></div><p class="paragraph">Instance of a UDF with 5 arguments. This UDF can be invoked with (typed) columns in a <span data-unresolved-link="org.apache.spark.sql/Dataset/select/#kotlin.Array[org.apache.spark.sql.Column]/PointingToDeclaration/">Dataset.select</span> or <a href="../select-typed.html">selectTyped</a> call. Alternatively it can be registered for SQL calls using <a href="../../../kotlin-spark-api_3.3.2_2.13/org.jetbrains.kotlinx.spark.api/index.html">register</a>.</p><h4 class="">See also</h4><div class="table"><div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><span data-unresolved-link="org.apache.spark.sql.expressions/UserDefinedFunction///PointingToDeclaration/"><span>User</span><wbr><span>Defined</span><wbr><span><span>Function</span></span></span></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-named-user-defined-function5/index.html"><span>Named</span><wbr><span>User</span><wbr><span>Defined</span><wbr><span><span>Function5</span></span></a></div></span></div><div></div></div></div><div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="udf.html"><span>User</span><wbr><span>Defined</span><wbr><span>Function5.</span><wbr><span>udf</span></a></div></span></div><div></div></div></div></div><h4 class="">Inheritors</h4><div class="table"><div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="main-subrow keyValue "><div class=""><span class="inline-flex"><div><a href="../-named-user-defined-function5/index.html">NamedUserDefinedFunction5</a></div></span></div><div></div></div></div></div></div></div>
+  </div>
+  <div class="tabbedcontent">
+    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
+    <div class="tabs-section-body">
+      <div data-togglable="CONSTRUCTOR">
+        <h2 class="">Constructors</h2>
+        <div class="table"><a data-name="-1333469419%2FConstructors%2F-1716837352" anchor-label="UserDefinedFunction5" id="-1333469419%2FConstructors%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-user-defined-function5.html"><span>User</span><wbr><span>Defined</span><wbr><span><span>Function5</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1333469419%2FConstructors%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">udf<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql.expressions/UserDefinedFunction///PointingToDeclaration/">UserDefinedFunction</span><span class="token punctuation">, </span></span><span class="parameter ">encoder<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Encoder///PointingToDeclaration/">Encoder</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="PROPERTY">
+        <h2 class="">Properties</h2>
+        <div class="table"><a data-name="-1274519069%2FProperties%2F-1716837352" anchor-label="deterministic" id="-1274519069%2FProperties%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-user-defined-function/deterministic.html"><span><span>deterministic</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-1274519069%2FProperties%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../-user-defined-function/deterministic.html">deterministic</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Returns true iff the UDF is deterministic, i.e. the UDF produces the same output given the same input.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-253218286%2FProperties%2F-1716837352" anchor-label="encoder" id="-253218286%2FProperties%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="encoder.html"><span><span>encoder</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-253218286%2FProperties%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="encoder.html">encoder</a><span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Encoder///PointingToDeclaration/">Encoder</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="783483524%2FProperties%2F-1716837352" anchor-label="nullable" id="783483524%2FProperties%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="../-user-defined-function/nullable.html"><span><span>nullable</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="783483524%2FProperties%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword"></span><span class="token keyword">val </span><a href="../-user-defined-function/nullable.html">nullable</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-boolean/index.html">Boolean</a></div><div class="brief "><p class="paragraph">Returns true when the UDF can return a nullable value.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="259303511%2FProperties%2F-1716837352" anchor-label="udf" id="259303511%2FProperties%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="udf.html"><span><span>udf</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="259303511%2FProperties%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">val </span><a href="udf.html">udf</a><span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql.expressions/UserDefinedFunction///PointingToDeclaration/">UserDefinedFunction</span></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div data-togglable="FUNCTION">
+        <h2 class="">Functions</h2>
+        <div class="table"><a data-name="-582273400%2FFunctions%2F-1716837352" anchor-label="getValue" id="-582273400%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="get-value.html"><span>get</span><wbr><span><span>Value</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-582273400%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">operator override </span><span class="token keyword">fun </span><a href="get-value.html"><span class="token function">getValue</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">thisRef<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-any/index.html">Any</a><span class="token operator">?</span><span class="token punctuation">, </span></span><span class="parameter ">property<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.reflect/-k-property/index.html">KProperty</a><span class="token operator">&lt;</span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-named-user-defined-function5/index.html">NamedUserDefinedFunction5</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T1</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T2</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T3</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T4</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T5</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns named variant of this UDF.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1224823406%2FFunctions%2F-1716837352" anchor-label="invoke" id="1224823406%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invoke.html"><span><span>invoke</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1224823406%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">operator </span><span class="token keyword">fun </span><a href="invoke.html"><span class="token function">invoke</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">param0<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param1<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param2<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param3<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param4<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span></div><div class="brief "><p class="paragraph">Returns an expression that invokes the UDF in untyped manner, using the given arguments.</p></div><div class="symbol monospace"><span class="token keyword">operator </span><span class="token keyword">fun </span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="invoke.html">DsType</a><span class="token operator">&gt; </span><a href="invoke.html"><span class="token function">invoke</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">param0<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/TypedColumn///PointingToDeclaration/">TypedColumn</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="invoke.html">DsType</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T1</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">param1<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/TypedColumn///PointingToDeclaration/">TypedColumn</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="invoke.html">DsType</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T2</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">param2<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/TypedColumn///PointingToDeclaration/">TypedColumn</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="invoke.html">DsType</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T3</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">param3<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/TypedColumn///PointingToDeclaration/">TypedColumn</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="invoke.html">DsType</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T4</a><span class="token operator">&gt;</span><span class="token punctuation">, </span></span><span class="parameter ">param4<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/TypedColumn///PointingToDeclaration/">TypedColumn</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="invoke.html">DsType</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T5</a><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/TypedColumn///PointingToDeclaration/">TypedColumn</span><span class="token operator">&lt;</span><span class="token keyword"></span><a href="invoke.html">DsType</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Allows this UDF to be called in typed manner using columns in a <a href="../../../kotlin-spark-api_3.3.2_2.13/org.jetbrains.kotlinx.spark.api/index.html">Dataset.selectTyped</a> call.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1582297736%2FFunctions%2F-1716837352" anchor-label="invokeUntyped" id="1582297736%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="invoke-untyped.html"><span>invoke</span><wbr><span><span>Untyped</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1582297736%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="invoke-untyped.html"><span class="token function">invokeUntyped</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">param0<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param1<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param2<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param3<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span><span class="token punctuation">, </span></span><span class="parameter ">param4<span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span></span></span><span class="token punctuation">)</span><span class="token operator">: </span><span data-unresolved-link="org.apache.spark.sql/Column///PointingToDeclaration/">Column</span></div><div class="brief "><p class="paragraph">Returns an expression that invokes the UDF in untyped manner, using the given arguments.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="392378953%2FFunctions%2F-1716837352" anchor-label="withName" id="392378953%2FFunctions%2F-1716837352" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"></a>
+          <div class="table-row" data-filterable-current=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main" data-filterable-set=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with-name.html"><span>with</span><wbr><span><span>Name</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="392378953%2FFunctions%2F-1716837352"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":kotlin-spark-api_3.3.2_2.13:dokkaHtmlPartial/main"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">override </span><span class="token keyword">fun </span><a href="with-name.html"><span class="token function">withName</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">name<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-named-user-defined-function5/index.html">NamedUserDefinedFunction5</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="index.html">T1</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T2</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T3</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T4</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">T5</a><span class="token punctuation">, </span><span class="token keyword"></span><a href="index.html">R</a><span class="token operator">&gt;</span></div><div class="brief "><p class="paragraph">Returns named variant of this UDF.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      <div class="footer">
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+      </div>
+    </div>
+</div>
+</body>
+</html>
+
