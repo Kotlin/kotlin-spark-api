@@ -119,7 +119,7 @@ To it, simply add
 to the top of your notebook. This will get the latest version of the API, together with the latest version of Spark.
 To define a certain version of Spark or the API itself, simply add it like this:
 ```jupyterpython
-%use spark(spark=3.3.2, scala=2.13, v=1.2.3)
+%use spark(spark=3.3.2, scala=2.13, v=1.2.4)
 ```
 
 Inside the notebook a Spark session will be initiated automatically. This can be accessed via the `spark` value.
