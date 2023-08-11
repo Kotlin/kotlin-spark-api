@@ -38,6 +38,8 @@ We have opened a Spark Project Improvement Proposal: [Kotlin support for Apache 
 
 | Apache Spark | Scala |       Kotlin for Apache Spark       |
 |:------------:|:-----:|:-----------------------------------:|
+|    3.4.1     | 2.13  | kotlin-spark-api_3.4.1_2.13:VERSION | 
+|              | 2.12  | kotlin-spark-api_3.4.1_2.12:VERSION | 
 |    3.3.2     | 2.13  | kotlin-spark-api_3.3.2_2.13:VERSION |
 |              | 2.12  | kotlin-spark-api_3.3.2_2.12:VERSION |
 |    3.3.1     | 2.13  | kotlin-spark-api_3.3.1_2.13:VERSION |
@@ -75,7 +77,7 @@ The Kotlin for Spark artifacts adhere to the following convention:
 The only exception to this is `scala-tuples-in-kotlin_[Scala core version]:[Kotlin for Apache Spark API version]`, which is 
 independent of Spark.
 
-[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api_3.3.2_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:"org.jetbrains.kotlinx.spark"%20AND%20a:"kotlin-spark-api_3.3.2_2.13")
+[![Maven Central](https://img.shields.io/maven-central/v/org.jetbrains.kotlinx.spark/kotlin-spark-api_3.4.1_2.13.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:"org.jetbrains.kotlinx.spark"%20AND%20a:"kotlin-spark-api_3.4.1_2.13")
 
 ## How to configure Kotlin for Apache Spark in your project
 
@@ -86,7 +88,7 @@ Here's an example `pom.xml`:
 ```xml
 <dependency>
   <groupId>org.jetbrains.kotlinx.spark</groupId>
-  <artifactId>kotlin-spark-api_3.3.2_2.13</artifactId>
+  <artifactId>kotlin-spark-api_3.4.1_2.13</artifactId>
   <version>${kotlin-spark-api.version}</version>
 </dependency>
 <dependency>
@@ -119,7 +121,7 @@ To it, simply add
 to the top of your notebook. This will get the latest version of the API, together with the latest version of Spark.
 To define a certain version of Spark or the API itself, simply add it like this:
 ```jupyterpython
-%use spark(spark=3.3.2, scala=2.13, v=1.2.4)
+%use spark(spark=3.4.1, scala=2.13, v=1.2.4)
 ```
 
 Inside the notebook a Spark session will be initiated automatically. This can be accessed via the `spark` value.
