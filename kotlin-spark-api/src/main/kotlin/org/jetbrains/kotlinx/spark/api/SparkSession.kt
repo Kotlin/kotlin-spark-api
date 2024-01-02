@@ -114,7 +114,7 @@ class KSparkSession(val spark: SparkSession) {
      * NOTE: [T] must be [Serializable].
      */
     fun <T> rddOf(vararg elements: T, numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
-        sc.toRDD(elements.toList(), numSlices)
+        sc.toRDD(elements.asList(), numSlices)
 
     /**
      * A collection of methods for registering user-defined functions (UDF).

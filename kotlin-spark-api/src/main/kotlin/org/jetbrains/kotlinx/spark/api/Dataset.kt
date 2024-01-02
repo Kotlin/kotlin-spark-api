@@ -61,19 +61,19 @@ inline fun <reified T> SparkSession.toDF(list: List<T>, vararg colNames: String)
  * Utility method to create dataset from *array or vararg arguments
  */
 inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
-    createDataset(t.toList(), encoder<T>())
+    createDataset(t.asList(), encoder<T>())
 
 /**
  * Utility method to create dataframe from *array or vararg arguments
  */
 inline fun <reified T> SparkSession.dfOf(vararg t: T): Dataset<Row> =
-    createDataset(t.toList(), encoder<T>()).toDF()
+    createDataset(t.asList(), encoder<T>()).toDF()
 
 /**
  * Utility method to create dataframe from *array or vararg arguments with given column names
  */
 inline fun <reified T> SparkSession.dfOf(colNames: Array<String>, vararg t: T): Dataset<Row> =
-    createDataset(t.toList(), encoder<T>())
+    createDataset(t.asList(), encoder<T>())
         .run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
 
 /**
@@ -92,7 +92,7 @@ inline fun <reified T> List<T>.toDF(spark: SparkSession, vararg colNames: String
  * Utility method to create dataset from list
  */
 inline fun <reified T> Array<T>.toDS(spark: SparkSession): Dataset<T> =
-    toList().toDS(spark)
+    asList().toDS(spark)
 
 /**
  * Utility method to create dataframe from list

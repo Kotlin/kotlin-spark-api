@@ -11,7 +11,7 @@ import java.io.Serializable
 fun <T> JavaSparkContext.rddOf(
     vararg elements: T,
     numSlices: Int = defaultParallelism(),
-): JavaRDD<T> = parallelize(elements.toList(), numSlices)
+): JavaRDD<T> = parallelize(elements.asList(), numSlices)
 
 /**
  * Utility method to create an RDD from a list.
