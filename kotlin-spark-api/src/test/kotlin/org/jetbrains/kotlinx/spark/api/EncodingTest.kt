@@ -22,6 +22,8 @@ package org.jetbrains.kotlinx.spark.api
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.collections.shouldContain
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
@@ -208,6 +210,39 @@ class EncodingTest : ShouldSpec({
     context("schema") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
+            context("Give proper names to columns of data classe") {
+                val old = KotlinTypeInference.DO_NAME_HACK
+                KotlinTypeInference.DO_NAME_HACK = true
+
+                should("Be able to serialize pairs") {
+                    val pairs = listOf(
+                        1 to "1",
+                        2 to "2",
+                        3 to "3",
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.collectAsList() shouldBe pairs
+                    dataset.columns().shouldContainExactly("first", "second")
+                }
+
+                should("Be able to serialize pairs of pairs") {
+                    val pairs = listOf(
+                        1 to (1 to "1"),
+                        2 to (2 to "2"),
+                        3 to (3 to "3"),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.columns().shouldContainExactly("first", "second")
+                    dataset.select("second.*").columns().shouldContainExactly("first", "second")
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                KotlinTypeInference.DO_NAME_HACK = old
+            }
+
             should("handle Scala Case class datasets") {
                 val caseClasses = listOf(
                     tupleOf(1, "1"),
@@ -253,14 +288,14 @@ class EncodingTest : ShouldSpec({
             }
 
 
-            xshould("handle Scala Option datasets") {
+            should("handle Scala Option datasets") {
                 val caseClasses = listOf(Some(1), Some(2), Some(3))
                 val dataset = caseClasses.toDS()
                 dataset.show()
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            xshould("handle Scala Option Option datasets") {
+            should("handle Scala Option Option datasets") {
                 val caseClasses = listOf(
                     Some(Some(1)),
                     Some(Some(2)),
@@ -270,7 +305,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            xshould("handle data class Scala Option datasets") {
+            should("handle data class Scala Option datasets") {
                 val caseClasses = listOf(
                     Some(1) to Some(2),
                     Some(3) to Some(4),
@@ -280,7 +315,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            xshould("handle Scala Option data class datasets") {
+            should("handle Scala Option data class datasets") {
                 val caseClasses = listOf(
                     Some(1 to 2),
                     Some(3 to 4),
@@ -501,7 +536,7 @@ class EncodingTest : ShouldSpec({
                 expect(result).toContain.inOrder.only.values(5.1 to 6)
             }
 
-            should("!handle primitive arrays") {
+            should("handle boxed arrays") {
                 val result = listOf(arrayOf(1, 2, 3, 4))
                     .toDS()
                     .map { it.map { ai -> ai + 1 } }

@@ -112,7 +112,7 @@ object KotlinTypeInference {
     // TODO this hack is a WIP and can give errors
     // TODO it's to make data classes get column names like "age" with functions like "getAge"
     // TODO instead of column names like "getAge"
-    var DO_NAME_HACK = false
+    var DO_NAME_HACK = true
 
     /**
      * @param kClass the class for which to infer the encoder.
@@ -151,6 +151,7 @@ object KotlinTypeInference {
             currentType = kType,
             seenTypeSet = emptySet(),
             typeVariables = emptyMap(),
+            isTopLevel = true,
         ) as AgnosticEncoder<T>
 
 
@@ -217,6 +218,7 @@ object KotlinTypeInference {
 
         // how the generic types of the data class (like T, S) are filled in for this instance of the class
         typeVariables: Map<String, KType>,
+        isTopLevel: Boolean = false,
     ): AgnosticEncoder<*> {
         val kClass =
             currentType.classifier as? KClass<*> ?: throw IllegalArgumentException("Unsupported type $currentType")
@@ -488,6 +490,7 @@ object KotlinTypeInference {
 
                     DirtyProductEncoderField(
                         doNameHack = DO_NAME_HACK,
+                        isTopLevel = isTopLevel,
                         columnName = paramName,
                         readMethodName = readMethodName,
                         writeMethodName = writeMethodName,
@@ -545,6 +548,7 @@ internal open class DirtyProductEncoderField(
     private val readMethodName: String, // the name of the method used to read the value
     private val writeMethodName: String?,
     private val doNameHack: Boolean,
+    private val isTopLevel: Boolean,
     encoder: AgnosticEncoder<*>,
     nullable: Boolean,
     metadata: Metadata = Metadata.empty(),
@@ -557,19 +561,20 @@ internal open class DirtyProductEncoderField(
     /* writeMethod = */ writeMethodName.toOption(),
 ), Serializable {
 
-    private var i = 0
+    private var isFirstNameCall = true
 
     /**
      * This dirty trick only works because in [SerializerBuildHelper], [ProductEncoder]
-     * creates an [Invoke] using [columnName] first and then calls [columnName] again to retrieve
+     * creates an [Invoke] using [name] first and then calls [name] again to retrieve
      * the name of the column. This way, we can alternate between the two names.
      */
     override fun name(): String =
-        when (doNameHack) {
-            true -> if (i++ % 2 == 0) readMethodName else columnName
-            false -> readMethodName
+        if (doNameHack && !isFirstNameCall) {
+            columnName
+        } else {
+            isFirstNameCall = false
+            readMethodName
         }
-
 
     override fun canEqual(that: Any?): Boolean = that is AgnosticEncoders.EncoderField
 
