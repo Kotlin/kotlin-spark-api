@@ -26,12 +26,6 @@ import scala.reflect.ClassTag
 
 object KSparkExtensions {
 
-  val kotlinVersion = /*$"\""+kotlin+"\""$*/ /*-*/ ""
-  val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
-  val scalaCompatVersion = /*$"\""+scalaCompat+"\""$*/ /*-*/ ""
-  val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
-  val sparkMinorVersion = /*$"\""+sparkMinor+"\""$*/ /*-*/ ""
-
   def col(d: Dataset[_], name: String): Column = d.col(name)
 
   def col(name: String): Column = functions.col(name)
@@ -45,19 +39,6 @@ object KSparkExtensions {
     //$scala.collection.JavaConverters.seqAsJavaList(ds.collect())
     //#endif
   }
-
-
-  def debugCodegen(df: Dataset[_]): Unit = {
-    import org.apache.spark.sql.execution.debug._
-    df.debugCodegen()
-  }
-
-  def debug(df: Dataset[_]): Unit = {
-    import org.apache.spark.sql.execution.debug._
-    df.debug()
-  }
-
-  def sparkContext(s: SparkSession): SparkContext = s.sparkContext
 
   /**
    * Produces a ClassTag[T], which is actually just a casted ClassTag[AnyRef].
