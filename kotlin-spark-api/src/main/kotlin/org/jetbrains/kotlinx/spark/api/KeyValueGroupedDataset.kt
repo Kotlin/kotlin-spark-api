@@ -51,7 +51,7 @@ import scala.Tuple2
  * ```
  */
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapValues(noinline func: (VALUE) -> R): KeyValueGroupedDataset<KEY, R> =
-    mapValues(MapFunction(func), encoder<R>())
+    mapValues(MapFunction(func), kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -70,7 +70,7 @@ inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapValues(
  * constraints of their cluster.
  */
 inline fun <KEY, VALUE, reified R> KeyValueGroupedDataset<KEY, VALUE>.mapGroups(noinline func: (KEY, Iterator<VALUE>) -> R): Dataset<R> =
-    mapGroups(MapGroupsFunction(func), encoder<R>())
+    mapGroups(MapGroupsFunction(func), kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -104,7 +104,7 @@ inline fun <K, V, reified U> KeyValueGroupedDataset<K, V>.flatMapGroups(
     noinline func: (key: K, values: Iterator<V>) -> Iterator<U>,
 ): Dataset<U> = flatMapGroups(
     FlatMapGroupsFunction(func),
-    encoder<U>(),
+    kotlinEncoderFor<U>(),
 )
 
 
@@ -127,8 +127,8 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
     noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U,
 ): Dataset<U> = mapGroupsWithState(
     MapGroupsWithStateFunction(func),
-    encoder<S>(),
-    encoder<U>(),
+    kotlinEncoderFor<S>(),
+    kotlinEncoderFor<U>(),
 )
 
 /**
@@ -152,8 +152,8 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.mapGroupsWi
     noinline func: (key: K, values: Iterator<V>, state: GroupState<S>) -> U,
 ): Dataset<U> = mapGroupsWithState(
     MapGroupsWithStateFunction(func),
-    encoder<S>(),
-    encoder<U>(),
+    kotlinEncoderFor<S>(),
+    kotlinEncoderFor<U>(),
     timeoutConf,
 )
 
@@ -181,8 +181,8 @@ inline fun <K, V, reified S, reified U> KeyValueGroupedDataset<K, V>.flatMapGrou
 ): Dataset<U> = flatMapGroupsWithState(
     FlatMapGroupsWithStateFunction(func),
     outputMode,
-    encoder<S>(),
-    encoder<U>(),
+    kotlinEncoderFor<S>(),
+    kotlinEncoderFor<U>(),
     timeoutConf,
 )
 
@@ -199,5 +199,5 @@ inline fun <K, V, U, reified R> KeyValueGroupedDataset<K, V>.cogroup(
 ): Dataset<R> = cogroup(
     other,
     CoGroupFunction(func),
-    encoder<R>(),
+    kotlinEncoderFor<R>(),
 )

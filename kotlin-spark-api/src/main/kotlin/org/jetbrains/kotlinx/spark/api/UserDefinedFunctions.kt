@@ -227,10 +227,10 @@ inline fun <reified R> udf(
 
 
     return UserDefinedFunction0(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -454,10 +454,10 @@ inline fun <reified T1, reified R> udf(
     T1::class.checkForValidType("T1")
 
     return UserDefinedFunction1(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -680,10 +680,10 @@ inline fun <reified T1, reified T2, reified R> udf(
     T2::class.checkForValidType("T2")
 
     return UserDefinedFunction2(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -907,10 +907,10 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
     T3::class.checkForValidType("T3")
 
     return UserDefinedFunction3(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1135,10 +1135,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
     T4::class.checkForValidType("T4")
 
     return UserDefinedFunction4(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1364,10 +1364,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T5::class.checkForValidType("T5")
 
     return UserDefinedFunction5(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1594,10 +1594,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T6::class.checkForValidType("T6")
 
     return UserDefinedFunction6(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1825,10 +1825,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T7::class.checkForValidType("T7")
 
     return UserDefinedFunction7(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2057,10 +2057,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T8::class.checkForValidType("T8")
 
     return UserDefinedFunction8(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2290,10 +2290,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T9::class.checkForValidType("T9")
 
     return UserDefinedFunction9(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2524,10 +2524,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T10::class.checkForValidType("T10")
 
     return UserDefinedFunction10(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2759,10 +2759,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T11::class.checkForValidType("T11")
 
     return UserDefinedFunction11(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2995,10 +2995,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T12::class.checkForValidType("T12")
 
     return UserDefinedFunction12(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3232,10 +3232,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T13::class.checkForValidType("T13")
 
     return UserDefinedFunction13(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3470,10 +3470,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T14::class.checkForValidType("T14")
 
     return UserDefinedFunction14(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3709,10 +3709,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T15::class.checkForValidType("T15")
 
     return UserDefinedFunction15(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3949,10 +3949,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T16::class.checkForValidType("T16")
 
     return UserDefinedFunction16(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4190,10 +4190,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T17::class.checkForValidType("T17")
 
     return UserDefinedFunction17(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4432,10 +4432,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T18::class.checkForValidType("T18")
 
     return UserDefinedFunction18(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4675,10 +4675,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T19::class.checkForValidType("T19")
 
     return UserDefinedFunction19(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4919,10 +4919,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T20::class.checkForValidType("T20")
 
     return UserDefinedFunction20(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -5164,10 +5164,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T21::class.checkForValidType("T21")
 
     return UserDefinedFunction21(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -5410,10 +5410,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T22::class.checkForValidType("T22")
 
     return UserDefinedFunction22(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, kotlinEncoderFor<R>().schema())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 

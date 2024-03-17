@@ -31,13 +31,6 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import org.apache.spark.sql.expressions.UserDefinedFunction as SparkUserDefinedFunction
 
-/** Unwraps [DataTypeWithClass]. */
-fun DataType.unWrap(): DataType =
-    when (this) {
-        is DataTypeWithClass -> DataType.fromJson(dt().json())
-        else -> this
-    }
-
 /**
  * Checks if [this] is of a valid type for a UDF, otherwise it throws a [TypeOfUDFParameterNotSupportedException]
  */

@@ -270,10 +270,10 @@ private object MyAverage : Aggregator<Employee, Average, Double>() {
     override fun finish(reduction: Average): Double = reduction.sum.toDouble() / reduction.count
 
     // Specifies the Encoder for the intermediate value type
-    override fun bufferEncoder(): Encoder<Average> = encoder()
+    override fun bufferEncoder(): Encoder<Average> = kotlinEncoderFor()
 
     // Specifies the Encoder for the final output value type
-    override fun outputEncoder(): Encoder<Double> = encoder()
+    override fun outputEncoder(): Encoder<Double> = kotlinEncoderFor()
 
 }
 

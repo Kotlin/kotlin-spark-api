@@ -37,7 +37,6 @@ import org.apache.spark.api.java.function.MapFunction
 import org.apache.spark.api.java.function.ReduceFunction
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.*
-import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
 import scala.Tuple2
 import scala.Tuple3
 import scala.Tuple4
@@ -49,7 +48,7 @@ import kotlin.reflect.KProperty1
  * Utility method to create dataset from list
  */
 inline fun <reified T> SparkSession.toDS(list: List<T>): Dataset<T> =
-    createDataset(list, encoder<T>())
+    createDataset(list, kotlinEncoderFor<T>())
 
 /**
  * Utility method to create dataframe from list
@@ -61,26 +60,26 @@ inline fun <reified T> SparkSession.toDF(list: List<T>, vararg colNames: String)
  * Utility method to create dataset from *array or vararg arguments
  */
 inline fun <reified T> SparkSession.dsOf(vararg t: T): Dataset<T> =
-    createDataset(t.toList(), encoder<T>())
+    createDataset(t.toList(), kotlinEncoderFor<T>())
 
 /**
  * Utility method to create dataframe from *array or vararg arguments
  */
 inline fun <reified T> SparkSession.dfOf(vararg t: T): Dataset<Row> =
-    createDataset(t.toList(), encoder<T>()).toDF()
+    createDataset(t.toList(), kotlinEncoderFor<T>()).toDF()
 
 /**
  * Utility method to create dataframe from *array or vararg arguments with given column names
  */
 inline fun <reified T> SparkSession.dfOf(colNames: Array<String>, vararg t: T): Dataset<Row> =
-    createDataset(t.toList(), encoder<T>())
+    createDataset(t.toList(), kotlinEncoderFor<T>())
         .run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
 
 /**
  * Utility method to create dataset from list
  */
 inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
-    spark.createDataset(this, encoder<T>())
+    spark.createDataset(this, kotlinEncoderFor<T>())
 
 /**
  * Utility method to create dataframe from list
@@ -104,13 +103,13 @@ inline fun <reified T> Array<T>.toDF(spark: SparkSession, vararg colNames: Strin
  * Utility method to create dataset from RDD
  */
 inline fun <reified T> RDD<T>.toDS(spark: SparkSession): Dataset<T> =
-    spark.createDataset(this, encoder<T>())
+    spark.createDataset(this, kotlinEncoderFor<T>())
 
 /**
  * Utility method to create dataset from JavaRDD
  */
 inline fun <reified T> JavaRDDLike<T, *>.toDS(spark: SparkSession): Dataset<T> =
-    spark.createDataset(this.rdd(), encoder<T>())
+    spark.createDataset(this.rdd(), kotlinEncoderFor<T>())
 
 /**
  * Utility method to create Dataset<Row> (Dataframe) from JavaRDD.
@@ -132,7 +131,7 @@ inline fun <reified T> RDD<T>.toDF(spark: SparkSession, vararg colNames: String)
  * Returns a new Dataset that contains the result of applying [func] to each element.
  */
 inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Dataset<R> =
-    map(MapFunction(func), encoder<R>())
+    map(MapFunction(func), kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -140,7 +139,7 @@ inline fun <reified T, reified R> Dataset<T>.map(noinline func: (T) -> R): Datas
  * and then flattening the results.
  */
 inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>): Dataset<R> =
-    flatMap(func, encoder<R>())
+    flatMap(func, kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -148,21 +147,21 @@ inline fun <T, reified R> Dataset<T>.flatMap(noinline func: (T) -> Iterator<R>):
  * `listOf(listOf(1, 2, 3), listOf(4, 5, 6))` will be flattened to a Dataset of `listOf(1, 2, 3, 4, 5, 6)`.
  */
 inline fun <reified T, I : Iterable<T>> Dataset<I>.flatten(): Dataset<T> =
-    flatMap(FlatMapFunction { it.iterator() }, encoder<T>())
+    flatMap(FlatMapFunction { it.iterator() }, kotlinEncoderFor<T>())
 
 /**
  * (Kotlin-specific)
  * Returns a [KeyValueGroupedDataset] where the data is grouped by the given key [func].
  */
 inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyValueGroupedDataset<R, T> =
-    groupByKey(MapFunction(func), encoder<R>())
+    groupByKey(MapFunction(func), kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
  * Returns a new Dataset that contains the result of applying [func] to each partition.
  */
 inline fun <T, reified R> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
-    mapPartitions(func, encoder<R>())
+    mapPartitions(func, kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -195,15 +194,6 @@ inline fun <reified T1, T2> Dataset<Pair<T1, T2>>.takeKeys(): Dataset<T1> = map 
 
 /**
  * (Kotlin-specific)
- * Maps the Dataset to only retain the "keys" or [Arity2._1] values.
- */
-@Suppress("DEPRECATION")
-@JvmName("takeKeysArity2")
-@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-inline fun <reified T1, T2> Dataset<Arity2<T1, T2>>.takeKeys(): Dataset<T1> = map { it._1 }
-
-/**
- * (Kotlin-specific)
  * Maps the Dataset to only retain the "values" or [Tuple2._2] values.
  */
 @JvmName("takeValuesTuple2")
@@ -215,22 +205,13 @@ inline fun <T1, reified T2> Dataset<Tuple2<T1, T2>>.takeValues(): Dataset<T2> = 
  */
 inline fun <T1, reified T2> Dataset<Pair<T1, T2>>.takeValues(): Dataset<T2> = map { it.second }
 
-/**
- * (Kotlin-specific)
- * Maps the Dataset to only retain the "values" or [Arity2._2] values.
- */
-@Suppress("DEPRECATION")
-@JvmName("takeValuesArity2")
-@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-inline fun <T1, reified T2> Dataset<Arity2<T1, T2>>.takeValues(): Dataset<T2> = map { it._2 }
-
 /** DEPRECATED: Use [as] or [to] for this. */
 @Deprecated(
     message = "Deprecated, since we already have `as`() and to().",
     replaceWith = ReplaceWith("this.to<R>()"),
     level = DeprecationLevel.ERROR,
 )
-inline fun <T, reified R> Dataset<T>.downcast(): Dataset<R> = `as`(encoder<R>())
+inline fun <T, reified R> Dataset<T>.downcast(): Dataset<R> = `as`(kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -252,7 +233,7 @@ inline fun <T, reified R> Dataset<T>.downcast(): Dataset<R> = `as`(encoder<R>())
  *
  * @see to as alias for [as]
  */
-inline fun <reified R> Dataset<*>.`as`(): Dataset<R> = `as`(encoder<R>())
+inline fun <reified R> Dataset<*>.`as`(): Dataset<R> = `as`(kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -274,7 +255,7 @@ inline fun <reified R> Dataset<*>.`as`(): Dataset<R> = `as`(encoder<R>())
  *
  * @see as as alias for [to]
  */
-inline fun <reified R> Dataset<*>.to(): Dataset<R> = `as`(encoder<R>())
+inline fun <reified R> Dataset<*>.to(): Dataset<R> = `as`(kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
@@ -292,12 +273,16 @@ inline fun <reified T> Dataset<T>.forEachPartition(noinline func: (Iterator<T>) 
 /**
  * It's hard to call `Dataset.debugCodegen` from kotlin, so here is utility for that
  */
-fun <T> Dataset<T>.debugCodegen(): Dataset<T> = also { KSparkExtensions.debugCodegen(it) }
+fun <T> Dataset<T>.debugCodegen(): Dataset<T> = also {
+    org.apache.spark.sql.execution.debug.`package$`.`MODULE$`.DebugQuery(it).debugCodegen()
+}
 
 /**
  * It's hard to call `Dataset.debug` from kotlin, so here is utility for that
  */
-fun <T> Dataset<T>.debug(): Dataset<T> = also { KSparkExtensions.debug(it) }
+fun <T> Dataset<T>.debug(): Dataset<T> = also {
+    org.apache.spark.sql.execution.debug.`package$`.`MODULE$`.DebugQuery(it).debug()
+}
 
 
 /**
@@ -369,18 +354,6 @@ fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByKey(): Dataset<Tuple2<T1, T2>> = sort
 /** Returns a dataset sorted by the second (`_2`) value of each [Tuple2] inside. */
 @JvmName("sortByTuple2Value")
 fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByValue(): Dataset<Tuple2<T1, T2>> = sort("_2")
-
-/** Returns a dataset sorted by the first (`_1`) value of each [Arity2] inside. */
-@Suppress("DEPRECATION")
-@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-@JvmName("sortByArity2Key")
-fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByKey(): Dataset<Arity2<T1, T2>> = sort("_1")
-
-/** Returns a dataset sorted by the second (`_2`) value of each [Arity2] inside. */
-@Suppress("DEPRECATION")
-@Deprecated("Use Scala tuples instead.", ReplaceWith(""))
-@JvmName("sortByArity2Value")
-fun <T1, T2> Dataset<Arity2<T1, T2>>.sortByValue(): Dataset<Arity2<T1, T2>> = sort("_2")
 
 /** Returns a dataset sorted by the first (`first`) value of each [Pair] inside. */
 @JvmName("sortByPairKey")
