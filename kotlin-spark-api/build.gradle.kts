@@ -29,10 +29,7 @@ tasks.withType<Test>().configureEach {
 dependencies {
 
     with(Projects) {
-        api(
-            core,
-            scalaTuplesInKotlin,
-        )
+        api(scalaTuplesInKotlin)
     }
 
     with(Dependencies) {
@@ -46,6 +43,7 @@ dependencies {
             sparkSql,
             sparkStreaming,
             hadoopClient,
+            kotlinDateTime,
         )
 
         testImplementation(
