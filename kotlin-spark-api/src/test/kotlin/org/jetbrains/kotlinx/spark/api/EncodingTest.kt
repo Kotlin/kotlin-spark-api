@@ -27,7 +27,6 @@ import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
 import org.jetbrains.kotlinx.spark.api.tuples.*
-import org.jetbrains.kotlinx.spark.extensions.DemoCaseClass
 import scala.*
 import java.math.BigDecimal
 import java.sql.Date
@@ -211,9 +210,9 @@ class EncodingTest : ShouldSpec({
 
             should("handle Scala Case class datasets") {
                 val caseClasses = listOf(
-                    DemoCaseClass(1, "1"),
-                    DemoCaseClass(2, "2"),
-                    DemoCaseClass(3, "3"),
+                    tupleOf(1, "1"),
+                    tupleOf(2, "2"),
+                    tupleOf(3, "3"),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -222,9 +221,9 @@ class EncodingTest : ShouldSpec({
 
             should("handle Scala Case class with data class datasets") {
                 val caseClasses = listOf(
-                    DemoCaseClass(1, "1" to 1L),
-                    DemoCaseClass(2, "2" to 2L),
-                    DemoCaseClass(3, "3" to 3L),
+                    tupleOf(1, "1" to 1L),
+                    tupleOf(2, "2" to 2L),
+                    tupleOf(3, "3" to 3L),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -233,9 +232,9 @@ class EncodingTest : ShouldSpec({
 
             should("handle data class with Scala Case class datasets") {
                 val caseClasses = listOf(
-                    1 to DemoCaseClass(1, "1"),
-                    2 to DemoCaseClass(2, "2"),
-                    3 to DemoCaseClass(3, "3"),
+                    1 to tupleOf(1, "1"),
+                    2 to tupleOf(2, "2"),
+                    3 to tupleOf(3, "3"),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -244,9 +243,9 @@ class EncodingTest : ShouldSpec({
 
             should("handle data class with Scala Case class & deeper datasets") {
                 val caseClasses = listOf(
-                    1 to DemoCaseClass(1, "1" to DemoCaseClass(1, 1.0)),
-                    2 to DemoCaseClass(2, "2" to DemoCaseClass(2, 2.0)),
-                    3 to DemoCaseClass(3, "3" to DemoCaseClass(3, 3.0)),
+                    1 to tupleOf(1, "1" to tupleOf(1, 1.0)),
+                    2 to tupleOf(2, "2" to tupleOf(2, 2.0)),
+                    3 to tupleOf(3, "3" to tupleOf(3, 3.0)),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -426,7 +425,7 @@ class EncodingTest : ShouldSpec({
             }
 
             should("Generate schema correctly with nullalble list and map") {
-                val schema = encoder<NullFieldAbleDataClass>().schema()
+                val schema = kotlinEncoderFor<NullFieldAbleDataClass>().schema()
                 schema.fields().forEach {
                     it.nullable() shouldBe true
                 }

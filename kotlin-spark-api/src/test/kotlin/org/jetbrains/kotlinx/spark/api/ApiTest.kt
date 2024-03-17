@@ -34,7 +34,7 @@ class ApiTest : ShouldSpec({
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
             should("Create Seqs") {
-                spark.createDataset(seqOf(1, 2, 3), encoder())
+                spark.createDataset(seqOf(1, 2, 3), kotlinEncoderFor())
                     .collectAsList() shouldBe listOf(1, 2, 3)
 
 
