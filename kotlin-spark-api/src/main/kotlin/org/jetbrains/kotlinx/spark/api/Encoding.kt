@@ -463,8 +463,24 @@ object KotlinTypeInference {
                 )
             }
 
-            currentType.isSubtypeOf<Map<*, *>?>() -> TODO()
-            currentType.isSubtypeOf<scala.collection.Map<*, *>?>() -> TODO()
+            currentType.isSubtypeOf<Map<*, *>?>() || currentType.isSubtypeOf<scala.collection.Map<*, *>?>() -> {
+                val keyEncoder = encoderFor(
+                    currentType = tArguments[0].type!!,
+                    seenTypeSet = seenTypeSet,
+                    typeVariables = typeVariables,
+                )
+                val valueEncoder = encoderFor(
+                    currentType = tArguments[1].type!!,
+                    seenTypeSet = seenTypeSet,
+                    typeVariables = typeVariables,
+                )
+                AgnosticEncoders.MapEncoder(
+                    /* clsTag = */ ClassTag.apply<Map<*, *>>(jClass),
+                    /* keyEncoder = */ keyEncoder,
+                    /* valueEncoder = */ valueEncoder,
+                    /* valueContainsNull = */ tArguments[1].type!!.isMarkedNullable,
+                )
+            }
 
             kClass.isData -> {
                 if (currentType in seenTypeSet) throw IllegalStateException("Circular reference detected for type $currentType")
