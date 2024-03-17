@@ -109,6 +109,11 @@ fun schema(kType: KType): DataType = kotlinEncoderFor<Any?>(kType).schema()
 
 object KotlinTypeInference {
 
+    // TODO this hack is a WIP and can give errors
+    // TODO it's to make data classes get column names like "age" with functions like "getAge"
+    // TODO instead of column names like "getAge"
+    var DO_NAME_HACK = false
+
     /**
      * @param kClass the class for which to infer the encoder.
      * @param arguments the generic type arguments for the class.
@@ -255,22 +260,22 @@ object KotlinTypeInference {
             currentType == typeOf<scala.Double>() -> AgnosticEncoders.`PrimitiveDoubleEncoder$`.`MODULE$`
 
             // boxed primitives java / kotlin
-            currentType == typeOf<Boolean?>() -> AgnosticEncoders.`BoxedBooleanEncoder$`.`MODULE$`
-            currentType == typeOf<Byte?>() -> AgnosticEncoders.`BoxedByteEncoder$`.`MODULE$`
-            currentType == typeOf<Short?>() -> AgnosticEncoders.`BoxedShortEncoder$`.`MODULE$`
-            currentType == typeOf<Int?>() -> AgnosticEncoders.`BoxedIntEncoder$`.`MODULE$`
-            currentType == typeOf<Long?>() -> AgnosticEncoders.`BoxedLongEncoder$`.`MODULE$`
-            currentType == typeOf<Float?>() -> AgnosticEncoders.`BoxedFloatEncoder$`.`MODULE$`
-            currentType == typeOf<Double?>() -> AgnosticEncoders.`BoxedDoubleEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<Boolean?>() -> AgnosticEncoders.`BoxedBooleanEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<Byte?>() -> AgnosticEncoders.`BoxedByteEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<Short?>() -> AgnosticEncoders.`BoxedShortEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<Int?>() -> AgnosticEncoders.`BoxedIntEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<Long?>() -> AgnosticEncoders.`BoxedLongEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<Float?>() -> AgnosticEncoders.`BoxedFloatEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<Double?>() -> AgnosticEncoders.`BoxedDoubleEncoder$`.`MODULE$`
 
             // boxed primitives scala
-            currentType == typeOf<scala.Boolean?>() -> AgnosticEncoders.`BoxedBooleanEncoder$`.`MODULE$`
-            currentType == typeOf<scala.Byte?>() -> AgnosticEncoders.`BoxedByteEncoder$`.`MODULE$`
-            currentType == typeOf<scala.Short?>() -> AgnosticEncoders.`BoxedShortEncoder$`.`MODULE$`
-            currentType == typeOf<scala.Int?>() -> AgnosticEncoders.`BoxedIntEncoder$`.`MODULE$`
-            currentType == typeOf<scala.Long?>() -> AgnosticEncoders.`BoxedLongEncoder$`.`MODULE$`
-            currentType == typeOf<scala.Float?>() -> AgnosticEncoders.`BoxedFloatEncoder$`.`MODULE$`
-            currentType == typeOf<scala.Double?>() -> AgnosticEncoders.`BoxedDoubleEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<scala.Boolean?>() -> AgnosticEncoders.`BoxedBooleanEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<scala.Byte?>() -> AgnosticEncoders.`BoxedByteEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<scala.Short?>() -> AgnosticEncoders.`BoxedShortEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<scala.Int?>() -> AgnosticEncoders.`BoxedIntEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<scala.Long?>() -> AgnosticEncoders.`BoxedLongEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<scala.Float?>() -> AgnosticEncoders.`BoxedFloatEncoder$`.`MODULE$`
+            currentType.isSubtypeOf<scala.Double?>() -> AgnosticEncoders.`BoxedDoubleEncoder$`.`MODULE$`
 
             // leaf encoders
             currentType.isSubtypeOf<String?>() -> AgnosticEncoders.`StringEncoder$`.`MODULE$`
@@ -482,7 +487,8 @@ object KotlinTypeInference {
                     val writeMethodName = (prop as? KMutableProperty<*>)?.setter?.javaMethod?.name
 
                     DirtyProductEncoderField(
-                        name = paramName,
+                        doNameHack = DO_NAME_HACK,
+                        columnName = paramName,
                         readMethodName = readMethodName,
                         writeMethodName = writeMethodName,
                         encoder = encoder,
@@ -535,9 +541,10 @@ object KotlinTypeInference {
 }
 
 internal open class DirtyProductEncoderField(
-    private val name: String, // the name used for the column
+    private val columnName: String, // the name used for the column
     private val readMethodName: String, // the name of the method used to read the value
     private val writeMethodName: String?,
+    private val doNameHack: Boolean,
     encoder: AgnosticEncoder<*>,
     nullable: Boolean,
     metadata: Metadata = Metadata.empty(),
@@ -554,12 +561,15 @@ internal open class DirtyProductEncoderField(
 
     /**
      * This dirty trick only works because in [SerializerBuildHelper], [ProductEncoder]
-     * creates an [Invoke] using [name] first and then calls [name] again to retrieve
+     * creates an [Invoke] using [columnName] first and then calls [columnName] again to retrieve
      * the name of the column. This way, we can alternate between the two names.
      */
     override fun name(): String =
-        if (i++ % 2 == 0) readMethodName
-        else name
+        when (doNameHack) {
+            true -> if (i++ % 2 == 0) readMethodName else columnName
+            false -> readMethodName
+        }
+
 
     override fun canEqual(that: Any?): Boolean = that is AgnosticEncoders.EncoderField
 
