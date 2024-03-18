@@ -22,9 +22,9 @@ package org.jetbrains.kotlinx.spark.api
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
-import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
@@ -210,7 +210,7 @@ class EncodingTest : ShouldSpec({
     context("schema") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
-            context("Give proper names to columns of data classe") {
+            context("Give proper names to columns of data classes") {
                 val old = KotlinTypeInference.DO_NAME_HACK
                 KotlinTypeInference.DO_NAME_HACK = true
 
@@ -237,6 +237,142 @@ class EncodingTest : ShouldSpec({
                     dataset.printSchema()
                     dataset.columns().shouldContainExactly("first", "second")
                     dataset.select("second.*").columns().shouldContainExactly("first", "second")
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize pairs of pairs of pairs") {
+                    val pairs = listOf(
+                        1 to (1 to (1 to "1")),
+                        2 to (2 to (2 to "2")),
+                        3 to (3 to (3 to "3")),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.columns().shouldContainExactly("first", "second")
+                    dataset.select("second.*").columns().shouldContainExactly("first", "second")
+                    dataset.select("second.second.*").columns().shouldContainExactly("first", "second")
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of pairs") {
+                    val pairs = listOf(
+                        listOf(1 to "1", 2 to "2"),
+                        listOf(3 to "3", 4 to "4"),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of lists of pairs") {
+                    val pairs = listOf(
+                        listOf(
+                            listOf(1 to "1", 2 to "2"),
+                            listOf(3 to "3", 4 to "4")
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of lists of lists of pairs") {
+                    val pairs = listOf(
+                        listOf(
+                            listOf(
+                                listOf(1 to "1", 2 to "2"),
+                                listOf(3 to "3", 4 to "4"),
+                            )
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of lists of lists of pairs of pairs") {
+                    val pairs = listOf(
+                        listOf(
+                            listOf(
+                                listOf(1 to ("1" to 3.0), 2 to ("2" to 3.0)),
+                                listOf(3 to ("3" to 3.0), 4 to ("4" to 3.0)),
+                            )
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize arrays of pairs") {
+                    val pairs = arrayOf(
+                        arrayOf(1 to "1", 2 to "2"),
+                        arrayOf(3 to "3", 4 to "4"),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize arrays of arrays of pairs") {
+                    val pairs = arrayOf(
+                        arrayOf(
+                            arrayOf(1 to "1", 2 to "2"),
+                            arrayOf(3 to "3", 4 to "4")
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize arrays of arrays of arrays of pairs") {
+                    val pairs = arrayOf(
+                        arrayOf(
+                            arrayOf(
+                                arrayOf(1 to "1", 2 to "2"),
+                                arrayOf(3 to "3", 4 to "4"),
+                            )
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
                     dataset.collectAsList() shouldBe pairs
                 }
 
@@ -351,6 +487,7 @@ class EncodingTest : ShouldSpec({
                     listOf(SomeClass(intArrayOf(1, 2, 3), 4)),
                     listOf(SomeClass(intArrayOf(3, 2, 1), 0)),
                 )
+                dataset.printSchema()
 
                 val (first, second) = dataset.collectAsList()
 

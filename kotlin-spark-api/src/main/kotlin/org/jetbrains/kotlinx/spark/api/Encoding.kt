@@ -36,7 +36,6 @@ import org.apache.spark.sql.catalyst.SerializerBuildHelper
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoder
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders.ProductEncoder
-import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder
 import org.apache.spark.sql.catalyst.encoders.OuterScopes
 import org.apache.spark.sql.catalyst.expressions.objects.Invoke
 import org.apache.spark.sql.types.DataType
@@ -69,14 +68,15 @@ fun <T : Any> kotlinEncoderFor(
     arguments: List<KTypeProjection> = emptyList(),
     nullable: Boolean = false,
     annotations: List<Annotation> = emptyList()
-): Encoder<T> = ExpressionEncoder.apply(
-    KotlinTypeInference.encoderFor(
-        kClass = kClass,
-        arguments = arguments,
-        nullable = nullable,
-        annotations = annotations,
+): Encoder<T> =
+    applyEncoder(
+        KotlinTypeInference.encoderFor(
+            kClass = kClass,
+            arguments = arguments,
+            nullable = nullable,
+            annotations = annotations,
+        )
     )
-)
 
 /**
  * Main method of API, which gives you seamless integration with Spark:
@@ -88,14 +88,25 @@ fun <T : Any> kotlinEncoderFor(
  * @return generated encoder
  */
 inline fun <reified T> kotlinEncoderFor(): Encoder<T> =
-    ExpressionEncoder.apply(
-        KotlinTypeInference.encoderFor<T>()
+    kotlinEncoderFor(
+        typeOf<T>()
     )
 
 fun <T> kotlinEncoderFor(kType: KType): Encoder<T> =
-    ExpressionEncoder.apply(
+    applyEncoder(
         KotlinTypeInference.encoderFor(kType)
     )
+
+/**
+ * For spark-connect, no ExpressionEncoder is needed, so we can just return the AgnosticEncoder.
+ */
+private fun <T> applyEncoder(agnosticEncoder: AgnosticEncoder<T>): Encoder<T> {
+    //#if sparkConnect == false
+    return org.apache.spark.sql.catalyst.encoders.ExpressionEncoder.apply(agnosticEncoder)
+    //#else
+    //$return agnosticEncoder
+    //#endif
+}
 
 
 @Deprecated("Use kotlinEncoderFor instead", ReplaceWith("kotlinEncoderFor<T>()"))
@@ -112,7 +123,7 @@ object KotlinTypeInference {
     // TODO this hack is a WIP and can give errors
     // TODO it's to make data classes get column names like "age" with functions like "getAge"
     // TODO instead of column names like "getAge"
-    var DO_NAME_HACK = true
+    var DO_NAME_HACK = false
 
     /**
      * @param kClass the class for which to infer the encoder.
@@ -151,7 +162,6 @@ object KotlinTypeInference {
             currentType = kType,
             seenTypeSet = emptySet(),
             typeVariables = emptyMap(),
-            isTopLevel = true,
         ) as AgnosticEncoder<T>
 
 
@@ -218,7 +228,6 @@ object KotlinTypeInference {
 
         // how the generic types of the data class (like T, S) are filled in for this instance of the class
         typeVariables: Map<String, KType>,
-        isTopLevel: Boolean = false,
     ): AgnosticEncoder<*> {
         val kClass =
             currentType.classifier as? KClass<*> ?: throw IllegalArgumentException("Unsupported type $currentType")
@@ -328,7 +337,7 @@ object KotlinTypeInference {
                 AgnosticEncoders.UDTEncoder(udt, udt.javaClass)
             }
 
-            currentType.isSubtypeOf<scala.Option<*>>() -> {
+            currentType.isSubtypeOf<scala.Option<*>?>() -> {
                 val elementEncoder = encoderFor(
                     currentType = tArguments.first().type!!,
                     seenTypeSet = seenTypeSet,
@@ -506,7 +515,6 @@ object KotlinTypeInference {
 
                     DirtyProductEncoderField(
                         doNameHack = DO_NAME_HACK,
-                        isTopLevel = isTopLevel,
                         columnName = paramName,
                         readMethodName = readMethodName,
                         writeMethodName = writeMethodName,
@@ -525,7 +533,7 @@ object KotlinTypeInference {
                 if (currentType in seenTypeSet) throw IllegalStateException("Circular reference detected for type $currentType")
                 val constructorParams = currentType.getScalaConstructorParameters(typeVariables, kClass)
 
-                val params: List<AgnosticEncoders.EncoderField> = constructorParams.map { (paramName, paramType) ->
+                val params = constructorParams.map { (paramName, paramType) ->
                     val encoder = encoderFor(
                         currentType = paramType,
                         seenTypeSet = seenTypeSet + currentType,
@@ -564,7 +572,6 @@ internal open class DirtyProductEncoderField(
     private val readMethodName: String, // the name of the method used to read the value
     private val writeMethodName: String?,
     private val doNameHack: Boolean,
-    private val isTopLevel: Boolean,
     encoder: AgnosticEncoder<*>,
     nullable: Boolean,
     metadata: Metadata = Metadata.empty(),
@@ -577,7 +584,7 @@ internal open class DirtyProductEncoderField(
     /* writeMethod = */ writeMethodName.toOption(),
 ), Serializable {
 
-    private var isFirstNameCall = true
+    private var noNameCalls = 0
 
     /**
      * This dirty trick only works because in [SerializerBuildHelper], [ProductEncoder]
@@ -585,10 +592,10 @@ internal open class DirtyProductEncoderField(
      * the name of the column. This way, we can alternate between the two names.
      */
     override fun name(): String =
-        if (doNameHack && !isFirstNameCall) {
+        if (doNameHack && noNameCalls > 0) {
             columnName
         } else {
-            isFirstNameCall = false
+            noNameCalls++
             readMethodName
         }
 

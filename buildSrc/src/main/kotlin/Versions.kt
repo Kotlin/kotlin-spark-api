@@ -9,6 +9,10 @@ object Versions {
     inline val scala get() = System.getProperty("scala") as String
     inline val sparkMinor get() = spark.substringBeforeLast('.')
     inline val scalaCompat get() = scala.substringBeforeLast('.')
+
+    // TODO
+    const val sparkConnect = false
+
     const val jupyter = "0.12.0-32-1"
 
     const val kotest = "5.5.4"
@@ -25,7 +29,7 @@ object Versions {
     const val jacksonDatabind = "2.13.4.2"
     const val kotlinxDateTime = "0.6.0-RC.2"
 
-    inline val versionMap
+    inline val versionMap: Map<String, String>
         get() = mapOf(
             "kotlin" to kotlin,
             "scala" to scala,
@@ -33,6 +37,7 @@ object Versions {
             "spark" to spark,
             "sparkMinor" to sparkMinor,
             "version" to project,
+            "sparkConnect" to sparkConnect.toString(),
         )
 
 }
