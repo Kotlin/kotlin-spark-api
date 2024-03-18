@@ -298,30 +298,30 @@ object KotlinTypeInference {
             currentType.isSubtypeOf<java.math.BigInteger?>() -> AgnosticEncoders.`JavaBigIntEncoder$`.`MODULE$`
             currentType.isSubtypeOf<CalendarInterval?>() -> AgnosticEncoders.`CalendarIntervalEncoder$`.`MODULE$`
             currentType.isSubtypeOf<java.time.LocalDate?>() -> AgnosticEncoders.STRICT_LOCAL_DATE_ENCODER()
-            currentType.isSubtypeOf<kotlinx.datetime.LocalDate?>() -> TODO("User java.time.LocalDate for now.")
+            currentType.isSubtypeOf<kotlinx.datetime.LocalDate?>() -> TODO("User java.time.LocalDate for now. We'll create a UDT for this.")
             currentType.isSubtypeOf<java.sql.Date?>() -> AgnosticEncoders.STRICT_DATE_ENCODER()
             currentType.isSubtypeOf<java.time.Instant?>() -> AgnosticEncoders.STRICT_INSTANT_ENCODER()
-            currentType.isSubtypeOf<kotlinx.datetime.Instant?>() -> TODO("Use java.time.Instant for now.")
-            currentType.isSubtypeOf<kotlin.time.TimeMark?>() -> TODO("Use java.time.Instant for now.")
+            currentType.isSubtypeOf<kotlinx.datetime.Instant?>() -> TODO("Use java.time.Instant for now. We'll create a UDT for this.")
+            currentType.isSubtypeOf<kotlin.time.TimeMark?>() -> TODO("Use java.time.Instant for now. We'll create a UDT for this.")
             currentType.isSubtypeOf<java.sql.Timestamp?>() -> AgnosticEncoders.STRICT_TIMESTAMP_ENCODER()
             currentType.isSubtypeOf<java.time.LocalDateTime?>() -> AgnosticEncoders.`LocalDateTimeEncoder$`.`MODULE$`
-            currentType.isSubtypeOf<kotlinx.datetime.LocalDateTime?>() -> TODO("Use java.time.LocalDateTime for now.")
+            currentType.isSubtypeOf<kotlinx.datetime.LocalDateTime?>() -> TODO("Use java.time.LocalDateTime for now. We'll create a UDT for this.")
             currentType.isSubtypeOf<java.time.Duration?>() -> AgnosticEncoders.`DayTimeIntervalEncoder$`.`MODULE$`
-            currentType.isSubtypeOf<kotlin.time.Duration?>() -> TODO("Use java.time.Duration for now.")
+            currentType.isSubtypeOf<kotlin.time.Duration?>() -> TODO("Use java.time.Duration for now. We'll create a UDT for this.")
             currentType.isSubtypeOf<java.time.Period?>() -> AgnosticEncoders.`YearMonthIntervalEncoder$`.`MODULE$`
-            currentType.isSubtypeOf<kotlinx.datetime.DateTimePeriod?>() -> TODO("Use java.time.Period for now.")
-            currentType.isSubtypeOf<kotlinx.datetime.DatePeriod?>() -> TODO("Use java.time.Period for now.")
+            currentType.isSubtypeOf<kotlinx.datetime.DateTimePeriod?>() -> TODO("Use java.time.Period for now. We'll create a UDT for this.")
+            currentType.isSubtypeOf<kotlinx.datetime.DatePeriod?>() -> TODO("Use java.time.Period for now. We'll create a UDT for this.")
             currentType.isSubtypeOf<Row?>() -> AgnosticEncoders.`UnboundRowEncoder$`.`MODULE$`
 
             // enums
-            kClass.isSubclassOf(Enum::class) -> AgnosticEncoders.JavaEnumEncoder(ClassTag.apply<Nothing>(jClass))
+            kClass.isSubclassOf(Enum::class) -> AgnosticEncoders.JavaEnumEncoder(ClassTag.apply<Any?>(jClass))
 
             // TODO test
             kClass.isSubclassOf(scala.Enumeration.Value::class) ->
-                AgnosticEncoders.ScalaEnumEncoder(jClass.superclass, ClassTag.apply<Nothing>(jClass))
+                AgnosticEncoders.ScalaEnumEncoder(jClass.superclass, ClassTag.apply<Any?>(jClass))
 
             // udts
-            currentType.hasAnnotation<SQLUserDefinedType>() -> {
+            kClass.hasAnnotation<SQLUserDefinedType>() -> {
                 val annotation = jClass.getAnnotation(SQLUserDefinedType::class.java)!!
                 val udtClass = annotation.udt
                 val udt = udtClass.primaryConstructor!!.call()
