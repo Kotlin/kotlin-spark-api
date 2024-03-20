@@ -19,8 +19,8 @@
  */
 package org.jetbrains.kotlinx.spark.extensions
 
-import org.apache.spark.SparkContext
 import org.apache.spark.sql._
+
 import java.util
 import scala.reflect.ClassTag
 

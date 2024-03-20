@@ -135,7 +135,7 @@ inline fun <reified R> udf(
 
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> ByteArray(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> ByteArray(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),
@@ -334,7 +334,7 @@ inline fun <reified R> udf(
 
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> ShortArray(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> ShortArray(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),
@@ -533,7 +533,7 @@ inline fun <reified R> udf(
 
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> IntArray(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> IntArray(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),
@@ -732,7 +732,7 @@ inline fun <reified R> udf(
 
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> LongArray(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> LongArray(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),
@@ -931,7 +931,7 @@ inline fun <reified R> udf(
 
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> FloatArray(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> FloatArray(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),
@@ -1130,7 +1130,7 @@ inline fun <reified R> udf(
 
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> DoubleArray(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> DoubleArray(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),
@@ -1325,11 +1325,9 @@ inline fun <reified R> udf(
     nondeterministic: Boolean = false,
     varargFunc: UDF1<BooleanArray, R>,
 ): UserDefinedFunctionVararg<Boolean, R> {
-
-
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> BooleanArray(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> BooleanArray(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),
@@ -1528,7 +1526,7 @@ inline fun <reified T, reified R> udf(
 
     return withAllowUntypedScalaUDF {
         UserDefinedFunctionVararg(
-            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> Array<T>(i, init::call) }, kotlinEncoderFor<R>().schema())
+            udf = functions.udf(VarargUnwrapper(varargFunc) { i, init -> Array<T>(i, init::apply) }, schemaFor<R>())
                 .let { if (nondeterministic) it.asNondeterministic() else it }
                 .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
             encoder = kotlinEncoderFor<R>(),

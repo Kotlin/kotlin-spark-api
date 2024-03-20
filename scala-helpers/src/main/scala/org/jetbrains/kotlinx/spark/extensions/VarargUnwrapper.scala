@@ -1,6 +1,13 @@
 package org.jetbrains.kotlinx.spark.extensions
 
-import org.apache.spark.sql.api.java.{UDF1, UDF2}
+
+trait VarargUnwrapperUDT1[T1, R] extends Serializable {
+  def apply(v1: T1): R
+}
+
+trait VarargUnwrapperUDT2[T1, T2, R] extends Serializable {
+  def apply(v1: T1, v2: T2): R
+}
 
 /**
  * Allows any simple vararg function reference to be treated as 23 different Scala functions.
@@ -13,8 +20,8 @@ import org.apache.spark.sql.api.java.{UDF1, UDF2}
  * @tparam R
  */
 class VarargUnwrapper[T, Array, R](
-    val varargFunc: UDF1[Array, R],
-    val newArray: UDF2[Integer, UDF1[Integer, T], Array],
+    val varargFunc: VarargUnwrapperUDT1[Array, R],
+    val newArray: VarargUnwrapperUDT2[Integer, VarargUnwrapperUDT1[Integer, T], Array],
 ) extends Serializable
   with Function0[R]
   with Function1[T, R]
@@ -40,7 +47,7 @@ class VarargUnwrapper[T, Array, R](
   with Function21[T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, R]
   with Function22[T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, R] {
 
-  private def vararg(t: T*): R = varargFunc.call(newArray.call(t.size, { t(_) }))
+  private def vararg(t: T*): R = varargFunc(newArray(t.size, { t(_) }))
 
   override def curried: Nothing = throw new UnsupportedOperationException()
   override def tupled: Nothing = throw new UnsupportedOperationException()

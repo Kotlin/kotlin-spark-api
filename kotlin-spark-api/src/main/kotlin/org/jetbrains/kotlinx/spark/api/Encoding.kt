@@ -32,22 +32,20 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.catalyst.DefinedByConstructorParams
-import org.apache.spark.sql.catalyst.SerializerBuildHelper
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoder
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders.EncoderField
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders.ProductEncoder
 import org.apache.spark.sql.catalyst.encoders.OuterScopes
-import org.apache.spark.sql.catalyst.expressions.objects.Invoke
 import org.apache.spark.sql.types.DataType
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.sql.types.Metadata
 import org.apache.spark.sql.types.SQLUserDefinedType
+import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.UDTRegistration
 import org.apache.spark.sql.types.UserDefinedType
 import org.apache.spark.unsafe.types.CalendarInterval
 import scala.reflect.ClassTag
-import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KType
@@ -113,11 +111,13 @@ private fun <T> applyEncoder(agnosticEncoder: AgnosticEncoder<T>): Encoder<T> {
 @Deprecated("Use kotlinEncoderFor instead", ReplaceWith("kotlinEncoderFor<T>()"))
 inline fun <reified T> encoder(): Encoder<T> = kotlinEncoderFor(typeOf<T>())
 
-@Deprecated("Use kotlinEncoderFor to get the schema.", ReplaceWith("kotlinEncoderFor<T>().schema()"))
-inline fun <reified T> schema(): DataType = kotlinEncoderFor<T>().schema()
+internal fun StructType.unwrap(): DataType =
+    if (fields().singleOrNull()?.name() == "value") fields().single().dataType()
+    else this
 
-@Deprecated("Use kotlinEncoderFor to get the schema.", ReplaceWith("kotlinEncoderFor<Any?>(kType).schema()"))
-fun schema(kType: KType): DataType = kotlinEncoderFor<Any?>(kType).schema()
+inline fun <reified T> schemaFor(): DataType = schemaFor(typeOf<T>())
+
+fun schemaFor(kType: KType): DataType = kotlinEncoderFor<Any?>(kType).schema().unwrap()
 
 object KotlinTypeInference {
 

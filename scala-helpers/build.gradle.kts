@@ -30,7 +30,7 @@ dependencies {
         if (Versions.spark == "3.3.1") implementation(jacksonDatabind)
 
         implementation(
-            sparkSql,
+//            sparkSql, not needed atm
         )
     }
 }

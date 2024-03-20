@@ -23,6 +23,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.*
 import org.apache.spark.sql.types.DataType
+import org.apache.spark.sql.types.StructType
 import scala.collection.Seq
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -30,6 +31,7 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import org.apache.spark.sql.expressions.UserDefinedFunction as SparkUserDefinedFunction
+
 
 /**
  * Checks if [this] is of a valid type for a UDF, otherwise it throws a [TypeOfUDFParameterNotSupportedException]
