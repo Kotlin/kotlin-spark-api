@@ -1,8 +1,6 @@
 @file:Suppress("NOTHING_TO_INLINE")
 
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.kotlin.dsl.support.delegates.ProjectDelegate
 
 object Projects {
 
@@ -17,8 +15,8 @@ object Projects {
     inline val Project.kotlinSparkApi
         get() = searchProject("kotlin-spark-api")
 
-    inline val Project.core
-        get() = searchProject("core")
+    inline val Project.scalaHelpers
+        get() = searchProject("scala-helpers")
 
     inline val Project.examples
         get() = searchProject("examples")

@@ -35,6 +35,7 @@ import org.apache.spark.sql.catalyst.DefinedByConstructorParams
 import org.apache.spark.sql.catalyst.SerializerBuildHelper
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoder
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders
+import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders.EncoderField
 import org.apache.spark.sql.catalyst.encoders.AgnosticEncoders.ProductEncoder
 import org.apache.spark.sql.catalyst.encoders.OuterScopes
 import org.apache.spark.sql.catalyst.expressions.objects.Invoke
@@ -119,11 +120,6 @@ inline fun <reified T> schema(): DataType = kotlinEncoderFor<T>().schema()
 fun schema(kType: KType): DataType = kotlinEncoderFor<Any?>(kType).schema()
 
 object KotlinTypeInference {
-
-    // TODO this hack is a WIP and can give errors
-    // TODO it's to make data classes get column names like "age" with functions like "getAge"
-    // TODO instead of column names like "getAge"
-    var DO_NAME_HACK = false
 
     /**
      * @param kClass the class for which to infer the encoder.
@@ -509,17 +505,18 @@ object KotlinTypeInference {
                         seenTypeSet = seenTypeSet + currentType,
                         typeVariables = typeVariables,
                     )
-                    val paramName = param.name!!
+
+                    val paramName = param.name
                     val readMethodName = prop.getter.javaMethod!!.name
                     val writeMethodName = (prop as? KMutableProperty<*>)?.setter?.javaMethod?.name
 
-                    DirtyProductEncoderField(
-                        doNameHack = DO_NAME_HACK,
-                        columnName = paramName,
-                        readMethodName = readMethodName,
-                        writeMethodName = writeMethodName,
-                        encoder = encoder,
-                        nullable = paramType.isMarkedNullable,
+                    EncoderField(
+                        /* name = */ readMethodName,
+                        /* enc = */ encoder,
+                        /* nullable = */ paramType.isMarkedNullable,
+                        /* metadata = */ Metadata.empty(),
+                        /* readMethod = */ readMethodName.toOption(),
+                        /* writeMethod = */ writeMethodName.toOption(),
                     )
                 }
                 ProductEncoder<Any>(
@@ -565,52 +562,4 @@ object KotlinTypeInference {
             else -> throw IllegalArgumentException("No encoder found for type $currentType")
         }
     }
-}
-
-internal open class DirtyProductEncoderField(
-    private val columnName: String, // the name used for the column
-    private val readMethodName: String, // the name of the method used to read the value
-    private val writeMethodName: String?,
-    private val doNameHack: Boolean,
-    encoder: AgnosticEncoder<*>,
-    nullable: Boolean,
-    metadata: Metadata = Metadata.empty(),
-) : AgnosticEncoders.EncoderField(
-    /* name = */ readMethodName,
-    /* enc = */ encoder,
-    /* nullable = */ nullable,
-    /* metadata = */ metadata,
-    /* readMethod = */ readMethodName.toOption(),
-    /* writeMethod = */ writeMethodName.toOption(),
-), Serializable {
-
-    private var noNameCalls = 0
-
-    /**
-     * This dirty trick only works because in [SerializerBuildHelper], [ProductEncoder]
-     * creates an [Invoke] using [name] first and then calls [name] again to retrieve
-     * the name of the column. This way, we can alternate between the two names.
-     */
-    override fun name(): String =
-        if (doNameHack && noNameCalls > 0) {
-            columnName
-        } else {
-            noNameCalls++
-            readMethodName
-        }
-
-    override fun canEqual(that: Any?): Boolean = that is AgnosticEncoders.EncoderField
-
-    override fun productElement(n: Int): Any =
-        when (n) {
-            0 -> readMethodName // so it doesn't affect name()
-            1 -> enc()
-            2 -> nullable()
-            3 -> metadata()
-            4 -> readMethod()
-            5 -> writeMethod()
-            else -> throw IndexOutOfBoundsException()
-        }
-
-    override fun productArity(): Int = 6
 }

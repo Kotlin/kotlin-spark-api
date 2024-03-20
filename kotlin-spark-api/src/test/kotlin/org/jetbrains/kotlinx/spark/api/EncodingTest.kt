@@ -211,8 +211,6 @@ class EncodingTest : ShouldSpec({
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
             context("Give proper names to columns of data classes") {
-                val old = KotlinTypeInference.DO_NAME_HACK
-                KotlinTypeInference.DO_NAME_HACK = true
 
                 should("Be able to serialize pairs") {
                     val pairs = listOf(
@@ -375,8 +373,6 @@ class EncodingTest : ShouldSpec({
                     }
                     dataset.collectAsList() shouldBe pairs
                 }
-
-                KotlinTypeInference.DO_NAME_HACK = old
             }
 
             should("handle Scala Case class datasets") {

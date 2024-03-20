@@ -29,7 +29,10 @@ tasks.withType<Test>().configureEach {
 dependencies {
 
     with(Projects) {
-        api(scalaTuplesInKotlin)
+        api(
+            scalaHelpers,
+            scalaTuplesInKotlin
+        )
     }
 
     with(Dependencies) {
