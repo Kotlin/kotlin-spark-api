@@ -33,7 +33,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ~/.gradle/jdks
-          key: ${{ runner.os }}-gradle-spark-${{ matrix.spark }}-${{ matrix.scala }}
+          key: "${{ runner.os }}-gradle-spark-${{ matrix.spark }}-${{ matrix.scala }}"
           restore-keys: |
             ${{ runner.os }}-gradle-
 
@@ -55,7 +55,7 @@ jobs:
           ./gradlew 
           -Pspark=${{ matrix.spark }} 
           -Pscala=${{ matrix.scala }} 
-          -PskipScalaTuplesInKotlin=${{ !(matrix.spark == '3.0.0' || matrix.scala == '2.13.10' && matrix.spark == '3.2.0') }} 
+          -PskipScalaOnlyDependent=${{ matrix.spark != matrix.spark[0] }}
           clean 
           publishMavenPublicationToGitHubPackagesRepository 
           --scan

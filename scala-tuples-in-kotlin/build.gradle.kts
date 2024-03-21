@@ -70,8 +70,8 @@ mavenPublishing {
 
 
 // Publishing of scala-tuples-in-kotlin can be skipped since it's only dependent on the Scala version
-val skipScalaTuplesInKotlin = System.getProperty("skipScalaTuplesInKotlin").toBoolean()
+val skipScalaOnlyDependent = System.getProperty("skipScalaOnlyDependent").toBoolean()
 tasks
     .filter { "publish" in it.name }
-    .forEach { it.onlyIf { !skipScalaTuplesInKotlin } }
+    .forEach { it.onlyIf { !skipScalaOnlyDependent } }
 

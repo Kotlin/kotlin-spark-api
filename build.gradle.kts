@@ -10,7 +10,6 @@ buildscript {
     }
 }
 
-
 plugins {
     mavenPublish version Versions.mavenPublish
     dokka version Versions.dokka

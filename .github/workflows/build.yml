@@ -32,7 +32,7 @@ jobs:
             ~/.gradle/caches
             ~/.gradle/wrapper
             ~/.gradle/jdks
-          key: ${{ runner.os }}-gradle-spark-${{ matrix.spark }}-${{ matrix.scala }}
+          key: "${{ runner.os }}-gradle-spark-${{ matrix.spark }}-${{ matrix.scala }}"
           restore-keys: |
             ${{ runner.os }}-gradle-
 

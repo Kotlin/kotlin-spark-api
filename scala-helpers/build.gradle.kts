@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage", "NOTHING_TO_INLINE")
+@file:Suppress("UnstableApiUsage")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavaLibrary
@@ -34,7 +34,6 @@ dependencies {
         )
     }
 }
-
 
 java {
     toolchain {
@@ -99,3 +98,8 @@ mavenPublishing {
     configure(JavaLibrary(Javadoc()))
 }
 
+// Publishing of scala-helpers can be skipped since it's only dependent on the Scala version
+val skipScalaOnlyDependent = System.getProperty("skipScalaOnlyDependent").toBoolean()
+tasks
+    .filter { "publish" in it.name }
+    .forEach { it.onlyIf { !skipScalaOnlyDependent } }

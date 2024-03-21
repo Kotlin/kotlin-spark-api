@@ -11,7 +11,7 @@ object Versions {
     inline val scalaCompat get() = scala.substringBeforeLast('.')
 
     // TODO
-    const val sparkConnect = false
+    inline val sparkConnect get() = System.getProperty("sparkConnect", "false").toBoolean()
 
     const val jupyter = "0.12.0-32-1"
 
@@ -39,5 +39,4 @@ object Versions {
             "version" to project,
             "sparkConnect" to sparkConnect.toString(),
         )
-
 }

@@ -40,6 +40,8 @@ dependencies {
         // https://github.com/FasterXML/jackson-bom/issues/52
         if (Versions.spark == "3.3.1") implementation(jacksonDatabind)
 
+        if (Versions.sparkConnect) TODO("unsupported for now")
+
         implementation(
             kotlinStdLib,
             reflect,
@@ -159,8 +161,3 @@ tasks.withType<AbstractDokkaLeafTask> {
 mavenPublishing {
     configure(KotlinJvm(Dokka("dokkaHtml")))
 }
-
-
-
-
-
