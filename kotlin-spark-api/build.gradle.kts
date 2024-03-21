@@ -69,10 +69,10 @@ dependencies {
 val kotlinMainSources = kotlin.sourceSets.main.get().kotlin.sourceDirectories
 
 val preprocessMain by tasks.creating(JcpTask::class) {
-    sources.set(kotlinMainSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("kt"))
-    vars.set(Versions.versionMap)
+    sources = kotlinMainSources
+    clearTarget = true
+    fileExtensions = listOf("kt")
+    vars = Versions.versionMap
     outputs.upToDateWhen { target.get().exists() }
 }
 
@@ -108,10 +108,10 @@ tasks.compileKotlin {
 val kotlinTestSources = kotlin.sourceSets.test.get().kotlin.sourceDirectories
 
 val preprocessTest by tasks.creating(JcpTask::class) {
-    sources.set(kotlinTestSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("kt"))
-    vars.set(Versions.versionMap)
+    sources = kotlinTestSources
+    clearTarget = true
+    fileExtensions = listOf("kt")
+    vars = Versions.versionMap
     outputs.upToDateWhen { target.get().exists() }
 }
 
@@ -144,9 +144,8 @@ tasks.compileTestKotlin {
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
-        )
+        languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
+
     }
 }
 

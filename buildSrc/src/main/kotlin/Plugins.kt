@@ -33,3 +33,6 @@ inline val Project.mavenPublishBase
 inline val PluginDependenciesSpec.jupyter
     get() = kotlin("jupyter.api") version Versions.jupyter
 
+inline val PluginDependenciesSpec.buildconfig
+    get() = id("com.github.gmazzo.buildconfig")
+

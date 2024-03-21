@@ -19,26 +19,23 @@
  */
 package org.jetbrains.kotlinx.spark.extensions
 
-import org.apache.spark.sql._
-
-import java.util
 import scala.reflect.ClassTag
 
 object KSparkExtensions {
 
-  def col(d: Dataset[_], name: String): Column = d.col(name)
-
-  def col(name: String): Column = functions.col(name)
-
-  def lit(literal: Any): Column = functions.lit(literal)
-
-  def collectAsList[T](ds: Dataset[T]): util.List[T] = {
-    //#if scalaCompat >= 2.13
-    scala.jdk.javaapi.CollectionConverters.asJava(ds.collect())
-    //#else
-    //$scala.collection.JavaConverters.seqAsJavaList(ds.collect())
-    //#endif
-  }
+//  def col(d: Dataset[_], name: String): Column = d.col(name)
+//
+//  def col(name: String): Column = functions.col(name)
+//
+//  def lit(literal: Any): Column = functions.lit(literal)
+//
+//  def collectAsList[T](ds: Dataset[T]): util.List[T] = {
+//    //#if scalaCompat >= 2.13
+//    scala.jdk.javaapi.CollectionConverters.asJava(ds.collect())
+//    //#else
+//    //$scala.collection.JavaConverters.seqAsJavaList(ds.collect())
+//    //#endif
+//  }
 
   /**
    * Produces a ClassTag[T], which is actually just a casted ClassTag[AnyRef].

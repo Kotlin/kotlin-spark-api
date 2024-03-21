@@ -38,13 +38,10 @@ dependencies {
 java {
     toolchain {
         if (Versions.scalaCompat.toDouble() > 2.12) { // scala 2.12 will always target java 8
-            languageVersion.set(
-                JavaLanguageVersion.of(Versions.jvmTarget)
-            )
+            languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
+
         } else if (Versions.jvmTarget == "1.8" || Versions.jvmTarget == "8") {
-            languageVersion.set(
-                JavaLanguageVersion.of(8)
-            )
+            languageVersion = JavaLanguageVersion.of(8)
         }
     }
 }
@@ -60,10 +57,10 @@ tasks.withType<ScalaCompile> {
 val scalaMainSources = sourceSets.main.get().scala.sourceDirectories
 
 val preprocessMain by tasks.creating(JcpTask::class)  {
-    sources.set(scalaMainSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("scala"))
-    vars.set(Versions.versionMap)
+    sources = scalaMainSources
+    clearTarget = true
+    fileExtensions = listOf("scala")
+    vars = Versions.versionMap
     outputs.upToDateWhen { target.get().exists() }
 }
 

@@ -18,6 +18,11 @@ fun DependencyHandler.testImplementation(vararg dependencyNotations: Any): List<
         add("testImplementation", it)
     }
 
+fun DependencyHandler.testRuntimeOnly(vararg dependencyNotations: Any): List<Dependency?> =
+    dependencyNotations.map {
+        add("testRuntimeOnly", it)
+    }
+
 fun DependencyHandler.implementation(vararg dependencyNotations: Any): List<Dependency?> =
     dependencyNotations.map {
         add("implementation", it)

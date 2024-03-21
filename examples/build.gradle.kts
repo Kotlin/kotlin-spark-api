@@ -37,8 +37,6 @@ dependencies {
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
-        )
+        languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
     }
 }

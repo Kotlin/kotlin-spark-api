@@ -1,5 +1,10 @@
 @file:Suppress("UnstableApiUsage")
 
+import Projects.compilerPlugin
+import Projects.gradlePlugin
+import com.github.gmazzo.buildconfig.BuildConfigExtension
+
+
 buildscript {
     repositories {
         mavenCentral()
@@ -15,6 +20,7 @@ plugins {
     dokka version Versions.dokka
     idea
     kotlin version Versions.kotlin apply false
+    buildconfig version Versions.buildconfig apply false
 }
 
 group = Versions.groupID
@@ -111,6 +117,38 @@ allprojects {
                     tag.set("HEAD")
                 }
             }
+        }
+    }
+}
+
+subprojects {
+    afterEvaluate {
+        extensions.findByType<BuildConfigExtension>()?.apply {
+            val projectVersion = Versions.project
+            val groupId = Versions.groupID
+
+            val compilerPluginId = "$groupId.compilerPlugin"
+
+            val compilerPluginArtifactId = compilerPlugin.name
+            val gradlePluginArtifactId = gradlePlugin.name
+
+            val defaultSparkifyFqName = "$groupId.plugin.annotations.Sparkify"
+            val defaultColumnNameFqName = "$groupId.plugin.annotations.ColumnName"
+
+            val projectRoot = project.rootDir.absolutePath
+
+            packageName(groupId)
+            className("Artifacts")
+
+            buildConfigField("compilerPluginId", compilerPluginId)
+            buildConfigField("groupId", groupId)
+            buildConfigField("gradlePluginArtifactId", gradlePluginArtifactId)
+            buildConfigField("projectVersion", projectVersion)
+            buildConfigField("compilerPluginArtifactId", compilerPluginArtifactId)
+
+            buildConfigField("defaultSparkifyFqName", defaultSparkifyFqName)
+            buildConfigField("defaultColumnNameFqName", defaultColumnNameFqName)
+            buildConfigField("projectRoot", projectRoot)
         }
     }
 }

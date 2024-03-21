@@ -119,6 +119,9 @@ inline fun <reified T> schemaFor(): DataType = schemaFor(typeOf<T>())
 
 fun schemaFor(kType: KType): DataType = kotlinEncoderFor<Any?>(kType).schema().unwrap()
 
+@Deprecated("Use schemaFor instead", ReplaceWith("schemaFor(kType)"))
+fun schema(kType: KType) = schemaFor(kType)
+
 object KotlinTypeInference {
 
     /**

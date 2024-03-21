@@ -26,4 +26,10 @@ object Projects {
 
     inline val Project.scalaTuplesInKotlin
         get() = searchProject("scala-tuples-in-kotlin")
+
+    inline val Project.compilerPlugin
+        get() = searchProject("compiler-plugin")
+
+    inline val Project.gradlePlugin
+        get() = searchProject("gradle-plugin")
 }
