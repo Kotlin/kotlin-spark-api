@@ -1,11 +1,11 @@
-package org.jetbrains.kotlinx.spark.compilerPlugin
+package org.jetbrains.kotlinx.spark.api.compilerPlugin
 
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
-import org.jetbrains.kotlinx.spark.Artifacts
+import org.jetbrains.kotlinx.spark.api.Artifacts
 
 open class SparkifyCommandLineProcessor : CommandLineProcessor {
 

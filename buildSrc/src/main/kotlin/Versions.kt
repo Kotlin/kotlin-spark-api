@@ -1,5 +1,5 @@
-object Versions {
-    const val project = "1.2.5-SNAPSHOT"
+object Versions : Dsl<Versions> {
+    const val project = "2.0.0-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
     const val kotlin = "2.0.0-Beta5"
     const val jvmTarget = "8"
@@ -13,7 +13,9 @@ object Versions {
     inline val sparkConnect get() = System.getProperty("sparkConnect", "false").toBoolean()
     const val jupyter = "0.12.0-32-1"
 
+    const val gradlePublishPlugin = "1.1.0"
     const val kotest = "5.5.4"
+    const val shadow = "8.1.1"
 
     const val buildconfig = "5.3.5"
 

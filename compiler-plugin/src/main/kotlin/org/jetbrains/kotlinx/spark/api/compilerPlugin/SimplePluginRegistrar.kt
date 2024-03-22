@@ -1,4 +1,4 @@
-package org.jetbrains.kotlinx.spark.compilerPlugin
+package org.jetbrains.kotlinx.spark.api.compilerPlugin
 
 import org.jetbrains.kotlin.fir.extensions.FirExtensionRegistrar
 

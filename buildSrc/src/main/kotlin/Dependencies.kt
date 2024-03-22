@@ -1,4 +1,4 @@
-object Dependencies {
+object Dependencies : Dsl<Dependencies> {
     inline val kotlinStdLib get() = "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${Versions.kotlin}"
     inline val reflect get() = "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin}"
     inline val scalaLibrary get() = "org.scala-lang:scala-library:${Versions.scala}"
@@ -35,6 +35,7 @@ object Dependencies {
     inline val kotlinScriptRuntime get() = "org.jetbrains.kotlin:kotlin-script-runtime:${Versions.kotlin}"
     inline val kotlinAnnotationsJvm get() = "org.jetbrains.kotlin:kotlin-annotations-jvm:${Versions.kotlin}"
     inline val kotlinCompilerInternalTestFramework get() = "org.jetbrains.kotlin:kotlin-compiler-internal-test-framework:${Versions.kotlin}"
+    inline val kotlinGradlePlugin get() = "org.jetbrains.kotlin:kotlin-gradle-plugin"
 }
 
 

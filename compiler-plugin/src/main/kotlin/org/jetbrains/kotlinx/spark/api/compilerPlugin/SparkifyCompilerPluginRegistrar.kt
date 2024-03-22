@@ -1,10 +1,10 @@
-package org.jetbrains.kotlinx.spark.compilerPlugin
+package org.jetbrains.kotlinx.spark.api.compilerPlugin
 
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.config.CompilerConfiguration
-import org.jetbrains.kotlinx.spark.Artifacts
-import org.jetbrains.kotlinx.spark.compilerPlugin.ir.SparkifyIrGenerationExtension
+import org.jetbrains.kotlinx.spark.api.Artifacts
+import org.jetbrains.kotlinx.spark.api.compilerPlugin.ir.SparkifyIrGenerationExtension
 
 open class SparkifyCompilerPluginRegistrar: CompilerPluginRegistrar() {
     init {

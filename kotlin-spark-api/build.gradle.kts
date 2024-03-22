@@ -28,14 +28,14 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
 
-    with(Projects) {
+    Projects {
         api(
             scalaHelpers,
             scalaTuplesInKotlin
         )
     }
 
-    with(Dependencies) {
+    Dependencies {
 
         // https://github.com/FasterXML/jackson-bom/issues/52
         if (Versions.spark == "3.3.1") implementation(jacksonDatabind)

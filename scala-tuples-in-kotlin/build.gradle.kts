@@ -27,7 +27,7 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-    with(Dependencies) {
+    Dependencies {
         implementation(
             kotlinStdLib,
             scalaLibrary,

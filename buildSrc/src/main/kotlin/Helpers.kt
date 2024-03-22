@@ -2,6 +2,10 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 
+interface Dsl<T> {
+    operator fun invoke(block: T.() -> Unit) = block(this as T)
+}
+
 fun DependencyHandler.testApi(vararg dependencyNotations: Any): List<Dependency?> =
     dependencyNotations.map {
         add("testApi", it)
@@ -31,6 +35,11 @@ fun DependencyHandler.implementation(vararg dependencyNotations: Any): List<Depe
 fun DependencyHandler.runtimeOnly(vararg dependencyNotations: Any): List<Dependency?> =
     dependencyNotations.map {
         add("runtimeOnly", it)
+    }
+
+fun DependencyHandler.compileOnly(vararg dependencyNotations: Any): List<Dependency?> =
+    dependencyNotations.map {
+        add("compileOnly", it)
     }
 
 fun DependencyHandler.project(

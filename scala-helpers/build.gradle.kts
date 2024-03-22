@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
 
-    with(Dependencies) {
+    Dependencies {
         api(
             scalaLibrary,
             reflect,

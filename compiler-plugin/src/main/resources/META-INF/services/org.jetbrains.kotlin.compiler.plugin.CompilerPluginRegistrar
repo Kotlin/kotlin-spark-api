@@ -1,1 +1,1 @@
-org.jetbrains.kotlinx.spark.compilerPlugin.SparkifyCompilerPluginRegistrar
+org.jetbrains.kotlinx.spark.api.compilerPlugin.SparkifyCompilerPluginRegistrar

@@ -1,4 +1,4 @@
-package org.jetbrains.kotlinx.spark.compilerPlugin.ir
+package org.jetbrains.kotlinx.spark.api.compilerPlugin.ir
 
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.ir.IrElement

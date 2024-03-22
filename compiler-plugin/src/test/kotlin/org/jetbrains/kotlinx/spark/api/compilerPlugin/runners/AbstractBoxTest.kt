@@ -1,4 +1,4 @@
-package org.jetbrains.kotlinx.spark.compilerPlugin.runners
+package org.jetbrains.kotlinx.spark.api.compilerPlugin.runners
 
 import org.jetbrains.kotlin.platform.jvm.JvmPlatforms
 import org.jetbrains.kotlin.test.FirParser

@@ -1,8 +1,8 @@
-package org.jetbrains.kotlinx.spark.compilerPlugin
+package org.jetbrains.kotlinx.spark.api.compilerPlugin
 
 import org.jetbrains.kotlin.generators.generateTestGroupSuiteWithJUnit5
-import org.jetbrains.kotlinx.spark.Artifacts
-import org.jetbrains.kotlinx.spark.compilerPlugin.runners.AbstractBoxTest
+import org.jetbrains.kotlinx.spark.api.Artifacts
+import org.jetbrains.kotlinx.spark.api.compilerPlugin.runners.AbstractBoxTest
 
 fun main() {
     generateTestGroupSuiteWithJUnit5 {

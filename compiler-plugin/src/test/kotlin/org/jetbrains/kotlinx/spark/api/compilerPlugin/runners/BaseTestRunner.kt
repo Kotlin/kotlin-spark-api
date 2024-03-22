@@ -1,4 +1,4 @@
-package org.jetbrains.kotlinx.spark.compilerPlugin.runners
+package org.jetbrains.kotlinx.spark.api.compilerPlugin.runners
 
 import org.jetbrains.kotlin.test.builders.TestConfigurationBuilder
 import org.jetbrains.kotlin.test.directives.FirDiagnosticsDirectives
@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.test.runners.AbstractKotlinCompilerTest
 import org.jetbrains.kotlin.test.runners.baseFirDiagnosticTestConfiguration
 import org.jetbrains.kotlin.test.services.EnvironmentBasedStandardLibrariesPathProvider
 import org.jetbrains.kotlin.test.services.KotlinStandardLibrariesPathProvider
-import org.jetbrains.kotlinx.spark.compilerPlugin.services.ExtensionRegistrarConfigurator
+import org.jetbrains.kotlinx.spark.api.compilerPlugin.services.ExtensionRegistrarConfigurator
 import org.junit.jupiter.api.BeforeAll
 
 abstract class BaseTestRunner : AbstractKotlinCompilerTest() {

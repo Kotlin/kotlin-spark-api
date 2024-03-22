@@ -2,7 +2,7 @@
 
 import org.gradle.api.Project
 
-object Projects {
+object Projects : Dsl<Projects> {
 
     inline fun Project.searchProject(name: String): Project =
         rootProject

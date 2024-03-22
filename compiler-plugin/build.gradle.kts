@@ -1,9 +1,10 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
     kotlin
-    mavenPublishBase
+    mavenPublish
     buildconfig
 }
 
@@ -24,7 +25,7 @@ sourceSets {
 }
 
 dependencies {
-    with(Dependencies) {
+    Dependencies {
         compileOnly(kotlinCompiler)
 
         testRuntimeOnly(
@@ -62,17 +63,29 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        languageVersion = "2.0"
-        freeCompilerArgs = freeCompilerArgs +
-                "-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi" +
-                "-Xcontext-receivers"
+    compilerOptions {
+        freeCompilerArgs.addAll(
+            "-opt-in=org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi",
+            "-Xcontext-receivers"
+        )
+        languageVersion = KotlinVersion.KOTLIN_2_0
+    }
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
     }
 }
 
 val generateTests by tasks.creating(JavaExec::class) {
     classpath = sourceSets.test.get().runtimeClasspath
-    mainClass.set("org.jetbrains.kotlinx.spark.compilerPlugin.GenerateTestsKt")
+    mainClass.set("org.jetbrains.kotlinx.spark.api.compilerPlugin.GenerateTestsKt")
 }
 
 val compileTestKotlin by tasks.getting {

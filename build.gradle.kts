@@ -21,6 +21,9 @@ plugins {
     idea
     kotlin version Versions.kotlin apply false
     buildconfig version Versions.buildconfig apply false
+
+    // Needs to be installed in the local maven repository
+    id("org.jetbrains.kotlinx.spark.api") version Versions.project apply false
 }
 
 group = Versions.groupID
@@ -127,17 +130,17 @@ subprojects {
             val projectVersion = Versions.project
             val groupId = Versions.groupID
 
-            val compilerPluginId = "$groupId.compilerPlugin"
-
             val compilerPluginArtifactId = compilerPlugin.name
             val gradlePluginArtifactId = gradlePlugin.name
 
-            val defaultSparkifyFqName = "$groupId.plugin.annotations.Sparkify"
-            val defaultColumnNameFqName = "$groupId.plugin.annotations.ColumnName"
+            val compilerPluginId = "$groupId.api"
+
+            val defaultSparkifyFqName = "$groupId.api.plugin.annotations.Sparkify"
+            val defaultColumnNameFqName = "$groupId.api.plugin.annotations.ColumnName"
 
             val projectRoot = project.rootDir.absolutePath
 
-            packageName(groupId)
+            packageName("$groupId.api")
             className("Artifacts")
 
             buildConfigField("compilerPluginId", compilerPluginId)
