@@ -2,6 +2,8 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugin.use.PluginDependenciesSpec
 
+inline val PluginDependenciesSpec.kotlinSparkApi
+    get() = id("org.jetbrains.kotlinx.spark.api")
 
 inline val PluginDependenciesSpec.kotlin
     get() = kotlin("jvm")

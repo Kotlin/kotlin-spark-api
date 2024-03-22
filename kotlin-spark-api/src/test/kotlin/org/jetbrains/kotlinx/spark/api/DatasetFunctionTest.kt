@@ -33,6 +33,7 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import scala.Tuple2
 import scala.Tuple3
 import scala.Tuple4
@@ -68,8 +69,10 @@ class DatasetFunctionTest : ShouldSpec({
             }
 
             should("handle join operations") {
+                @Sparkify
                 data class Left(val id: Int, val name: String)
 
+                @Sparkify
                 data class Right(val id: Int, val value: Int)
 
                 val first = dsOf(Left(1, "a"), Left(2, "b"))
@@ -453,4 +456,5 @@ class DatasetFunctionTest : ShouldSpec({
     }
 })
 
+@Sparkify
 data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable

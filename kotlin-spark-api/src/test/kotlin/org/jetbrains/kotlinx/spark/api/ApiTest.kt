@@ -21,6 +21,7 @@ import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import scala.collection.Seq
 import java.io.Serializable
 import kotlin.collections.Iterator
@@ -165,4 +166,5 @@ class ApiTest : ShouldSpec({
 
 
 // (data) class must be Serializable to be broadcast
+@Sparkify
 data class SomeClass(val a: IntArray, val b: Int) : Serializable

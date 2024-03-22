@@ -23,6 +23,7 @@ import ch.tutteli.atrium.creating.Expect
 import io.kotest.core.spec.style.ShouldSpec
 import org.apache.spark.sql.types.ArrayType
 import org.apache.spark.sql.types.IntegerType
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import org.jetbrains.kotlinx.spark.api.struct.model.DataType.StructType
 import org.jetbrains.kotlinx.spark.api.struct.model.DataType.TypeName
 import org.jetbrains.kotlinx.spark.api.struct.model.ElementType.ComplexElement
@@ -35,8 +36,8 @@ import kotlin.reflect.typeOf
 @OptIn(ExperimentalStdlibApi::class)
 class TypeInferenceTest : ShouldSpec({
     context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema") {
-        data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
-        data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
+        @Sparkify data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
+        @Sparkify data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
 
         val struct = Struct.fromJson(kotlinEncoderFor<Pair<String, Test<Int>>>().schema().prettyJson())!!
         should("contain correct typings") {
@@ -64,9 +65,10 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema with more complex data") {
-        data class Single<T>(val vala3: T)
+        @Sparkify data class Single<T>(val vala3: T)
+        @Sparkify
         data class Test2<T>(val vala2: T, val para2: Pair<T, Single<Double>>)
-        data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
+        @Sparkify data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
 
         val struct = Struct.fromJson(kotlinEncoderFor<Pair<String, Test<Int>>>().schema().prettyJson())!!
         should("contain correct typings") {

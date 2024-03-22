@@ -28,6 +28,7 @@ import io.kotest.matchers.string.shouldContain
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.*
 import java.math.BigDecimal
@@ -600,7 +601,9 @@ class EncodingTest : ShouldSpec({
             }
 
             should("handle strings converted to lists") {
+                @Sparkify
                 data class Movie(val id: Long, val genres: String)
+                @Sparkify
                 data class MovieExpanded(val id: Long, val genres: List<String>)
 
                 val comedies = listOf(Movie(1, "Comedy|Romance"), Movie(2, "Horror|Action")).toDS()
@@ -617,8 +620,10 @@ class EncodingTest : ShouldSpec({
 
             should("handle strings converted to arrays") {
 
+                @Sparkify
                 data class Movie(val id: Long, val genres: String)
 
+                @Sparkify
                 data class MovieExpanded(val id: Long, val genres: Array<String>) {
                     override fun equals(other: Any?): Boolean {
                         if (this === other) return true
@@ -681,6 +686,7 @@ class EncodingTest : ShouldSpec({
     }
 })
 
+@Sparkify
 data class IsSomethingClass(
     val enabled: Boolean,
     val isEnabled: Boolean,
@@ -690,14 +696,17 @@ data class IsSomethingClass(
     val getDouble: Double
 )
 
+@Sparkify
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
+@Sparkify
 data class LonLat(val lon: Double, val lat: Double)
 
 enum class SomeEnum { A, B }
 
 enum class SomeOtherEnum(val value: Int) { C(1), D(2) }
 
+@Sparkify
 data class ComplexEnumDataClass(
     val int: Int,
     val string: String,
@@ -711,6 +720,7 @@ data class ComplexEnumDataClass(
     val enumMap: Map<SomeEnum, SomeOtherEnum>,
 )
 
+@Sparkify
 data class NullFieldAbleDataClass(
     val optionList: List<Int>?,
     val optionMap: Map<String, Int>?,

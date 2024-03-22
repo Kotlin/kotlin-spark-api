@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage", "NOTHING_TO_INLINE")
+@file:Suppress("UnstableApiUsage")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavadocJar.Dokka
@@ -11,6 +11,7 @@ plugins {
     mavenPublishBase
     jcp
     idea
+    kotlinSparkApi // for @Sparkify
 }
 
 group = Versions.groupID
@@ -19,6 +20,7 @@ version = Versions.project
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 tasks.withType<Test>().configureEach {

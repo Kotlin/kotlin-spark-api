@@ -23,7 +23,7 @@ plugins {
     buildconfig version Versions.buildconfig apply false
 
     // Needs to be installed in the local maven repository
-    id("org.jetbrains.kotlinx.spark.api") version Versions.project apply false
+    kotlinSparkApi version Versions.kotlinSparkApiGradlePlugin apply false
 }
 
 group = Versions.groupID

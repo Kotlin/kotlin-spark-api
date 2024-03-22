@@ -33,6 +33,7 @@ import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.Aggregator
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import org.junit.jupiter.api.assertThrows
 import scala.collection.Seq
 import java.io.Serializable
@@ -1261,8 +1262,8 @@ class UDFTest : ShouldSpec({
     }
 })
 
-data class Employee(val name: String, val salary: Long)
-data class Average(var sum: Long, var count: Long)
+@Sparkify data class Employee(val name: String, val salary: Long)
+@Sparkify data class Average(var sum: Long, var count: Long)
 
 private object MyAverage : Aggregator<Employee, Average, Double>() {
     // A zero value for this aggregation. Should satisfy the property that any b + zero = b
@@ -1316,6 +1317,7 @@ private val aggregator = aggregatorOf<Long, Average, Double>(
 
 private val addTwoConst = { x: Int, y: Int -> x + y }
 
+@Sparkify
 data class NormalClass(
     val age: Int,
     val name: String
