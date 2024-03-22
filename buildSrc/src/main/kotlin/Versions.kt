@@ -2,7 +2,8 @@ object Versions : Dsl<Versions> {
     const val project = "2.0.0-SNAPSHOT"
     const val kotlinSparkApiGradlePlugin = "2.0.0-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
-    const val kotlin = "2.0.0-Beta5"
+//    const val kotlin = "2.0.0-Beta5" todo issues with NonSerializable lambdas
+    const val kotlin = "1.9.23"
     const val jvmTarget = "8"
     const val jupyterJvmTarget = "8"
     inline val spark get() = System.getProperty("spark") as String

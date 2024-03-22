@@ -34,6 +34,7 @@ import org.apache.spark.api.java.function.FlatMapFunction
 import org.apache.spark.api.java.function.ForeachFunction
 import org.apache.spark.api.java.function.ForeachPartitionFunction
 import org.apache.spark.api.java.function.MapFunction
+import org.apache.spark.api.java.function.MapPartitionsFunction
 import org.apache.spark.api.java.function.ReduceFunction
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.*
@@ -161,7 +162,7 @@ inline fun <T, reified R> Dataset<T>.groupByKey(noinline func: (T) -> R): KeyVal
  * Returns a new Dataset that contains the result of applying [func] to each partition.
  */
 inline fun <T, reified R> Dataset<T>.mapPartitions(noinline func: (Iterator<T>) -> Iterator<R>): Dataset<R> =
-    mapPartitions(func, kotlinEncoderFor<R>())
+    mapPartitions(MapPartitionsFunction(func), kotlinEncoderFor<R>())
 
 /**
  * (Kotlin-specific)
