@@ -9,6 +9,7 @@ import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstructorCallImpl
@@ -40,9 +41,13 @@ class DataClassPropertyAnnotationGenerator(
 
     override fun visitElement(element: IrElement) {
         when (element) {
-            is IrDeclaration,
-            is IrFile,
-            is IrModuleFragment -> element.acceptChildrenVoid(this)
+//            is IrDeclaration,
+//            is IrFile,
+//            is IrBlockBody,
+//            is IrModuleFragment -> element.acceptChildrenVoid(this)
+
+            // test for now
+            else -> element.acceptChildrenVoid(this)
         }
     }
 

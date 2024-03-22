@@ -358,11 +358,11 @@ fun <T1, T2> Dataset<Tuple2<T1, T2>>.sortByValue(): Dataset<Tuple2<T1, T2>> = so
 
 /** Returns a dataset sorted by the first (`first`) value of each [Pair] inside. */
 @JvmName("sortByPairKey")
-fun <T1, T2> Dataset<Pair<T1, T2>>.sortByKey(): Dataset<Pair<T1, T2>> = sort("first")
+fun <T1, T2> Dataset<Pair<T1, T2>>.sortByKey(): Dataset<Pair<T1, T2>> = sort("getFirst")
 
 /** Returns a dataset sorted by the second (`second`) value of each [Pair] inside. */
 @JvmName("sortByPairValue")
-fun <T1, T2> Dataset<Pair<T1, T2>>.sortByValue(): Dataset<Pair<T1, T2>> = sort("second")
+fun <T1, T2> Dataset<Pair<T1, T2>>.sortByValue(): Dataset<Pair<T1, T2>> = sort("getSecond")
 
 /**
  * This function creates block, where one can call any further computations on already cached dataset

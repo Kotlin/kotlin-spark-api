@@ -77,6 +77,8 @@ class DatasetFunctionTest : ShouldSpec({
 
                 val first = dsOf(Left(1, "a"), Left(2, "b"))
                 val second = dsOf(Right(1, 100), Right(3, 300))
+                first.show()
+                second.show()
                 val result = first
                     .leftJoin(second, first.col("id") eq second.col("id"))
                     .map { it._1.id X it._1.name X it._2?.value }
@@ -211,8 +213,7 @@ class DatasetFunctionTest : ShouldSpec({
                     s = key
                     s shouldBe key
 
-                    if (collected.size > 1) collected.iterator()
-                    else emptyList<Tuple2<Int, String>>().iterator()
+                    if (collected.size > 1) collected else emptyList()
                 }
 
                 flatMappedWithState.count() shouldBe 2

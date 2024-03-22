@@ -1,0 +1,61 @@
+FILE: dataClassInFunctionTest.kt
+    package foo.bar
+
+    public final annotation class Sparkify : R|kotlin/Annotation| {
+        public constructor(): R|foo/bar/Sparkify| {
+            super<R|kotlin/Any|>()
+        }
+
+    }
+    public final annotation class ColumnName : R|kotlin/Annotation| {
+        public constructor(name: R|kotlin/String|): R|foo/bar/ColumnName| {
+            super<R|kotlin/Any|>()
+        }
+
+        public final val name: R|kotlin/String| = R|<local>/name|
+            public get(): R|kotlin/String|
+
+    }
+    public final fun box(): R|kotlin/String| {
+        @R|foo/bar/Sparkify|() local final data class User : R|kotlin/Any| {
+            public constructor(name: R|kotlin/String| = String(John Doe), age: R|kotlin/Int| = Int(25), @R|foo/bar/ColumnName|(name = String(a)) test: R|kotlin/Double| = Double(1.0), test2: R|kotlin/Double| = Double(2.0)): R|<local>/User| {
+                super<R|kotlin/Any|>()
+            }
+
+            public final val name: R|kotlin/String| = R|<local>/name|
+                public get(): R|kotlin/String|
+
+            public final val age: R|kotlin/Int| = R|<local>/age|
+                public get(): R|kotlin/Int|
+
+            public final val test: R|kotlin/Double| = R|<local>/test|
+                public get(): R|kotlin/Double|
+
+            public final val test2: R|kotlin/Double| = R|<local>/test2|
+                @PROPERTY_GETTER:R|foo/bar/ColumnName|(name = String(b)) public get(): R|kotlin/Double|
+
+            public final operator fun component1(): R|kotlin/String|
+
+            public final operator fun component2(): R|kotlin/Int|
+
+            public final operator fun component3(): R|kotlin/Double|
+
+            public final operator fun component4(): R|kotlin/Double|
+
+            public final fun copy(name: R|kotlin/String| = this@R|<local>/User|.R|<local>/name|, age: R|kotlin/Int| = this@R|<local>/User|.R|<local>/age|, @R|foo/bar/ColumnName|(name = String(a)) test: R|kotlin/Double| = this@R|<local>/User|.R|<local>/test|, test2: R|kotlin/Double| = this@R|<local>/User|.R|<local>/test2|): R|<local>/User|
+
+        }
+
+        lval user: R|<local>/User| = R|<local>/User.User|()
+        lval name: R|kotlin/Any!| = <getClass>(Q|<local>/User|).R|kotlin/jvm/java|<R|<local>/User|>.R|SubstitutionOverride<java/lang/Class.getMethod: R|java/lang/reflect/Method!|>|(String(name)).R|java/lang/reflect/Method.invoke|(R|<local>/user|)
+        lval age: R|kotlin/Any!| = <getClass>(Q|<local>/User|).R|kotlin/jvm/java|<R|<local>/User|>.R|SubstitutionOverride<java/lang/Class.getMethod: R|java/lang/reflect/Method!|>|(String(age)).R|java/lang/reflect/Method.invoke|(R|<local>/user|)
+        lval a: R|kotlin/Any!| = <getClass>(Q|<local>/User|).R|kotlin/jvm/java|<R|<local>/User|>.R|SubstitutionOverride<java/lang/Class.getMethod: R|java/lang/reflect/Method!|>|(String(a)).R|java/lang/reflect/Method.invoke|(R|<local>/user|)
+        lval b: R|kotlin/Any!| = <getClass>(Q|<local>/User|).R|kotlin/jvm/java|<R|<local>/User|>.R|SubstitutionOverride<java/lang/Class.getMethod: R|java/lang/reflect/Method!|>|(String(b)).R|java/lang/reflect/Method.invoke|(R|<local>/user|)
+        when () {
+            !=(R|<local>/name|, String(John Doe)) || !=(R|<local>/age|, Int(25)) || !=(R|<local>/a|, Double(1.0)) || !=(R|<local>/b|, Double(2.0)) ->  {
+                ^box String(Could not invoke functions name(), age(), a(), or b() from Java)
+            }
+        }
+
+        ^box String(OK)
+    }
