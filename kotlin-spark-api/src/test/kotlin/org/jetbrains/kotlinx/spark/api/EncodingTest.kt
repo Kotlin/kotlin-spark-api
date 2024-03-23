@@ -41,6 +41,9 @@ import java.time.Period
 
 class EncodingTest : ShouldSpec({
 
+    @Sparkify
+    data class SparkifiedPair<T, U>(val first: T, val second: U)
+
     context("encoders") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
@@ -134,8 +137,8 @@ class EncodingTest : ShouldSpec({
             }
 
             should("be able to serialize Date") {
-                val datePair = Date.valueOf("2020-02-10") to 5
-                val dataset: Dataset<Pair<Date, Int>> = dsOf(datePair)
+                val datePair = SparkifiedPair(Date.valueOf("2020-02-10"), 5)
+                val dataset: Dataset<SparkifiedPair<Date, Int>> = dsOf(datePair)
                 dataset.collectAsList() shouldBe listOf(datePair)
             }
 
@@ -212,6 +215,8 @@ class EncodingTest : ShouldSpec({
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
             context("Give proper names to columns of data classes") {
+
+                infix fun <A, B> A.to(other: B) = SparkifiedPair(this, other)
 
                 should("Be able to serialize pairs") {
                     val pairs = listOf(
@@ -653,25 +658,25 @@ class EncodingTest : ShouldSpec({
             }
 
             should("handle arrays of generics") {
-                data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>)
+                data class Test<Z>(val id: Long, val data: Array<SparkifiedPair<Z, Int>>)
 
-                val result = listOf(Test(1, arrayOf(5.1 to 6, 6.1 to 7)))
+                val result = listOf(Test(1, arrayOf(SparkifiedPair(5.1, 6), SparkifiedPair(6.1, 7))))
                     .toDS()
                     .map { it.id to it.data.firstOrNull { liEl -> liEl.first < 6 } }
                     .map { it.second }
                     .collectAsList()
-                expect(result).toContain.inOrder.only.values(5.1 to 6)
+                expect(result).toContain.inOrder.only.values(SparkifiedPair(5.1, 6))
             }
 
             should("handle lists of generics") {
-                data class Test<Z>(val id: Long, val data: List<Pair<Z, Int>>)
+                data class Test<Z>(val id: Long, val data: List<SparkifiedPair<Z, Int>>)
 
-                val result = listOf(Test(1, listOf(5.1 to 6, 6.1 to 7)))
+                val result = listOf(Test(1, listOf(SparkifiedPair(5.1, 6), SparkifiedPair(6.1, 7))))
                     .toDS()
                     .map { it.id to it.data.firstOrNull { liEl -> liEl.first < 6 } }
                     .map { it.second }
                     .collectAsList()
-                expect(result).toContain.inOrder.only.values(5.1 to 6)
+                expect(result).toContain.inOrder.only.values(SparkifiedPair(5.1, 6))
             }
 
             should("handle boxed arrays") {

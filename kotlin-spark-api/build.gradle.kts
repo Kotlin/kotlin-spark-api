@@ -147,7 +147,6 @@ tasks.compileTestKotlin {
 kotlin {
     jvmToolchain {
         languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
-
     }
 }
 

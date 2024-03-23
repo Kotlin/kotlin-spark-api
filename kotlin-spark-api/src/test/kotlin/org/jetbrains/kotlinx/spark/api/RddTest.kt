@@ -6,11 +6,15 @@ import io.kotest.matchers.shouldBe
 import org.apache.spark.api.java.JavaRDD
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
+import java.io.Serializable
 
-class RddTest : ShouldSpec({
+class RddTest : Serializable, ShouldSpec({
     context("RDD extension functions") {
 
-        withSpark(logLevel = SparkLogLevel.DEBUG) {
+        withSpark(
+            props = mapOf("spark.sql.codegen.wholeStage" to false),
+            logLevel = SparkLogLevel.DEBUG,
+        ) {
 
             context("Key/value") {
                 should("work with spark example") {

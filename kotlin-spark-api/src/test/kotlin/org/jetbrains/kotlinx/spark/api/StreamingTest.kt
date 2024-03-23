@@ -39,6 +39,7 @@ import scala.Tuple2
 import java.io.File
 import java.io.Serializable
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -201,10 +202,10 @@ class StreamingTest : ShouldSpec({
 
 private val scalaCompatVersion = SCALA_COMPAT_VERSION
 private val sparkVersion = SPARK_VERSION
-private fun createTempDir() = File.createTempFile(
-    System.getProperty("java.io.tmpdir"),
-    "spark_${scalaCompatVersion}_${sparkVersion}"
-).apply { deleteOnExit() }
+private fun createTempDir() =
+    Files.createTempDirectory("spark_${scalaCompatVersion}_${sparkVersion}")
+        .toFile()
+        .also { it.deleteOnExit() }
 
 private fun checkpointFile(checkpointDir: String, checkpointTime: Time): Path {
     val klass = Class.forName("org.apache.spark.streaming.Checkpoint$")
@@ -215,7 +216,10 @@ private fun checkpointFile(checkpointDir: String, checkpointTime: Time): Path {
     return checkpointFileMethod.invoke(module, checkpointDir, checkpointTime) as Path
 }
 
-private fun getCheckpointFiles(checkpointDir: String, fs: scala.Option<FileSystem>): scala.collection.immutable.Seq<Path> {
+private fun getCheckpointFiles(
+    checkpointDir: String,
+    fs: scala.Option<FileSystem>
+): scala.collection.immutable.Seq<Path> {
     val klass = Class.forName("org.apache.spark.streaming.Checkpoint$")
     val moduleField = klass.getField("MODULE$").also { it.isAccessible = true }
     val module = moduleField.get(null)
@@ -227,7 +231,11 @@ private fun getCheckpointFiles(checkpointDir: String, fs: scala.Option<FileSyste
 private fun createCorruptedCheckpoint(): String {
     val checkpointDirectory = createTempDir().absolutePath
     val fakeCheckpointFile = checkpointFile(checkpointDirectory, Time(1000))
-    FileUtils.write(File(fakeCheckpointFile.toString()), "spark_corrupt_${scalaCompatVersion}_${sparkVersion}", StandardCharsets.UTF_8)
+    FileUtils.write(
+        File(fakeCheckpointFile.toString()),
+        "spark_corrupt_${scalaCompatVersion}_${sparkVersion}",
+        StandardCharsets.UTF_8
+    )
     assert(getCheckpointFiles(checkpointDirectory, (null as FileSystem?).toOption()).nonEmpty())
     return checkpointDirectory
 }

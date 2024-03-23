@@ -20,6 +20,9 @@ class SparkKotlinCompilerGradlePlugin : KotlinCompilerPluginSupportPlugin {
                 compilerOptions {
                     // Make sure the parameters of data classes are visible to scala
                     javaParameters.set(true)
+
+                    // Avoid NotSerializableException by making lambdas serializable
+                    freeCompilerArgs.add("-Xlambdas=class")
                 }
             }
         }

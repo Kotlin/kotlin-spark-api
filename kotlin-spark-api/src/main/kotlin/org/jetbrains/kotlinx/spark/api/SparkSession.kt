@@ -44,6 +44,7 @@ import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 import org.jetbrains.kotlinx.spark.api.tuples.*
+import scala.reflect.ClassTag
 import java.io.Serializable
 
 /**
@@ -406,7 +407,7 @@ private fun getDefaultHadoopConf(): Configuration {
  * @return `Broadcast` object, a read-only variable cached on each machine
  */
 inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
-    sparkContext.broadcast(value, kotlinEncoderFor<T>().clsTag())
+    sparkContext.broadcast(value, ClassTag.apply(T::class.java))
 } catch (e: ClassNotFoundException) {
     JavaSparkContext(sparkContext).broadcast(value)
 }
@@ -426,7 +427,7 @@ inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
     DeprecationLevel.WARNING
 )
 inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
-    broadcast(value, kotlinEncoderFor<T>().clsTag())
+    broadcast(value, ClassTag.apply(T::class.java))
 } catch (e: ClassNotFoundException) {
     JavaSparkContext(this).broadcast(value)
 }

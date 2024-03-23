@@ -46,6 +46,7 @@ import org.apache.spark.sql.types.UDTRegistration
 import org.apache.spark.sql.types.UserDefinedType
 import org.apache.spark.unsafe.types.CalendarInterval
 import scala.reflect.ClassTag
+import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.KType
@@ -122,7 +123,10 @@ fun schemaFor(kType: KType): DataType = kotlinEncoderFor<Any?>(kType).schema().u
 @Deprecated("Use schemaFor instead", ReplaceWith("schemaFor(kType)"))
 fun schema(kType: KType) = schemaFor(kType)
 
-object KotlinTypeInference {
+object KotlinTypeInference : Serializable {
+
+    // https://blog.stylingandroid.com/kotlin-serializable-objects/
+    private fun readResolve(): Any = KotlinTypeInference
 
     /**
      * @param kClass the class for which to infer the encoder.

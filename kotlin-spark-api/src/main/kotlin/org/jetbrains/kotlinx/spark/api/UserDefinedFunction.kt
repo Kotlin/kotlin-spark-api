@@ -69,9 +69,9 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
 )
 
 @JvmName("arrayColumnAsSeq")
-fun <DsType, T> TypedColumn<DsType, Array<T>>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
+inline fun <DsType, reified T> TypedColumn<DsType, Array<T>>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
 @JvmName("iterableColumnAsSeq")
-fun <DsType, T, I : Iterable<T>> TypedColumn<DsType, I>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
+inline fun <DsType, reified T, I : Iterable<T>> TypedColumn<DsType, I>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
 @JvmName("byteArrayColumnAsSeq")
 fun <DsType> TypedColumn<DsType, ByteArray>.asSeq(): TypedColumn<DsType, Seq<Byte>> = typed()
 @JvmName("charArrayColumnAsSeq")
