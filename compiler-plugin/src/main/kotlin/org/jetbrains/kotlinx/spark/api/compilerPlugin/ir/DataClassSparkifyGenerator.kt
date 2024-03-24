@@ -46,7 +46,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.SpecialNames
 
-class DataClassPropertyAnnotationGenerator(
+class DataClassSparkifyGenerator(
     private val pluginContext: IrPluginContext,
     private val sparkifyAnnotationFqNames: List<String>,
     private val columnNameAnnotationFqNames: List<String>,
