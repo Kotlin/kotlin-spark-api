@@ -495,6 +495,9 @@ object KotlinTypeInference : Serializable {
             }
 
             kClass.isData -> {
+                // TODO provide warnings for non-Sparkify annotated classes
+                // TODO especially Pair and Triple, promote people to use Tuple2 and Tuple3 or use "getFirst" etc. as column name
+
                 if (currentType in seenTypeSet) throw IllegalStateException("Circular reference detected for type $currentType")
                 val constructor = kClass.primaryConstructor!!
                 val kParameters = constructor.parameters

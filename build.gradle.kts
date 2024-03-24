@@ -152,6 +152,9 @@ subprojects {
             buildConfigField("defaultSparkifyFqName", defaultSparkifyFqName)
             buildConfigField("defaultColumnNameFqName", defaultColumnNameFqName)
             buildConfigField("projectRoot", projectRoot)
+
+            buildConfigField("scalaVersion", Versions.scala)
+            buildConfigField("sparkVersion", Versions.spark)
         }
     }
 }

@@ -35,6 +35,6 @@ fun TestConfigurationBuilder.commonFirWithPluginFrontendConfiguration() {
     }
 
     useConfigurators(
-        ::ExtensionRegistrarConfigurator
+        ::ExtensionRegistrarConfigurator,
     )
 }

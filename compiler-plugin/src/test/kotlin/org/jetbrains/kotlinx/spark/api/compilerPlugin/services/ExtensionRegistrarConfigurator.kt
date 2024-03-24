@@ -15,10 +15,12 @@ class ExtensionRegistrarConfigurator(testServices: TestServices) : EnvironmentCo
     ) {
         val sparkifyAnnotationFqNames = listOf("foo.bar.Sparkify")
         val columnNameAnnotationFqNames = listOf("foo.bar.ColumnName")
+        val productFqNames = listOf("foo.bar.Product")
         IrGenerationExtension.registerExtension(
             SparkifyIrGenerationExtension(
                 sparkifyAnnotationFqNames = sparkifyAnnotationFqNames,
                 columnNameAnnotationFqNames = columnNameAnnotationFqNames,
+                productFqNames = productFqNames,
             )
         )
     }

@@ -28,6 +28,12 @@ public class BoxTestGenerated extends AbstractBoxTest {
   }
 
   @Test
+  @TestMetadata("dataClassIsProductTest.kt")
+  public void testDataClassIsProductTest() {
+    runTest("/mnt/data/Projects/kotlin-spark-api/compiler-plugin/src/test/resources/testData/box/dataClassIsProductTest.kt");
+  }
+
+  @Test
   @TestMetadata("dataClassTest.kt")
   public void testDataClassTest() {
     runTest("/mnt/data/Projects/kotlin-spark-api/compiler-plugin/src/test/resources/testData/box/dataClassTest.kt");

@@ -23,10 +23,14 @@ open class SparkifyCompilerPluginRegistrar: CompilerPluginRegistrar() {
         val columnNameAnnotationFqNames = configuration.get(KEY_COLUMN_NAME_ANNOTATION_FQ_NAMES)
             ?: listOf(Artifacts.defaultColumnNameFqName)
 
+        val productFqNames = // TODO: get from configuration
+            listOf("scala.Product")
+
         IrGenerationExtension.registerExtension(
             SparkifyIrGenerationExtension(
                 sparkifyAnnotationFqNames = sparkifyAnnotationFqNames,
                 columnNameAnnotationFqNames = columnNameAnnotationFqNames,
+                productFqNames = productFqNames,
             )
         )
     }

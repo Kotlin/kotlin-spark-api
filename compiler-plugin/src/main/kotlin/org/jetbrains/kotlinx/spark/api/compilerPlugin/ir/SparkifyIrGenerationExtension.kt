@@ -9,6 +9,7 @@ import org.jetbrains.kotlinx.spark.api.compilerPlugin.ir.DataClassPropertyAnnota
 class SparkifyIrGenerationExtension(
     private val sparkifyAnnotationFqNames: List<String>,
     private val columnNameAnnotationFqNames: List<String>,
+    private val productFqNames: List<String>,
 ) : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         val visitors = listOf(
@@ -16,6 +17,7 @@ class SparkifyIrGenerationExtension(
                 pluginContext = pluginContext,
                 sparkifyAnnotationFqNames = sparkifyAnnotationFqNames,
                 columnNameAnnotationFqNames = columnNameAnnotationFqNames,
+                productFqNames = productFqNames,
             ),
         )
         for (visitor in visitors) {
