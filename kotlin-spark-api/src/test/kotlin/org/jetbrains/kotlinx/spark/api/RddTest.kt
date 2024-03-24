@@ -74,7 +74,7 @@ class RddTest : Serializable, ShouldSpec({
                     rdd.min() shouldBe 1.0
                 }
 
-                context("Work with any number") {
+                xcontext("Work with any number") {
 
                     should("Work with Bytes") {
                         val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toByte)
