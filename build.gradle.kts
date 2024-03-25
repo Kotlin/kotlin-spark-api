@@ -3,6 +3,7 @@
 import Projects.compilerPlugin
 import Projects.gradlePlugin
 import com.github.gmazzo.buildconfig.BuildConfigExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 
 buildscript {
@@ -126,14 +127,23 @@ allprojects {
 }
 
 subprojects {
-    // Adding the bootstraps directory to the repositories of the subprojects, so that
-    // the bootstrap version of compiler-plugin.jar can be found and used by the gradle-plugin
-    // without mavenLocal
-    repositories.flatDir {
-        dirs("${project.rootDir.absolutePath}/gradle/bootstraps")
-    }
-
     afterEvaluate {
+        // Adding the bootstraps directory to the repositories of the subprojects, so that
+        // the bootstrap version of compiler-plugin.jar can be found and used by the gradle-plugin
+        // without mavenLocal
+        if (plugins.hasPlugin("org.jetbrains.kotlinx.spark.api")) {
+            repositories.flatDir {
+                dirs("${project.rootDir.absolutePath}/gradle/bootstraps")
+            }
+            tasks.withType<KotlinCompile> {
+                dependsOn(":compiler-plugin:updateBootstrapVersion")
+                dependsOn(":gradle-plugin:updateBootstrapVersion")
+            }
+        }
+
+        repositories.flatDir {
+            dirs("${project.rootDir.absolutePath}/gradle/bootstraps")
+        }
         extensions.findByType<BuildConfigExtension>()?.apply {
             val projectVersion = Versions.project
             val groupId = Versions.groupID

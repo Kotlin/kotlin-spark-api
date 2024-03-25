@@ -35,7 +35,7 @@ rootProject.name = "kotlin-spark-api-parent_$versions"
 include("scala-helpers")
 include("scala-tuples-in-kotlin")
 include("kotlin-spark-api")
-include("jupyter")
+//include("jupyter")
 include("examples")
 include("compiler-plugin")
 include("gradle-plugin")
@@ -46,7 +46,7 @@ project(":scala-tuples-in-kotlin").name = "scala-tuples-in-kotlin_$scalaCompat"
 
 // spark+scala dependent
 project(":kotlin-spark-api").name = "kotlin-spark-api_$versions"
-project(":jupyter").name = "jupyter_$versions"
+//project(":jupyter").name = "jupyter_$versions"
 project(":examples").name = "examples_$versions"
 
 buildCache {
