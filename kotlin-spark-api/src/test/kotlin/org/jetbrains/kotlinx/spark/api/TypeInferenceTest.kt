@@ -226,7 +226,7 @@ class TypeInferenceTest : ShouldSpec({
         should("generate valid serializer schema") {
             expect(schemaFor<Sample>() as org.apache.spark.sql.types.StructType) {
                 this
-                    .feature("data type", { this.fields()?.toList() }) {
+                    .feature("data type", { this.fields()?.asList() }) {
                         this.notToEqualNull().toContain.inOrder.only.entry {
                             this
                                 .feature("element name", { name() }) { toEqual("optionList") }

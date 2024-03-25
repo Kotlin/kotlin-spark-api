@@ -92,7 +92,7 @@ inline fun <reified T> List<T>.toDF(spark: SparkSession, vararg colNames: String
  * Utility method to create dataset from list
  */
 inline fun <reified T> Array<T>.toDS(spark: SparkSession): Dataset<T> =
-    toList().toDS(spark)
+    asList().toDS(spark)
 
 /**
  * Utility method to create dataframe from list
