@@ -36,6 +36,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
+      - name: Publish plugins to maven local
+        run: >
+          ./gradlew
+          clean 
+          compiler-plugin:publishToMavenLocal
+          gradle-plugin:publishToMavenLocal
+
       - name: Build with Gradle
         uses: gradle/gradle-build-action@v2
         with:
