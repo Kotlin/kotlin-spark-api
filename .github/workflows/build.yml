@@ -39,7 +39,6 @@ jobs:
       - name: Publish plugins to maven local
         run: >
           ./gradlew
-          clean 
           compiler-plugin:publishToMavenLocal
           gradle-plugin:publishToMavenLocal
 
