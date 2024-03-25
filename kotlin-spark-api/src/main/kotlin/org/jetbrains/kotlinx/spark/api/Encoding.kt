@@ -532,7 +532,9 @@ object KotlinTypeInference : Serializable {
                 ProductEncoder<Any>(
                     /* clsTag = */ ClassTag.apply(jClass),
                     /* fields = */ params.asScalaSeq(),
+                    //#if sparkMinor >= 3.5
                     /* outerPointerGetter = */ OuterScopes.getOuterScope(jClass).toOption(),
+                    //#endif
                 )
             }
 
@@ -558,7 +560,9 @@ object KotlinTypeInference : Serializable {
                 ProductEncoder<Any>(
                     /* clsTag = */ ClassTag.apply(jClass),
                     /* fields = */ params.asScalaSeq(),
+                    //#if sparkMinor >= 3.5
                     /* outerPointerGetter = */ OuterScopes.getOuterScope(jClass).toOption(),
+                    //#endif
                 )
             }
 
