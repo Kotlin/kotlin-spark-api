@@ -16,6 +16,16 @@ FILE: dataClassInFunctionTest.kt
             public get(): R|kotlin/String|
 
     }
+    public abstract interface Equals : R|kotlin/Any| {
+        public abstract fun canEqual(that: R|kotlin/Any?|): R|kotlin/Boolean|
+
+    }
+    public abstract interface Product : R|foo/bar/Equals| {
+        public abstract fun productElement(n: R|kotlin/Int|): R|kotlin/Any|
+
+        public abstract fun productArity(): R|kotlin/Int|
+
+    }
     public final fun box(): R|kotlin/String| {
         @R|foo/bar/Sparkify|() local final data class User : R|kotlin/Any| {
             public constructor(name: R|kotlin/String| = String(John Doe), age: R|kotlin/Int| = Int(25), @R|foo/bar/ColumnName|(name = String(a)) test: R|kotlin/Double| = Double(1.0), test2: R|kotlin/Double| = Double(2.0)): R|<local>/User| {

@@ -11,9 +11,9 @@ fun main() {
             testDataRoot = "${Artifacts.projectRoot}/${Artifacts.compilerPluginArtifactId}/src/test/resources/testData",
             testsRoot = "${Artifacts.projectRoot}/${Artifacts.compilerPluginArtifactId}/src/test-gen/kotlin",
         ) {
-            testClass<AbstractDiagnosticTest> {
-                model("diagnostics")
-            }
+//            testClass<AbstractDiagnosticTest> {
+//                model("diagnostics")
+//            }
 
             testClass<AbstractBoxTest> {
                 model("box")

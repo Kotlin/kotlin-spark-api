@@ -3,6 +3,17 @@ package foo.bar
 annotation class Sparkify
 annotation class ColumnName(val name: String)
 
+// Fake Equals
+interface Equals {
+    fun canEqual(that: Any?): Boolean
+}
+
+// Fake Product
+interface Product: Equals {
+    fun productElement(n: Int): Any
+    fun productArity(): Int
+}
+
 fun box(): String {
     val user = User()
     val name = User::class.java.getMethod("name").invoke(user)

@@ -16,6 +16,16 @@ FILE: dataClassTest.kt
             public get(): R|kotlin/String|
 
     }
+    public abstract interface Equals : R|kotlin/Any| {
+        public abstract fun canEqual(that: R|kotlin/Any?|): R|kotlin/Boolean|
+
+    }
+    public abstract interface Product : R|foo/bar/Equals| {
+        public abstract fun productElement(n: R|kotlin/Int|): R|kotlin/Any|
+
+        public abstract fun productArity(): R|kotlin/Int|
+
+    }
     public final fun box(): R|kotlin/String| {
         lval user: R|foo/bar/User| = R|foo/bar/User.User|()
         lval name: R|kotlin/Any!| = <getClass>(Q|foo/bar/User|).R|kotlin/jvm/java|<R|foo/bar/User|>.R|SubstitutionOverride<java/lang/Class.getMethod: R|java/lang/reflect/Method!|>|(String(name)).R|java/lang/reflect/Method.invoke|(R|<local>/user|)
