@@ -3,6 +3,7 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 
 interface Dsl<T> {
+    @Suppress("UNCHECKED_CAST")
     operator fun invoke(block: T.() -> Unit) = block(this as T)
 }
 

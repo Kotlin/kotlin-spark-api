@@ -49,13 +49,29 @@ dependencies {
     }
 }
 
-//tasks.withType<ShadowJar> {
-//    isZip64 = true
-//    archiveClassifier = ""
-//}
-
 kotlin {
     jvmToolchain {
         languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
     }
+}
+
+/**
+ * Copies the built jar file to the gradle/bootstraps directory.
+ * This allows the project to use the gradle plugin without mavenLocal.
+ */
+val updateBootstrapVersion by tasks.creating(Copy::class) {
+    group = "build"
+    dependsOn(tasks.jar)
+
+    val jarFile = tasks.jar.get().outputs.files.files.single {
+        it.extension == "jar" && it.name.startsWith("gradle-plugin")
+    }
+    from(jarFile)
+    rename { "gradle-plugin.jar" }
+    into(project.rootDir.resolve("gradle/bootstraps"))
+    outputs.upToDateWhen { false }
+}
+
+tasks.build {
+    finalizedBy(updateBootstrapVersion)
 }

@@ -96,6 +96,7 @@ class DataClassSparkifyGenerator(
      * )
      * ```
      */
+    @OptIn(UnsafeDuringIrConstructionAPI::class)
     override fun visitProperty(declaration: IrProperty) {
         val origin = declaration.parent as? IrClass ?: return super.visitProperty(declaration)
         if (sparkifyAnnotationFqNames.none { origin.hasAnnotation(FqName(it)) })

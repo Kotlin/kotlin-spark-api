@@ -12,6 +12,10 @@ buildscript {
     dependencies {
         classpath(jcp)
         classpath(mavenPublish)
+
+        // Allows the project to use the gradle plugin without mavenLocal
+        // Kept up-to-date by :gradle-plugin:updateBootstrapVersion
+        classpath(files("${project.rootDir.absolutePath}/gradle/bootstraps/gradle-plugin.jar"))
     }
 }
 
@@ -21,9 +25,6 @@ plugins {
     idea
     kotlin version Versions.kotlin apply false
     buildconfig version Versions.buildconfig apply false
-
-    // Needs to be installed in the local maven repository
-    kotlinSparkApi version Versions.kotlinSparkApiGradlePlugin apply false
 }
 
 group = Versions.groupID
@@ -125,6 +126,13 @@ allprojects {
 }
 
 subprojects {
+    // Adding the bootstraps directory to the repositories of the subprojects, so that
+    // the bootstrap version of compiler-plugin.jar can be found and used by the gradle-plugin
+    // without mavenLocal
+    repositories.flatDir {
+        dirs("${project.rootDir.absolutePath}/gradle/bootstraps")
+    }
+
     afterEvaluate {
         extensions.findByType<BuildConfigExtension>()?.apply {
             val projectVersion = Versions.project

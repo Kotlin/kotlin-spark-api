@@ -1,17 +1,17 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    // Needs to be installed in the local maven repository
+    // Needs to be installed in the local maven repository or have the bootstrap jar on the classpath
     id("org.jetbrains.kotlinx.spark.api")
-    kotlin
+    kotlin("jvm")
 }
 
-//kotlinSparkApi {
-//    enabled = true
-//    sparkifyAnnotationFqNames = listOf(
-//        "org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify",
-//    )
-//}
+kotlinSparkApi {
+    enabled = true
+    sparkifyAnnotationFqNames = listOf(
+        "org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify",
+    )
+}
 
 group = Versions.groupID
 version = Versions.project

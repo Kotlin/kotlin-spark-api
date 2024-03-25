@@ -103,3 +103,24 @@ fun Test.setLibraryProperty(propName: String, jarName: String) {
         ?: return
     systemProperty(propName, path)
 }
+
+/**
+ * Copies the built jar file to the gradle/bootstraps directory.
+ * This allows the project to use the compiler plugin without mavenLocal.
+ */
+val updateBootstrapVersion by tasks.creating(Copy::class) {
+    group = "build"
+    dependsOn(tasks.jar)
+
+    val jarFile = tasks.jar.get().outputs.files.files.single {
+        it.extension == "jar" && it.name.startsWith("compiler-plugin")
+    }
+    from(jarFile)
+    rename { "compiler-plugin.jar" }
+    into(project.rootDir.resolve("gradle/bootstraps"))
+    outputs.upToDateWhen { false }
+}
+
+tasks.build {
+    finalizedBy(updateBootstrapVersion)
+}
