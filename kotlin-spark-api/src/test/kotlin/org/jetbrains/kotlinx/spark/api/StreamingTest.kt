@@ -219,13 +219,13 @@ private fun checkpointFile(checkpointDir: String, checkpointTime: Time): Path {
 private fun getCheckpointFiles(
     checkpointDir: String,
     fs: scala.Option<FileSystem>
-): scala.collection.immutable.Seq<Path> {
+): scala.collection.Seq<Path> {
     val klass = Class.forName("org.apache.spark.streaming.Checkpoint$")
     val moduleField = klass.getField("MODULE$").also { it.isAccessible = true }
     val module = moduleField.get(null)
     val getCheckpointFilesMethod = klass.getMethod("getCheckpointFiles", String::class.java, scala.Option::class.java)
         .also { it.isAccessible = true }
-    return getCheckpointFilesMethod.invoke(module, checkpointDir, fs) as scala.collection.immutable.Seq<Path>
+    return getCheckpointFilesMethod.invoke(module, checkpointDir, fs) as scala.collection.Seq<Path>
 }
 
 private fun createCorruptedCheckpoint(): String {
