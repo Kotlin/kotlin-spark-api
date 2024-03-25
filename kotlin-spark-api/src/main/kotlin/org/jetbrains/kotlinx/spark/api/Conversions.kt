@@ -134,7 +134,7 @@ fun <A> Iterable<A>.asScalaSeq(): ScalaImmutableSeq<A> =
     //#if scalaCompat >= 2.13
     scala.jdk.javaapi.CollectionConverters.asScala<A>(this).toSeq()
     //#else
-    //$scala.collection.JavaConverters.iterableAsScalaIterable<A>(this).toSeq()
+    //$scala.collection.immutable.`Seq$`.`MODULE$`.apply<A>(scala.collection.JavaConverters.iterableAsScalaIterable<A>(this).toSeq()) as ScalaImmutableSeq<A>
     //#endif
 
 //#if scalaCompat >= 2.13
