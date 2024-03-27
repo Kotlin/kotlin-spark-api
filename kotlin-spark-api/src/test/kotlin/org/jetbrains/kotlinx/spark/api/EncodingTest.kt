@@ -22,12 +22,14 @@ package org.jetbrains.kotlinx.spark.api
 import ch.tutteli.atrium.api.fluent.en_GB.*
 import ch.tutteli.atrium.api.verbs.expect
 import io.kotest.core.spec.style.ShouldSpec
+import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.types.Decimal
 import org.apache.spark.unsafe.types.CalendarInterval
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import org.jetbrains.kotlinx.spark.api.tuples.*
-import org.jetbrains.kotlinx.spark.extensions.DemoCaseClass
 import scala.*
 import java.math.BigDecimal
 import java.sql.Date
@@ -38,6 +40,9 @@ import java.time.LocalDate
 import java.time.Period
 
 class EncodingTest : ShouldSpec({
+
+    @Sparkify
+    data class SparkifiedPair<T, U>(val first: T, val second: U)
 
     context("encoders") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
@@ -132,8 +137,8 @@ class EncodingTest : ShouldSpec({
             }
 
             should("be able to serialize Date") {
-                val datePair = Date.valueOf("2020-02-10") to 5
-                val dataset: Dataset<Pair<Date, Int>> = dsOf(datePair)
+                val datePair = SparkifiedPair(Date.valueOf("2020-02-10"), 5)
+                val dataset: Dataset<SparkifiedPair<Date, Int>> = dsOf(datePair)
                 dataset.collectAsList() shouldBe listOf(datePair)
             }
 
@@ -209,11 +214,178 @@ class EncodingTest : ShouldSpec({
     context("schema") {
         withSpark(props = mapOf("spark.sql.codegen.comments" to true)) {
 
+            context("Give proper names to columns of data classes") {
+
+                infix fun <A, B> A.to(other: B) = SparkifiedPair(this, other)
+
+                should("Be able to serialize pairs") {
+                    val pairs = listOf(
+                        1 to "1",
+                        2 to "2",
+                        3 to "3",
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.collectAsList() shouldBe pairs
+                    dataset.columns().shouldContainExactly("first", "second")
+                }
+
+                should("Be able to serialize pairs of pairs") {
+                    val pairs = listOf(
+                        1 to (1 to "1"),
+                        2 to (2 to "2"),
+                        3 to (3 to "3"),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.columns().shouldContainExactly("first", "second")
+                    dataset.select("second.*").columns().shouldContainExactly("first", "second")
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize pairs of pairs of pairs") {
+                    val pairs = listOf(
+                        1 to (1 to (1 to "1")),
+                        2 to (2 to (2 to "2")),
+                        3 to (3 to (3 to "3")),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.columns().shouldContainExactly("first", "second")
+                    dataset.select("second.*").columns().shouldContainExactly("first", "second")
+                    dataset.select("second.second.*").columns().shouldContainExactly("first", "second")
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of pairs") {
+                    val pairs = listOf(
+                        listOf(1 to "1", 2 to "2"),
+                        listOf(3 to "3", 4 to "4"),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of lists of pairs") {
+                    val pairs = listOf(
+                        listOf(
+                            listOf(1 to "1", 2 to "2"),
+                            listOf(3 to "3", 4 to "4")
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of lists of lists of pairs") {
+                    val pairs = listOf(
+                        listOf(
+                            listOf(
+                                listOf(1 to "1", 2 to "2"),
+                                listOf(3 to "3", 4 to "4"),
+                            )
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize lists of lists of lists of pairs of pairs") {
+                    val pairs = listOf(
+                        listOf(
+                            listOf(
+                                listOf(1 to ("1" to 3.0), 2 to ("2" to 3.0)),
+                                listOf(3 to ("3" to 3.0), 4 to ("4" to 3.0)),
+                            )
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize arrays of pairs") {
+                    val pairs = arrayOf(
+                        arrayOf(1 to "1", 2 to "2"),
+                        arrayOf(3 to "3", 4 to "4"),
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize arrays of arrays of pairs") {
+                    val pairs = arrayOf(
+                        arrayOf(
+                            arrayOf(1 to "1", 2 to "2"),
+                            arrayOf(3 to "3", 4 to "4")
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+
+                should("Be able to serialize arrays of arrays of arrays of pairs") {
+                    val pairs = arrayOf(
+                        arrayOf(
+                            arrayOf(
+                                arrayOf(1 to "1", 2 to "2"),
+                                arrayOf(3 to "3", 4 to "4"),
+                            )
+                        )
+                    )
+                    val dataset = pairs.toDS()
+                    dataset.show()
+                    dataset.printSchema()
+                    dataset.schema().toString().let {
+                        it shouldContain "first"
+                        it shouldContain "second"
+                    }
+                    dataset.collectAsList() shouldBe pairs
+                }
+            }
+
             should("handle Scala Case class datasets") {
                 val caseClasses = listOf(
-                    DemoCaseClass(1, "1"),
-                    DemoCaseClass(2, "2"),
-                    DemoCaseClass(3, "3"),
+                    tupleOf(1, "1"),
+                    tupleOf(2, "2"),
+                    tupleOf(3, "3"),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -222,9 +394,9 @@ class EncodingTest : ShouldSpec({
 
             should("handle Scala Case class with data class datasets") {
                 val caseClasses = listOf(
-                    DemoCaseClass(1, "1" to 1L),
-                    DemoCaseClass(2, "2" to 2L),
-                    DemoCaseClass(3, "3" to 3L),
+                    tupleOf(1, "1" to 1L),
+                    tupleOf(2, "2" to 2L),
+                    tupleOf(3, "3" to 3L),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -233,9 +405,9 @@ class EncodingTest : ShouldSpec({
 
             should("handle data class with Scala Case class datasets") {
                 val caseClasses = listOf(
-                    1 to DemoCaseClass(1, "1"),
-                    2 to DemoCaseClass(2, "2"),
-                    3 to DemoCaseClass(3, "3"),
+                    1 to tupleOf(1, "1"),
+                    2 to tupleOf(2, "2"),
+                    3 to tupleOf(3, "3"),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -244,9 +416,9 @@ class EncodingTest : ShouldSpec({
 
             should("handle data class with Scala Case class & deeper datasets") {
                 val caseClasses = listOf(
-                    1 to DemoCaseClass(1, "1" to DemoCaseClass(1, 1.0)),
-                    2 to DemoCaseClass(2, "2" to DemoCaseClass(2, 2.0)),
-                    3 to DemoCaseClass(3, "3" to DemoCaseClass(3, 3.0)),
+                    1 to tupleOf(1, "1" to tupleOf(1, 1.0)),
+                    2 to tupleOf(2, "2" to tupleOf(2, 2.0)),
+                    3 to tupleOf(3, "3" to tupleOf(3, 3.0)),
                 )
                 val dataset = caseClasses.toDS()
                 dataset.show()
@@ -254,14 +426,14 @@ class EncodingTest : ShouldSpec({
             }
 
 
-            xshould("handle Scala Option datasets") {
+            should("handle Scala Option datasets") {
                 val caseClasses = listOf(Some(1), Some(2), Some(3))
                 val dataset = caseClasses.toDS()
                 dataset.show()
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            xshould("handle Scala Option Option datasets") {
+            should("handle Scala Option Option datasets") {
                 val caseClasses = listOf(
                     Some(Some(1)),
                     Some(Some(2)),
@@ -271,7 +443,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            xshould("handle data class Scala Option datasets") {
+            should("handle data class Scala Option datasets") {
                 val caseClasses = listOf(
                     Some(1) to Some(2),
                     Some(3) to Some(4),
@@ -281,7 +453,7 @@ class EncodingTest : ShouldSpec({
                 dataset.collectAsList() shouldBe caseClasses
             }
 
-            xshould("handle Scala Option data class datasets") {
+            should("handle Scala Option data class datasets") {
                 val caseClasses = listOf(
                     Some(1 to 2),
                     Some(3 to 4),
@@ -317,6 +489,7 @@ class EncodingTest : ShouldSpec({
                     listOf(SomeClass(intArrayOf(1, 2, 3), 4)),
                     listOf(SomeClass(intArrayOf(3, 2, 1), 0)),
                 )
+                dataset.printSchema()
 
                 val (first, second) = dataset.collectAsList()
 
@@ -426,14 +599,16 @@ class EncodingTest : ShouldSpec({
             }
 
             should("Generate schema correctly with nullalble list and map") {
-                val schema = encoder<NullFieldAbleDataClass>().schema()
+                val schema = kotlinEncoderFor<NullFieldAbleDataClass>().schema()
                 schema.fields().forEach {
                     it.nullable() shouldBe true
                 }
             }
 
             should("handle strings converted to lists") {
+                @Sparkify
                 data class Movie(val id: Long, val genres: String)
+                @Sparkify
                 data class MovieExpanded(val id: Long, val genres: List<String>)
 
                 val comedies = listOf(Movie(1, "Comedy|Romance"), Movie(2, "Horror|Action")).toDS()
@@ -450,8 +625,10 @@ class EncodingTest : ShouldSpec({
 
             should("handle strings converted to arrays") {
 
+                @Sparkify
                 data class Movie(val id: Long, val genres: String)
 
+                @Sparkify
                 data class MovieExpanded(val id: Long, val genres: Array<String>) {
                     override fun equals(other: Any?): Boolean {
                         if (this === other) return true
@@ -481,28 +658,28 @@ class EncodingTest : ShouldSpec({
             }
 
             should("handle arrays of generics") {
-                data class Test<Z>(val id: Long, val data: Array<Pair<Z, Int>>)
+                data class Test<Z>(val id: Long, val data: Array<SparkifiedPair<Z, Int>>)
 
-                val result = listOf(Test(1, arrayOf(5.1 to 6, 6.1 to 7)))
+                val result = listOf(Test(1, arrayOf(SparkifiedPair(5.1, 6), SparkifiedPair(6.1, 7))))
                     .toDS()
                     .map { it.id to it.data.firstOrNull { liEl -> liEl.first < 6 } }
                     .map { it.second }
                     .collectAsList()
-                expect(result).toContain.inOrder.only.values(5.1 to 6)
+                expect(result).toContain.inOrder.only.values(SparkifiedPair(5.1, 6))
             }
 
             should("handle lists of generics") {
-                data class Test<Z>(val id: Long, val data: List<Pair<Z, Int>>)
+                data class Test<Z>(val id: Long, val data: List<SparkifiedPair<Z, Int>>)
 
-                val result = listOf(Test(1, listOf(5.1 to 6, 6.1 to 7)))
+                val result = listOf(Test(1, listOf(SparkifiedPair(5.1, 6), SparkifiedPair(6.1, 7))))
                     .toDS()
                     .map { it.id to it.data.firstOrNull { liEl -> liEl.first < 6 } }
                     .map { it.second }
                     .collectAsList()
-                expect(result).toContain.inOrder.only.values(5.1 to 6)
+                expect(result).toContain.inOrder.only.values(SparkifiedPair(5.1, 6))
             }
 
-            should("!handle primitive arrays") {
+            should("handle boxed arrays") {
                 val result = listOf(arrayOf(1, 2, 3, 4))
                     .toDS()
                     .map { it.map { ai -> ai + 1 } }
@@ -514,6 +691,7 @@ class EncodingTest : ShouldSpec({
     }
 })
 
+@Sparkify
 data class IsSomethingClass(
     val enabled: Boolean,
     val isEnabled: Boolean,
@@ -523,14 +701,17 @@ data class IsSomethingClass(
     val getDouble: Double
 )
 
+@Sparkify
 data class DataClassWithTuple<T : Product>(val tuple: T)
 
+@Sparkify
 data class LonLat(val lon: Double, val lat: Double)
 
 enum class SomeEnum { A, B }
 
 enum class SomeOtherEnum(val value: Int) { C(1), D(2) }
 
+@Sparkify
 data class ComplexEnumDataClass(
     val int: Int,
     val string: String,
@@ -544,6 +725,7 @@ data class ComplexEnumDataClass(
     val enumMap: Map<SomeEnum, SomeOtherEnum>,
 )
 
+@Sparkify
 data class NullFieldAbleDataClass(
     val optionList: List<Int>?,
     val optionMap: Map<String, Int>?,

@@ -443,7 +443,7 @@ operator fun Column.get(key: Any): Column = getItem(key)
  * @see typed
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <DsType, reified U> Column.`as`(): TypedColumn<DsType, U> = `as`(encoder<U>()) as TypedColumn<DsType, U>
+inline fun <DsType, reified U> Column.`as`(): TypedColumn<DsType, U> = `as`(kotlinEncoderFor<U>()) as TypedColumn<DsType, U>
 
 /**
  * Provides a type hint about the expected return value of this column. This information can
@@ -458,7 +458,7 @@ inline fun <DsType, reified U> Column.`as`(): TypedColumn<DsType, U> = `as`(enco
  * @see typed
  */
 @Suppress("UNCHECKED_CAST")
-inline fun <DsType, reified U> TypedColumn<DsType, *>.`as`(): TypedColumn<DsType, U> = `as`(encoder<U>()) as TypedColumn<DsType, U>
+inline fun <DsType, reified U> TypedColumn<DsType, *>.`as`(): TypedColumn<DsType, U> = `as`(kotlinEncoderFor<U>()) as TypedColumn<DsType, U>
 
 /**
  * Provides a type hint about the expected return value of this column. This information can

@@ -1,3 +1,12 @@
+pluginManagement {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
+        maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
+    }
+}
+
 plugins {
     id("com.gradle.enterprise") version "3.10.3"
 }
@@ -9,14 +18,12 @@ gradleEnterprise {
     }
 }
 
-
 val spark: String by settings
 val scala: String by settings
-val skipScalaTuplesInKotlin: String by settings
+val skipScalaOnlyDependent: String by settings
 System.setProperty("spark", spark)
 System.setProperty("scala", scala)
-System.setProperty("skipScalaTuplesInKotlin", skipScalaTuplesInKotlin)
-
+System.setProperty("skipScalaOnlyDependent", skipScalaOnlyDependent)
 
 val scalaCompat
     get() = scala.substringBeforeLast('.')
@@ -25,16 +32,21 @@ val versions = "${spark}_${scalaCompat}"
 
 rootProject.name = "kotlin-spark-api-parent_$versions"
 
-include("core")
+include("scala-helpers")
 include("scala-tuples-in-kotlin")
 include("kotlin-spark-api")
-include("jupyter")
+//include("jupyter")
 include("examples")
+include("compiler-plugin")
+include("gradle-plugin")
 
-project(":core").name = "core_$versions"
+// just scala dependent
+project(":scala-helpers").name = "scala-helpers_$scalaCompat"
 project(":scala-tuples-in-kotlin").name = "scala-tuples-in-kotlin_$scalaCompat"
+
+// spark+scala dependent
 project(":kotlin-spark-api").name = "kotlin-spark-api_$versions"
-project(":jupyter").name = "jupyter_$versions"
+//project(":jupyter").name = "jupyter_$versions"
 project(":examples").name = "examples_$versions"
 
 buildCache {

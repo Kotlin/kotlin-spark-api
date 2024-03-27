@@ -1,17 +1,27 @@
-object Versions {
-    const val project = "1.2.5-SNAPSHOT"
+object Versions : Dsl<Versions> {
+    const val project = "2.0.0-SNAPSHOT"
+    const val kotlinSparkApiGradlePlugin = "2.0.0-SNAPSHOT"
     const val groupID = "org.jetbrains.kotlinx.spark"
-    const val kotlin = "1.8.20"
+    const val kotlin = "2.0.0-Beta5"
     const val jvmTarget = "8"
     const val jupyterJvmTarget = "8"
-
     inline val spark get() = System.getProperty("spark") as String
     inline val scala get() = System.getProperty("scala") as String
     inline val sparkMinor get() = spark.substringBeforeLast('.')
-    inline val scalaCompat get() = scala.substringBeforeLast('.')
 
+    inline val scalaCompat get() = scala.substringBeforeLast('.')
+    // TODO
+    inline val sparkConnect get() = System.getProperty("sparkConnect", "false").toBoolean()
     const val jupyter = "0.12.0-32-1"
+
+    const val gradlePublishPlugin = "1.1.0"
     const val kotest = "5.5.4"
+    const val shadow = "8.1.1"
+
+    const val buildconfig = "5.3.5"
+
+    const val junitJupiterEngine = "5.8.1"
+    const val junit = "4.13.2"
     const val kotestTestContainers = "1.3.3"
     const val dokka = "1.8.20"
     const val jcp = "7.0.5"
@@ -23,8 +33,9 @@ object Versions {
     const val kotlinxHtml = "0.7.5"
     const val klaxon = "5.5"
     const val jacksonDatabind = "2.13.4.2"
+    const val kotlinxDateTime = "0.6.0-RC.2"
 
-    inline val versionMap
+    inline val versionMap: Map<String, String>
         get() = mapOf(
             "kotlin" to kotlin,
             "scala" to scala,
@@ -32,6 +43,6 @@ object Versions {
             "spark" to spark,
             "sparkMinor" to sparkMinor,
             "version" to project,
+            "sparkConnect" to sparkConnect.toString(),
         )
-
 }

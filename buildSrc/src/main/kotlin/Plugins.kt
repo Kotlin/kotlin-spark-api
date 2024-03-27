@@ -2,6 +2,8 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugin.use.PluginDependenciesSpec
 
+inline val PluginDependenciesSpec.kotlinSparkApi
+    get() = id("org.jetbrains.kotlinx.spark.api")
 
 inline val PluginDependenciesSpec.kotlin
     get() = kotlin("jvm")
@@ -33,3 +35,11 @@ inline val Project.mavenPublishBase
 inline val PluginDependenciesSpec.jupyter
     get() = kotlin("jupyter.api") version Versions.jupyter
 
+inline val PluginDependenciesSpec.buildconfig
+    get() = id("com.github.gmazzo.buildconfig")
+
+inline val PluginDependenciesSpec.gradlePublishPlugin
+    get() = id("com.gradle.plugin-publish") version Versions.gradlePublishPlugin
+
+inline val PluginDependenciesSpec.shadow
+    get() = id("com.github.johnrengelman.shadow") version Versions.shadow

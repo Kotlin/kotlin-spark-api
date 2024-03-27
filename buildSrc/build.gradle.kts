@@ -1,10 +1,8 @@
-import org.gradle.kotlin.dsl.`kotlin-dsl`
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     `kotlin-dsl`
 }
 
 repositories {
     mavenCentral()
+    maven("https://maven.pkg.jetbrains.space/kotlin/p/kotlin/bootstrap")
 }

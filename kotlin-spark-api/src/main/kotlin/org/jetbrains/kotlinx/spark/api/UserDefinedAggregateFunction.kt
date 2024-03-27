@@ -41,8 +41,8 @@ inline fun <reified IN, reified BUF, reified OUT> aggregatorOf(
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
-    bufferEncoder: Encoder<BUF> = encoder(),
-    outputEncoder: Encoder<OUT> = encoder(),
+    bufferEncoder: Encoder<BUF> = kotlinEncoderFor(),
+    outputEncoder: Encoder<OUT> = kotlinEncoderFor(),
 ): Aggregator<IN, BUF, OUT> = Aggregator(zero, reduce, merge, finish, bufferEncoder, outputEncoder)
 
 class Aggregator<IN, BUF, OUT>(
@@ -129,10 +129,10 @@ inline fun <reified IN, reified OUT, reified AGG : Aggregator<IN, *, OUT>> udafU
     IN::class.checkForValidType("IN")
 
     return UserDefinedFunction1(
-        udf = functions.udaf(agg, encoder<IN>())
+        udf = functions.udaf(agg, kotlinEncoderFor<IN>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<OUT>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<OUT>(),
+        encoder = kotlinEncoderFor<OUT>(),
     )
 }
 
@@ -160,8 +160,8 @@ inline fun <reified IN, reified BUF, reified OUT> udaf(
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
-    bufferEncoder: Encoder<BUF> = encoder(),
-    outputEncoder: Encoder<OUT> = encoder(),
+    bufferEncoder: Encoder<BUF> = kotlinEncoderFor(),
+    outputEncoder: Encoder<OUT> = kotlinEncoderFor(),
     nondeterministic: Boolean = false,
 ): UserDefinedFunction1<IN, OUT> = udafUnnamed(
     aggregatorOf(
@@ -202,8 +202,8 @@ inline fun <reified IN, reified BUF, reified OUT> udaf(
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
-    bufferEncoder: Encoder<BUF> = encoder(),
-    outputEncoder: Encoder<OUT> = encoder(),
+    bufferEncoder: Encoder<BUF> = kotlinEncoderFor(),
+    outputEncoder: Encoder<OUT> = kotlinEncoderFor(),
     nondeterministic: Boolean = false,
 ): NamedUserDefinedFunction1<IN, OUT> = udaf(
     name = name,
@@ -279,8 +279,8 @@ inline fun <reified IN, reified BUF, reified OUT> UDFRegistration.register(
     noinline reduce: (b: BUF, a: IN) -> BUF,
     noinline merge: (b1: BUF, b2: BUF) -> BUF,
     noinline finish: (reduction: BUF) -> OUT,
-    bufferEncoder: Encoder<BUF> = encoder(),
-    outputEncoder: Encoder<OUT> = encoder(),
+    bufferEncoder: Encoder<BUF> = kotlinEncoderFor(),
+    outputEncoder: Encoder<OUT> = kotlinEncoderFor(),
     nondeterministic: Boolean = false,
 ): NamedUserDefinedFunction1<IN, OUT> = register(
     udaf(name, zero, reduce, merge, finish, bufferEncoder, outputEncoder, nondeterministic)

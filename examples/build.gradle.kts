@@ -1,26 +1,34 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin
-    idea
+    // Needs to be installed in the local maven repository or have the bootstrap jar on the classpath
+    id("org.jetbrains.kotlinx.spark.api")
+    kotlin("jvm")
+}
+
+kotlinSparkApi {
+    enabled = true
+    sparkifyAnnotationFqNames = listOf(
+        "org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify",
+    )
 }
 
 group = Versions.groupID
 version = Versions.project
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 dependencies {
-
-    with(Projects) {
+    Projects {
         implementation(
             kotlinSparkApi,
         )
     }
 
-    with(Dependencies) {
+    Dependencies {
 
         // https://github.com/FasterXML/jackson-bom/issues/52
         if (Versions.spark == "3.3.1") implementation(jacksonDatabind)
@@ -31,14 +39,12 @@ dependencies {
             sparkStreaming,
             sparkStreamingKafka,
         )
-
     }
 }
 
 kotlin {
+    jvmToolchain(8)
     jvmToolchain {
-        languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
-        )
+        languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
     }
 }

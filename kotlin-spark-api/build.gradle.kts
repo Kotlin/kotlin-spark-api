@@ -1,4 +1,4 @@
-@file:Suppress("UnstableApiUsage", "NOTHING_TO_INLINE")
+@file:Suppress("UnstableApiUsage")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavadocJar.Dokka
@@ -11,6 +11,7 @@ plugins {
     mavenPublishBase
     jcp
     idea
+    kotlinSparkApi // for @Sparkify
 }
 
 group = Versions.groupID
@@ -19,6 +20,7 @@ version = Versions.project
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 tasks.withType<Test>().configureEach {
@@ -28,17 +30,19 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
 
-    with(Projects) {
+    Projects {
         api(
-            core,
-            scalaTuplesInKotlin,
+            scalaHelpers,
+            scalaTuplesInKotlin
         )
     }
 
-    with(Dependencies) {
+    Dependencies {
 
         // https://github.com/FasterXML/jackson-bom/issues/52
         if (Versions.spark == "3.3.1") implementation(jacksonDatabind)
+
+        if (Versions.sparkConnect) TODO("unsupported for now")
 
         implementation(
             kotlinStdLib,
@@ -46,6 +50,7 @@ dependencies {
             sparkSql,
             sparkStreaming,
             hadoopClient,
+            kotlinDateTime,
         )
 
         testImplementation(
@@ -66,10 +71,10 @@ dependencies {
 val kotlinMainSources = kotlin.sourceSets.main.get().kotlin.sourceDirectories
 
 val preprocessMain by tasks.creating(JcpTask::class) {
-    sources.set(kotlinMainSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("kt"))
-    vars.set(Versions.versionMap)
+    sources = kotlinMainSources
+    clearTarget = true
+    fileExtensions = listOf("kt")
+    vars = Versions.versionMap
     outputs.upToDateWhen { target.get().exists() }
 }
 
@@ -105,10 +110,10 @@ tasks.compileKotlin {
 val kotlinTestSources = kotlin.sourceSets.test.get().kotlin.sourceDirectories
 
 val preprocessTest by tasks.creating(JcpTask::class) {
-    sources.set(kotlinTestSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("kt"))
-    vars.set(Versions.versionMap)
+    sources = kotlinTestSources
+    clearTarget = true
+    fileExtensions = listOf("kt")
+    vars = Versions.versionMap
     outputs.upToDateWhen { target.get().exists() }
 }
 
@@ -141,9 +146,7 @@ tasks.compileTestKotlin {
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
-        )
+        languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
     }
 }
 
@@ -158,8 +161,3 @@ tasks.withType<AbstractDokkaLeafTask> {
 mavenPublishing {
     configure(KotlinJvm(Dokka("dokkaHtml")))
 }
-
-
-
-
-

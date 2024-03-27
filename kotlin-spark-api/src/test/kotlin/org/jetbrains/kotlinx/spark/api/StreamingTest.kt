@@ -26,22 +26,20 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.shouldBe
 import org.apache.commons.io.FileUtils
 import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.fs.Path
 import org.apache.spark.SparkException
-import org.apache.spark.streaming.Checkpoint
 import org.apache.spark.streaming.Duration
 import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.Time
-import org.apache.spark.util.Utils
 import org.jetbrains.kotlinx.spark.api.tuples.X
 import org.jetbrains.kotlinx.spark.api.tuples.component1
 import org.jetbrains.kotlinx.spark.api.tuples.component2
 import org.jetbrains.kotlinx.spark.api.tuples.t
-import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
-import org.jetbrains.kotlinx.spark.extensions.`KSparkExtensions$`
 import scala.Tuple2
 import java.io.File
 import java.io.Serializable
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -202,18 +200,43 @@ class StreamingTest : ShouldSpec({
 })
 
 
-private val scalaCompatVersion = `KSparkExtensions$`.`MODULE$`.scalaCompatVersion()
-private val sparkVersion = `KSparkExtensions$`.`MODULE$`.sparkVersion()
-private fun createTempDir() = Utils.createTempDir(
-    System.getProperty("java.io.tmpdir"),
-    "spark_${scalaCompatVersion}_${sparkVersion}"
-).apply { deleteOnExit() }
+private val scalaCompatVersion = SCALA_COMPAT_VERSION
+private val sparkVersion = SPARK_VERSION
+private fun createTempDir() =
+    Files.createTempDirectory("spark_${scalaCompatVersion}_${sparkVersion}")
+        .toFile()
+        .also { it.deleteOnExit() }
+
+private fun checkpointFile(checkpointDir: String, checkpointTime: Time): Path {
+    val klass = Class.forName("org.apache.spark.streaming.Checkpoint$")
+    val moduleField = klass.getField("MODULE$").also { it.isAccessible = true }
+    val module = moduleField.get(null)
+    val checkpointFileMethod = klass.getMethod("checkpointFile", String::class.java, Time::class.java)
+        .also { it.isAccessible = true }
+    return checkpointFileMethod.invoke(module, checkpointDir, checkpointTime) as Path
+}
+
+private fun getCheckpointFiles(
+    checkpointDir: String,
+    fs: scala.Option<FileSystem>
+): scala.collection.Seq<Path> {
+    val klass = Class.forName("org.apache.spark.streaming.Checkpoint$")
+    val moduleField = klass.getField("MODULE$").also { it.isAccessible = true }
+    val module = moduleField.get(null)
+    val getCheckpointFilesMethod = klass.getMethod("getCheckpointFiles", String::class.java, scala.Option::class.java)
+        .also { it.isAccessible = true }
+    return getCheckpointFilesMethod.invoke(module, checkpointDir, fs) as scala.collection.Seq<Path>
+}
 
 private fun createCorruptedCheckpoint(): String {
     val checkpointDirectory = createTempDir().absolutePath
-    val fakeCheckpointFile = Checkpoint.checkpointFile(checkpointDirectory, Time(1000))
-    FileUtils.write(File(fakeCheckpointFile.toString()), "spark_corrupt_${scalaCompatVersion}_${sparkVersion}", StandardCharsets.UTF_8)
-    assert(Checkpoint.getCheckpointFiles(checkpointDirectory, (null as FileSystem?).toOption()).nonEmpty())
+    val fakeCheckpointFile = checkpointFile(checkpointDirectory, Time(1000))
+    FileUtils.write(
+        File(fakeCheckpointFile.toString()),
+        "spark_corrupt_${scalaCompatVersion}_${sparkVersion}",
+        StandardCharsets.UTF_8
+    )
+    assert(getCheckpointFiles(checkpointDirectory, (null as FileSystem?).toOption()).nonEmpty())
     return checkpointDirectory
 }
 

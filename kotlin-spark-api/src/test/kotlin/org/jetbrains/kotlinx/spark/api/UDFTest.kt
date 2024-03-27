@@ -33,7 +33,9 @@ import org.apache.spark.sql.Encoder
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.expressions.Aggregator
 import org.intellij.lang.annotations.Language
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import org.junit.jupiter.api.assertThrows
+import scala.Product
 import scala.collection.Seq
 import java.io.Serializable
 import kotlin.random.Random
@@ -234,7 +236,8 @@ class UDFTest : ShouldSpec({
                     udf.register(::stringIntDiff)
 
                     @Language("SQL")
-                    val result = spark.sql("SELECT stringIntDiff(first, second) FROM test1").to<Int>().collectAsList()
+                    val result =
+                        spark.sql("SELECT stringIntDiff(getFirst, getSecond) FROM test1").to<Int>().collectAsList()
                     result shouldBe listOf(96, 96)
                 }
             }
@@ -303,7 +306,8 @@ class UDFTest : ShouldSpec({
                     )
                     ds should beOfType<Dataset<String>>()
 
-                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns().single()
+                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns()
+                        .single()
 
                     val collectAsList = ds.collectAsList()
                     collectAsList[0] shouldBe "a-10"
@@ -328,7 +332,8 @@ class UDFTest : ShouldSpec({
                     )
                     ds should beOfType<Dataset<Row>>()
 
-                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns().single()
+                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns()
+                        .single()
 
                     val collectAsList = ds.collectAsList()
                     collectAsList[0].getAs<String>(0) shouldBe "a-10"
@@ -353,7 +358,8 @@ class UDFTest : ShouldSpec({
                     )
                     ds should beOfType<Dataset<Row>>()
 
-                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns().single()
+                    "${nameConcatAge.name}(${NormalClass::name.name}, ${NormalClass::age.name})" shouldBe ds.columns()
+                        .single()
 
                     val collectAsList = ds.collectAsList()
                     collectAsList[0].getAs<String>(0) shouldBe "a-10"
@@ -418,13 +424,14 @@ class UDFTest : ShouldSpec({
 
         context("udf return data class") {
             withSpark(logLevel = SparkLogLevel.DEBUG) {
+                /** TODO [org.apache.spark.sql.catalyst.CatalystTypeConverters.StructConverter.toCatalystImpl] needs it to be a [scala.Product] */
                 should("return NormalClass") {
                     listOf("a" to 1, "b" to 2).toDS().toDF().createOrReplaceTempView("test2")
 
                     udf.register("toNormalClass") { name: String, age: Int ->
                         NormalClass(age, name)
                     }
-                    spark.sql("select toNormalClass(first, second) from test2").show()
+                    spark.sql("select toNormalClass(getFirst, getSecond) from test2").show()
                 }
 
                 should("not return NormalClass when not registered") {
@@ -433,16 +440,17 @@ class UDFTest : ShouldSpec({
                     val toNormalClass2 = udf("toNormalClass2", ::NormalClass)
 
                     shouldThrow<AnalysisException> {
-                        spark.sql("select toNormalClass2(first, second) from test2").show()
+                        spark.sql("select toNormalClass2(getFirst, getSecond) from test2").show()
                     }
                 }
 
+                /** TODO [org.apache.spark.sql.catalyst.CatalystTypeConverters.StructConverter.toCatalystImpl] needs it to be a [scala.Product] */
                 should("return NormalClass using accessed by delegate") {
                     listOf(1 to "a", 2 to "b").toDS().toDF().createOrReplaceTempView("test2")
                     val toNormalClass3 = udf("toNormalClass3", ::NormalClass)
                     toNormalClass3.register()
 
-                    spark.sql("select toNormalClass3(first, second) from test2").show()
+                    spark.sql("select toNormalClass3(getFirst, getSecond) from test2").show()
                 }
             }
         }
@@ -491,8 +499,8 @@ class UDFTest : ShouldSpec({
                             buffer.apply { sum += it.sum; count += it.count }
 
                         override fun finish(it: Average) = it.sum.toDouble() / it.count
-                        override fun bufferEncoder() = encoder<Average>()
-                        override fun outputEncoder() = encoder<Double>()
+                        override fun bufferEncoder() = kotlinEncoderFor<Average>()
+                        override fun outputEncoder() = kotlinEncoderFor<Double>()
                     }
 
 //                    shouldThrow<IllegalStateException> {
@@ -615,8 +623,8 @@ class UDFTest : ShouldSpec({
                                 buffer.apply { sum += it.sum; count += it.count }
 
                             override fun finish(it: Average) = it.sum.toDouble() / it.count
-                            override fun bufferEncoder() = encoder<Average>()
-                            override fun outputEncoder() = encoder<Double>()
+                            override fun bufferEncoder() = kotlinEncoderFor<Average>()
+                            override fun outputEncoder() = kotlinEncoderFor<Double>()
                         }
                     )
 
@@ -640,7 +648,6 @@ class UDFTest : ShouldSpec({
                     result should beOfType<Dataset<Double>>()
                     result.collectAsList().single() shouldBe 3750.0
                 }
-
 
 
             }
@@ -1261,7 +1268,9 @@ class UDFTest : ShouldSpec({
     }
 })
 
+@Sparkify
 data class Employee(val name: String, val salary: Long)
+@Sparkify
 data class Average(var sum: Long, var count: Long)
 
 private object MyAverage : Aggregator<Employee, Average, Double>() {
@@ -1288,10 +1297,10 @@ private object MyAverage : Aggregator<Employee, Average, Double>() {
     override fun finish(reduction: Average): Double = reduction.sum.toDouble() / reduction.count
 
     // Specifies the Encoder for the intermediate value type
-    override fun bufferEncoder(): Encoder<Average> = encoder()
+    override fun bufferEncoder(): Encoder<Average> = kotlinEncoderFor()
 
     // Specifies the Encoder for the final output value type
-    override fun outputEncoder(): Encoder<Double> = encoder()
+    override fun outputEncoder(): Encoder<Double> = kotlinEncoderFor()
 
 }
 
@@ -1316,10 +1325,22 @@ private val aggregator = aggregatorOf<Long, Average, Double>(
 
 private val addTwoConst = { x: Int, y: Int -> x + y }
 
+@Sparkify
 data class NormalClass(
     val age: Int,
     val name: String
 )
+//    : Product {
+//    override fun canEqual(that: Any?): Boolean = that is NormalClass
+//
+//    override fun productElement(n: Int): Any =
+//        when (n) {
+//            0 -> age
+//            1 -> name
+//            else -> throw IndexOutOfBoundsException(n.toString())
+//        }
+//    override fun productArity(): Int = 2
+//}
 
 private val firstByteVal = { a: ByteArray -> a.firstOrNull() }
 private val firstShortVal = { a: ShortArray -> a.firstOrNull() }

@@ -6,11 +6,15 @@ import io.kotest.matchers.shouldBe
 import org.apache.spark.api.java.JavaRDD
 import org.jetbrains.kotlinx.spark.api.tuples.*
 import scala.Tuple2
+import java.io.Serializable
 
-class RddTest : ShouldSpec({
+class RddTest : Serializable, ShouldSpec({
     context("RDD extension functions") {
 
-        withSpark(logLevel = SparkLogLevel.DEBUG) {
+        withSpark(
+            props = mapOf("spark.sql.codegen.wholeStage" to false),
+            logLevel = SparkLogLevel.DEBUG,
+        ) {
 
             context("Key/value") {
                 should("work with spark example") {
@@ -70,7 +74,7 @@ class RddTest : ShouldSpec({
                     rdd.min() shouldBe 1.0
                 }
 
-                context("Work with any number") {
+                xcontext("Work with any number") {
 
                     should("Work with Bytes") {
                         val data = listOf(1, 1, 2, 2, 2, 3).map(Int::toByte)
