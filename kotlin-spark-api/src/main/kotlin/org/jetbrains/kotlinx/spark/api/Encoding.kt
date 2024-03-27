@@ -45,10 +45,13 @@ import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.types.UDTRegistration
 import org.apache.spark.sql.types.UserDefinedType
 import org.apache.spark.unsafe.types.CalendarInterval
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.ColumnName
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import scala.reflect.ClassTag
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
 import kotlin.reflect.KTypeProjection
 import kotlin.reflect.full.createType
@@ -204,6 +207,66 @@ object KotlinTypeInference : Serializable {
         }
 
         return params
+    }
+
+    /**
+     * Provides helpful warnings for when something goes wrong with encoding a certain data class.
+     */
+    private fun KClass<*>.checkIsSparkified(props: List<KProperty1<*, *>>, propHasColumnNameAnnotation: List<Boolean>) {
+        val isAnnotated = hasAnnotation<Sparkify>()
+
+        val mismatchedNames = buildList {
+            for ((i, prop) in props.withIndex()) {
+                if (isAnnotated && propHasColumnNameAnnotation[i]) continue
+                val name = prop.name
+                val getterMethodName = prop.getter.javaMethod!!.name
+                if (name != getterMethodName)
+                    add(name to getterMethodName)
+            }
+        }
+
+        val isPair = this == Pair::class
+        val isTriple = this == Triple::class
+
+        // can't be checked if injected by Sparkify
+        val isProduct = this.isSubclassOf(scala.Product::class)
+
+        when {
+            // happy path
+            isAnnotated && mismatchedNames.isEmpty() -> return
+
+            // not annotated but still happy as spark will like it
+            !isAnnotated && mismatchedNames.isEmpty() && isProduct -> return
+        }
+
+        val warningMessage = buildString {
+            appendLine(this@checkIsSparkified.toString() + " does not seem to be ready for Kotlin Spark:")
+            if (isAnnotated) {
+                appendLine("  - It is annotated with @Sparkify, but, the compiler plugin might not be installed or may be misfunctioning.")
+            } else {
+                appendLine("  - It is not annotated with @Sparkify and it does not have the correct structure for Spark:")
+            }
+            if (mismatchedNames.isNotEmpty()) {
+                appendLine("  - The following property names do not match their getter method names:")
+                for ((name, getter) in mismatchedNames) {
+                    appendLine("    - prop name: `$name`, getter name: `$getter`")
+                }
+                appendLine("    Spark uses the getter method names to get the column names.")
+                appendLine("    Properties must be annotated with @get:JvmName(\"<PROP_NAME>\") to generate the right getters. Else, your columns might be be named \"getXYZ\".")
+                appendLine("    @Sparkify can do this for you.")
+                appendLine("    If you agree with the getter/column names above (like if you've added custom @get:JvmName's), you can ignore this warning.")
+            }
+            if (isPair) {
+                appendLine("  - It is a Pair, which is not well supported by Spark. You can use scala.Tuple2 instead.")
+            } else if (isTriple) {
+                appendLine("  - It is a Triple, which is not well supported by Spark. You can use scala.Tuple3 instead.")
+            }
+            if (!isProduct) {
+                appendLine("  - It is not a scala.Product, which is fine for most cases, but can break compatibility with UDFs. You can let your data class implement scala.Product to fix this or let @Sparkify handle it for you.")
+            }
+        }
+
+        println(warningMessage)
     }
 
     /**
@@ -506,6 +569,8 @@ object KotlinTypeInference : Serializable {
                 val props = kParameters.map {
                     kClass.declaredMemberProperties.find { prop -> prop.name == it.name }!!
                 }
+
+                kClass.checkIsSparkified(props, kParameters.map { it.hasAnnotation<ColumnName>() })
 
                 val params = (kParameters zip props).map { (param, prop) ->
                     // check if the type was a filled-in generic type, otherwise just use the given type
