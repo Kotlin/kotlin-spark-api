@@ -189,7 +189,7 @@ FILE fqName:foo.bar fileName:/dataClassTest.kt
             GET_FIELD 'FIELD PROPERTY_BACKING_FIELD name:age type:kotlin.Int visibility:private [final]' type=kotlin.Int origin=null
               receiver: GET_VAR '<this>: foo.bar.NormalUser declared in foo.bar.NormalUser.toString' type=foo.bar.NormalUser origin=null
             CONST String type=kotlin.String value=")"
-  CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product]
+  CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product; java.io.Serializable]
     annotations:
       Sparkify
     $this: VALUE_PARAMETER INSTANCE_RECEIVER name:<this> type:foo.bar.User
@@ -263,7 +263,7 @@ FILE fqName:foo.bar fileName:/dataClassTest.kt
           CONST Double type=kotlin.Double value=2.0
       BLOCK_BODY
         DELEGATING_CONSTRUCTOR_CALL 'public constructor <init> () declared in kotlin.Any'
-        INSTANCE_INITIALIZER_CALL classDescriptor='CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product]'
+        INSTANCE_INITIALIZER_CALL classDescriptor='CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product; java.io.Serializable]'
     FUN GENERATED_DATA_CLASS_MEMBER name:component1 visibility:public modality:FINAL <> ($this:foo.bar.User) returnType:kotlin.String [operator]
       $this: VALUE_PARAMETER name:<this> type:foo.bar.User
       BLOCK_BODY
@@ -542,7 +542,7 @@ FILE fqName:foo.bar fileName:/dataClassTest.kt
           $this: CALL 'public open fun getMethod (p0: @[FlexibleNullability] kotlin.String?, vararg p1: @[FlexibleNullability] java.lang.Class<*>?): @[FlexibleNullability] java.lang.reflect.Method? declared in java.lang.Class' type=@[FlexibleNullability] java.lang.reflect.Method? origin=null
             $this: CALL 'public final fun <get-java> <T> (): java.lang.Class<T of kotlin.jvm.<get-java>> declared in kotlin.jvm' type=java.lang.Class<foo.bar.User> origin=GET_PROPERTY
               <T>: foo.bar.User
-              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product]' type=kotlin.reflect.KClass<foo.bar.User>
+              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product; java.io.Serializable]' type=kotlin.reflect.KClass<foo.bar.User>
             p0: CONST String type=kotlin.String value="name"
           p0: GET_VAR 'val user: foo.bar.User declared in foo.bar.box' type=foo.bar.User origin=null
       VAR name:age type:@[FlexibleNullability] kotlin.Any? [val]
@@ -550,7 +550,7 @@ FILE fqName:foo.bar fileName:/dataClassTest.kt
           $this: CALL 'public open fun getMethod (p0: @[FlexibleNullability] kotlin.String?, vararg p1: @[FlexibleNullability] java.lang.Class<*>?): @[FlexibleNullability] java.lang.reflect.Method? declared in java.lang.Class' type=@[FlexibleNullability] java.lang.reflect.Method? origin=null
             $this: CALL 'public final fun <get-java> <T> (): java.lang.Class<T of kotlin.jvm.<get-java>> declared in kotlin.jvm' type=java.lang.Class<foo.bar.User> origin=GET_PROPERTY
               <T>: foo.bar.User
-              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product]' type=kotlin.reflect.KClass<foo.bar.User>
+              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product; java.io.Serializable]' type=kotlin.reflect.KClass<foo.bar.User>
             p0: CONST String type=kotlin.String value="age"
           p0: GET_VAR 'val user: foo.bar.User declared in foo.bar.box' type=foo.bar.User origin=null
       VAR name:a type:@[FlexibleNullability] kotlin.Any? [val]
@@ -558,7 +558,7 @@ FILE fqName:foo.bar fileName:/dataClassTest.kt
           $this: CALL 'public open fun getMethod (p0: @[FlexibleNullability] kotlin.String?, vararg p1: @[FlexibleNullability] java.lang.Class<*>?): @[FlexibleNullability] java.lang.reflect.Method? declared in java.lang.Class' type=@[FlexibleNullability] java.lang.reflect.Method? origin=null
             $this: CALL 'public final fun <get-java> <T> (): java.lang.Class<T of kotlin.jvm.<get-java>> declared in kotlin.jvm' type=java.lang.Class<foo.bar.User> origin=GET_PROPERTY
               <T>: foo.bar.User
-              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product]' type=kotlin.reflect.KClass<foo.bar.User>
+              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product; java.io.Serializable]' type=kotlin.reflect.KClass<foo.bar.User>
             p0: CONST String type=kotlin.String value="a"
           p0: GET_VAR 'val user: foo.bar.User declared in foo.bar.box' type=foo.bar.User origin=null
       VAR name:b type:@[FlexibleNullability] kotlin.Any? [val]
@@ -566,7 +566,7 @@ FILE fqName:foo.bar fileName:/dataClassTest.kt
           $this: CALL 'public open fun getMethod (p0: @[FlexibleNullability] kotlin.String?, vararg p1: @[FlexibleNullability] java.lang.Class<*>?): @[FlexibleNullability] java.lang.reflect.Method? declared in java.lang.Class' type=@[FlexibleNullability] java.lang.reflect.Method? origin=null
             $this: CALL 'public final fun <get-java> <T> (): java.lang.Class<T of kotlin.jvm.<get-java>> declared in kotlin.jvm' type=java.lang.Class<foo.bar.User> origin=GET_PROPERTY
               <T>: foo.bar.User
-              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product]' type=kotlin.reflect.KClass<foo.bar.User>
+              $receiver: CLASS_REFERENCE 'CLASS CLASS name:User modality:FINAL visibility:public [data] superTypes:[kotlin.Any; foo.bar.Product; java.io.Serializable]' type=kotlin.reflect.KClass<foo.bar.User>
             p0: CONST String type=kotlin.String value="b"
           p0: GET_VAR 'val user: foo.bar.User declared in foo.bar.box' type=foo.bar.User origin=null
       WHEN type=kotlin.Unit origin=IF

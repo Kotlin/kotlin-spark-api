@@ -28,6 +28,10 @@ fun box(): String {
     if (user !is foo.bar.Product)
         return "User is not a Product"
 
+    @Suppress("USELESS_IS_CHECK")
+    if (user !is java.io.Serializable)
+        return "User is not Serializable"
+
     val canEqual = User::class.java.getMethod("canEqual", Any::class.java).invoke(user, user)
     if (canEqual != true) {
         return "Could invoke function canEqual() from Java but was false"

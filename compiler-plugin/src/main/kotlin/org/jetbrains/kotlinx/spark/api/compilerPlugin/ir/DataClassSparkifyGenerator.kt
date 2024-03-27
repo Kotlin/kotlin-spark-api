@@ -207,17 +207,19 @@ class DataClassSparkifyGenerator(
 
         if (!declaration.isData) return super.visitClass(declaration)
 
-        // add superclass
+        // add superclasses
         val scalaProductClass = productFqNames.firstNotNullOfOrNull {
             val classId = ClassId.topLevel(FqName(it))
-//                ClassId(
-//                packageFqName = FqName("scala"),
-//                topLevelName = Name.identifier("Product"),
-//            )
             pluginContext.referenceClass(classId)
         }!!
 
         declaration.superTypes += scalaProductClass.defaultType
+
+        val serializableClass = pluginContext.referenceClass(
+            ClassId.topLevel(FqName("java.io.Serializable"))
+        )!!
+
+        declaration.superTypes += serializableClass.defaultType
 
         // finding the constructor params
         val constructorParams = declaration.primaryConstructor?.valueParameters
@@ -349,7 +351,7 @@ class DataClassSparkifyGenerator(
                     }
 
                     val ioobClass = pluginContext.referenceClass(
-                        FqName("java.lang.IndexOutOfBoundsException").toClassId()
+                        ClassId(FqName("java.lang"), Name.identifier("IndexOutOfBoundsException"))
                     )!!
                     val ioobConstructor = ioobClass.constructors.first { it.owner.valueParameters.isEmpty() }
                     val throwCall = irThrow(

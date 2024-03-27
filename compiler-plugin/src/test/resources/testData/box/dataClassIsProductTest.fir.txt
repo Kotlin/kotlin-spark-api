@@ -44,6 +44,12 @@ FILE: dataClassIsProductTest.kt
             }
         }
 
+        @R|kotlin/Suppress|(names = vararg(String(USELESS_IS_CHECK))) when () {
+            (R|<local>/user| !is R|java/io/Serializable|) ->  {
+                ^box String(User is not Serializable)
+            }
+        }
+
         lval canEqual: R|kotlin/Any!| = <getClass>(Q|foo/bar/User|).R|kotlin/jvm/java|<R|foo/bar/User|>.R|SubstitutionOverride<java/lang/Class.getMethod: R|java/lang/reflect/Method!|>|(String(canEqual), vararg(<getClass>(Q|kotlin/Any|).R|kotlin/jvm/java|<R|kotlin/Any|>)).R|java/lang/reflect/Method.invoke|(R|<local>/user|, vararg(R|<local>/user|))
         when () {
             !=(R|<local>/canEqual|, Boolean(true)) ->  {

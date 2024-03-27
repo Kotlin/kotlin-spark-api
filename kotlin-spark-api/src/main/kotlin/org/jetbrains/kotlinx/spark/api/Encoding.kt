@@ -230,13 +230,14 @@ object KotlinTypeInference : Serializable {
 
         // can't be checked if injected by Sparkify
         val isProduct = this.isSubclassOf(scala.Product::class)
+        val isSerializable = this.isSubclassOf(Serializable::class)
 
         when {
             // happy path
             isAnnotated && mismatchedNames.isEmpty() -> return
 
             // not annotated but still happy as spark will like it
-            !isAnnotated && mismatchedNames.isEmpty() && isProduct -> return
+            !isAnnotated && mismatchedNames.isEmpty() && isProduct && isSerializable -> return
         }
 
         val warningMessage = buildString {
@@ -263,6 +264,9 @@ object KotlinTypeInference : Serializable {
             }
             if (!isProduct) {
                 appendLine("  - It is not a scala.Product, which is fine for most cases, but can break compatibility with UDFs. You can let your data class implement scala.Product to fix this or let @Sparkify handle it for you.")
+            }
+            if (!isSerializable) {
+                appendLine("  - It is not Serializable, which is fine for most cases, but can break compatibility. You can let your data class implement java.io.Serializable to fix this or let @Sparkify handle it for you.")
             }
         }
 
