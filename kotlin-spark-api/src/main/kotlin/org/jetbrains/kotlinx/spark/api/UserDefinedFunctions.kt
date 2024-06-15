@@ -23,6 +23,7 @@ package org.jetbrains.kotlinx.spark.api
 import org.apache.spark.sql.*
 import org.apache.spark.sql.api.java.*
 import kotlin.reflect.*
+import java.io.Serializable
 import org.apache.spark.sql.expressions.UserDefinedFunction as SparkUserDefinedFunction
 
 
@@ -194,7 +195,7 @@ inline fun <reified R> UDFRegistration.register(
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF0<R> : org.apache.spark.sql.api.java.UDF0<R> { override fun call(): R }
+fun interface UDF0<R> : Serializable, org.apache.spark.sql.api.java.UDF0<R> { override fun call(): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction0]) instance based on the (lambda) function [func].
@@ -227,10 +228,10 @@ inline fun <reified R> udf(
 
 
     return UserDefinedFunction0(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -421,7 +422,10 @@ inline fun <reified T1, reified R> UDFRegistration.register(
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF1<T1, R> : org.apache.spark.sql.api.java.UDF1<T1, R> { override fun call(t1: T1): R }
+fun interface UDF1<T1, R> : Serializable, org.apache.spark.sql.api.java.UDF1<T1, R>, org.jetbrains.kotlinx.spark.extensions.VarargUnwrapperUDT1<T1, R> {
+    override fun call(t1: T1): R
+    override fun apply(t1: T1): R = call(t1)
+}
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction1]) instance based on the (lambda) function [func].
@@ -454,10 +458,10 @@ inline fun <reified T1, reified R> udf(
     T1::class.checkForValidType("T1")
 
     return UserDefinedFunction1(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -646,7 +650,10 @@ inline fun <reified T1, reified T2, reified R> UDFRegistration.register(
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF2<T1, T2, R> : org.apache.spark.sql.api.java.UDF2<T1, T2, R> { override fun call(t1: T1, t2: T2): R }
+fun interface UDF2<T1, T2, R> : Serializable, org.apache.spark.sql.api.java.UDF2<T1, T2, R>, org.jetbrains.kotlinx.spark.extensions.VarargUnwrapperUDT2<T1, T2, R> {
+    override fun call(t1: T1, t2: T2): R
+    override fun apply(t1: T1, t2: T2): R = call(t1, t2)
+}
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction2]) instance based on the (lambda) function [func].
@@ -680,10 +687,10 @@ inline fun <reified T1, reified T2, reified R> udf(
     T2::class.checkForValidType("T2")
 
     return UserDefinedFunction2(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -872,7 +879,7 @@ inline fun <reified T1, reified T2, reified T3, reified R> UDFRegistration.regis
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF3<T1, T2, T3, R> : org.apache.spark.sql.api.java.UDF3<T1, T2, T3, R> { override fun call(t1: T1, t2: T2, t3: T3): R }
+fun interface UDF3<T1, T2, T3, R> : Serializable, org.apache.spark.sql.api.java.UDF3<T1, T2, T3, R> { override fun call(t1: T1, t2: T2, t3: T3): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction3]) instance based on the (lambda) function [func].
@@ -907,10 +914,10 @@ inline fun <reified T1, reified T2, reified T3, reified R> udf(
     T3::class.checkForValidType("T3")
 
     return UserDefinedFunction3(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1099,7 +1106,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> UDFRegist
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF4<T1, T2, T3, T4, R> : org.apache.spark.sql.api.java.UDF4<T1, T2, T3, T4, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4): R }
+fun interface UDF4<T1, T2, T3, T4, R> : Serializable, org.apache.spark.sql.api.java.UDF4<T1, T2, T3, T4, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction4]) instance based on the (lambda) function [func].
@@ -1135,10 +1142,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified R> udf(
     T4::class.checkForValidType("T4")
 
     return UserDefinedFunction4(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1327,7 +1334,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF5<T1, T2, T3, T4, T5, R> : org.apache.spark.sql.api.java.UDF5<T1, T2, T3, T4, T5, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5): R }
+fun interface UDF5<T1, T2, T3, T4, T5, R> : Serializable, org.apache.spark.sql.api.java.UDF5<T1, T2, T3, T4, T5, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction5]) instance based on the (lambda) function [func].
@@ -1364,10 +1371,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T5::class.checkForValidType("T5")
 
     return UserDefinedFunction5(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1556,7 +1563,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF6<T1, T2, T3, T4, T5, T6, R> : org.apache.spark.sql.api.java.UDF6<T1, T2, T3, T4, T5, T6, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6): R }
+fun interface UDF6<T1, T2, T3, T4, T5, T6, R> : Serializable, org.apache.spark.sql.api.java.UDF6<T1, T2, T3, T4, T5, T6, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction6]) instance based on the (lambda) function [func].
@@ -1594,10 +1601,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T6::class.checkForValidType("T6")
 
     return UserDefinedFunction6(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -1786,7 +1793,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF7<T1, T2, T3, T4, T5, T6, T7, R> : org.apache.spark.sql.api.java.UDF7<T1, T2, T3, T4, T5, T6, T7, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7): R }
+fun interface UDF7<T1, T2, T3, T4, T5, T6, T7, R> : Serializable, org.apache.spark.sql.api.java.UDF7<T1, T2, T3, T4, T5, T6, T7, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction7]) instance based on the (lambda) function [func].
@@ -1825,10 +1832,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T7::class.checkForValidType("T7")
 
     return UserDefinedFunction7(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2017,7 +2024,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF8<T1, T2, T3, T4, T5, T6, T7, T8, R> : org.apache.spark.sql.api.java.UDF8<T1, T2, T3, T4, T5, T6, T7, T8, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8): R }
+fun interface UDF8<T1, T2, T3, T4, T5, T6, T7, T8, R> : Serializable, org.apache.spark.sql.api.java.UDF8<T1, T2, T3, T4, T5, T6, T7, T8, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction8]) instance based on the (lambda) function [func].
@@ -2057,10 +2064,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T8::class.checkForValidType("T8")
 
     return UserDefinedFunction8(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2249,7 +2256,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> : org.apache.spark.sql.api.java.UDF9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9): R }
+fun interface UDF9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> : Serializable, org.apache.spark.sql.api.java.UDF9<T1, T2, T3, T4, T5, T6, T7, T8, T9, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction9]) instance based on the (lambda) function [func].
@@ -2290,10 +2297,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T9::class.checkForValidType("T9")
 
     return UserDefinedFunction9(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2482,7 +2489,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> : org.apache.spark.sql.api.java.UDF10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10): R }
+fun interface UDF10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> : Serializable, org.apache.spark.sql.api.java.UDF10<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction10]) instance based on the (lambda) function [func].
@@ -2524,10 +2531,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T10::class.checkForValidType("T10")
 
     return UserDefinedFunction10(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2716,7 +2723,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> : org.apache.spark.sql.api.java.UDF11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11): R }
+fun interface UDF11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> : Serializable, org.apache.spark.sql.api.java.UDF11<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction11]) instance based on the (lambda) function [func].
@@ -2759,10 +2766,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T11::class.checkForValidType("T11")
 
     return UserDefinedFunction11(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -2951,7 +2958,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> : org.apache.spark.sql.api.java.UDF12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12): R }
+fun interface UDF12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> : Serializable, org.apache.spark.sql.api.java.UDF12<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction12]) instance based on the (lambda) function [func].
@@ -2995,10 +3002,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T12::class.checkForValidType("T12")
 
     return UserDefinedFunction12(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3187,7 +3194,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> : org.apache.spark.sql.api.java.UDF13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13): R }
+fun interface UDF13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> : Serializable, org.apache.spark.sql.api.java.UDF13<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction13]) instance based on the (lambda) function [func].
@@ -3232,10 +3239,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T13::class.checkForValidType("T13")
 
     return UserDefinedFunction13(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3424,7 +3431,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> : org.apache.spark.sql.api.java.UDF14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14): R }
+fun interface UDF14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> : Serializable, org.apache.spark.sql.api.java.UDF14<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction14]) instance based on the (lambda) function [func].
@@ -3470,10 +3477,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T14::class.checkForValidType("T14")
 
     return UserDefinedFunction14(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3662,7 +3669,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> : org.apache.spark.sql.api.java.UDF15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15): R }
+fun interface UDF15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> : Serializable, org.apache.spark.sql.api.java.UDF15<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction15]) instance based on the (lambda) function [func].
@@ -3709,10 +3716,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T15::class.checkForValidType("T15")
 
     return UserDefinedFunction15(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -3901,7 +3908,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> : org.apache.spark.sql.api.java.UDF16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16): R }
+fun interface UDF16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> : Serializable, org.apache.spark.sql.api.java.UDF16<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction16]) instance based on the (lambda) function [func].
@@ -3949,10 +3956,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T16::class.checkForValidType("T16")
 
     return UserDefinedFunction16(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4141,7 +4148,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> : org.apache.spark.sql.api.java.UDF17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17): R }
+fun interface UDF17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> : Serializable, org.apache.spark.sql.api.java.UDF17<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction17]) instance based on the (lambda) function [func].
@@ -4190,10 +4197,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T17::class.checkForValidType("T17")
 
     return UserDefinedFunction17(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4382,7 +4389,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> : org.apache.spark.sql.api.java.UDF18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18): R }
+fun interface UDF18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> : Serializable, org.apache.spark.sql.api.java.UDF18<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction18]) instance based on the (lambda) function [func].
@@ -4432,10 +4439,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T18::class.checkForValidType("T18")
 
     return UserDefinedFunction18(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4624,7 +4631,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> : org.apache.spark.sql.api.java.UDF19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19): R }
+fun interface UDF19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> : Serializable, org.apache.spark.sql.api.java.UDF19<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction19]) instance based on the (lambda) function [func].
@@ -4675,10 +4682,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T19::class.checkForValidType("T19")
 
     return UserDefinedFunction19(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -4867,7 +4874,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> : org.apache.spark.sql.api.java.UDF20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20): R }
+fun interface UDF20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> : Serializable, org.apache.spark.sql.api.java.UDF20<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction20]) instance based on the (lambda) function [func].
@@ -4919,10 +4926,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T20::class.checkForValidType("T20")
 
     return UserDefinedFunction20(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -5111,7 +5118,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> : org.apache.spark.sql.api.java.UDF21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21): R }
+fun interface UDF21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> : Serializable, org.apache.spark.sql.api.java.UDF21<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction21]) instance based on the (lambda) function [func].
@@ -5164,10 +5171,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T21::class.checkForValidType("T21")
 
     return UserDefinedFunction21(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 
@@ -5356,7 +5363,7 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
 
 
 /** Kotlin wrapper around UDF interface to ensure nullability in types. */
-fun interface UDF22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> : org.apache.spark.sql.api.java.UDF22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22): R }
+fun interface UDF22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> : Serializable, org.apache.spark.sql.api.java.UDF22<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21, T22, R> { override fun call(t1: T1, t2: T2, t3: T3, t4: T4, t5: T5, t6: T6, t7: T7, t8: T8, t9: T9, t10: T10, t11: T11, t12: T12, t13: T13, t14: T14, t15: T15, t16: T16, t17: T17, t18: T18, t19: T19, t20: T20, t21: T21, t22: T22): R }
 
 /**
  * Defines a named UDF ([NamedUserDefinedFunction22]) instance based on the (lambda) function [func].
@@ -5410,10 +5417,10 @@ inline fun <reified T1, reified T2, reified T3, reified T4, reified T5, reified 
     T22::class.checkForValidType("T22")
 
     return UserDefinedFunction22(
-        udf = functions.udf(func, schema(typeOf<R>()).unWrap())
+        udf = functions.udf(func, schemaFor<R>())
             .let { if (nondeterministic) it.asNondeterministic() else it }
             .let { if (typeOf<R>().isMarkedNullable) it else it.asNonNullable() },
-        encoder = encoder<R>(),
+        encoder = kotlinEncoderFor<R>(),
     )
 }
 

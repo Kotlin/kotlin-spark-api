@@ -33,6 +33,7 @@ import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.streaming.GroupState
 import org.apache.spark.sql.streaming.GroupStateTimeout
 import org.jetbrains.kotlinx.spark.api.tuples.*
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import scala.Tuple2
 import scala.Tuple3
 import scala.Tuple4
@@ -68,12 +69,16 @@ class DatasetFunctionTest : ShouldSpec({
             }
 
             should("handle join operations") {
+                @Sparkify
                 data class Left(val id: Int, val name: String)
 
+                @Sparkify
                 data class Right(val id: Int, val value: Int)
 
                 val first = dsOf(Left(1, "a"), Left(2, "b"))
                 val second = dsOf(Right(1, 100), Right(3, 300))
+                first.show()
+                second.show()
                 val result = first
                     .leftJoin(second, first.col("id") eq second.col("id"))
                     .map { it._1.id X it._1.name X it._2?.value }
@@ -208,8 +213,7 @@ class DatasetFunctionTest : ShouldSpec({
                     s = key
                     s shouldBe key
 
-                    if (collected.size > 1) collected.iterator()
-                    else emptyList<Tuple2<Int, String>>().iterator()
+                    if (collected.size > 1) collected else emptyList()
                 }
 
                 flatMappedWithState.count() shouldBe 2
@@ -453,4 +457,5 @@ class DatasetFunctionTest : ShouldSpec({
     }
 })
 
+@Sparkify
 data class SomeOtherClass(val a: IntArray, val b: Int, val c: Boolean) : Serializable

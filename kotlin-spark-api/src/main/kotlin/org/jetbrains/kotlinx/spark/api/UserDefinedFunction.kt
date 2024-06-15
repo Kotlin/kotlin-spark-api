@@ -23,6 +23,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.sql.*
 import org.apache.spark.sql.types.DataType
+import org.apache.spark.sql.types.StructType
 import scala.collection.Seq
 import java.io.Serializable
 import kotlin.reflect.KClass
@@ -31,12 +32,6 @@ import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.primaryConstructor
 import org.apache.spark.sql.expressions.UserDefinedFunction as SparkUserDefinedFunction
 
-/** Unwraps [DataTypeWithClass]. */
-fun DataType.unWrap(): DataType =
-    when (this) {
-        is DataTypeWithClass -> DataType.fromJson(dt().json())
-        else -> this
-    }
 
 /**
  * Checks if [this] is of a valid type for a UDF, otherwise it throws a [TypeOfUDFParameterNotSupportedException]
@@ -74,9 +69,9 @@ class TypeOfUDFParameterNotSupportedException(kClass: KClass<*>, parameterName: 
 )
 
 @JvmName("arrayColumnAsSeq")
-fun <DsType, T> TypedColumn<DsType, Array<T>>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
+inline fun <DsType, reified T> TypedColumn<DsType, Array<T>>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
 @JvmName("iterableColumnAsSeq")
-fun <DsType, T, I : Iterable<T>> TypedColumn<DsType, I>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
+inline fun <DsType, reified T, I : Iterable<T>> TypedColumn<DsType, I>.asSeq(): TypedColumn<DsType, Seq<T>> = typed()
 @JvmName("byteArrayColumnAsSeq")
 fun <DsType> TypedColumn<DsType, ByteArray>.asSeq(): TypedColumn<DsType, Seq<Byte>> = typed()
 @JvmName("charArrayColumnAsSeq")

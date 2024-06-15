@@ -1,0 +1,66 @@
+FILE: dataClassTest.kt
+    package foo.bar
+
+    public final annotation class Sparkify : R|kotlin/Annotation| {
+        public constructor(): R|foo/bar/Sparkify| {
+            super<R|kotlin/Any|>()
+        }
+
+    }
+    public final annotation class ColumnName : R|kotlin/Annotation| {
+        public constructor(name: R|kotlin/String|): R|foo/bar/ColumnName| {
+            super<R|kotlin/Any|>()
+        }
+
+        public final val name: R|kotlin/String| = R|<local>/name|
+            public get(): R|kotlin/String|
+
+    }
+    public abstract interface Equals : R|kotlin/Any| {
+        public abstract fun canEqual(that: R|kotlin/Any?|): R|kotlin/Boolean|
+
+    }
+    public abstract interface Product : R|foo/bar/Equals| {
+        public abstract fun productElement(n: R|kotlin/Int|): R|kotlin/Any|
+
+        public abstract fun productArity(): R|kotlin/Int|
+
+    }
+    public final fun test(): R|kotlin/Unit| {
+        lval user: R|foo/bar/User| = R|foo/bar/User.User|()
+        R|<local>/user|.R|foo/bar/User.productArity|()
+    }
+    @R|foo/bar/Sparkify|() public final data class User : R|kotlin/Any|, R|foo/bar/Product| {
+        public constructor(name: R|kotlin/String| = String(John Doe), age: R|kotlin/Int| = Int(25), @R|foo/bar/ColumnName|(name = String(a)) test: R|kotlin/Double| = Double(1.0), test2: R|kotlin/Double| = Double(2.0)): R|foo/bar/User| {
+            super<R|kotlin/Any|>()
+        }
+
+        public final val name: R|kotlin/String| = R|<local>/name|
+            public get(): R|kotlin/String|
+
+        public final val age: R|kotlin/Int| = R|<local>/age|
+            public get(): R|kotlin/Int|
+
+        public final val test: R|kotlin/Double| = R|<local>/test|
+            public get(): R|kotlin/Double|
+
+        public final val test2: R|kotlin/Double| = R|<local>/test2|
+            @PROPERTY_GETTER:R|foo/bar/ColumnName|(name = String(b)) public get(): R|kotlin/Double|
+
+        public final operator fun component1(): R|kotlin/String|
+
+        public final operator fun component2(): R|kotlin/Int|
+
+        public final operator fun component3(): R|kotlin/Double|
+
+        public final operator fun component4(): R|kotlin/Double|
+
+        public final fun copy(name: R|kotlin/String| = this@R|foo/bar/User|.R|foo/bar/User.name|, age: R|kotlin/Int| = this@R|foo/bar/User|.R|foo/bar/User.age|, @R|foo/bar/ColumnName|(name = String(a)) test: R|kotlin/Double| = this@R|foo/bar/User|.R|foo/bar/User.test|, test2: R|kotlin/Double| = this@R|foo/bar/User|.R|foo/bar/User.test2|): R|foo/bar/User|
+
+        public final fun productArity(): R|kotlin/Int|
+
+        public final fun productElement(n: R|kotlin/Int|): R|kotlin/Any?|
+
+        public final fun canEqual(that: R|kotlin/Any?|): R|kotlin/Boolean|
+
+    }

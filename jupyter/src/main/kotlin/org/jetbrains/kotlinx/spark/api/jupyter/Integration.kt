@@ -19,21 +19,43 @@
  */
 package org.jetbrains.kotlinx.spark.api.jupyter
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.*
+import org.apache.spark.api.java.JavaDoubleRDD
+import org.apache.spark.api.java.JavaPairRDD
+import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlinx.jupyter.api.*
+import org.jetbrains.kotlinx.jupyter.api.Code
+import org.jetbrains.kotlinx.jupyter.api.FieldValue
+import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
+import org.jetbrains.kotlinx.jupyter.api.MimeTypedResult
+import org.jetbrains.kotlinx.jupyter.api.Notebook
+import org.jetbrains.kotlinx.jupyter.api.VariableDeclaration
+import org.jetbrains.kotlinx.jupyter.api.createRendererByCompileTimeType
+import org.jetbrains.kotlinx.jupyter.api.declare
 import org.jetbrains.kotlinx.jupyter.api.libraries.JupyterIntegration
+import org.jetbrains.kotlinx.jupyter.api.textResult
+import org.jetbrains.kotlinx.spark.api.SparkSession
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.displayLimitName
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.displayTruncateName
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.scalaName
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkName
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkPropertiesName
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.versionName
-import kotlin.reflect.KProperty1
+import org.jetbrains.kotlinx.spark.api.kotlinEncoderFor
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.ColumnName
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
+import scala.Tuple2
+import kotlin.reflect.KClass
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubtypeOf
+import kotlin.reflect.full.memberFunctions
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.valueParameters
 import kotlin.reflect.typeOf
 
 
@@ -45,9 +67,6 @@ abstract class Integration(private val notebook: Notebook, private val options: 
     protected val scalaVersion = /*$"\""+scala+"\""$*/ /*-*/ ""
     protected val sparkVersion = /*$"\""+spark+"\""$*/ /*-*/ ""
     protected val version = /*$"\""+version+"\""$*/ /*-*/ ""
-
-    protected val displayLimitOld = "DISPLAY_LIMIT"
-    protected val displayTruncateOld = "DISPLAY_TRUNCATE"
 
     protected val properties: Properties
         get() = notebook
@@ -101,6 +120,7 @@ abstract class Integration(private val notebook: Notebook, private val options: 
     )
 
     open val imports: Array<String> = arrayOf(
+        "org.jetbrains.kotlinx.spark.api.plugin.annotations.*",
         "org.jetbrains.kotlinx.spark.api.*",
         "org.jetbrains.kotlinx.spark.api.tuples.*",
         *(1..22).map { "scala.Tuple$it" }.toTypedArray(),
@@ -115,6 +135,9 @@ abstract class Integration(private val notebook: Notebook, private val options: 
         "org.apache.spark.streaming.api.*",
         "org.apache.spark.streaming.*",
     )
+
+    // Needs to be set by integration
+    var spark: SparkSession? = null
 
     override fun Builder.onLoaded() {
         dependencies(*dependencies)
@@ -135,35 +158,15 @@ abstract class Integration(private val notebook: Notebook, private val options: 
                 )
             )
 
-            @Language("kts")
-            val _0 = execute(
-                """
-                @Deprecated("Use ${displayLimitName}=${properties.displayLimit} in %use magic or ${sparkPropertiesName}.${displayLimitName} = ${properties.displayLimit} instead", ReplaceWith("${sparkPropertiesName}.${displayLimitName}"))
-                var $displayLimitOld: Int
-                    get() = ${sparkPropertiesName}.${displayLimitName}
-                    set(value) {
-                        println("$displayLimitOld is deprecated: Use ${sparkPropertiesName}.${displayLimitName} instead")
-                        ${sparkPropertiesName}.${displayLimitName} = value
-                    }
-                
-                @Deprecated("Use ${displayTruncateName}=${properties.displayTruncate} in %use magic or ${sparkPropertiesName}.${displayTruncateName} = ${properties.displayTruncate} instead", ReplaceWith("${sparkPropertiesName}.${displayTruncateName}"))
-                var $displayTruncateOld: Int
-                    get() = ${sparkPropertiesName}.${displayTruncateName}
-                    set(value) {
-                        println("$displayTruncateOld is deprecated: Use ${sparkPropertiesName}.${displayTruncateName} instead")
-                        ${sparkPropertiesName}.${displayTruncateName} = value
-                    }
-            """.trimIndent()
-            )
-
             onLoaded()
         }
 
         beforeCellExecution {
-            if (scalaCompatVersion.toDouble() >= 2.13)
+            if (scalaCompatVersion.toDouble() >= 2.13) {
                 execute("scala.`Console\$`.`MODULE\$`.setOutDirect(System.out)")
-            else
+            } else {
                 execute("""scala.Console.setOut(System.out)""")
+            }
 
             beforeCellExecution()
         }
@@ -180,27 +183,123 @@ abstract class Integration(private val notebook: Notebook, private val options: 
             onShutdown()
         }
 
+        onClassAnnotation<Sparkify> {
+            for (klass in it) {
+                if (klass.isData) {
+                    execute(generateSparkifyClass(klass))
+                }
+            }
+        }
 
         // Render Dataset
         render<Dataset<*>> {
-            with(properties) {
-                HTML(it.toHtml(limit = displayLimit, truncate = displayTruncate))
-            }
+            renderDataset(it)
         }
 
-        render<RDD<*>> {
-            with(properties) {
-                HTML(it.toJavaRDD().toHtml(limit = displayLimit, truncate = displayTruncate))
-            }
-        }
+        // using compile time KType, convert this JavaRDDLike to Dataset and render it
+        notebook.renderersProcessor.registerWithoutOptimizing(
+            createRendererByCompileTimeType<JavaRDDLike<*, *>> {
+                if (spark == null) return@createRendererByCompileTimeType it.value.toString()
 
-        render<JavaRDDLike<*, *>> {
-            with(properties) {
-                HTML(it.toHtml(limit = displayLimit, truncate = displayTruncate))
-            }
+                val rdd = (it.value as JavaRDDLike<*, *>).rdd()
+                val type = when {
+                    it.type.isSubtypeOf(typeOf<JavaDoubleRDD>()) ->
+                        typeOf<Double>()
 
-        }
+                    it.type.isSubtypeOf(typeOf<JavaPairRDD<*, *>>()) ->
+                        Tuple2::class.createType(
+                            listOf(
+                                it.type.arguments.first(),
+                                it.type.arguments.last(),
+                            )
+                        )
+
+                    it.type.isSubtypeOf(typeOf<JavaRDD<*>>()) ->
+                        it.type.arguments.first().type!!
+
+                    else -> it.type.arguments.first().type!!
+                }
+                val ds = spark!!.createDataset(rdd, kotlinEncoderFor(type))
+                renderDataset(ds)
+            }
+        )
+
+        // using compile time KType, convert this RDD to Dataset and render it
+        notebook.renderersProcessor.registerWithoutOptimizing(
+            createRendererByCompileTimeType<RDD<*>> {
+                if (spark == null) return@createRendererByCompileTimeType it.value.toString()
+
+                val rdd = it.value as RDD<*>
+                val type = it.type.arguments.first().type!!
+                val ds = spark!!.createDataset(rdd, kotlinEncoderFor(type))
+                renderDataset(ds)
+            }
+        )
 
         onLoadedAlsoDo()
+    }
+
+    private fun renderDataset(it: Dataset<*>): MimeTypedResult =
+        with(properties) {
+//            val showFunction = Dataset::class
+//                .memberFunctions
+//                .firstOrNull { it.name == "showString" && it.valueParameters.size == 3 }
+//
+//            textResult(
+//                if (showFunction != null) {
+//                    showFunction.call(it, displayLimit, displayTruncate, false) as String
+//                } else {
+//                    // if the function cannot be called, make sure it will call println instead
+//                    it.show(displayLimit, displayTruncate)
+//                    ""
+//                }
+//            )
+
+            // don't actually render, instead use `show()`, which calls System.out
+            it.show(displayLimit, displayTruncate)
+            textResult("")
+        }
+
+
+    // TODO wip
+    private fun generateSparkifyClass(klass: KClass<*>): Code {
+//        val name = "`${klass.simpleName!!}${'$'}Generated`"
+        val name = klass.simpleName
+        val constructorArgs = klass.primaryConstructor!!.parameters
+        val visibility = klass.visibility?.name?.lowercase() ?: ""
+        val memberProperties = klass.memberProperties
+
+        val properties = constructorArgs.associateWith {
+            memberProperties.first { it.name == it.name }
+        }
+
+        val constructorParamsCode = properties.entries.joinToString("\n") { (param, prop) ->
+            // TODO check override
+            if (param.isOptional) TODO()
+            val modifier = if (prop is KMutableProperty<*>) "var" else "val"
+            val paramVisiblity = prop.visibility?.name?.lowercase() ?: ""
+            val columnName = param.findAnnotation<ColumnName>()?.name ?: param.name!!
+
+            "|     @get:kotlin.jvm.JvmName(\"$columnName\") $paramVisiblity $modifier ${param.name}: ${param.type},"
+        }
+
+        val productElementWhenParamsCode = properties.entries.joinToString("\n") { (param, _) ->
+            "|        ${param.index} -> this.${param.name}"
+        }
+
+        @Language("kotlin")
+        val code = """
+            |$visibility data class $name(
+            $constructorParamsCode
+            |): scala.Product, java.io.Serializable {
+            |    override fun canEqual(that: Any?): Boolean = that is $name
+            |    override fun productArity(): Int = ${constructorArgs.size}
+            |    override fun productElement(n: Int): Any = when (n) {
+            $productElementWhenParamsCode
+            |        else -> throw IndexOutOfBoundsException()
+            |    }
+            |}
+        """.trimMargin()
+        return code
     }
 }

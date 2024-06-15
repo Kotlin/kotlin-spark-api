@@ -1,5 +1,11 @@
 @file:Suppress("UnstableApiUsage")
 
+import Projects.compilerPlugin
+import Projects.gradlePlugin
+import com.github.gmazzo.buildconfig.BuildConfigExtension
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+
 buildscript {
     repositories {
         mavenCentral()
@@ -7,15 +13,19 @@ buildscript {
     dependencies {
         classpath(jcp)
         classpath(mavenPublish)
+
+        // Allows the project to use the gradle plugin without mavenLocal
+        // Kept up-to-date by :gradle-plugin:updateBootstrapVersion
+        classpath(files("${project.rootDir.absolutePath}/gradle/bootstraps/gradle-plugin.jar"))
     }
 }
-
 
 plugins {
     mavenPublish version Versions.mavenPublish
     dokka version Versions.dokka
     idea
     kotlin version Versions.kotlin apply false
+    buildconfig version Versions.buildconfig apply false
 }
 
 group = Versions.groupID
@@ -112,6 +122,57 @@ allprojects {
                     tag.set("HEAD")
                 }
             }
+        }
+    }
+}
+
+subprojects {
+    afterEvaluate {
+        // Adding the bootstraps directory to the repositories of the subprojects, so that
+        // the bootstrap version of compiler-plugin.jar can be found and used by the gradle-plugin
+        // without mavenLocal
+        if (plugins.hasPlugin("org.jetbrains.kotlinx.spark.api")) {
+            repositories.flatDir {
+                dirs("${project.rootDir.absolutePath}/gradle/bootstraps")
+            }
+            tasks.withType<KotlinCompile> {
+                dependsOn(":compiler-plugin:updateBootstrapVersion")
+                dependsOn(":gradle-plugin:updateBootstrapVersion")
+            }
+        }
+
+        repositories.flatDir {
+            dirs("${project.rootDir.absolutePath}/gradle/bootstraps")
+        }
+        extensions.findByType<BuildConfigExtension>()?.apply {
+            val projectVersion = Versions.project
+            val groupId = Versions.groupID
+
+            val compilerPluginArtifactId = compilerPlugin.name
+            val gradlePluginArtifactId = gradlePlugin.name
+
+            val compilerPluginId = "$groupId.api"
+
+            val defaultSparkifyFqName = "$groupId.api.plugin.annotations.Sparkify"
+            val defaultColumnNameFqName = "$groupId.api.plugin.annotations.ColumnName"
+
+            val projectRoot = project.rootDir.absolutePath
+
+            packageName("$groupId.api")
+            className("Artifacts")
+
+            buildConfigField("compilerPluginId", compilerPluginId)
+            buildConfigField("groupId", groupId)
+            buildConfigField("gradlePluginArtifactId", gradlePluginArtifactId)
+            buildConfigField("projectVersion", projectVersion)
+            buildConfigField("compilerPluginArtifactId", compilerPluginArtifactId)
+
+            buildConfigField("defaultSparkifyFqName", defaultSparkifyFqName)
+            buildConfigField("defaultColumnNameFqName", defaultColumnNameFqName)
+            buildConfigField("projectRoot", projectRoot)
+
+            buildConfigField("scalaVersion", Versions.scala)
+            buildConfigField("sparkVersion", Versions.spark)
         }
     }
 }

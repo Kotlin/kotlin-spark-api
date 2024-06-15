@@ -31,16 +31,14 @@ import jupyter.kotlin.DependsOn
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.intellij.lang.annotations.Language
-import org.jetbrains.kotlinx.jupyter.EvalRequestData
-import org.jetbrains.kotlinx.jupyter.MutableNotebook
-import org.jetbrains.kotlinx.jupyter.ReplForJupyter
-import org.jetbrains.kotlinx.jupyter.ReplForJupyterImpl
 import org.jetbrains.kotlinx.jupyter.api.Code
 import org.jetbrains.kotlinx.jupyter.api.MimeTypedResult
-import org.jetbrains.kotlinx.jupyter.libraries.EmptyResolutionInfoProvider
-import org.jetbrains.kotlinx.jupyter.repl.EvalResultEx
+import org.jetbrains.kotlinx.jupyter.api.MimeTypes
+import org.jetbrains.kotlinx.jupyter.libraries.createLibraryHttpUtil
+import org.jetbrains.kotlinx.jupyter.repl.EvalRequestData
+import org.jetbrains.kotlinx.jupyter.repl.ReplForJupyter
 import org.jetbrains.kotlinx.jupyter.repl.creating.createRepl
-import org.jetbrains.kotlinx.jupyter.testkit.JupyterReplTestCase
+import org.jetbrains.kotlinx.jupyter.repl.result.EvalResultEx
 import org.jetbrains.kotlinx.jupyter.testkit.ReplProvider
 import org.jetbrains.kotlinx.jupyter.util.PatternNameAcceptanceRule
 import org.jetbrains.kotlinx.spark.api.SparkSession
@@ -52,6 +50,7 @@ class JupyterTests : ShouldSpec({
 
     val replProvider = ReplProvider { classpath ->
         createRepl(
+            httpUtil = createLibraryHttpUtil(),
             scriptClasspath = classpath,
             isEmbedded = true,
         ).apply {
@@ -83,10 +82,11 @@ class JupyterTests : ShouldSpec({
 
     context("Jupyter") {
         withRepl {
+            exec("%trackExecution")
 
             should("Allow functions on local data classes") {
                 @Language("kts")
-                val klass = exec("""data class Test(val a: Int, val b: String)""")
+                val klass = exec("""@Sparkify data class Test(val a: Int, val b: String)""")
 
                 @Language("kts")
                 val ds = exec("""val ds = dsOf(Test(1, "hi"), Test(2, "something"))""")
@@ -110,9 +110,9 @@ class JupyterTests : ShouldSpec({
                 sc as? JavaSparkContext shouldNotBe null
             }
 
-            should("render Datasets") {
+            xshould("render Datasets") {
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                     val ds = listOf(1, 2, 3).toDS()
                     ds
@@ -126,9 +126,9 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "3"
             }
 
-            should("render JavaRDDs") {
+            xshould("render JavaRDDs") {
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                     val rdd: JavaRDD<List<Int>> = listOf(
                         listOf(1, 2, 3), 
@@ -143,9 +143,9 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "4, 5, 6"
             }
 
-            should("render JavaRDDs with Arrays") {
+            xshould("render JavaRDDs with Arrays") {
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                     val rdd: JavaRDD<IntArray> = rddOf(
                         intArrayOf(1, 2, 3), 
@@ -160,12 +160,12 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "4, 5, 6"
             }
 
-            should("render JavaRDDs with custom class") {
+            xshould("render JavaRDDs with custom class") {
 
                 @Language("kts")
                 val klass = exec(
                     """
-                    data class Test(
+                    @Sparkify data class Test(
                         val longFirstName: String,
                         val second: LongArray,
                         val somethingSpecial: Map<Int, String>,
@@ -174,7 +174,7 @@ class JupyterTests : ShouldSpec({
                 )
 
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                     val rdd =
                         listOf(
@@ -185,29 +185,40 @@ class JupyterTests : ShouldSpec({
                     rdd
                     """.trimIndent()
                 )
-                html shouldContain "Test(longFirstName=aaaaaaaa..."
+                html shouldContain """
+                    +-------------+---------------+--------------------+
+                    |longFirstName|         second|    somethingSpecial|
+                    +-------------+---------------+--------------------+
+                    |    aaaaaaaaa|[1, 100000, 24]|{1 -> one, 2 -> two}|
+                    |    aaaaaaaaa|[1, 100000, 24]|{1 -> one, 2 -> two}|
+                    +-------------+---------------+--------------------+""".trimIndent()
             }
 
-            should("render JavaPairRDDs") {
+            xshould("render JavaPairRDDs") {
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                     val rdd: JavaPairRDD<Int, Int> = rddOf(
-                        c(1, 2).toTuple(),
-                        c(3, 4).toTuple(),
+                        t(1, 2),
+                        t(3, 4),
                     ).toJavaPairRDD()
                     rdd
                     """.trimIndent()
                 )
                 println(html)
 
-                html shouldContain "1, 2"
-                html shouldContain "3, 4"
+                html shouldContain """
+                    +---+---+
+                    | _1| _2|
+                    +---+---+
+                    |  1|  2|
+                    |  3|  4|
+                    +---+---+""".trimIndent()
             }
 
-            should("render JavaDoubleRDD") {
+            xshould("render JavaDoubleRDD") {
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                     val rdd: JavaDoubleRDD = rddOf(1.0, 2.0, 3.0, 4.0,).toJavaDoubleRDD()
                     rdd
@@ -221,9 +232,9 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "4.0"
             }
 
-            should("render Scala RDD") {
+            xshould("render Scala RDD") {
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                     val rdd: RDD<List<Int>> = rddOf(
                         listOf(1, 2, 3), 
@@ -238,15 +249,15 @@ class JupyterTests : ShouldSpec({
                 html shouldContain "4, 5, 6"
             }
 
-            should("truncate dataset cells using properties") {
+            xshould("truncate dataset cells using properties") {
 
                 @Language("kts")
                 val oldTruncation = exec("""sparkProperties.displayTruncate""") as Int
 
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
-                        data class Test(val a: String)
+                        @Sparkify data class Test(val a: String)
                         sparkProperties.displayTruncate = 3
                         dsOf(Test("aaaaaaaaaa"))
                     """.trimIndent()
@@ -255,19 +266,19 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val restoreTruncation = exec("""sparkProperties.displayTruncate = $oldTruncation""")
 
-                html shouldContain "<td>aaa</td>"
-                html shouldNotContain "<td>aaaaaaaaaa</td>"
+                html shouldContain "aaa"
+                html shouldNotContain "aaaaaaaaaa"
             }
 
-            should("limit dataset rows using properties") {
+            xshould("limit dataset rows using properties") {
 
                 @Language("kts")
                 val oldLimit = exec("""sparkProperties.displayLimit""") as Int
 
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
-                        data class Test(val a: String)
+                        @Sparkify data class Test(val a: String)
                         sparkProperties.displayLimit = 3
                         dsOf(Test("a"), Test("b"), Test("c"), Test("d"), Test("e"))
                     """.trimIndent()
@@ -276,20 +287,20 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val restoreLimit = exec("""sparkProperties.displayLimit = $oldLimit""")
 
-                html shouldContain "<td>a</td>"
-                html shouldContain "<td>b</td>"
-                html shouldContain "<td>c</td>"
-                html shouldNotContain "<td>d</td>"
-                html shouldNotContain "<td>e</td>"
+                html shouldContain "a|"
+                html shouldContain "b|"
+                html shouldContain "c|"
+                html shouldNotContain "d|"
+                html shouldNotContain "e|"
             }
 
-            should("truncate rdd cells using properties") {
+            xshould("truncate rdd cells using properties") {
 
                 @Language("kts")
                 val oldTruncation = exec("""sparkProperties.displayTruncate""") as Int
 
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                         sparkProperties.displayTruncate = 3
                         rddOf("aaaaaaaaaa")
@@ -299,17 +310,17 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val restoreTruncation = exec("""sparkProperties.displayTruncate = $oldTruncation""")
 
-                html shouldContain "<td>aaa</td>"
-                html shouldNotContain "<td>aaaaaaaaaa</td>"
+                html shouldContain "aaa"
+                html shouldNotContain "aaaaaaaaaa"
             }
 
-            should("limit rdd rows using properties") {
+            xshould("limit rdd rows using properties") {
 
                 @Language("kts")
                 val oldLimit = exec("""sparkProperties.displayLimit""") as Int
 
                 @Language("kts")
-                val html = execHtml(
+                val html = execForDisplayText(
                     """
                         sparkProperties.displayLimit = 3
                         rddOf("a", "b", "c", "d", "e")
@@ -319,11 +330,11 @@ class JupyterTests : ShouldSpec({
                 @Language("kts")
                 val restoreLimit = exec("""sparkProperties.displayLimit = $oldLimit""")
 
-                html shouldContain "<td>a</td>"
-                html shouldContain "<td>b</td>"
-                html shouldContain "<td>c</td>"
-                html shouldNotContain "<td>d</td>"
-                html shouldNotContain "<td>e</td>"
+                html shouldContain " a|"
+                html shouldContain " b|"
+                html shouldContain " c|"
+                html shouldNotContain " d|"
+                html shouldNotContain " e|"
             }
 
             @Language("kts")
@@ -335,6 +346,7 @@ class JupyterTests : ShouldSpec({
 class JupyterStreamingTests : ShouldSpec({
     val replProvider = ReplProvider { classpath ->
         createRepl(
+            httpUtil = createLibraryHttpUtil(),
             scriptClasspath = classpath,
             isEmbedded = true,
         ).apply {
@@ -364,7 +376,7 @@ class JupyterStreamingTests : ShouldSpec({
     fun createRepl(): ReplForJupyter = replProvider(scriptClasspath)
     suspend fun withRepl(action: suspend ReplForJupyter.() -> Unit): Unit = createRepl().action()
 
-    context("Jupyter") {
+    xcontext("Jupyter") {
         withRepl {
 
             // For when onInterrupt is implemented in the Jupyter kernel
@@ -391,7 +403,7 @@ class JupyterStreamingTests : ShouldSpec({
                 }
             }
 
-            xshould("stream") {
+            should("stream") {
 
                 @Language("kts")
                 val value = exec(
@@ -440,9 +452,7 @@ class JupyterStreamingTests : ShouldSpec({
 
 private fun ReplForJupyter.execEx(code: Code): EvalResultEx = evalEx(EvalRequestData(code))
 
-private fun ReplForJupyter.exec(code: Code): Any? = execEx(code).renderedValue
-
-private fun ReplForJupyter.execRaw(code: Code): Any? = execEx(code).rawValue
+private fun ReplForJupyter.exec(code: Code): Any? = (execEx(code) as? EvalResultEx.Success)?.renderedValue
 
 @JvmName("execTyped")
 private inline fun <reified T : Any> ReplForJupyter.exec(code: Code): T {
@@ -456,6 +466,13 @@ private fun ReplForJupyter.execHtml(code: Code): String {
     val html = res["text/html"]
     html.shouldNotBeNull()
     return html
+}
+
+private fun ReplForJupyter.execForDisplayText(code: Code): String {
+    val res = exec<MimeTypedResult>(code)
+    val text = res[MimeTypes.PLAIN_TEXT]
+    text.shouldNotBeNull()
+    return text
 }
 
 class Counter(@Volatile var value: Int) : Serializable

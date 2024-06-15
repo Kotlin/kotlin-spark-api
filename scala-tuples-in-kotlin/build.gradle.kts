@@ -27,7 +27,7 @@ tasks.withType<Test>().configureEach {
 }
 
 dependencies {
-    with(Dependencies) {
+    Dependencies {
         implementation(
             kotlinStdLib,
             scalaLibrary,
@@ -43,9 +43,7 @@ dependencies {
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(
-            JavaLanguageVersion.of(Versions.jvmTarget)
-        )
+        languageVersion = JavaLanguageVersion.of(Versions.jvmTarget)
     }
 }
 
@@ -70,8 +68,8 @@ mavenPublishing {
 
 
 // Publishing of scala-tuples-in-kotlin can be skipped since it's only dependent on the Scala version
-val skipScalaTuplesInKotlin = System.getProperty("skipScalaTuplesInKotlin").toBoolean()
+val skipScalaOnlyDependent = System.getProperty("skipScalaOnlyDependent").toBoolean()
 tasks
     .filter { "publish" in it.name }
-    .forEach { it.onlyIf { !skipScalaTuplesInKotlin } }
+    .forEach { it.onlyIf { !skipScalaOnlyDependent } }
 

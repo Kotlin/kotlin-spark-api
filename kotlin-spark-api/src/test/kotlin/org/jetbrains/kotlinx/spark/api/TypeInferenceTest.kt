@@ -23,22 +23,29 @@ import ch.tutteli.atrium.creating.Expect
 import io.kotest.core.spec.style.ShouldSpec
 import org.apache.spark.sql.types.ArrayType
 import org.apache.spark.sql.types.IntegerType
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 import org.jetbrains.kotlinx.spark.api.struct.model.DataType.StructType
 import org.jetbrains.kotlinx.spark.api.struct.model.DataType.TypeName
 import org.jetbrains.kotlinx.spark.api.struct.model.ElementType.ComplexElement
 import org.jetbrains.kotlinx.spark.api.struct.model.ElementType.SimpleElement
 import org.jetbrains.kotlinx.spark.api.struct.model.Struct
 import org.jetbrains.kotlinx.spark.api.struct.model.StructField
-import kotlin.reflect.typeOf
-
 
 @OptIn(ExperimentalStdlibApi::class)
 class TypeInferenceTest : ShouldSpec({
-    context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema") {
-        data class Test2<T>(val vala2: T, val para2: Pair<T, String>)
-        data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
+    @Sparkify
+    data class SparkifiedPair<T, U>(val first: T, val second: U)
 
-        val struct = Struct.fromJson(schema(typeOf<Pair<String, Test<Int>>>()).prettyJson())!!
+    @Sparkify
+    data class SparkifiedTriple<T, U, V>(val first: T, val second: U, val third: V)
+
+    context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema") {
+        @Sparkify
+        data class Test2<T>(val vala2: T, val para2: SparkifiedPair<T, String>)
+        @Sparkify
+        data class Test<T>(val vala: T, val tripl1: SparkifiedTriple<T, Test2<Long>, T>)
+
+        val struct = Struct.fromJson(schemaFor<SparkifiedPair<String, Test<Int>>>().prettyJson())!!
         should("contain correct typings") {
             expect(struct.fields).notToEqualNull().toContain.inAnyOrder.only.entries(
                 hasField("first", "string"),
@@ -64,11 +71,15 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema with more complex data") {
+        @Sparkify
         data class Single<T>(val vala3: T)
-        data class Test2<T>(val vala2: T, val para2: Pair<T, Single<Double>>)
-        data class Test<T>(val vala: T, val tripl1: Triple<T, Test2<Long>, T>)
 
-        val struct = Struct.fromJson(schema(typeOf<Pair<String, Test<Int>>>()).prettyJson())!!
+        @Sparkify
+        data class Test2<T>(val vala2: T, val para2: SparkifiedPair<T, Single<Double>>)
+        @Sparkify
+        data class Test<T>(val vala: T, val tripl1: SparkifiedTriple<T, Test2<Long>, T>)
+
+        val struct = Struct.fromJson(schemaFor<SparkifiedPair<String, Test<Int>>>().prettyJson())!!
         should("contain correct typings") {
             expect(struct.fields).notToEqualNull().toContain.inAnyOrder.only.entries(
                 hasField("first", "string"),
@@ -97,9 +108,9 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("org.jetbrains.spark.api.org.jetbrains.spark.api.schema without generics") {
-        data class Test(val a: String, val b: Int, val c: Double)
+        @Sparkify data class Test(val a: String, val b: Int, val c: Double)
 
-        val struct = Struct.fromJson(schema(typeOf<Test>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<Test>().prettyJson())!!
         should("return correct types too") {
             expect(struct.fields).notToEqualNull().toContain.inAnyOrder.only.entries(
                 hasField("a", "string"),
@@ -109,7 +120,7 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("type with list of ints") {
-        val struct = Struct.fromJson(schema(typeOf<List<Int>>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<List<Int>>().prettyJson())!!
         should("return correct types too") {
             expect(struct) {
                 isOfType("array")
@@ -118,7 +129,7 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("type with list of Pairs int to long") {
-        val struct = Struct.fromJson(schema(typeOf<List<Pair<Int, Long>>>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<List<SparkifiedPair<Int, Long>>>().prettyJson())!!
         should("return correct types too") {
             expect(struct) {
                 isOfType("array")
@@ -132,9 +143,9 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("type with list of generic data class with E generic name") {
-        data class Test<E>(val e: E)
+        @Sparkify data class Test<E>(val e: E)
 
-        val struct = Struct.fromJson(schema(typeOf<List<Test<String>>>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<List<Test<String>>>().prettyJson())!!
         should("return correct types too") {
             expect(struct) {
                 isOfType("array")
@@ -147,7 +158,7 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("type with list of list of int") {
-        val struct = Struct.fromJson(schema(typeOf<List<List<Int>>>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<List<List<Int>>>().prettyJson())!!
         should("return correct types too") {
             expect(struct) {
                 isOfType("array")
@@ -158,7 +169,7 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("Subtypes of list") {
-        val struct = Struct.fromJson(schema(typeOf<ArrayList<Int>>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<ArrayList<Int>>().prettyJson())!!
         should("return correct types too") {
             expect(struct) {
                 isOfType("array")
@@ -168,7 +179,7 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("Subtypes of list with nullable values") {
-        val struct = Struct.fromJson(schema(typeOf<ArrayList<Int?>>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<ArrayList<Int?>>().prettyJson())!!
         should("return correct types too") {
             expect(struct) {
                 isOfType("array")
@@ -178,9 +189,9 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("data class with props in order lon → lat") {
-        data class Test(val lon: Double, val lat: Double)
+        @Sparkify data class Test(val lon: Double, val lat: Double)
 
-        val struct = Struct.fromJson(schema(typeOf<Test>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<Test>().prettyJson())!!
         should("Not change order of fields") {
             expect(struct.fields).notToEqualNull().containsExactly(
                 hasField("lon", "double"),
@@ -189,9 +200,9 @@ class TypeInferenceTest : ShouldSpec({
         }
     }
     context("data class with nullable list inside") {
-        data class Sample(val optionList: List<Int>?)
+        @Sparkify data class Sample(val optionList: List<Int>?)
 
-        val struct = Struct.fromJson(schema(typeOf<Sample>()).prettyJson())!!
+        val struct = Struct.fromJson(schemaFor<Sample>().prettyJson())!!
 
         should("show that list is nullable and element is not") {
             expect(struct)
@@ -213,7 +224,7 @@ class TypeInferenceTest : ShouldSpec({
         }
 
         should("generate valid serializer schema") {
-            expect(encoder<Sample>().schema()) {
+            expect(schemaFor<Sample>() as org.apache.spark.sql.types.StructType) {
                 this
                     .feature("data type", { this.fields()?.asList() }) {
                         this.notToEqualNull().toContain.inOrder.only.entry {
@@ -221,8 +232,8 @@ class TypeInferenceTest : ShouldSpec({
                                 .feature("element name", { name() }) { toEqual("optionList") }
                                 .feature("field type", { dataType() }, {
                                     this
-                                        .isA<ArrayType>()
-                                        .feature("element type", { elementType() }) { isA<IntegerType>() }
+                                        .toBeAnInstanceOf<ArrayType>()
+                                        .feature("element type", { elementType() }) { toBeAnInstanceOf<IntegerType>() }
                                         .feature("element nullable", { containsNull() }) { toEqual(expected = false) }
                                 })
                                 .feature("optionList nullable", { nullable() }) { toEqual(true) }
@@ -256,5 +267,5 @@ private fun hasStruct(
 
 private fun hasField(name: String, type: String): Expect<StructField>.() -> Unit = {
     feature { f(it::name) }.toEqual(name)
-    feature { f(it::type) }.isA<TypeName>().feature { f(it::value) }.toEqual(type)
+    feature { f(it::type) }.toBeAnInstanceOf<TypeName>().feature { f(it::value) }.toEqual(type)
 }

@@ -1,10 +1,9 @@
-@file:Suppress("UnstableApiUsage", "NOTHING_TO_INLINE")
+@file:Suppress("UnstableApiUsage")
 
 import com.igormaznitsa.jcp.gradle.JcpTask
 import com.vanniktech.maven.publish.JavadocJar.Dokka
 import com.vanniktech.maven.publish.KotlinJvm
 import org.jetbrains.dokka.gradle.AbstractDokkaLeafTask
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     scala
@@ -37,13 +36,13 @@ tasks.processJupyterApiResources {
 }
 
 dependencies {
-    with(Projects) {
+    Projects {
         api(
             kotlinSparkApi,
         )
     }
 
-    with(Dependencies) {
+    Dependencies {
 
         // https://github.com/FasterXML/jackson-bom/issues/52
         if (Versions.spark == "3.3.1") implementation(jacksonDatabind)
@@ -74,10 +73,10 @@ dependencies {
 val kotlinMainSources = kotlin.sourceSets.main.get().kotlin.sourceDirectories
 
 val preprocessMain by tasks.creating(JcpTask::class) {
-    sources.set(kotlinMainSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("kt"))
-    vars.set(Versions.versionMap)
+    sources = kotlinMainSources
+    clearTarget = true
+    fileExtensions = listOf("kt")
+    vars = Versions.versionMap
     outputs.upToDateWhen { target.get().exists() }
 }
 
@@ -110,10 +109,10 @@ tasks.compileKotlin {
 val kotlinTestSources = kotlin.sourceSets.test.get().kotlin.sourceDirectories
 
 val preprocessTest by tasks.creating(JcpTask::class) {
-    sources.set(kotlinTestSources)
-    clearTarget.set(true)
-    fileExtensions.set(listOf("java", "kt"))
-    vars.set(Versions.versionMap)
+    sources = kotlinTestSources
+    clearTarget = true
+    fileExtensions = listOf("java", "kt")
+    vars = Versions.versionMap
     outputs.upToDateWhen { target.get().exists() }
 }
 
@@ -143,9 +142,7 @@ tasks.compileTestKotlin {
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(
-            JavaLanguageVersion.of(Versions.jupyterJvmTarget)
-        )
+        languageVersion = JavaLanguageVersion.of(Versions.jupyterJvmTarget)
     }
 }
 

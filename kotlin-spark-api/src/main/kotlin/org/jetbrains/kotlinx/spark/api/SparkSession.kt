@@ -34,7 +34,6 @@ import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.JavaRDDLike
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.deploy.SparkHadoopUtil
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
@@ -45,7 +44,7 @@ import org.apache.spark.streaming.Durations
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.jetbrains.kotlinx.spark.api.SparkLogLevel.ERROR
 import org.jetbrains.kotlinx.spark.api.tuples.*
-import org.jetbrains.kotlinx.spark.extensions.KSparkExtensions
+import scala.reflect.ClassTag
 import java.io.Serializable
 
 /**
@@ -76,7 +75,7 @@ class KSparkSession(val spark: SparkSession) {
     inline fun <reified T> dsOf(vararg arg: T): Dataset<T> = spark.dsOf(*arg)
 
     /** Creates new empty dataset of type [T]. */
-    inline fun <reified T> emptyDataset(): Dataset<T> = spark.emptyDataset(encoder<T>())
+    inline fun <reified T> emptyDataset(): Dataset<T> = spark.emptyDataset(kotlinEncoderFor<T>())
 
     /** Utility method to create dataframe from *array or vararg arguments */
     inline fun <reified T> dfOf(vararg arg: T): Dataset<Row> = spark.dfOf(*arg)
@@ -227,7 +226,7 @@ enum class SparkLogLevel {
  * Returns the Spark context associated with this Spark session.
  */
 val SparkSession.sparkContext: SparkContext
-    get() = KSparkExtensions.sparkContext(this)
+    get() = sparkContext()
 
 /**
  * Wrapper for spark creation which allows setting different spark params.
@@ -339,7 +338,7 @@ inline fun withSpark(sparkConf: SparkConf, logLevel: SparkLogLevel = ERROR, func
 fun withSparkStreaming(
     batchDuration: Duration = Durations.seconds(1L),
     checkpointPath: String? = null,
-    hadoopConf: Configuration = SparkHadoopUtil.get().conf(),
+    hadoopConf: Configuration = getDefaultHadoopConf(),
     createOnError: Boolean = false,
     props: Map<String, Any> = emptyMap(),
     master: String = SparkConf().get("spark.master", "local[*]"),
@@ -386,6 +385,18 @@ fun withSparkStreaming(
     ssc.stop()
 }
 
+// calling org.apache.spark.deploy.`SparkHadoopUtil$`.`MODULE$`.get().conf()
+private fun getDefaultHadoopConf(): Configuration {
+    val klass = Class.forName("org.apache.spark.deploy.SparkHadoopUtil$")
+    val moduleField = klass.getField("MODULE$").also { it.isAccessible = true }
+    val module = moduleField.get(null)
+    val getMethod = klass.getMethod("get").also { it.isAccessible = true }
+    val sparkHadoopUtil = getMethod.invoke(module)
+    val confMethod = sparkHadoopUtil.javaClass.getMethod("conf").also { it.isAccessible = true }
+    val conf = confMethod.invoke(sparkHadoopUtil) as Configuration
+
+    return conf
+}
 
 /**
  * Broadcast a read-only variable to the cluster, returning a
@@ -396,7 +407,7 @@ fun withSparkStreaming(
  * @return `Broadcast` object, a read-only variable cached on each machine
  */
 inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
-    sparkContext.broadcast(value, encoder<T>().clsTag())
+    sparkContext.broadcast(value, ClassTag.apply(T::class.java))
 } catch (e: ClassNotFoundException) {
     JavaSparkContext(sparkContext).broadcast(value)
 }
@@ -416,7 +427,7 @@ inline fun <reified T> SparkSession.broadcast(value: T): Broadcast<T> = try {
     DeprecationLevel.WARNING
 )
 inline fun <reified T> SparkContext.broadcast(value: T): Broadcast<T> = try {
-    broadcast(value, encoder<T>().clsTag())
+    broadcast(value, ClassTag.apply(T::class.java))
 } catch (e: ClassNotFoundException) {
     JavaSparkContext(this).broadcast(value)
 }

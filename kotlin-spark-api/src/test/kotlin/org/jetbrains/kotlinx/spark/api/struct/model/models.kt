@@ -23,6 +23,7 @@ import com.beust.klaxon.Converter
 import com.beust.klaxon.JsonObject
 import com.beust.klaxon.JsonValue
 import com.beust.klaxon.Klaxon
+import org.jetbrains.kotlinx.spark.api.plugin.annotations.Sparkify
 
 private fun <T> Klaxon.convert(
     k: kotlin.reflect.KClass<*>,
@@ -43,6 +44,7 @@ private val klaxon = Klaxon()
     .convert(DataType::class, { DataType.fromJson(it) }, { it.toJson() }, true)
     .convert(ElementType::class, { ElementType.fromJson(it) }, { it.toJson() }, true)
 
+@Sparkify
 data class Struct(
     val type: String,
     val fields: List<StructField>? = null,
@@ -56,6 +58,7 @@ data class Struct(
     }
 }
 
+@Sparkify
 data class StructField(
     val name: String,
     val type: DataType,
@@ -66,8 +69,8 @@ data class StructField(
 typealias Metadata = JsonObject
 
 sealed class DataType {
-    data class StructType(val value: Struct) : DataType()
-    data class TypeName(val value: String) : DataType()
+    @Sparkify data class StructType(val value: Struct) : DataType()
+    @Sparkify data class TypeName(val value: String) : DataType()
 
     public fun toJson(): String = klaxon.toJsonString(when (this) {
         is StructType -> this.value
@@ -84,8 +87,8 @@ sealed class DataType {
 }
 
 sealed class ElementType {
-    data class SimpleElement(val value: String) : ElementType()
-    data class ComplexElement(val value: Struct) : ElementType()
+    @Sparkify data class SimpleElement(val value: String) : ElementType()
+    @Sparkify data class ComplexElement(val value: Struct) : ElementType()
 
     public fun toJson(): String = klaxon.toJsonString(when (this) {
         is SimpleElement -> this.value

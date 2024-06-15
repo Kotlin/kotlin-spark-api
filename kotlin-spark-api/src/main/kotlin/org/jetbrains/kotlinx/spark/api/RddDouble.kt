@@ -20,7 +20,7 @@ inline fun <reified T : Number> JavaRDD<T>.toJavaDoubleRDD(): JavaDoubleRDD =
 
 /** Utility method to convert [JavaDoubleRDD] to [JavaRDD]<[Double]>. */
 @Suppress("UNCHECKED_CAST")
-fun JavaDoubleRDD.toDoubleRDD(): JavaRDD<Double> =
+inline fun JavaDoubleRDD.toDoubleRDD(): JavaRDD<Double> =
     JavaDoubleRDD.toRDD(this).toJavaRDD() as JavaRDD<Double>
 
 /** Add up the elements in this RDD. */

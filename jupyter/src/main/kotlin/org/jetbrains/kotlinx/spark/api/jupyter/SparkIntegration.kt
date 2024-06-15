@@ -25,6 +25,7 @@ package org.jetbrains.kotlinx.spark.api.jupyter
 import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlinx.jupyter.api.KotlinKernelHost
 import org.jetbrains.kotlinx.jupyter.api.Notebook
+import org.jetbrains.kotlinx.spark.api.SparkSession
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.appNameName
 import org.jetbrains.kotlinx.spark.api.jupyter.Properties.Companion.sparkMasterName
 
@@ -86,7 +87,7 @@ class SparkIntegration(notebook: Notebook, options: MutableMap<String, String?>)
             """
                 inline fun <reified T> dfOf(vararg arg: T): Dataset<Row> = spark.dfOf(*arg)""".trimIndent(),
             """
-                inline fun <reified T> emptyDataset(): Dataset<T> = spark.emptyDataset(encoder<T>())""".trimIndent(),
+                inline fun <reified T> emptyDataset(): Dataset<T> = spark.emptyDataset(kotlinEncoderFor<T>())""".trimIndent(),
             """
                 inline fun <reified T> dfOf(colNames: Array<String>, vararg arg: T): Dataset<Row> = spark.dfOf(colNames, *arg)""".trimIndent(),
             """
@@ -108,6 +109,8 @@ class SparkIntegration(notebook: Notebook, options: MutableMap<String, String?>)
             """
                 inline fun <RETURN, reified NAMED_UDF : NamedUserDefinedFunction<RETURN, *>> UserDefinedFunction<RETURN, NAMED_UDF>.register(name: String): NAMED_UDF = spark.udf().register(name = name, udf = this)""".trimIndent(),
         ).map(::execute)
+
+        spark = execute("spark").value as SparkSession
     }
 
     override fun KotlinKernelHost.onShutdown() {
