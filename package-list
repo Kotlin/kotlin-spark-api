@@ -1,0 +1,10 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+
+module:jupyter_3.3.2_2.13
+org.jetbrains.kotlinx.spark.api.jupyter
+module:kotlin-spark-api_3.3.2_2.13
+org.jetbrains.kotlinx.spark.api
+module:scala-tuples-in-kotlin_2.13
+org.jetbrains.kotlinx.spark.api
+org.jetbrains.kotlinx.spark.api.tuples
